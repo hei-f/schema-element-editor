@@ -4,13 +4,14 @@
 
 ## 功能特性
 
-- 🎯 **元素检测**：按住 Alt/Option 键悬停时自动检测元素的 `data-chat-msg-id` 和 `data-opener-component-id` 属性
+- 🎯 **元素检测**：按住 Alt/Option 键悬停时自动检测元素的 `data-schema-params` 属性（可自定义属性名）
 - 🎨 **可视化高亮**：用友好的样式标记目标元素
 - 📝 **Schema编辑**：内置代码编辑器编辑JSON Schema
 - 💾 **一键更新**：修改后直接更新页面Schema
 - 🔄 **格式化工具**：内置JSON格式化和校验功能
 - 🎛️ **状态持久化**：记住激活状态和偏好设置
 - 🛡️ **防误触设计**：仅在按住 Alt/Option 键时启用检测功能
+- ⚙️ **可自定义属性**：在配置页面可自定义要检测的属性名称
 
 ## 技术栈
 
@@ -61,8 +62,6 @@ npm run package
 2. 创建 zip 安装包
 3. 输出到 `releases/` 目录
 
-详细分发说明请查看 [DISTRIBUTION.md](./DISTRIBUTION.md)
-
 ### 加载到Chrome（开发模式）
 
 1. 打开Chrome浏览器
@@ -70,10 +69,6 @@ npm run package
 3. 开启右上角的"开发者模式"
 4. 点击"加载已解压的扩展程序"
 5. 选择项目的 `dist` 目录
-
-### 安装到Chrome（用户模式）
-
-如果你只是想使用插件而不是开发，请查看 [INSTALL.md](./INSTALL.md) 获取安装指南。
 
 ## 使用说明
 
@@ -112,35 +107,35 @@ npm run package
 
 插件需要页面提供以下全局方法：
 
-### `window.__getSchemaById(chatMsgId, openerComponentId)`
+### `window.__getSchemaByParams(params)`
 
 ```typescript
 /**
  * 获取元素的Schema数据
- * @param chatMsgId - 聊天消息ID（来自元素的 data-chat-msg-id 属性）
- * @param openerComponentId - 打开组件ID（来自元素的 data-opener-component-id 属性）
+ * @param params - 参数数组（来自元素的 data-schema-params 属性，用逗号分隔）
  * @returns Schema对象
  */
-window.__getSchemaById = (chatMsgId, openerComponentId) => {
-  // 根据ID返回对应的Schema对象
+window.__getSchemaByParams = (params) => {
+  // params 是一个数组，例如：['param1', 'param2']
+  // 根据参数返回对应的Schema对象
   return {
     // 你的Schema数据
   }
 }
 ```
 
-### `window.__updateSchemaById(schema, chatMsgId, openerComponentId)`
+### `window.__updateSchemaByParams(schema, params)`
 
 ```typescript
 /**
  * 更新元素的Schema数据
  * @param schema - 新的Schema对象
- * @param chatMsgId - 聊天消息ID
- * @param openerComponentId - 打开组件ID
+ * @param params - 参数数组
  * @returns 是否更新成功（返回true表示成功）
  */
-window.__updateSchemaById = (schema, chatMsgId, openerComponentId) => {
+window.__updateSchemaByParams = (schema, params) => {
   // 更新Schema数据
+  // params 是一个数组，可用于定位要更新的Schema
   // ... 你的更新逻辑
   return true // 返回true表示更新成功
 }
@@ -148,22 +143,26 @@ window.__updateSchemaById = (schema, chatMsgId, openerComponentId) => {
 
 ### 元素标记方式
 
-**⚠️ 重要：元素必须同时具有两个属性才会被识别为有效元素**
-
-在HTML元素上添加 data 属性：
+在HTML元素上添加 `data-schema-params` 属性（或在配置页面自定义的属性名）：
 
 ```html
-<!-- ✅ 正确：同时包含两个属性 -->
-<div data-chat-msg-id="msg-001" data-opener-component-id="comp-001">
-  内容
-</div>
+<!-- ✅ 正确：包含参数 -->
+<div data-schema-params="param1">单个参数</div>
 
-<!-- ❌ 错误：只有chatMsgId（会被标记为"非法目标"）-->
-<div data-chat-msg-id="msg-001">内容</div>
+<!-- ✅ 正确：包含多个参数（逗号分隔）-->
+<div data-schema-params="msg-001,comp-001">多个参数</div>
 
-<!-- ❌ 错误：只有openerComponentId（会被标记为"非法目标"）-->
-<div data-opener-component-id="comp-001">内容</div>
+<!-- ❌ 错误：没有属性（会被标记为"非法目标"）-->
+<div>无参数</div>
+
+<!-- ❌ 错误：空属性值（会被标记为"非法目标"）-->
+<div data-schema-params="">空参数</div>
 ```
+
+**参数格式说明：**
+- 单个参数：直接写参数值，如 `"user123"`
+- 多个参数：用逗号分隔，如 `"msg-001,comp-001,user-123"`
+- 插件会自动解析并转换为数组传递给 API 方法
 
 ## 项目结构
 
@@ -238,10 +237,11 @@ Ant Design Message显示结果
 ## 注意事项
 
 1. 插件图标采用可爱幽灵主题，通过颜色区分状态（绿色=激活，灰色=未激活）
-2. 页面必须提供 `window.__getSchemaById` 和 `window.__updateSchemaById` 方法
-3. **⚠️ 目标元素必须同时具有 `data-chat-msg-id` 和 `data-opener-component-id` 两个属性**（HTML data属性）
-4. 插件通过读取HTML data属性来识别元素，而不是JavaScript对象属性
-5. 只有一个属性的元素会被标记为"非法目标"，无法打开编辑器
+2. 页面必须提供 `window.__getSchemaByParams` 和 `window.__updateSchemaByParams` 方法
+3. **⚠️ 目标元素必须具有 `data-schema-params` 属性**（或在配置页面自定义的属性名）
+4. 插件通过读取HTML data属性来识别元素，属性值可以是单个参数或用逗号分隔的多个参数
+5. 没有有效属性的元素会被标记为"非法目标"，无法打开编辑器
+6. 可以在扩展的配置页面（右键点击图标 → 选项）自定义要检测的属性名称
 
 ## 许可证
 
