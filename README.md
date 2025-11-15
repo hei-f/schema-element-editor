@@ -81,8 +81,8 @@ npm run package
 
 1. 点击浏览器工具栏中的Schema Editor图标
 2. 图标状态变化：
-   - **激活时**：显示 🟢 绿色 **"ON"** 徽章
-   - **停用时**：显示 ⚪ 灰色 **"OFF"** 徽章
+   - **激活时**：图标显示 🟢 **绿色**幽灵
+   - **停用时**：图标显示 ⚫ **灰色**幽灵
    - 标题显示：`Schema Editor - 已激活 ✓` 或 `Schema Editor - 未激活`
 
 ### 检查元素
@@ -237,7 +237,7 @@ Ant Design Message显示结果
 
 ## 注意事项
 
-1. 插件图标需要手动生成，可以打开 `public/icons/create-icons.html` 下载
+1. 插件图标采用可爱幽灵主题，通过颜色区分状态（绿色=激活，灰色=未激活）
 2. 页面必须提供 `window.__getSchemaById` 和 `window.__updateSchemaById` 方法
 3. **⚠️ 目标元素必须同时具有 `data-chat-msg-id` 和 `data-opener-component-id` 两个属性**（HTML data属性）
 4. 插件通过读取HTML data属性来识别元素，而不是JavaScript对象属性
@@ -246,4 +246,3 @@ Ant Design Message显示结果
 ## 许可证
 
 MIT
-
