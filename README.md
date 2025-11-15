@@ -177,20 +177,30 @@ ChromeTools/
 │   ├── content/               # Content Scripts
 │   │   ├── index.tsx          # 入口文件
 │   │   ├── monitor.ts         # 元素监听器
-│   │   ├── injected-script.ts # 页面注入脚本
 │   │   └── ui/                # React UI组件
 │   │       ├── App.tsx
 │   │       ├── SchemaDrawer.tsx
 │   │       ├── Tooltip.tsx
 │   │       └── styles.ts
+│   ├── options/               # 配置页面
+│   │   ├── options.html
+│   │   ├── index.tsx
+│   │   └── OptionsApp.tsx
 │   ├── utils/                 # 工具函数
 │   │   ├── message.ts
 │   │   ├── storage.ts
-│   │   └── element-detector.ts
+│   │   ├── element-detector.ts
+│   │   ├── json-serializer.ts
+│   │   └── monaco-loader.ts
 │   └── types/                 # TypeScript类型定义
 │       └── index.ts
 ├── public/
+│   ├── injected.js            # 页面注入脚本
 │   └── icons/                 # 扩展图标
+│       ├── gen.py             # 图标生成脚本
+│       ├── icon-active-*.png  # 激活态图标
+│       └── icon-inactive-*.png # 未激活态图标
+├── test/                      # 测试相关
 ├── vite.config.ts
 ├── tsconfig.json
 └── package.json
@@ -238,7 +248,7 @@ Ant Design Message显示结果
 
 ## 注意事项
 
-1. 插件图标采用可爱幽灵主题，通过颜色区分状态（绿色=激活，灰色=未激活）
+1. 插件图标采用幽灵主题，通过颜色区分状态（绿色=激活，灰色=未激活）
 2. 页面必须提供 `window.__getSchemaByParams` 和 `window.__updateSchemaByParams` 方法
 3. **⚠️ 目标元素必须具有 `data-schema-params` 属性**（或在配置页面自定义的属性名）
 4. 插件通过读取HTML data属性来识别元素，属性值可以是单个参数或用逗号分隔的多个参数
