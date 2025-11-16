@@ -16,6 +16,20 @@ interface State {
 export class MonacoErrorBoundary extends React.Component<Props, State> {
   private originalConsoleError: typeof console.error
   private originalConsoleWarn: typeof console.warn
+  
+  // Monaco Worker 相关错误关键词（静态常量，可在静态方法中使用）
+  private static readonly monacoErrorKeywords = [
+    'Could not create web worker',
+    'Web Workers are disabled',
+    'Workers are disabled',
+    'Unexpected usage',
+    'loadForeignModule',
+    "reading 'then'",
+    'MonacoEnvironment.getWorker',
+    'getWorkerUrl',
+    'worker',
+    'monaco'
+  ]
 
   constructor(props: Props) {
     super(props)
@@ -24,25 +38,21 @@ export class MonacoErrorBoundary extends React.Component<Props, State> {
     this.originalConsoleError = console.error
     this.originalConsoleWarn = console.warn
   }
+  
+  private static isMonacoError(message: string): boolean {
+    return MonacoErrorBoundary.monacoErrorKeywords.some(keyword => message.includes(keyword))
+  }
+  
+  private isMonacoErrorInstance(message: string): boolean {
+    return MonacoErrorBoundary.isMonacoError(message)
+  }
 
   componentDidMount() {
     // 拦截 console.error 和 console.warn，过滤 Monaco Worker 相关错误
     console.error = (...args: any[]) => {
       const message = args.join(' ')
       
-      // 过滤掉 Monaco Worker 相关的错误
-      if (
-        message.includes('Could not create web worker') ||
-        message.includes('Web Workers are disabled') ||
-        message.includes('Workers are disabled') ||
-        message.includes('Unexpected usage') ||
-        message.includes('loadForeignModule') ||
-        message.includes("Cannot read properties of undefined (reading 'then')") ||
-        message.includes("reading 'then'") ||
-        message.includes('MonacoEnvironment.getWorker') ||
-        message.includes('getWorkerUrl') ||
-        (message.includes('worker') && message.includes('monaco'))
-      ) {
+      if (this.isMonacoErrorInstance(message)) {
         // 静默处理，不输出到控制台
         return
       }
@@ -54,11 +64,7 @@ export class MonacoErrorBoundary extends React.Component<Props, State> {
     console.warn = (...args: any[]) => {
       const message = args.join(' ')
       
-      // 过滤掉 Monaco Worker 相关的警告
-      if (
-        message.includes('Could not create web worker') ||
-        message.includes('Falling back to loading web worker code in main thread')
-      ) {
+      if (this.isMonacoErrorInstance(message) || message.includes('Falling back to loading web worker code in main thread')) {
         // 静默处理
         return
       }
@@ -87,16 +93,7 @@ export class MonacoErrorBoundary extends React.Component<Props, State> {
   handleGlobalError = (event: ErrorEvent) => {
     const message = event.message || event.error?.message || ''
     
-    // 如果是 Monaco Worker 相关错误，阻止传播
-    if (
-      message.includes('Unexpected usage') ||
-      message.includes('Web Workers are disabled') ||
-      message.includes('Workers are disabled') ||
-      message.includes('loadForeignModule') ||
-      message.includes("reading 'then'") ||
-      message.includes('MonacoEnvironment.getWorker') ||
-      message.includes('getWorkerUrl')
-    ) {
+    if (this.isMonacoErrorInstance(message)) {
       event.preventDefault()
       event.stopPropagation()
       return false
@@ -107,14 +104,7 @@ export class MonacoErrorBoundary extends React.Component<Props, State> {
     const reason = event.reason
     const message = typeof reason === 'string' ? reason : reason?.message || ''
     
-    // 如果是 Monaco Worker 相关的 Promise rejection，阻止传播
-    if (
-      message.includes('Workers are disabled') ||
-      message.includes('Web Workers are disabled') ||
-      message.includes('Unexpected usage') ||
-      message.includes('loadForeignModule') ||
-      message.includes('worker')
-    ) {
+    if (this.isMonacoErrorInstance(message)) {
       event.preventDefault()
       event.stopImmediatePropagation()
       return false
@@ -123,14 +113,7 @@ export class MonacoErrorBoundary extends React.Component<Props, State> {
 
   static getDerivedStateFromError(error: Error): State {
     // 如果是 Monaco 相关错误，静默处理
-    if (
-      error.message.includes('worker') ||
-      error.message.includes('monaco') ||
-      error.message.includes('Unexpected usage') ||
-      error.message.includes("reading 'then'") ||
-      error.message.includes('MonacoEnvironment') ||
-      error.message.includes('getWorkerUrl')
-    ) {
+    if (MonacoErrorBoundary.isMonacoError(error.message)) {
       return { hasError: false, error: null }
     }
     
@@ -139,14 +122,7 @@ export class MonacoErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Monaco 相关错误不记录
-    if (
-      error.message.includes('worker') ||
-      error.message.includes('monaco') ||
-      error.message.includes('Unexpected usage') ||
-      error.message.includes("reading 'then'") ||
-      error.message.includes('MonacoEnvironment') ||
-      error.message.includes('getWorkerUrl')
-    ) {
+    if (MonacoErrorBoundary.isMonacoError(error.message)) {
       return
     }
     
