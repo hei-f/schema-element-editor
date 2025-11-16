@@ -108,14 +108,29 @@ export interface ElementPosition {
 }
 
 /**
+ * 获取Schema的函数类型
+ * @template T Schema数据类型，不能是 null 或 undefined
+ */
+export type GetSchemaFunction<T = unknown> = (params: string) => NonNullable<T>
+
+/**
+ * 更新Schema的函数类型
+ * @template T Schema数据类型，不能是 null 或 undefined
+ */
+export type UpdateSchemaFunction<T = unknown> = (schema: NonNullable<T>, params: string) => boolean
+
+/**
  * 扩展window对象，添加页面提供的方法
  * 注意：实际函数名可通过配置自定义
  */
 declare global {
   interface Window {
-    __getSchemaByParams?: (params: string) => any
-    __updateSchemaByParams?: (schema: any, params: string) => boolean
-    [key: string]: any
+    /** 默认的获取Schema函数 */
+    __getSchemaByParams?: GetSchemaFunction
+    /** 默认的更新Schema函数 */
+    __updateSchemaByParams?: UpdateSchemaFunction
+    /** 支持自定义函数名的索引签名 */
+    [key: string]: GetSchemaFunction | UpdateSchemaFunction | any
   }
 }
 
