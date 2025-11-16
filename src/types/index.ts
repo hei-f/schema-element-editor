@@ -50,6 +50,10 @@ export interface StorageData {
   attributeName: string
   /** 搜索配置 */
   searchConfig: SearchConfig
+  /** 获取Schema的函数名 */
+  getFunctionName: string
+  /** 更新Schema的函数名 */
+  updateFunctionName: string
 }
 
 /**
@@ -105,11 +109,13 @@ export interface ElementPosition {
 
 /**
  * 扩展window对象，添加页面提供的方法
+ * 注意：实际函数名可通过配置自定义
  */
 declare global {
   interface Window {
     __getSchemaByParams?: (params: string) => any
     __updateSchemaByParams?: (schema: any, params: string) => boolean
+    [key: string]: any
   }
 }
 

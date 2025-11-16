@@ -6,6 +6,23 @@
     FROM_INJECTED: 'schema-editor-injected'
   }
 
+  /** 函数名配置 */
+  let functionNames = {
+    get: '__getSchemaByParams',
+    update: '__updateSchemaByParams'
+  }
+
+  /** 加载函数名配置 */
+  chrome.storage.local.get(['getFunctionName', 'updateFunctionName'], (result) => {
+    if (result.getFunctionName) {
+      functionNames.get = result.getFunctionName
+    }
+    if (result.updateFunctionName) {
+      functionNames.update = result.updateFunctionName
+    }
+    console.log('已加载函数名配置:', functionNames)
+  })
+
   window.addEventListener('message', (event) => {
     if (event.source !== window) return
     if (!event.data || event.data.source !== MESSAGE_SOURCE.FROM_CONTENT) return
@@ -33,15 +50,16 @@
     console.log('🔍 解构后:', { params })
 
     try {
-      if (typeof window.__getSchemaByParams !== 'function') {
+      const getFn = window[functionNames.get]
+      if (typeof getFn !== 'function') {
         sendResponse('SCHEMA_RESPONSE', {
           success: false,
-          error: '页面未提供__getSchemaByParams方法'
+          error: `页面未提供${functionNames.get}方法`
         })
         return
       }
 
-      const schema = window.__getSchemaByParams(params)
+      const schema = getFn(params)
       sendResponse('SCHEMA_RESPONSE', {
         success: true,
         data: schema
@@ -59,15 +77,16 @@
     const { schema, params } = payload || {}
 
     try {
-      if (typeof window.__updateSchemaByParams !== 'function') {
+      const updateFn = window[functionNames.update]
+      if (typeof updateFn !== 'function') {
         sendResponse('UPDATE_RESULT', {
           success: false,
-          error: '页面未提供__updateSchemaByParams方法'
+          error: `页面未提供${functionNames.update}方法`
         })
         return
       }
 
-      const result = window.__updateSchemaByParams(schema, params)
+      const result = updateFn(schema, params)
       sendResponse('UPDATE_RESULT', {
         success: !!result,
         message: result ? '更新成功' : '更新失败'

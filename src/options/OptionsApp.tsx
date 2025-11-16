@@ -35,6 +35,8 @@ export const OptionsApp: React.FC = () => {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [attributeName, setAttributeName] = useState('schema-params')
+  const [getFunctionName, setGetFunctionName] = useState('__getSchemaByParams')
+  const [updateFunctionName, setUpdateFunctionName] = useState('__updateSchemaByParams')
 
   /**
    * 加载配置
@@ -47,13 +49,19 @@ export const OptionsApp: React.FC = () => {
     try {
       const name = await storage.getAttributeName()
       const searchConfig = await storage.getSearchConfig()
+      const getFn = await storage.getGetFunctionName()
+      const updateFn = await storage.getUpdateFunctionName()
       
       setAttributeName(name)
+      setGetFunctionName(getFn)
+      setUpdateFunctionName(updateFn)
       form.setFieldsValue({ 
         attributeName: name,
         searchDepthDown: searchConfig.searchDepthDown,
         searchDepthUp: searchConfig.searchDepthUp,
-        throttleInterval: searchConfig.throttleInterval
+        throttleInterval: searchConfig.throttleInterval,
+        getFunctionName: getFn,
+        updateFunctionName: updateFn
       })
     } catch (error) {
       message.error('加载配置失败')
@@ -72,7 +80,10 @@ export const OptionsApp: React.FC = () => {
         searchDepthUp: values.searchDepthUp,
         throttleInterval: values.throttleInterval
       })
+      await storage.setFunctionNames(values.getFunctionName, values.updateFunctionName)
       setAttributeName(values.attributeName)
+      setGetFunctionName(values.getFunctionName)
+      setUpdateFunctionName(values.updateFunctionName)
       message.success('设置已保存')
     } catch (error) {
       message.error('保存失败')
@@ -89,7 +100,9 @@ export const OptionsApp: React.FC = () => {
       attributeName: 'schema-params',
       searchDepthDown: 5,
       searchDepthUp: 0,
-      throttleInterval: 16
+      throttleInterval: 16,
+      getFunctionName: '__getSchemaByParams',
+      updateFunctionName: '__updateSchemaByParams'
     })
   }
 
@@ -109,7 +122,9 @@ export const OptionsApp: React.FC = () => {
             attributeName: 'schema-params',
             searchDepthDown: 5,
             searchDepthUp: 0,
-            throttleInterval: 16
+            throttleInterval: 16,
+            getFunctionName: '__getSchemaByParams',
+            updateFunctionName: '__updateSchemaByParams'
           }}
         >
           <Form.Item
@@ -124,7 +139,33 @@ export const OptionsApp: React.FC = () => {
             <Input placeholder="例如: schema-params" />
           </Form.Item>
 
-          <Collapse defaultActiveKey={['1']} style={{ marginBottom: '24px' }}>
+          <Collapse defaultActiveKey={['1', '2']} style={{ marginBottom: '24px' }}>
+            <Panel header="API函数配置" key="2">
+              <Form.Item
+                label="获取Schema函数名"
+                name="getFunctionName"
+                rules={[
+                  { required: true, message: '请输入函数名' },
+                  { pattern: /^[a-zA-Z_$][a-zA-Z0-9_$]*$/, message: '必须是有效的JavaScript函数名' }
+                ]}
+                extra="页面需要提供的获取Schema数据的全局函数名"
+              >
+                <Input placeholder="例如: __getSchemaByParams" />
+              </Form.Item>
+
+              <Form.Item
+                label="更新Schema函数名"
+                name="updateFunctionName"
+                rules={[
+                  { required: true, message: '请输入函数名' },
+                  { pattern: /^[a-zA-Z_$][a-zA-Z0-9_$]*$/, message: '必须是有效的JavaScript函数名' }
+                ]}
+                extra="页面需要提供的更新Schema数据的全局函数名"
+              >
+                <Input placeholder="例如: __updateSchemaByParams" />
+              </Form.Item>
+            </Panel>
+
             <Panel header="高级搜索设置" key="1">
               <Form.Item
                 label="向下搜索深度"
@@ -174,12 +215,12 @@ export const OptionsApp: React.FC = () => {
 
 <!-- 页面需要提供的全局函数 -->
 <script>
-  window.__getSchemaByParams = function(params) {
+  window.${getFunctionName} = function(params) {
     // params: "param1,param2,param3"
     return { your: 'schema' };
   };
   
-  window.__updateSchemaByParams = function(schema, params) {
+  window.${updateFunctionName} = function(schema, params) {
     // schema: 修改后的数据
     // params: "param1,param2,param3"
     return true;
@@ -199,10 +240,10 @@ export const OptionsApp: React.FC = () => {
               属性值为逗号分隔的参数字符串，例如：<Text code>"value1,value2,value3"</Text>
             </li>
             <li>
-              页面需要实现两个全局函数：
+              页面需要实现两个全局函数（函数名可在上方配置）：
               <ul>
-                <li><Text code>window.__getSchemaByParams(params)</Text> - 获取schema数据</li>
-                <li><Text code>window.__updateSchemaByParams(schema, params)</Text> - 更新schema数据</li>
+                <li><Text code>window.{getFunctionName}(params)</Text> - 获取schema数据</li>
+                <li><Text code>window.{updateFunctionName}(schema, params)</Text> - 更新schema数据</li>
               </ul>
             </li>
             <li>

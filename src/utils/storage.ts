@@ -9,18 +9,22 @@ class StorageManager {
     IS_ACTIVE: 'isActive',
     DRAWER_WIDTH: 'drawerWidth',
     ATTRIBUTE_NAME: 'attributeName',
-    SEARCH_CONFIG: 'searchConfig'
+    SEARCH_CONFIG: 'searchConfig',
+    GET_FUNCTION_NAME: 'getFunctionName',
+    UPDATE_FUNCTION_NAME: 'updateFunctionName'
   }
 
   private readonly DEFAULT_VALUES: StorageData = {
     isActive: false,
     drawerWidth: 800,
     attributeName: 'schema-params',
-  searchConfig: {
-    searchDepthDown: 5,
-    searchDepthUp: 0,
-    throttleInterval: 16
-  }
+    searchConfig: {
+      searchDepthDown: 5,
+      searchDepthUp: 0,
+      throttleInterval: 16
+    },
+    getFunctionName: '__getSchemaByParams',
+    updateFunctionName: '__updateSchemaByParams'
   }
 
   /**
@@ -140,16 +144,58 @@ class StorageManager {
   }
 
   /**
+   * 获取获取Schema的函数名
+   */
+  async getGetFunctionName(): Promise<string> {
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.GET_FUNCTION_NAME)
+      return result[this.STORAGE_KEYS.GET_FUNCTION_NAME] ?? this.DEFAULT_VALUES.getFunctionName
+    } catch (error) {
+      console.error('获取函数名失败:', error)
+      return this.DEFAULT_VALUES.getFunctionName
+    }
+  }
+
+  /**
+   * 获取更新Schema的函数名
+   */
+  async getUpdateFunctionName(): Promise<string> {
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.UPDATE_FUNCTION_NAME)
+      return result[this.STORAGE_KEYS.UPDATE_FUNCTION_NAME] ?? this.DEFAULT_VALUES.updateFunctionName
+    } catch (error) {
+      console.error('获取函数名失败:', error)
+      return this.DEFAULT_VALUES.updateFunctionName
+    }
+  }
+
+  /**
+   * 设置函数名
+   */
+  async setFunctionNames(getFunctionName: string, updateFunctionName: string): Promise<void> {
+    try {
+      await chrome.storage.local.set({
+        [this.STORAGE_KEYS.GET_FUNCTION_NAME]: getFunctionName,
+        [this.STORAGE_KEYS.UPDATE_FUNCTION_NAME]: updateFunctionName
+      })
+    } catch (error) {
+      console.error('设置函数名失败:', error)
+    }
+  }
+
+  /**
    * 获取所有存储数据
    */
   async getAllData(): Promise<StorageData> {
-    const [isActive, drawerWidth, attributeName, searchConfig] = await Promise.all([
+    const [isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName] = await Promise.all([
       this.getActiveState(),
       this.getDrawerWidth(),
       this.getAttributeName(),
-      this.getSearchConfig()
+      this.getSearchConfig(),
+      this.getGetFunctionName(),
+      this.getUpdateFunctionName()
     ])
-    return { isActive, drawerWidth, attributeName, searchConfig }
+    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName }
   }
 }
 

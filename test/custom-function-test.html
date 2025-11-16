@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>自定义函数名测试页面</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    .test-element {
+      padding: 20px;
+      margin: 10px 0;
+      background: #f0f0f0;
+      border: 2px solid #333;
+      cursor: pointer;
+    }
+    .test-element:hover {
+      background: #e0e0e0;
+    }
+    .log {
+      background: #000;
+      color: #0f0;
+      padding: 10px;
+      font-family: monospace;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+    .log-entry {
+      margin: 5px 0;
+    }
+    .log-entry.info { color: #0ff; }
+    .log-entry.success { color: #0f0; }
+    .log-entry.error { color: #f00; }
+    h2 {
+      color: #333;
+    }
+    code {
+      background: #f4f4f4;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <h1>自定义函数名测试页面</h1>
+  
+  <div class="test-section">
+    <h2>测试说明</h2>
+    <p>本页面用于测试 Schema Editor 插件的自定义函数名功能。</p>
+    <ol>
+      <li>打开插件的选项页面（右键点击插件图标 → 选项）</li>
+      <li>在"API函数配置"中修改函数名：
+        <ul>
+          <li>获取Schema函数名：<code>myCustomGetSchema</code></li>
+          <li>更新Schema函数名：<code>myCustomUpdateSchema</code></li>
+        </ul>
+      </li>
+      <li>保存设置并刷新本页面</li>
+      <li>激活插件，按住 Alt/Option 键悬停并点击下方的测试元素</li>
+    </ol>
+  </div>
+
+  <div class="test-section">
+    <h2>测试元素 1 - 默认函数名</h2>
+    <p>使用默认函数名：<code>window.__getSchemaByParams</code> 和 <code>window.__updateSchemaByParams</code></p>
+    <div class="test-element" data-schema-params="user,profile,default">
+      点击我测试默认函数名
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>测试元素 2 - 自定义函数名</h2>
+    <p>使用自定义函数名：<code>window.myCustomGetSchema</code> 和 <code>window.myCustomUpdateSchema</code></p>
+    <div class="test-element" data-schema-params="product,detail,custom">
+      点击我测试自定义函数名
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>调用日志</h2>
+    <div class="log" id="log"></div>
+  </div>
+
+  <script>
+    const logContainer = document.getElementById('log')
+
+    function addLog(type, message, data) {
+      const entry = document.createElement('div')
+      entry.className = `log-entry ${type}`
+      const timestamp = new Date().toLocaleTimeString()
+      entry.textContent = `[${timestamp}] ${message}`
+      if (data) {
+        entry.textContent += ` ${JSON.stringify(data)}`
+      }
+      logContainer.appendChild(entry)
+      logContainer.scrollTop = logContainer.scrollHeight
+    }
+
+    // 默认函数名实现
+    window.__getSchemaByParams = (params) => {
+      addLog('info', '🔍 调用 __getSchemaByParams (默认)', { params })
+      return {
+        type: 'default',
+        params: params,
+        data: {
+          name: '测试数据',
+          value: 123,
+          timestamp: Date.now()
+        }
+      }
+    }
+
+    window.__updateSchemaByParams = (schema, params) => {
+      addLog('info', '💾 调用 __updateSchemaByParams (默认)', { schema, params })
+      addLog('success', '✅ 默认函数更新成功')
+      return true
+    }
+
+    // 自定义函数名实现
+    window.myCustomGetSchema = (params) => {
+      addLog('info', '🔍 调用 myCustomGetSchema (自定义)', { params })
+      return {
+        type: 'custom',
+        params: params,
+        data: {
+          name: '自定义测试数据',
+          value: 456,
+          customField: 'This is custom',
+          timestamp: Date.now()
+        }
+      }
+    }
+
+    window.myCustomUpdateSchema = (schema, params) => {
+      addLog('info', '💾 调用 myCustomUpdateSchema (自定义)', { schema, params })
+      addLog('success', '✅ 自定义函数更新成功')
+      return true
+    }
+
+    addLog('success', '✅ 页面加载完成，所有函数已注册')
+    addLog('info', '📋 已注册函数：__getSchemaByParams, __updateSchemaByParams, myCustomGetSchema, myCustomUpdateSchema')
+  </script>
+</body>
+</html>
+
