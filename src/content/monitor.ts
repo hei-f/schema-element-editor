@@ -162,8 +162,7 @@ export class ElementMonitor {
     const target = event.target as HTMLElement
     
     // 忽略我们自己创建的元素
-    if (target === this.tooltipElement || 
-        (target instanceof HTMLElement && target.closest('[data-schema-editor-ui]'))) {
+    if (target === this.tooltipElement || (target.closest && target.closest('[data-schema-editor-ui]'))) {
       return
     }
     

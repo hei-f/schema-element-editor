@@ -103,7 +103,7 @@ describe('Storage工具测试', () => {
         attributeName: 'schema-params',
         searchConfig: {
           searchDepthDown: 5,
-          searchDepthUp: 3,
+          searchDepthUp: 0,
           throttleInterval: 16
         }
       })
@@ -148,7 +148,7 @@ describe('Storage工具测试', () => {
         attributeName: 'schema-params',
         searchConfig: {
           searchDepthDown: 5,
-          searchDepthUp: 3,
+          searchDepthUp: 0,
           throttleInterval: 16
         }
       })
@@ -161,7 +161,7 @@ describe('Storage工具测试', () => {
       
       expect(result).toEqual({
         searchDepthDown: 5,
-        searchDepthUp: 3,
+        searchDepthUp: 0,
         throttleInterval: 16
       })
     })
@@ -203,7 +203,7 @@ describe('Storage工具测试', () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
         searchConfig: {
           searchDepthDown: 5,
-          searchDepthUp: 3,
+          searchDepthUp: 0,
           throttleInterval: 16
         }
       })
@@ -227,7 +227,7 @@ describe('Storage工具测试', () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
         searchConfig: {
           searchDepthDown: 5,
-          searchDepthUp: 3,
+          searchDepthUp: 0,
           throttleInterval: 16
         }
       })
@@ -239,7 +239,7 @@ describe('Storage工具测试', () => {
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         searchConfig: {
           searchDepthDown: 8,
-          searchDepthUp: 3,
+          searchDepthUp: 0,
           throttleInterval: 16
         }
       })
@@ -249,7 +249,7 @@ describe('Storage工具测试', () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
         searchConfig: {
           searchDepthDown: 5,
-          searchDepthUp: 3,
+          searchDepthUp: 0,
           throttleInterval: 16
         }
       })
@@ -261,7 +261,7 @@ describe('Storage工具测试', () => {
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         searchConfig: {
           searchDepthDown: 5,
-          searchDepthUp: 3,
+          searchDepthUp: 0,
           throttleInterval: 50
         }
       })

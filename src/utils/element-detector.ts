@@ -1,6 +1,11 @@
 import type { ElementAttributes, ElementPosition } from '@/types'
 import { storage } from './storage'
 
+/** 扩展UI元素的选择器 */
+const UI_ELEMENT_SELECTOR = '[data-schema-editor-ui]'
+/** 扩展UI元素的属性名 */
+const UI_ELEMENT_ATTR = 'data-schema-editor-ui'
+
 /**
  * 检查元素是否可见
  */
@@ -27,26 +32,33 @@ export function isVisibleElement(element: HTMLElement): boolean {
 /**
  * BFS向下搜索子元素
  */
-async function searchDescendants(
+function searchDescendants(
   element: HTMLElement,
   maxDepth: number,
-  attributeName: string
-): Promise<HTMLElement[]> {
+  dataAttrName: string
+): HTMLElement[] {
   const results: HTMLElement[] = []
-  const dataAttrName = `data-${attributeName}`
   const queue: Array<{ el: HTMLElement; depth: number }> = [{ el: element, depth: 0 }]
+  let queueIndex = 0
 
-  while (queue.length > 0) {
-    const { el, depth } = queue.shift()!
+  while (queueIndex < queue.length) {
+    const { el, depth } = queue[queueIndex++]
 
     // 超过最大深度则停止
     if (depth > maxDepth) continue
 
-    // 检查所有直接子元素
-    const children = Array.from(el.children) as HTMLElement[]
-    for (const child of children) {
+    // 直接遍历children，避免Array.from转换
+    const children = el.children
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i] as HTMLElement
+      
       // 跳过不可见元素
       if (!isVisibleElement(child)) continue
+
+      // 跳过扩展UI元素
+      if (child.hasAttribute(UI_ELEMENT_ATTR) || child.closest(UI_ELEMENT_SELECTOR)) {
+        continue
+      }
 
       // 如果有目标属性，加入结果
       if (child.hasAttribute(dataAttrName)) {
@@ -62,20 +74,26 @@ async function searchDescendants(
 }
 
 /**
- * BFS向上搜索父元素
+ * 向上搜索父元素
  */
-async function searchAncestors(
+function searchAncestors(
   element: HTMLElement,
   maxDepth: number,
-  attributeName: string
-): Promise<HTMLElement[]> {
+  dataAttrName: string
+): HTMLElement[] {
   const results: HTMLElement[] = []
-  const dataAttrName = `data-${attributeName}`
   let current: HTMLElement | null = element.parentElement
   let depth = 0
 
   while (current && depth < maxDepth) {
-    // 跳过不可见元素
+    // 跳过扩展UI元素
+    if (current.hasAttribute(UI_ELEMENT_ATTR) || current.closest(UI_ELEMENT_SELECTOR)) {
+      current = current.parentElement
+      depth++
+      continue
+    }
+
+    // 跳过不可见元素，合并条件判断
     if (isVisibleElement(current) && current.hasAttribute(dataAttrName)) {
       results.push(current)
     }
@@ -105,9 +123,11 @@ export async function findElementWithSchemaParams(
   const allCandidates: HTMLElement[] = []
 
   // 遍历每个元素
-  for (const element of elementsAtPoint) {
-    // 忽略扩展自己的UI元素
-    if (element.closest('[data-schema-editor-ui]')) {
+  for (let i = 0; i < elementsAtPoint.length; i++) {
+    const element = elementsAtPoint[i] as HTMLElement
+    
+    // 忽略扩展自己的UI元素（提前终止，避免后续检查）
+    if (element.closest(UI_ELEMENT_SELECTOR)) {
       continue
     }
 
@@ -121,35 +141,34 @@ export async function findElementWithSchemaParams(
       allCandidates.push(element)
     }
 
-    // 向下搜索
-    const descendants = await searchDescendants(
-      element,
-      searchConfig.searchDepthDown,
-      attributeName
-    )
-    allCandidates.push(...descendants)
+    // 向下搜索（深度为0时跳过）
+    if (searchConfig.searchDepthDown > 0) {
+      const descendants = searchDescendants(
+        element,
+        searchConfig.searchDepthDown,
+        dataAttrName
+      )
+      allCandidates.push(...descendants)
+    }
 
-    // 向上搜索
-    const ancestors = await searchAncestors(
-      element,
-      searchConfig.searchDepthUp,
-      attributeName
-    )
-    allCandidates.push(...ancestors)
+    // 向上搜索（深度为0时跳过）
+    if (searchConfig.searchDepthUp > 0) {
+      const ancestors = searchAncestors(
+        element,
+        searchConfig.searchDepthUp,
+        dataAttrName
+      )
+      allCandidates.push(...ancestors)
+    }
   }
 
-  // 去重
+  // 去重（UI元素已在搜索函数内部过滤）
   const uniqueCandidates = Array.from(new Set(allCandidates))
 
-  // 过滤掉扩展UI元素
-  const filteredCandidates = uniqueCandidates.filter(
-    el => !el.hasAttribute('data-schema-editor-ui') && !el.closest('[data-schema-editor-ui]')
-  )
-
   // 返回第一个找到的元素作为目标
-  const target = filteredCandidates.length > 0 ? filteredCandidates[0] : null
+  const target = uniqueCandidates.length > 0 ? uniqueCandidates[0] : null
 
-  return { target, candidates: filteredCandidates }
+  return { target, candidates: uniqueCandidates }
 }
 
 /**

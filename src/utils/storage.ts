@@ -16,11 +16,11 @@ class StorageManager {
     isActive: false,
     drawerWidth: 800,
     attributeName: 'schema-params',
-    searchConfig: {
-      searchDepthDown: 5,
-      searchDepthUp: 3,
-      throttleInterval: 16
-    }
+  searchConfig: {
+    searchDepthDown: 5,
+    searchDepthUp: 0,
+    throttleInterval: 16
+  }
   }
 
   /**

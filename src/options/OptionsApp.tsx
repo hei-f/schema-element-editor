@@ -88,7 +88,7 @@ export const OptionsApp: React.FC = () => {
     form.setFieldsValue({ 
       attributeName: 'schema-params',
       searchDepthDown: 5,
-      searchDepthUp: 3,
+      searchDepthUp: 0,
       throttleInterval: 16
     })
   }
@@ -108,7 +108,7 @@ export const OptionsApp: React.FC = () => {
           initialValues={{ 
             attributeName: 'schema-params',
             searchDepthDown: 5,
-            searchDepthUp: 3,
+            searchDepthUp: 0,
             throttleInterval: 16
           }}
         >
@@ -129,17 +129,17 @@ export const OptionsApp: React.FC = () => {
               <Form.Item
                 label="向下搜索深度"
                 name="searchDepthDown"
-                extra="查找子元素的最大层数，用于处理嵌套元素"
+                extra="查找子元素的最大层数，设置为 0 则不向下搜索"
               >
-                <InputNumber min={1} max={10} style={{ width: '100%' }} />
+                <InputNumber min={0} style={{ width: '100%' }} />
               </Form.Item>
 
               <Form.Item
                 label="向上搜索深度"
                 name="searchDepthUp"
-                extra="查找父元素的最大层数"
+                extra="查找父元素的最大层数，设置为 0 则不向上搜索"
               >
-                <InputNumber min={1} max={10} style={{ width: '100%' }} />
+                <InputNumber min={0} style={{ width: '100%' }} />
               </Form.Item>
 
               <Form.Item
