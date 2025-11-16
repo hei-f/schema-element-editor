@@ -62,16 +62,6 @@ describe('Injected Script 集成测试', () => {
       update: '__updateSchemaByParams'
     }
 
-    // 加载配置
-    chrome.storage.local.get(['getFunctionName', 'updateFunctionName'], (result) => {
-      if (result.getFunctionName) {
-        functionNames.get = result.getFunctionName
-      }
-      if (result.updateFunctionName) {
-        functionNames.update = result.updateFunctionName
-      }
-    })
-
     // 监听消息
     window.addEventListener('message', (event: MessageEvent) => {
       if (event.source !== window) return
@@ -80,6 +70,9 @@ describe('Injected Script 集成测试', () => {
       const { type, payload } = event.data
 
       switch (type) {
+        case 'CONFIG_SYNC':
+          handleConfigSync(payload)
+          break
         case 'GET_SCHEMA':
           handleGetSchema(payload)
           break
@@ -88,6 +81,17 @@ describe('Injected Script 集成测试', () => {
           break
       }
     })
+
+    function handleConfigSync(payload: any) {
+      const { getFunctionName, updateFunctionName } = payload || {}
+      
+      if (getFunctionName) {
+        functionNames.get = getFunctionName
+      }
+      if (updateFunctionName) {
+        functionNames.update = updateFunctionName
+      }
+    }
 
     function handleGetSchema(payload: any) {
       const { params } = payload || {}
@@ -257,14 +261,6 @@ describe('Injected Script 集成测试', () => {
   })
 
   describe('自定义函数名', () => {
-    beforeEach(() => {
-      // 设置自定义函数名配置
-      mockStorage = {
-        getFunctionName: 'myCustomGetFn',
-        updateFunctionName: 'myCustomUpdateFn'
-      }
-    })
-
     it('应该使用自定义函数名获取Schema', () => {
       ;(window as any).myCustomGetFn = jest.fn((params: string) => ({
         custom: 'data',
@@ -273,6 +269,17 @@ describe('Injected Script 集成测试', () => {
 
       simulateInjectedScript()
 
+      // 先发送 CONFIG_SYNC 消息
+      triggerMessage({
+        source: 'schema-editor-content',
+        type: 'CONFIG_SYNC',
+        payload: {
+          getFunctionName: 'myCustomGetFn',
+          updateFunctionName: 'myCustomUpdateFn'
+        }
+      })
+
+      // 再发送 GET_SCHEMA 消息
       triggerMessage({
         source: 'schema-editor-content',
         type: 'GET_SCHEMA',
@@ -301,6 +308,17 @@ describe('Injected Script 集成测试', () => {
 
       simulateInjectedScript()
 
+      // 先发送 CONFIG_SYNC 消息
+      triggerMessage({
+        source: 'schema-editor-content',
+        type: 'CONFIG_SYNC',
+        payload: {
+          getFunctionName: 'myCustomGetFn',
+          updateFunctionName: 'myCustomUpdateFn'
+        }
+      })
+
+      // 再发送 UPDATE_SCHEMA 消息
       triggerMessage({
         source: 'schema-editor-content',
         type: 'UPDATE_SCHEMA',
@@ -331,6 +349,16 @@ describe('Injected Script 集成测试', () => {
 
       simulateInjectedScript()
 
+      // 先发送 CONFIG_SYNC 消息
+      triggerMessage({
+        source: 'schema-editor-content',
+        type: 'CONFIG_SYNC',
+        payload: {
+          getFunctionName: 'myCustomGetFn'
+        }
+      })
+
+      // 再发送 GET_SCHEMA 消息
       triggerMessage({
         source: 'schema-editor-content',
         type: 'GET_SCHEMA',
@@ -354,6 +382,16 @@ describe('Injected Script 集成测试', () => {
 
       simulateInjectedScript()
 
+      // 先发送 CONFIG_SYNC 消息
+      triggerMessage({
+        source: 'schema-editor-content',
+        type: 'CONFIG_SYNC',
+        payload: {
+          updateFunctionName: 'myCustomUpdateFn'
+        }
+      })
+
+      // 再发送 UPDATE_SCHEMA 消息
       triggerMessage({
         source: 'schema-editor-content',
         type: 'UPDATE_SCHEMA',
@@ -426,40 +464,77 @@ describe('Injected Script 集成测试', () => {
     })
   })
 
-  describe('配置加载', () => {
-    it('应该正确加载存储中的函数名配置', () => {
-      mockStorage = {
-        getFunctionName: 'loadedGetFn',
-        updateFunctionName: 'loadedUpdateFn'
-      }
+  describe('CONFIG_SYNC 消息处理', () => {
+    it('应该通过 CONFIG_SYNC 消息更新函数名配置', () => {
+      ;(window as any).syncedGetFn = jest.fn(() => ({ synced: true }))
 
-      ;(window as any).loadedGetFn = jest.fn(() => ({ loaded: true }))
+      simulateInjectedScript()
 
-      const { functionNames } = simulateInjectedScript()
+      // 发送 CONFIG_SYNC 消息
+      triggerMessage({
+        source: 'schema-editor-content',
+        type: 'CONFIG_SYNC',
+        payload: {
+          getFunctionName: 'syncedGetFn',
+          updateFunctionName: 'syncedUpdateFn'
+        }
+      })
 
-      // 验证配置被加载
-      expect(chrome.storage.local.get).toHaveBeenCalledWith(
-        ['getFunctionName', 'updateFunctionName'],
-        expect.any(Function)
-      )
-
-      // 触发消息验证使用了正确的函数名
+      // 触发 GET_SCHEMA 验证配置已更新
       triggerMessage({
         source: 'schema-editor-content',
         type: 'GET_SCHEMA',
         payload: { params: 'test' }
       })
 
-      expect((window as any).loadedGetFn).toHaveBeenCalled()
+      expect((window as any).syncedGetFn).toHaveBeenCalledWith('test')
     })
 
-    it('当配置为空时应该使用默认函数名', () => {
-      mockStorage = {}
+    it('应该支持只更新部分配置', () => {
+      ;(window as any).partialGetFn = jest.fn(() => ({ partial: true }))
+      ;(window as any).__updateSchemaByParams = jest.fn(() => true)
 
+      simulateInjectedScript()
+
+      // 只更新 getFunctionName
+      triggerMessage({
+        source: 'schema-editor-content',
+        type: 'CONFIG_SYNC',
+        payload: {
+          getFunctionName: 'partialGetFn'
+        }
+      })
+
+      // 验证 get 函数名已更新
+      triggerMessage({
+        source: 'schema-editor-content',
+        type: 'GET_SCHEMA',
+        payload: { params: 'test' }
+      })
+      expect((window as any).partialGetFn).toHaveBeenCalled()
+
+      // 验证 update 函数名仍为默认值
+      triggerMessage({
+        source: 'schema-editor-content',
+        type: 'UPDATE_SCHEMA',
+        payload: { schema: {}, params: 'test' }
+      })
+      expect((window as any).__updateSchemaByParams).toHaveBeenCalled()
+    })
+
+    it('当配置为空时应该保持默认函数名', () => {
       ;(window as any).__getSchemaByParams = jest.fn(() => ({ default: true }))
 
       simulateInjectedScript()
 
+      // 发送空配置
+      triggerMessage({
+        source: 'schema-editor-content',
+        type: 'CONFIG_SYNC',
+        payload: {}
+      })
+
+      // 验证仍使用默认函数名
       triggerMessage({
         source: 'schema-editor-content',
         type: 'GET_SCHEMA',
