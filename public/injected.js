@@ -95,9 +95,11 @@
       }
 
       const result = updateFn(schema, params)
+      // 只要没抛异常就认为成功（除非明确返回 false）
+      const success = result !== false
       sendResponse('UPDATE_RESULT', {
-        success: !!result,
-        message: result ? '更新成功' : '更新失败'
+        success,
+        message: success ? '更新成功' : '更新失败'
       })
     } catch (error) {
       console.error('更新Schema失败:', error)
