@@ -66,9 +66,9 @@ describe('Storage工具测试', () => {
   })
 
   describe('getAttributeName', () => {
-    it('应该返回默认属性名schema-params', async () => {
+    it('应该返回默认属性名id', async () => {
       const result = await storage.getAttributeName()
-      expect(result).toBe('schema-params')
+      expect(result).toBe('id')
     })
 
     it('应该返回存储的属性名', async () => {
@@ -100,14 +100,16 @@ describe('Storage工具测试', () => {
       expect(result).toEqual({
         isActive: false,
         drawerWidth: 800,
-        attributeName: 'schema-params',
+        attributeName: 'id',
         searchConfig: {
           searchDepthDown: 5,
           searchDepthUp: 0,
           throttleInterval: 16
         },
-        getFunctionName: '__getSchemaByParams',
-        updateFunctionName: '__updateSchemaByParams'
+        getFunctionName: '__getContentById',
+        updateFunctionName: '__updateContentById',
+        autoParseString: true,
+        enableDebugLog: false
       })
     })
 
@@ -122,7 +124,8 @@ describe('Storage工具测试', () => {
           throttleInterval: 8
         },
         getFunctionName: 'myGetFn',
-        updateFunctionName: 'myUpdateFn'
+        updateFunctionName: 'myUpdateFn',
+        autoParseString: true
       })
       
       const result = await storage.getAllData()
@@ -137,7 +140,9 @@ describe('Storage工具测试', () => {
           throttleInterval: 8
         },
         getFunctionName: 'myGetFn',
-        updateFunctionName: 'myUpdateFn'
+        updateFunctionName: 'myUpdateFn',
+        autoParseString: true,
+        enableDebugLog: false
       })
     })
 
@@ -151,14 +156,16 @@ describe('Storage工具测试', () => {
       expect(result).toEqual({
         isActive: true,
         drawerWidth: 800,
-        attributeName: 'schema-params',
+        attributeName: 'id',
         searchConfig: {
           searchDepthDown: 5,
           searchDepthUp: 0,
           throttleInterval: 16
         },
-        getFunctionName: '__getSchemaByParams',
-        updateFunctionName: '__updateSchemaByParams'
+        getFunctionName: '__getContentById',
+        updateFunctionName: '__updateContentById',
+        autoParseString: true,
+        enableDebugLog: false
       })
     })
   })
@@ -279,7 +286,7 @@ describe('Storage工具测试', () => {
   describe('getGetFunctionName', () => {
     it('应该返回默认函数名', async () => {
       const result = await storage.getGetFunctionName()
-      expect(result).toBe('__getSchemaByParams')
+      expect(result).toBe('__getContentById')
     })
 
     it('应该返回存储的函数名', async () => {
@@ -295,7 +302,7 @@ describe('Storage工具测试', () => {
   describe('getUpdateFunctionName', () => {
     it('应该返回默认函数名', async () => {
       const result = await storage.getUpdateFunctionName()
-      expect(result).toBe('__updateSchemaByParams')
+      expect(result).toBe('__updateContentById')
     })
 
     it('应该返回存储的函数名', async () => {
@@ -358,8 +365,40 @@ describe('Storage工具测试', () => {
           throttleInterval: 20
         },
         getFunctionName: 'getMySchema',
-        updateFunctionName: 'updateMySchema'
+        updateFunctionName: 'updateMySchema',
+        autoParseString: true,
+        enableDebugLog: false
       })
+    })
+  })
+
+  describe('getAutoParseString', () => {
+    it('应该返回默认值true', async () => {
+      const result = await storage.getAutoParseString()
+      expect(result).toBe(true)
+    })
+
+    it('应该返回存储的值', async () => {
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ 
+        autoParseString: false 
+      })
+      
+      const result = await storage.getAutoParseString()
+      expect(result).toBe(false)
+    })
+  })
+
+  describe('setAutoParseString', () => {
+    it('应该保存字符串自动解析配置', async () => {
+      await storage.setAutoParseString(false)
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({ autoParseString: false })
+    })
+
+    it('应该能够开启字符串自动解析', async () => {
+      await storage.setAutoParseString(true)
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({ autoParseString: true })
     })
   })
 
@@ -375,7 +414,7 @@ describe('Storage工具测试', () => {
       ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
       
       const result = await storage.getGetFunctionName()
-      expect(result).toBe('__getSchemaByParams')
+      expect(result).toBe('__getContentById')
     })
 
     it('set操作失败时不应该抛出错误', async () => {

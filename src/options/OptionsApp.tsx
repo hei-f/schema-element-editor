@@ -1,5 +1,6 @@
 import { storage } from '@/utils/storage'
-import { Button, Card, Collapse, Form, Input, InputNumber, message, Slider, Space, Typography } from 'antd'
+import { InfoCircleOutlined } from '@ant-design/icons'
+import { Button, Card, Collapse, Form, Input, InputNumber, message, Slider, Space, Switch, Tooltip, Typography } from 'antd'
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
@@ -51,6 +52,8 @@ export const OptionsApp: React.FC = () => {
       const searchConfig = await storage.getSearchConfig()
       const getFn = await storage.getGetFunctionName()
       const updateFn = await storage.getUpdateFunctionName()
+      const autoParse = await storage.getAutoParseString()
+      const debugLog = await storage.getEnableDebugLog()
       
       setAttributeName(name)
       setGetFunctionName(getFn)
@@ -61,7 +64,9 @@ export const OptionsApp: React.FC = () => {
         searchDepthUp: searchConfig.searchDepthUp,
         throttleInterval: searchConfig.throttleInterval,
         getFunctionName: getFn,
-        updateFunctionName: updateFn
+        updateFunctionName: updateFn,
+        autoParseString: autoParse,
+        enableDebugLog: debugLog
       })
     } catch (error) {
       message.error('加载配置失败')
@@ -81,6 +86,8 @@ export const OptionsApp: React.FC = () => {
         throttleInterval: values.throttleInterval
       })
       await storage.setFunctionNames(values.getFunctionName, values.updateFunctionName)
+      await storage.setAutoParseString(values.autoParseString)
+      await storage.setEnableDebugLog(values.enableDebugLog)
       setAttributeName(values.attributeName)
       setGetFunctionName(values.getFunctionName)
       setUpdateFunctionName(values.updateFunctionName)
@@ -102,7 +109,9 @@ export const OptionsApp: React.FC = () => {
       searchDepthUp: 0,
       throttleInterval: 16,
       getFunctionName: '__getContentById',
-      updateFunctionName: '__updateContentById'
+      updateFunctionName: '__updateContentById',
+      autoParseString: true,
+      enableDebugLog: false
     })
   }
 
@@ -124,7 +133,9 @@ export const OptionsApp: React.FC = () => {
             searchDepthUp: 0,
             throttleInterval: 16,
             getFunctionName: '__getContentById',
-            updateFunctionName: '__updateContentById'
+            updateFunctionName: '__updateContentById',
+            autoParseString: true,
+            enableDebugLog: false
           }}
         >
           <Form.Item
@@ -139,8 +150,7 @@ export const OptionsApp: React.FC = () => {
             <Input placeholder="例如: id" />
           </Form.Item>
 
-          <Collapse defaultActiveKey={['1', '2']} style={{ marginBottom: '24px' }}>
-            <Panel header="API函数配置" key="2">
+          <Title level={5} style={{ marginTop: '24px', marginBottom: '16px' }}>API函数配置</Title>
               <Form.Item
                 label="获取Schema函数名"
                 name="getFunctionName"
@@ -164,9 +174,8 @@ export const OptionsApp: React.FC = () => {
               >
                 <Input placeholder="例如: __updateContentById" />
               </Form.Item>
-            </Panel>
 
-            <Panel header="高级搜索设置" key="1">
+          <Title level={5} style={{ marginTop: '24px', marginBottom: '16px' }}>搜索配置</Title>
               <Form.Item
                 label="向下搜索深度"
                 name="searchDepthDown"
@@ -189,6 +198,40 @@ export const OptionsApp: React.FC = () => {
                 extra="控制鼠标移动检测频率，较小值响应更快但可能影响性能"
               >
                 <Slider min={8} max={50} marks={{ 8: '8ms', 16: '16ms', 50: '50ms' }} />
+          </Form.Item>
+
+          <Collapse style={{ marginTop: '24px', marginBottom: '24px' }}>
+            <Panel header="高级" key="advanced">
+              <Form.Item
+                label={
+                  <Space>
+                    字符串自动解析
+                    <Tooltip title="开启后，当获取的Schema数据为字符串时，插件会自动将其解析为Markdown Elements结构。编辑完成后保存时，会将Elements结构转换回字符串。关闭则直接显示原始字符串。">
+                      <InfoCircleOutlined style={{ color: '#1890ff', cursor: 'help' }} />
+                    </Tooltip>
+                  </Space>
+                }
+                name="autoParseString"
+                valuePropName="checked"
+                extra="自动将字符串类型的Schema数据解析为Markdown Elements结构进行编辑，保存时自动转换回字符串"
+              >
+                <Switch />
+              </Form.Item>
+
+              <Form.Item
+                label={
+                  <Space>
+                    启用调试日志
+                    <Tooltip title="开启后，会在浏览器控制台输出插件的调试日志，如'注入成功'、'配置已同步'等信息。生产环境建议关闭。">
+                      <InfoCircleOutlined style={{ color: '#1890ff', cursor: 'help' }} />
+                    </Tooltip>
+                  </Space>
+                }
+                name="enableDebugLog"
+                valuePropName="checked"
+                extra="在浏览器控制台显示插件的调试日志信息"
+              >
+                <Switch />
               </Form.Item>
             </Panel>
           </Collapse>

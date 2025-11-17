@@ -1,4 +1,5 @@
 import { MessageType, type ElementAttributes, type Message } from '@/types'
+import { logger } from '@/utils/logger'
 import { listenChromeMessages } from '@/utils/message'
 import { configureMonaco } from '@/utils/monaco-loader'
 import { storage } from '@/utils/storage'
@@ -7,7 +8,7 @@ import ReactDOM from 'react-dom/client'
 import { ElementMonitor } from './monitor'
 import { App } from './ui/App'
 
-console.log('Schema Editor Content Script已加载')
+logger.log('Schema Editor Content Script已加载')
 
 // 在全局上下文中配置Monaco Editor（必须在Shadow DOM创建之前）
 configureMonaco()
@@ -20,13 +21,13 @@ function injectPageScript(): void {
   const script = document.createElement('script')
   script.src = chrome.runtime.getURL('injected.js')
   script.onload = async () => {
-    console.log('✅ Injected script已成功注入')
+    logger.log('✅ Injected script已成功注入')
     script.remove()
     
     await syncConfigToInjectedScript()
   }
   script.onerror = (error) => {
-    console.error('❌ Injected script注入失败:', error)
+    logger.error('❌ Injected script注入失败:', error)
   }
   ;(document.head || document.documentElement).appendChild(script)
 }
@@ -51,9 +52,9 @@ async function syncConfigToInjectedScript(): Promise<void> {
       '*'
     )
     
-    console.log('⚙️ 配置已同步到injected script:', { getFunctionName, updateFunctionName })
+    logger.log('⚙️ 配置已同步到injected script:', { getFunctionName, updateFunctionName })
   } catch (error) {
-    console.error('❌ 同步配置失败:', error)
+    logger.error('❌ 同步配置失败:', error)
   }
 }
 
@@ -139,7 +140,7 @@ class SchemaEditorContent {
       this.handleElementClick(element, attrs)
     })
 
-    console.log('Schema Editor Content初始化完成, 激活状态:', this.isActive)
+    logger.log('Schema Editor Content初始化完成, 激活状态:', this.isActive)
   }
 
   /**
@@ -160,7 +161,7 @@ class SchemaEditorContent {
    * 处理激活状态变化
    */
   private handleActiveStateChanged(isActive: boolean): void {
-    console.log('激活状态变化:', isActive)
+    logger.log('激活状态变化:', isActive)
     this.isActive = isActive
 
     if (isActive) {
@@ -174,7 +175,7 @@ class SchemaEditorContent {
    * 启动监听
    */
   private start(): void {
-    console.log('启动Schema Editor')
+    logger.log('启动Schema Editor')
     
     // 启动元素监听器
     this.monitor.start()
@@ -189,7 +190,7 @@ class SchemaEditorContent {
    * 停止监听
    */
   private stop(): void {
-    console.log('停止Schema Editor')
+    logger.log('停止Schema Editor')
     this.monitor.stop()
   }
 
@@ -209,14 +210,14 @@ class SchemaEditorContent {
       </React.StrictMode>
     )
 
-    console.log('React UI已初始化')
+    logger.log('React UI已初始化')
   }
 
   /**
    * 处理元素点击
    */
   private handleElementClick(element: HTMLElement, attrs: ElementAttributes): void {
-    console.log('元素点击事件:', element, attrs)
+    logger.log('元素点击事件:', element, attrs)
 
     // 触发自定义事件，通知React应用
     const event = new CustomEvent('schema-editor:element-click', {

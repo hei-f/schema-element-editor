@@ -1,5 +1,6 @@
 import type { ElementAttributes, Message, SchemaResponsePayload, UpdateResultPayload } from '@/types'
 import { MessageType } from '@/types'
+import { logger } from '@/utils/logger'
 import { listenPageMessages, postMessageToPage } from '@/utils/message'
 import { storage } from '@/utils/storage'
 import { ConfigProvider, message as antdMessage } from 'antd'
@@ -30,7 +31,7 @@ export const App: React.FC = () => {
    */
   useEffect(() => {
     const cleanup = listenPageMessages((msg: Message) => {
-      console.log('React App收到页面消息:', msg)
+      logger.log('React App收到页面消息:', msg)
 
       switch (msg.type) {
         case MessageType.SCHEMA_RESPONSE:
@@ -55,7 +56,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     const handleElementClick = (event: CustomEvent) => {
       const { element, attributes } = event.detail
-      console.log('元素被点击:', element, attributes)
+      logger.log('元素被点击:', element, attributes)
 
       setCurrentAttributes(attributes)
       requestSchema(attributes)
@@ -74,7 +75,7 @@ export const App: React.FC = () => {
   const requestSchema = (attributes: ElementAttributes) => {
     const params = attributes.params.join(',')
     const payload = { params }
-    console.log('📤 App准备发送GET_SCHEMA消息:', payload)
+    logger.log('📤 App准备发送GET_SCHEMA消息:', payload)
     
     postMessageToPage({
       type: MessageType.GET_SCHEMA,
@@ -127,9 +128,8 @@ export const App: React.FC = () => {
    * 处理更新结果
    */
   const handleUpdateResult = (payload: UpdateResultPayload) => {
-    if (payload.success) {
-      antdMessage.success(payload.message || '更新成功')
-    } else {
+    // 只处理失败情况，成功提示由 SchemaDrawer 显示
+    if (!payload.success) {
       antdMessage.error(payload.error || '更新失败')
     }
   }

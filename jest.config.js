@@ -15,7 +15,8 @@ export default {
     '^monaco-editor/(.*)$': '<rootDir>/test/__mocks__/fileMock.ts',
     '^@monaco-editor/react$': '<rootDir>/test/__mocks__/monacoMock.ts',
     '\\?worker$': '<rootDir>/test/__mocks__/fileMock.ts',
-    '^@/utils/monaco-loader$': '<rootDir>/test/__mocks__/monacoLoaderMock.ts'
+    '^@/utils/monaco-loader$': '<rootDir>/test/__mocks__/monacoLoaderMock.ts',
+    '^@ant-design/md-editor$': '<rootDir>/test/__mocks__/mdEditorMock.ts'
   },
   setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
   collectCoverageFrom: [

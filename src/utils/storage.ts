@@ -11,7 +11,9 @@ class StorageManager {
     ATTRIBUTE_NAME: 'attributeName',
     SEARCH_CONFIG: 'searchConfig',
     GET_FUNCTION_NAME: 'getFunctionName',
-    UPDATE_FUNCTION_NAME: 'updateFunctionName'
+    UPDATE_FUNCTION_NAME: 'updateFunctionName',
+    AUTO_PARSE_STRING: 'autoParseString',
+    ENABLE_DEBUG_LOG: 'enableDebugLog'
   }
 
   private readonly DEFAULT_VALUES: StorageData = {
@@ -24,7 +26,9 @@ class StorageManager {
       throttleInterval: 16
     },
     getFunctionName: '__getContentById',
-    updateFunctionName: '__updateContentById'
+    updateFunctionName: '__updateContentById',
+    autoParseString: true,
+    enableDebugLog: false
   }
 
   /**
@@ -184,18 +188,72 @@ class StorageManager {
   }
 
   /**
+   * 获取字符串自动解析配置
+   */
+  async getAutoParseString(): Promise<boolean> {
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.AUTO_PARSE_STRING)
+      return result[this.STORAGE_KEYS.AUTO_PARSE_STRING] ?? this.DEFAULT_VALUES.autoParseString
+    } catch (error) {
+      console.error('获取字符串自动解析配置失败:', error)
+      return this.DEFAULT_VALUES.autoParseString
+    }
+  }
+
+  /**
+   * 设置字符串自动解析配置
+   */
+  async setAutoParseString(enabled: boolean): Promise<void> {
+    try {
+      await chrome.storage.local.set({
+        [this.STORAGE_KEYS.AUTO_PARSE_STRING]: enabled
+      })
+    } catch (error) {
+      console.error('设置字符串自动解析配置失败:', error)
+    }
+  }
+
+  /**
+   * 获取调试日志启用状态
+   */
+  async getEnableDebugLog(): Promise<boolean> {
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.ENABLE_DEBUG_LOG)
+      return result[this.STORAGE_KEYS.ENABLE_DEBUG_LOG] ?? this.DEFAULT_VALUES.enableDebugLog
+    } catch (error) {
+      console.error('获取调试日志配置失败:', error)
+      return this.DEFAULT_VALUES.enableDebugLog
+    }
+  }
+
+  /**
+   * 设置调试日志启用状态
+   */
+  async setEnableDebugLog(enabled: boolean): Promise<void> {
+    try {
+      await chrome.storage.local.set({
+        [this.STORAGE_KEYS.ENABLE_DEBUG_LOG]: enabled
+      })
+    } catch (error) {
+      console.error('设置调试日志配置失败:', error)
+    }
+  }
+
+  /**
    * 获取所有存储数据
    */
   async getAllData(): Promise<StorageData> {
-    const [isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName] = await Promise.all([
+    const [isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog] = await Promise.all([
       this.getActiveState(),
       this.getDrawerWidth(),
       this.getAttributeName(),
       this.getSearchConfig(),
       this.getGetFunctionName(),
-      this.getUpdateFunctionName()
+      this.getUpdateFunctionName(),
+      this.getAutoParseString(),
+      this.getEnableDebugLog()
     ])
-    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName }
+    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog }
   }
 }
 

@@ -1,5 +1,7 @@
 import type { ElementAttributes } from '@/types'
 import { deserializeJson, serializeJson } from '@/utils/json-serializer'
+import { isElementsArray, isStringData, parseMarkdownString, parserSchemaNodeToMarkdown } from '@/utils/markdown-parser'
+import { storage } from '@/utils/storage'
 import Editor from '@monaco-editor/react'
 import { Button, Drawer, Space, Tooltip, message } from 'antd'
 import React, { useEffect, useState } from 'react'
@@ -37,21 +39,47 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   const [editorValue, setEditorValue] = useState<string>('')
   const [isModified, setIsModified] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [wasStringData, setWasStringData] = useState(false)
 
   /**
    * 当schemaData变化时，更新编辑器内容
    */
   useEffect(() => {
+    const processSchemaData = async () => {
     if (schemaData !== null && schemaData !== undefined) {
       try {
+          const autoParseEnabled = await storage.getAutoParseString()
+          
+          if (autoParseEnabled && isStringData(schemaData)) {
+            setWasStringData(true)
+            const elements = parseMarkdownString(schemaData)
+            
+            if (elements.length > 0) {
+              const formatted = JSON.stringify(elements, null, 2)
+              setEditorValue(formatted)
+              setIsModified(false)
+            } else {
+              message.warning('Markdown解析失败，显示原始字符串')
+              setWasStringData(false)
+              setEditorValue(JSON.stringify(schemaData, null, 2))
+              setIsModified(false)
+            }
+          } else {
+            setWasStringData(false)
         const formatted = JSON.stringify(schemaData, null, 2)
         setEditorValue(formatted)
         setIsModified(false)
+          }
       } catch (error) {
-        console.error('格式化Schema失败:', error)
+          console.error('处理Schema数据失败:', error)
+          setWasStringData(false)
         setEditorValue(JSON.stringify(schemaData))
+          setIsModified(false)
+        }
       }
     }
+    
+    processSchemaData()
   }, [schemaData])
 
   /**
@@ -125,16 +153,38 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
    */
   const handleSave = async () => {
     try {
-      // 验证JSON格式
       const parsed = JSON.parse(editorValue)
 
       setIsSaving(true)
-      await onSave(parsed)
-      setIsModified(false)
       
-      // 保存成功后自动关闭抽屉
-      message.success('保存成功')
-      onClose()
+      if (wasStringData) {
+        // 原始数据是字符串，需要转换回字符串
+        if (isElementsArray(parsed)) {
+          // 如果是 Elements[] 数组，转换为 Markdown 字符串
+          try {
+            const markdownString = parserSchemaNodeToMarkdown(parsed)
+            await onSave(markdownString)
+            setIsModified(false)
+            message.success('保存成功')
+            onClose()
+          } catch (error: any) {
+            message.error(`转换为Markdown失败: ${error.message}`)
+          }
+        } else {
+          // 其他类型（对象、数组、字符串等），序列化为 JSON 字符串
+          const jsonString = JSON.stringify(parsed)
+          await onSave(jsonString)
+          setIsModified(false)
+          message.success('保存成功')
+          onClose()
+        }
+      } else {
+        // 原始数据不是字符串，保持原类型
+        await onSave(parsed)
+        setIsModified(false)
+        message.success('保存成功')
+        onClose()
+      }
     } catch (error: any) {
       message.error(`保存失败: ${error.message}`)
     } finally {
