@@ -69,7 +69,7 @@ window.__updateContentById = (schema: any, params: string) => {
 
 属性值为参数数组的 `join(',')` 结果。
 
-> **注意**：`data-id` 符合 Agentic UI 的规范，使用默认配置即可，无需用户手动配置属性名。如有特殊需求，属性名也可在配置页面自定义。
+> **注意**：`data-id` 符合 [Agentic UI](https://github.com/ant-design/agentic-ui) 的规范，使用默认配置即可，无需用户手动配置属性名。如有特殊需求，属性名也可在配置页面自定义。
 
 ## 项目结构
 
