@@ -11,7 +11,10 @@ echo "🚀 开始打包 Schema Editor..."
 VERSION=$(grep '"version"' src/manifest.json | sed 's/.*"version": "\(.*\)".*/\1/')
 echo "📦 版本号: v$VERSION"
 
-# 构建生产版本
+# 清理并构建生产版本
+echo "🧹 清理旧文件..."
+rm -rf dist
+
 echo "🔨 构建生产版本..."
 npm run build
 
