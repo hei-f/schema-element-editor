@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">48.38% </span>
+                <span class="strong">50% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>30/62</span>
+                <span class='fraction'>31/62</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/16</span>
+                <span class='fraction'>0/13</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">47.54% </span>
+                <span class="strong">49.18% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>29/61</span>
+                <span class='fraction'>30/61</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -228,6 +228,7 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -349,9 +350,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">13x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -379,6 +379,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import type { ElementAttributes, Message, SchemaResponsePayload, UpdateResultPayload } from '@/types'
 import { MessageType } from '@/types'
+import { logger } from '@/utils/logger'
 import { listenPageMessages, postMessageToPage } from '@/utils/message'
 import { storage } from '@/utils/storage'
 import { ConfigProvider, message as antdMessage } from 'antd'
@@ -409,7 +410,7 @@ export const App: React.FC = () =&gt; {
    */
   useEffect(() =&gt; {
     const cleanup = listenPageMessages(<span class="fstat-no" title="function not covered" >(m</span>sg: Message) =&gt; {
-<span class="cstat-no" title="statement not covered" >      console.log('React App收到页面消息:', msg)</span>
+<span class="cstat-no" title="statement not covered" >      logger.log('React App收到页面消息:', msg)</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      switch (msg.type) {</span>
         case MessageType.SCHEMA_RESPONSE:
@@ -434,7 +435,7 @@ export const App: React.FC = () =&gt; {
   useEffect(() =&gt; {
     const handleElementClick = <span class="fstat-no" title="function not covered" >(e</span>vent: CustomEvent) =&gt; {
       const { element, attributes } = <span class="cstat-no" title="statement not covered" >event.detail</span>
-<span class="cstat-no" title="statement not covered" >      console.log('元素被点击:', element, attributes)</span>
+<span class="cstat-no" title="statement not covered" >      logger.log('元素被点击:', element, attributes)</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      setCurrentAttributes(attributes)</span>
 <span class="cstat-no" title="statement not covered" >      requestSchema(attributes)</span>
@@ -453,7 +454,7 @@ export const App: React.FC = () =&gt; {
   const requestSchema = <span class="fstat-no" title="function not covered" >(a</span>ttributes: ElementAttributes) =&gt; {
     const params = <span class="cstat-no" title="statement not covered" >attributes.params.join(',')</span>
     const payload = <span class="cstat-no" title="statement not covered" >{ params }</span>
-<span class="cstat-no" title="statement not covered" >    console.log('📤 App准备发送GET_SCHEMA消息:', payload)</span>
+<span class="cstat-no" title="statement not covered" >    logger.log('📤 App准备发送GET_SCHEMA消息:', payload)</span>
     
 <span class="cstat-no" title="statement not covered" >    postMessageToPage({</span>
       type: MessageType.GET_SCHEMA,
@@ -506,9 +507,8 @@ export const App: React.FC = () =&gt; {
    * 处理更新结果
    */
   const handleUpdateResult = <span class="fstat-no" title="function not covered" >(p</span>ayload: UpdateResultPayload) =&gt; {
-<span class="cstat-no" title="statement not covered" >    if (payload.success) {</span>
-<span class="cstat-no" title="statement not covered" >      antdMessage.success(payload.message || '更新成功')</span>
-    } else {
+    // 只处理失败情况，成功提示由 SchemaDrawer 显示
+<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!payload.success) {</span>
 <span class="cstat-no" title="statement not covered" >      antdMessage.error(payload.error || '更新失败')</span>
     }
   }
@@ -541,7 +541,7 @@ export const App: React.FC = () =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-17T11:21:52.072Z
+                at 2025-11-18T08:54:00.144Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

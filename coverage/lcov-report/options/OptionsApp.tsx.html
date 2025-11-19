@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">57.44% </span>
+                <span class="strong">55.1% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>27/47</span>
+                <span class='fraction'>27/49</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">56.52% </span>
+                <span class="strong">54.16% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>26/46</span>
+                <span class='fraction'>26/48</span>
             </div>
         
             
@@ -362,7 +362,28 @@
 <a name='L297'></a><a href='#L297'>297</a>
 <a name='L298'></a><a href='#L298'>298</a>
 <a name='L299'></a><a href='#L299'>299</a>
-<a name='L300'></a><a href='#L300'>300</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L300'></a><a href='#L300'>300</a>
+<a name='L301'></a><a href='#L301'>301</a>
+<a name='L302'></a><a href='#L302'>302</a>
+<a name='L303'></a><a href='#L303'>303</a>
+<a name='L304'></a><a href='#L304'>304</a>
+<a name='L305'></a><a href='#L305'>305</a>
+<a name='L306'></a><a href='#L306'>306</a>
+<a name='L307'></a><a href='#L307'>307</a>
+<a name='L308'></a><a href='#L308'>308</a>
+<a name='L309'></a><a href='#L309'>309</a>
+<a name='L310'></a><a href='#L310'>310</a>
+<a name='L311'></a><a href='#L311'>311</a>
+<a name='L312'></a><a href='#L312'>312</a>
+<a name='L313'></a><a href='#L313'>313</a>
+<a name='L314'></a><a href='#L314'>314</a>
+<a name='L315'></a><a href='#L315'>315</a>
+<a name='L316'></a><a href='#L316'>316</a>
+<a name='L317'></a><a href='#L317'>317</a>
+<a name='L318'></a><a href='#L318'>318</a>
+<a name='L319'></a><a href='#L319'>319</a>
+<a name='L320'></a><a href='#L320'>320</a>
+<a name='L321'></a><a href='#L321'>321</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -417,11 +438,13 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -453,6 +476,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -475,7 +499,25 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -716,6 +758,7 @@ export const OptionsApp: React.FC = () =&gt; {
       const getFn = <span class="cstat-no" title="statement not covered" >await storage.getGetFunctionName()</span>
       const updateFn = <span class="cstat-no" title="statement not covered" >await storage.getUpdateFunctionName()</span>
       const autoParse = <span class="cstat-no" title="statement not covered" >await storage.getAutoParseString()</span>
+      const debugLog = <span class="cstat-no" title="statement not covered" >await storage.getEnableDebugLog()</span>
       
 <span class="cstat-no" title="statement not covered" >      setAttributeName(name)</span>
 <span class="cstat-no" title="statement not covered" >      setGetFunctionName(getFn)</span>
@@ -727,7 +770,8 @@ export const OptionsApp: React.FC = () =&gt; {
         throttleInterval: searchConfig.throttleInterval,
         getFunctionName: getFn,
         updateFunctionName: updateFn,
-        autoParseString: autoParse
+        autoParseString: autoParse,
+        enableDebugLog: debugLog
       })
     } catch (error) {
       message.error('加载配置失败')
@@ -748,6 +792,7 @@ export const OptionsApp: React.FC = () =&gt; {
       })
 <span class="cstat-no" title="statement not covered" >      await storage.setFunctionNames(values.getFunctionName, values.updateFunctionName)</span>
 <span class="cstat-no" title="statement not covered" >      await storage.setAutoParseString(values.autoParseString)</span>
+<span class="cstat-no" title="statement not covered" >      await storage.setEnableDebugLog(values.enableDebugLog)</span>
 <span class="cstat-no" title="statement not covered" >      setAttributeName(values.attributeName)</span>
 <span class="cstat-no" title="statement not covered" >      setGetFunctionName(values.getFunctionName)</span>
 <span class="cstat-no" title="statement not covered" >      setUpdateFunctionName(values.updateFunctionName)</span>
@@ -770,7 +815,8 @@ export const OptionsApp: React.FC = () =&gt; {
       throttleInterval: 16,
       getFunctionName: '__getContentById',
       updateFunctionName: '__updateContentById',
-      autoParseString: true
+      autoParseString: true,
+      enableDebugLog: false
     })
   }
 &nbsp;
@@ -793,7 +839,8 @@ export const OptionsApp: React.FC = () =&gt; {
             throttleInterval: 16,
             getFunctionName: '__getContentById',
             updateFunctionName: '__updateContentById',
-            autoParseString: true
+            autoParseString: true,
+            enableDebugLog: false
           }}
         &gt;
           &lt;Form.Item
@@ -809,53 +856,53 @@ export const OptionsApp: React.FC = () =&gt; {
           &lt;/Form.Item&gt;
 &nbsp;
           &lt;Title level={5} style={{ marginTop: '24px', marginBottom: '16px' }}&gt;API函数配置&lt;/Title&gt;
-          &lt;Form.Item
-            label="获取Schema函数名"
-            name="getFunctionName"
-            rules={[
-              { required: true, message: '请输入函数名' },
-              { pattern: /^[a-zA-Z_$][a-zA-Z0-9_$]*$/, message: '必须是有效的JavaScript函数名' }
-            ]}
-            extra="页面需要提供的获取Schema数据的全局函数名"
-          &gt;
-            &lt;Input placeholder="例如: __getContentById" /&gt;
-          &lt;/Form.Item&gt;
+              &lt;Form.Item
+                label="获取Schema函数名"
+                name="getFunctionName"
+                rules={[
+                  { required: true, message: '请输入函数名' },
+                  { pattern: /^[a-zA-Z_$][a-zA-Z0-9_$]*$/, message: '必须是有效的JavaScript函数名' }
+                ]}
+                extra="页面需要提供的获取Schema数据的全局函数名"
+              &gt;
+                &lt;Input placeholder="例如: __getContentById" /&gt;
+              &lt;/Form.Item&gt;
 &nbsp;
-          &lt;Form.Item
-            label="更新Schema函数名"
-            name="updateFunctionName"
-            rules={[
-              { required: true, message: '请输入函数名' },
-              { pattern: /^[a-zA-Z_$][a-zA-Z0-9_$]*$/, message: '必须是有效的JavaScript函数名' }
-            ]}
-            extra="页面需要提供的更新Schema数据的全局函数名"
-          &gt;
-            &lt;Input placeholder="例如: __updateContentById" /&gt;
-          &lt;/Form.Item&gt;
+              &lt;Form.Item
+                label="更新Schema函数名"
+                name="updateFunctionName"
+                rules={[
+                  { required: true, message: '请输入函数名' },
+                  { pattern: /^[a-zA-Z_$][a-zA-Z0-9_$]*$/, message: '必须是有效的JavaScript函数名' }
+                ]}
+                extra="页面需要提供的更新Schema数据的全局函数名"
+              &gt;
+                &lt;Input placeholder="例如: __updateContentById" /&gt;
+              &lt;/Form.Item&gt;
 &nbsp;
           &lt;Title level={5} style={{ marginTop: '24px', marginBottom: '16px' }}&gt;搜索配置&lt;/Title&gt;
-          &lt;Form.Item
-            label="向下搜索深度"
-            name="searchDepthDown"
-            extra="查找子元素的最大层数，设置为 0 则不向下搜索"
-          &gt;
-            &lt;InputNumber min={0} style={{ width: '100%' }} /&gt;
-          &lt;/Form.Item&gt;
+              &lt;Form.Item
+                label="向下搜索深度"
+                name="searchDepthDown"
+                extra="查找子元素的最大层数，设置为 0 则不向下搜索"
+              &gt;
+                &lt;InputNumber min={0} style={{ width: '100%' }} /&gt;
+              &lt;/Form.Item&gt;
 &nbsp;
-          &lt;Form.Item
-            label="向上搜索深度"
-            name="searchDepthUp"
-            extra="查找父元素的最大层数，设置为 0 则不向上搜索"
-          &gt;
-            &lt;InputNumber min={0} style={{ width: '100%' }} /&gt;
-          &lt;/Form.Item&gt;
+              &lt;Form.Item
+                label="向上搜索深度"
+                name="searchDepthUp"
+                extra="查找父元素的最大层数，设置为 0 则不向上搜索"
+              &gt;
+                &lt;InputNumber min={0} style={{ width: '100%' }} /&gt;
+              &lt;/Form.Item&gt;
 &nbsp;
-          &lt;Form.Item
-            label="节流间隔 (毫秒)"
-            name="throttleInterval"
-            extra="控制鼠标移动检测频率，较小值响应更快但可能影响性能"
-          &gt;
-            &lt;Slider min={8} max={50} marks={{ 8: '8ms', 16: '16ms', 50: '50ms' }} /&gt;
+              &lt;Form.Item
+                label="节流间隔 (毫秒)"
+                name="throttleInterval"
+                extra="控制鼠标移动检测频率，较小值响应更快但可能影响性能"
+              &gt;
+                &lt;Slider min={8} max={50} marks={{ 8: '8ms', 16: '16ms', 50: '50ms' }} /&gt;
           &lt;/Form.Item&gt;
 &nbsp;
           &lt;Collapse style={{ marginTop: '24px', marginBottom: '24px' }}&gt;
@@ -872,6 +919,22 @@ export const OptionsApp: React.FC = () =&gt; {
                 name="autoParseString"
                 valuePropName="checked"
                 extra="自动将字符串类型的Schema数据解析为Markdown Elements结构进行编辑，保存时自动转换回字符串"
+              &gt;
+                &lt;Switch /&gt;
+              &lt;/Form.Item&gt;
+&nbsp;
+              &lt;Form.Item
+                label={
+                  &lt;Space&gt;
+                    启用调试日志
+                    &lt;Tooltip title="开启后，会在浏览器控制台输出插件的调试日志，如'注入成功'、'配置已同步'等信息。生产环境建议关闭。"&gt;
+                      &lt;InfoCircleOutlined style={{ color: '#1890ff', cursor: 'help' }} /&gt;
+                    &lt;/Tooltip&gt;
+                  &lt;/Space&gt;
+                }
+                name="enableDebugLog"
+                valuePropName="checked"
+                extra="在浏览器控制台显示插件的调试日志信息"
               &gt;
                 &lt;Switch /&gt;
               &lt;/Form.Item&gt;
@@ -967,7 +1030,7 @@ export const OptionsApp: React.FC = () =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-17T11:21:52.072Z
+                at 2025-11-18T08:54:00.144Z
             </div>
         <script src="../prettify.js"></script>
         <script>

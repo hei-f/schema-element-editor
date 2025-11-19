@@ -464,6 +464,108 @@ describe('Injected Script 集成测试', () => {
     })
   })
 
+  describe('重复注入检测', () => {
+    it('应该在首次注入时设置全局标记', () => {
+      // 确保标记初始不存在
+      delete (window as any).__SCHEMA_EDITOR_INJECTED__
+
+      // 模拟 injected.js 的注入检测逻辑
+      const injectScript = () => {
+        if ((window as any).__SCHEMA_EDITOR_INJECTED__) {
+          return false // 已注入，跳过
+        }
+        ;(window as any).__SCHEMA_EDITOR_INJECTED__ = true
+        return true // 新注入
+      }
+
+      const result = injectScript()
+
+      expect(result).toBe(true)
+      expect((window as any).__SCHEMA_EDITOR_INJECTED__).toBe(true)
+    })
+
+    it('应该在重复注入时返回 false', () => {
+      // 设置已注入标记
+      ;(window as any).__SCHEMA_EDITOR_INJECTED__ = true
+
+      const injectScript = () => {
+        if ((window as any).__SCHEMA_EDITOR_INJECTED__) {
+          return false // 已注入，跳过
+        }
+        ;(window as any).__SCHEMA_EDITOR_INJECTED__ = true
+        return true // 新注入
+      }
+
+      const result = injectScript()
+
+      expect(result).toBe(false)
+    })
+
+    it('应该在检测到已注入时跳过脚本执行', () => {
+      ;(window as any).__SCHEMA_EDITOR_INJECTED__ = true
+
+      let scriptExecuted = false
+
+      // 模拟完整的 injected.js 逻辑
+      const runInjectedScript = () => {
+        if ((window as any).__SCHEMA_EDITOR_INJECTED__) {
+          console.log('Schema Editor injected script已存在，跳过重复注入')
+          return
+        }
+
+        ;(window as any).__SCHEMA_EDITOR_INJECTED__ = true
+        scriptExecuted = true
+        // ... 其他初始化逻辑
+      }
+
+      runInjectedScript()
+
+      expect(scriptExecuted).toBe(false)
+    })
+
+    it('应该在标记不存在时正常执行脚本', () => {
+      delete (window as any).__SCHEMA_EDITOR_INJECTED__
+
+      let scriptExecuted = false
+
+      const runInjectedScript = () => {
+        if ((window as any).__SCHEMA_EDITOR_INJECTED__) {
+          console.log('Schema Editor injected script已存在，跳过重复注入')
+          return
+        }
+
+        ;(window as any).__SCHEMA_EDITOR_INJECTED__ = true
+        scriptExecuted = true
+        // ... 其他初始化逻辑
+      }
+
+      runInjectedScript()
+
+      expect(scriptExecuted).toBe(true)
+      expect((window as any).__SCHEMA_EDITOR_INJECTED__).toBe(true)
+    })
+
+    it('全局标记应该在整个会话中保持', () => {
+      delete (window as any).__SCHEMA_EDITOR_INJECTED__
+
+      // 第一次注入
+      ;(window as any).__SCHEMA_EDITOR_INJECTED__ = true
+
+      // 模拟后续的注入尝试
+      const attempts = [1, 2, 3, 4, 5]
+      const results = attempts.map(() => {
+        if ((window as any).__SCHEMA_EDITOR_INJECTED__) {
+          return 'skipped'
+        }
+        return 'injected'
+      })
+
+      // 所有后续尝试都应该被跳过
+      expect(results).toEqual(['skipped', 'skipped', 'skipped', 'skipped', 'skipped'])
+      expect((window as any).__SCHEMA_EDITOR_INJECTED__).toBe(true)
+    })
+  })
+
   describe('CONFIG_SYNC 消息处理', () => {
     it('应该通过 CONFIG_SYNC 消息更新函数名配置', () => {
       ;(window as any).syncedGetFn = jest.fn(() => ({ synced: true }))

@@ -24,7 +24,7 @@ function updateIconState(isActive: boolean) {
 /**
  * 监听扩展图标点击事件
  */
-chrome.action.onClicked.addListener(async (tab: chrome.tabs.Tab) => {
+chrome.action.onClicked.addListener(async (_tab: chrome.tabs.Tab) => {
   console.log('扩展图标被点击')
   
   // 切换激活状态
@@ -34,16 +34,26 @@ chrome.action.onClicked.addListener(async (tab: chrome.tabs.Tab) => {
   // 更新图标状态
   updateIconState(newState)
   
-  // 通知当前标签页的content script
-  if (tab.id) {
-    try {
-      await chrome.tabs.sendMessage(tab.id, {
-        type: MessageType.ACTIVE_STATE_CHANGED,
-        payload: { isActive: newState }
-      } as Message)
-    } catch (error) {
-      console.error('通知content script失败:', error)
+  // 通知所有标签页的content script
+  try {
+    const tabs = await chrome.tabs.query({})
+    console.log(`通知 ${tabs.length} 个标签页激活状态变更`)
+    
+    for (const tab of tabs) {
+      if (tab.id) {
+        try {
+          await chrome.tabs.sendMessage(tab.id, {
+            type: MessageType.ACTIVE_STATE_CHANGED,
+            payload: { isActive: newState }
+          } as Message)
+        } catch (error) {
+          // 某些特殊页面（如 chrome://, edge:// 等）无法接收消息，忽略这些错误
+          console.debug(`标签页 ${tab.id} 无法接收消息:`, error)
+        }
+      }
     }
+  } catch (error) {
+    console.error('查询标签页失败:', error)
   }
 })
 

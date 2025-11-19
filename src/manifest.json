@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Schema Editor",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "DOM元素Schema查看和编辑工具",
   "permissions": [
     "storage",
@@ -23,17 +23,17 @@
   ],
   "action": {
     "default_icon": {
-      "16": "icons/icon-16.png",
-      "48": "icons/icon-48.png",
-      "128": "icons/icon-128.png"
+      "16": "icons/icon-active-16.png",
+      "48": "icons/icon-active-48.png",
+      "128": "icons/icon-active-128.png"
     },
     "default_title": "Schema Editor - 点击激活/停用"
   },
   "options_page": "src/options/options.html",
   "icons": {
-    "16": "icons/icon-16.png",
-    "48": "icons/icon-48.png",
-    "128": "icons/icon-128.png"
+    "16": "icons/icon-active-16.png",
+    "48": "icons/icon-active-48.png",
+    "128": "icons/icon-active-128.png"
   },
   "web_accessible_resources": [
     {

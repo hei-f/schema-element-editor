@@ -10,14 +10,19 @@ import { App } from './ui/App'
 
 logger.log('Schema Editor Content Script已加载')
 
-// 在全局上下文中配置Monaco Editor（必须在Shadow DOM创建之前）
-configureMonaco()
-
 /**
  * 注入页面脚本
  * 使用chrome.runtime.getURL加载独立的脚本文件
  */
 function injectPageScript(): void {
+  // 检查是否已经注入过
+  if ((window as any).__SCHEMA_EDITOR_INJECTED__) {
+    logger.log('⏭️ Injected script已存在，跳过注入')
+    // 即使已注入，也要同步配置（配置可能已更新）
+    syncConfigToInjectedScript()
+    return
+  }
+  
   const script = document.createElement('script')
   script.src = chrome.runtime.getURL('injected.js')
   script.onload = async () => {
@@ -69,9 +74,9 @@ function createShadowRoot(): { container: HTMLDivElement; root: ReactDOM.Root } 
   container.style.cssText = `
     position: fixed;
     top: 0;
+    right: 0;
+    bottom: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
     z-index: 2147483646;
     pointer-events: none;
   `
@@ -110,7 +115,9 @@ function createShadowRoot(): { container: HTMLDivElement; root: ReactDOM.Root } 
 class SchemaEditorContent {
   private monitor: ElementMonitor
   private reactRoot: ReactDOM.Root | null = null
+  private container: HTMLDivElement | null = null
   private isActive: boolean = false
+  private isInitialized: boolean = false
 
   constructor() {
     this.monitor = new ElementMonitor()
@@ -121,9 +128,6 @@ class SchemaEditorContent {
    * 初始化
    */
   private async init(): Promise<void> {
-    // 注入页面脚本
-    injectPageScript()
-
     // 检查初始激活状态
     this.isActive = await storage.getActiveState()
     if (this.isActive) {
@@ -177,6 +181,15 @@ class SchemaEditorContent {
   private start(): void {
     logger.log('启动Schema Editor')
     
+    // 首次激活时执行初始化
+    if (!this.isInitialized) {
+      // 配置Monaco Editor（必须在Shadow DOM创建之前）
+      configureMonaco()
+      // 注入页面脚本
+      injectPageScript()
+      this.isInitialized = true
+    }
+    
     // 启动元素监听器
     this.monitor.start()
 
@@ -192,6 +205,12 @@ class SchemaEditorContent {
   private stop(): void {
     logger.log('停止Schema Editor')
     this.monitor.stop()
+    
+    // 移除UI容器（完全清除DOM元素）
+    if (this.container && this.container.parentNode) {
+      this.container.parentNode.removeChild(this.container)
+      logger.log('✅ UI容器已移除')
+    }
   }
 
   /**
@@ -200,7 +219,8 @@ class SchemaEditorContent {
   private initReactUI(): void {
     if (this.reactRoot) return
 
-    const { root } = createShadowRoot()
+    const { container, root } = createShadowRoot()
+    this.container = container
     this.reactRoot = root
 
     // 渲染React应用

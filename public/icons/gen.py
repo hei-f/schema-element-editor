@@ -118,9 +118,5 @@ for size in sizes:
     img.save(f'icon-inactive-{size}.png')
     print(f'Created icon-inactive-{size}.png')
 
-# 生成默认图标（使用激活态作为默认）
-for size in sizes:
-    img = draw_ghost_icon(size, colors['active'])
-    img.save(f'icon-{size}.png')
-    print(f'Created icon-{size}.png (default)')
+print('\n注意：manifest.json 使用 icon-active-{size}.png 作为默认图标')
 

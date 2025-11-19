@@ -10,8 +10,10 @@ import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker'
  * - 使用 Vite 的 ?worker 语法导入 Worker 文件，绕过 CSP 限制
  * - 为 JSON 语言提供完整的语言服务（包括代码折叠、语法验证等）
  * - 所有 Worker 相关错误由 MonacoErrorBoundary 拦截和处理
+ * 
+ * @returns {boolean} 如果是新配置返回 true，如果使用已有配置返回 false
  */
-export function configureMonaco() {
+export function configureMonaco(): boolean {
   // 检查页面是否已有 MonacoEnvironment 配置
   const existingEnv = (self as any).MonacoEnvironment
   
@@ -28,12 +30,17 @@ export function configureMonaco() {
       }
     }
     console.log('📝 Monaco Editor 已加载（使用 Worker 支持）')
+    
+    // 使用本地加载的monaco实例
+    loader.config({ monaco })
+    return true
   } else {
     // 页面已有配置，不覆盖，使用页面的配置
     console.log('📝 Monaco Editor 已加载（使用页面现有配置）')
+    
+    // 使用本地加载的monaco实例
+    loader.config({ monaco })
+    return false
   }
-  
-  // 使用本地加载的monaco实例
-  loader.config({ monaco })
 }
 

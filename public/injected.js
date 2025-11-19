@@ -1,4 +1,12 @@
 ;(function () {
+  // 检测是否已经注入，避免重复注入
+  if (window.__SCHEMA_EDITOR_INJECTED__) {
+    console.log('Schema Editor injected script已存在，跳过重复注入')
+    return
+  }
+  
+  // 设置全局标记
+  window.__SCHEMA_EDITOR_INJECTED__ = true
   console.log('Schema Editor injected script已加载')
 
   const MESSAGE_SOURCE = {

@@ -209,6 +209,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
       destroyOnClose={false}
       closable={true}
       closeIcon={true}
+      getContainer={false}
       styles={{
         body: { padding: 0 },
         header: { position: 'relative' }

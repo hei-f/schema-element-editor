@@ -8,7 +8,13 @@ global.chrome = {
       addListener: jest.fn(),
       removeListener: jest.fn()
     },
-    getURL: jest.fn((path: string) => `chrome-extension://test-id/${path}`)
+    getURL: jest.fn((path: string) => `chrome-extension://test-id/${path}`),
+    onInstalled: {
+      addListener: jest.fn()
+    },
+    onStartup: {
+      addListener: jest.fn()
+    }
   },
   storage: {
     local: {
@@ -18,7 +24,15 @@ global.chrome = {
     }
   },
   tabs: {
-    sendMessage: jest.fn()
+    sendMessage: jest.fn(() => Promise.resolve()),
+    query: jest.fn(() => Promise.resolve([]))
+  },
+  action: {
+    onClicked: {
+      addListener: jest.fn()
+    },
+    setTitle: jest.fn(() => Promise.resolve()),
+    setIcon: jest.fn(() => Promise.resolve())
   }
 } as any
 

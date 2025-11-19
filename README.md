@@ -32,6 +32,28 @@ npm run package
 
 加载到Chrome：访问 `chrome://extensions/`，开启开发者模式，选择 `dist` 目录。
 
+## 测试
+
+**方式一：一键启动（推荐）**
+
+```bash
+npm run test:dev
+```
+
+访问 http://localhost:8080/index.html
+
+**方式二：分开启动**
+
+```bash
+# 终端1：启动开发服务器
+npm run dev
+
+# 终端2：启动测试页面
+npm run test:page
+```
+
+访问 http://localhost:8080/index.html
+
 ## 使用
 
 点击工具栏图标激活插件（绿色=激活，灰色=未激活）。按住 Alt/Option 键悬停元素显示高亮，点击打开编辑器。
