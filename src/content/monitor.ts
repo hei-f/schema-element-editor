@@ -42,6 +42,7 @@ export class ElementMonitor {
     document.addEventListener('click', this.handleClick, true)
     document.addEventListener('keydown', this.handleKeyDown, true)
     document.addEventListener('keyup', this.handleKeyUp, true)
+    window.addEventListener('schema-editor:clear-highlight', this.handleClearHighlight)
     
     // 创建tooltip元素
     this.createTooltip()
@@ -62,12 +63,20 @@ export class ElementMonitor {
     document.removeEventListener('click', this.handleClick, true)
     document.removeEventListener('keydown', this.handleKeyDown, true)
     document.removeEventListener('keyup', this.handleKeyUp, true)
+    window.removeEventListener('schema-editor:clear-highlight', this.handleClearHighlight)
     
     // 清理当前高亮
     this.clearHighlight()
     
     // 移除tooltip
     this.removeTooltip()
+  }
+
+  /**
+   * 处理清除高亮事件
+   */
+  private handleClearHighlight = (): void => {
+    this.clearHighlight()
   }
 
   /**

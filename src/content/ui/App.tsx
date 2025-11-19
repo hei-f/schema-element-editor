@@ -139,6 +139,9 @@ export const App: React.FC = () => {
    */
   const handleCloseDrawer = () => {
     setDrawerOpen(false)
+    
+    // 抽屉关闭时，触发清除高亮的事件
+    window.dispatchEvent(new CustomEvent('schema-editor:clear-highlight'))
   }
 
   return (
