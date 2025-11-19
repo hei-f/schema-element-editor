@@ -92,18 +92,6 @@ function createShadowRoot(): { container: HTMLDivElement; root: ReactDOM.Root } 
   `
   shadowRoot.appendChild(styleContainer)
 
-  // 注入Ant Design样式
-  const antdResetStyle = document.createElement('link')
-  antdResetStyle.rel = 'stylesheet'
-  antdResetStyle.href = 'https://cdn.jsdelivr.net/npm/antd@5.12.0/dist/reset.css'
-  shadowRoot.appendChild(antdResetStyle)
-
-  // 注入Ant Design完整样式
-  const antdStyle = document.createElement('link')
-  antdStyle.rel = 'stylesheet'
-  antdStyle.href = 'https://cdn.jsdelivr.net/npm/antd@5.12.0/dist/antd.min.css'
-  shadowRoot.appendChild(antdStyle)
-
   // 创建React根容器
   const reactContainer = document.createElement('div')
   reactContainer.id = 'react-root'
