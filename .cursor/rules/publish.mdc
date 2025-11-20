@@ -22,7 +22,8 @@ alwaysApply: false
 ### 3. 更新版本号（如需要）
 同时更新以下文件中的版本号：
 - `package.json` 中的 `version` 字段
-- `manifest.json` 中的 `version` 字段
+- `src/manifest.json` 中的 `version` 字段
+- `src/options/OptionsApp.tsx` 中的版本号显示（搜索 `<VersionTag>v` 并更新版本号）
 - 版本号格式：`major.minor.patch`（如 `1.2.3`）
 
 ### 4. 检查README文档更新
