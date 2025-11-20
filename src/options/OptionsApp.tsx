@@ -3,7 +3,6 @@ import { InfoCircleOutlined } from '@ant-design/icons'
 import { Button, Card, Collapse, Form, Input, InputNumber, message, Space, Switch, Tooltip, Typography } from 'antd'
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import packageJson from '../../package.json'
 
 const { Title, Paragraph, Text } = Typography
 const { Panel } = Collapse
@@ -173,7 +172,7 @@ export const OptionsApp: React.FC = () => {
           </Paragraph>
         </HeaderContent>
         <HeaderActions>
-          <VersionTag>v{packageJson.version}</VersionTag>
+          <VersionTag>v1.0.8</VersionTag>
           <Button onClick={handleCheckUpdate}>
             检查更新
           </Button>
