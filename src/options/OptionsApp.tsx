@@ -172,7 +172,7 @@ export const OptionsApp: React.FC = () => {
           </Paragraph>
         </HeaderContent>
         <HeaderActions>
-          <VersionTag>v1.0.8</VersionTag>
+          <VersionTag>v1.0.9</VersionTag>
           <Button onClick={handleCheckUpdate}>
             检查更新
           </Button>
