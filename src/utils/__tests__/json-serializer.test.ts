@@ -102,5 +102,96 @@ describe('JSON序列化工具测试', () => {
       }
     })
   })
+
+  describe('序列化-反序列化往返测试', () => {
+    it('应该正确处理简单数据的往返操作', () => {
+      const originalData = { key: 'value', nested: { prop: 'test' } }
+      
+      // 序列化
+      const serializeResult = serializeJson(originalData)
+      expect(serializeResult.success).toBe(true)
+      
+      // 反序列化
+      const deserializeResult = deserializeJson(serializeResult.data!)
+      expect(deserializeResult.success).toBe(true)
+      
+      // 验证往返一致性
+      const finalData = JSON.parse(deserializeResult.data!)
+      expect(finalData).toEqual(originalData)
+    })
+
+    it('应该正确处理包含嵌套JSON字符串的复杂结构（用户场景）', () => {
+      // 模拟用户场景：children[0].text包含JSON字符串
+      const complexData = [
+        {
+          type: "paragraph",
+          children: [{ text: "好的，没问题。请补充以下信息" }]
+        },
+        {
+          type: "apaasify",
+          language: "apaasify",
+          render: false,
+          value: [
+            {
+              componentPath: "AnalysisCard",
+              componentProps: {
+                type: "Space",
+                data: {
+                  mode: "空间分析",
+                  instName: "商业银行"
+                }
+              }
+            }
+          ],
+          children: [
+            {
+              text: JSON.stringify([
+                {
+                  componentPath: "AnalysisCard",
+                  componentProps: {
+                    type: "Space",
+                    data: {
+                      mode: "空间分析"
+                    }
+                  }
+                }
+              ], null, 2)
+            }
+          ]
+        }
+      ]
+      
+      // 序列化
+      const serializeResult = serializeJson(complexData)
+      expect(serializeResult.success).toBe(true)
+      
+      // 反序列化
+      const deserializeResult = deserializeJson(serializeResult.data!)
+      expect(deserializeResult.success).toBe(true)
+      
+      // 验证往返一致性
+      const finalData = JSON.parse(deserializeResult.data!)
+      expect(finalData).toEqual(complexData)
+    })
+
+    it('应该正确处理数组类型的往返操作', () => {
+      const arrayData = [
+        { id: 1, name: 'item1' },
+        { id: 2, name: 'item2' }
+      ]
+      
+      // 序列化
+      const serializeResult = serializeJson(arrayData)
+      expect(serializeResult.success).toBe(true)
+      
+      // 反序列化
+      const deserializeResult = deserializeJson(serializeResult.data!)
+      expect(deserializeResult.success).toBe(true)
+      
+      // 验证往返一致性
+      const finalData = JSON.parse(deserializeResult.data!)
+      expect(finalData).toEqual(arrayData)
+    })
+  })
 })
 

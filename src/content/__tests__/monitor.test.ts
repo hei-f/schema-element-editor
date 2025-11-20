@@ -46,7 +46,7 @@ describe('ElementMonitor测试', () => {
     mockGetSearchConfig.mockResolvedValue({
       searchDepthDown: 5,
       searchDepthUp: 3,
-      throttleInterval: 16
+      throttleInterval: 100
     })
     
     // 默认 mock 返回值

@@ -1,6 +1,6 @@
 import { storage } from '@/utils/storage'
 import { InfoCircleOutlined } from '@ant-design/icons'
-import { Button, Card, Collapse, Form, Input, InputNumber, message, Slider, Space, Switch, Tooltip, Typography } from 'antd'
+import { Button, Card, Collapse, Form, Input, InputNumber, message, Space, Switch, Tooltip, Typography } from 'antd'
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
@@ -27,6 +27,29 @@ const CodeBlock = styled.pre`
   font-family: 'Monaco', 'Consolas', monospace;
   font-size: 13px;
   overflow-x: auto;
+`
+
+const HeaderSection = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 16px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`
+
+const HeaderContent = styled.div`
+  flex: 1;
+`
+
+const HeaderActions = styled.div`
+  display: flex;
+  align-items: center;
+  padding-top: 4px;
 `
 
 /**
@@ -107,7 +130,7 @@ export const OptionsApp: React.FC = () => {
       attributeName: 'id',
       searchDepthDown: 5,
       searchDepthUp: 0,
-      throttleInterval: 16,
+      throttleInterval: 100,
       getFunctionName: '__getContentById',
       updateFunctionName: '__updateContentById',
       autoParseString: true,
@@ -115,12 +138,31 @@ export const OptionsApp: React.FC = () => {
     })
   }
 
+  /**
+   * 检查更新
+   */
+  const handleCheckUpdate = () => {
+    chrome.tabs.create({
+      url: 'https://github.com/hei-f/schema-editor/releases/',
+      active: true
+    })
+  }
+
   return (
     <Container>
-      <Title level={2}>⚙️ Schema Editor 设置</Title>
-      <Paragraph type="secondary">
-        配置插件的行为参数
-      </Paragraph>
+      <HeaderSection>
+        <HeaderContent>
+          <Title level={2} style={{ marginBottom: '8px' }}>⚙️ Schema Editor 设置</Title>
+          <Paragraph type="secondary" style={{ marginBottom: 0 }}>
+            配置插件的行为参数
+          </Paragraph>
+        </HeaderContent>
+        <HeaderActions>
+          <Button onClick={handleCheckUpdate}>
+            检查更新
+          </Button>
+        </HeaderActions>
+      </HeaderSection>
 
       <StyledCard title="参数属性名配置">
         <Form
@@ -131,7 +173,7 @@ export const OptionsApp: React.FC = () => {
             attributeName: 'id',
             searchDepthDown: 5,
             searchDepthUp: 0,
-            throttleInterval: 16,
+            throttleInterval: 100,
             getFunctionName: '__getContentById',
             updateFunctionName: '__updateContentById',
             autoParseString: true,
@@ -195,9 +237,9 @@ export const OptionsApp: React.FC = () => {
               <Form.Item
                 label="节流间隔 (毫秒)"
                 name="throttleInterval"
-                extra="控制鼠标移动检测频率，较小值响应更快但可能影响性能"
+                extra="控制鼠标移动检测频率，建议范围 8-200ms，较小值响应更快但可能影响性能"
               >
-                <Slider min={8} max={50} marks={{ 8: '8ms', 16: '16ms', 50: '50ms' }} />
+                <InputNumber min={8} style={{ width: '100%' }} />
           </Form.Item>
 
           <Collapse style={{ marginTop: '24px', marginBottom: '24px' }}>

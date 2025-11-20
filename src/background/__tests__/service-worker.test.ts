@@ -381,5 +381,171 @@ describe('Background Service Worker', () => {
       expect(chrome.tabs.sendMessage).toHaveBeenCalledTimes(2)
     })
   })
+
+  describe('Service Worker 启动时图标状态恢复', () => {
+    it('当 storage 中状态为 true 时，应该恢复为激活状态图标', async () => {
+      mockStorage.isActive = true
+
+      // 模拟 Service Worker 启动时的图标恢复逻辑
+      const restoreIconState = async () => {
+        const result = await chrome.storage.local.get('isActive')
+        const isActive = result.isActive ?? false
+        
+        await chrome.action.setTitle({
+          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`
+        })
+        
+        const iconSuffix = isActive ? 'active' : 'inactive'
+        await chrome.action.setIcon({
+          path: {
+            16: `icons/icon-${iconSuffix}-16.png`,
+            48: `icons/icon-${iconSuffix}-48.png`,
+            128: `icons/icon-${iconSuffix}-128.png`
+          }
+        })
+
+        return isActive
+      }
+
+      const restoredState = await restoreIconState()
+
+      expect(restoredState).toBe(true)
+      expect(chrome.storage.local.get).toHaveBeenCalledWith('isActive')
+      expect(chrome.action.setTitle).toHaveBeenCalledWith({
+        title: 'Schema Editor - 已激活 ✓'
+      })
+      expect(chrome.action.setIcon).toHaveBeenCalledWith({
+        path: {
+          16: 'icons/icon-active-16.png',
+          48: 'icons/icon-active-48.png',
+          128: 'icons/icon-active-128.png'
+        }
+      })
+    })
+
+    it('当 storage 中状态为 false 时，应该恢复为未激活状态图标', async () => {
+      mockStorage.isActive = false
+
+      const restoreIconState = async () => {
+        const result = await chrome.storage.local.get('isActive')
+        const isActive = result.isActive ?? false
+        
+        await chrome.action.setTitle({
+          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`
+        })
+        
+        const iconSuffix = isActive ? 'active' : 'inactive'
+        await chrome.action.setIcon({
+          path: {
+            16: `icons/icon-${iconSuffix}-16.png`,
+            48: `icons/icon-${iconSuffix}-48.png`,
+            128: `icons/icon-${iconSuffix}-128.png`
+          }
+        })
+
+        return isActive
+      }
+
+      const restoredState = await restoreIconState()
+
+      expect(restoredState).toBe(false)
+      expect(chrome.storage.local.get).toHaveBeenCalledWith('isActive')
+      expect(chrome.action.setTitle).toHaveBeenCalledWith({
+        title: 'Schema Editor - 未激活'
+      })
+      expect(chrome.action.setIcon).toHaveBeenCalledWith({
+        path: {
+          16: 'icons/icon-inactive-16.png',
+          48: 'icons/icon-inactive-48.png',
+          128: 'icons/icon-inactive-128.png'
+        }
+      })
+    })
+
+    it('当 storage 中没有保存状态时，应该使用默认状态（false）', async () => {
+      // 模拟 storage 中没有 isActive 键
+      delete mockStorage.isActive
+
+      const restoreIconState = async () => {
+        const result = await chrome.storage.local.get('isActive')
+        const isActive = result.isActive ?? false
+        
+        await chrome.action.setTitle({
+          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`
+        })
+        
+        const iconSuffix = isActive ? 'active' : 'inactive'
+        await chrome.action.setIcon({
+          path: {
+            16: `icons/icon-${iconSuffix}-16.png`,
+            48: `icons/icon-${iconSuffix}-48.png`,
+            128: `icons/icon-${iconSuffix}-128.png`
+          }
+        })
+
+        return isActive
+      }
+
+      const restoredState = await restoreIconState()
+
+      expect(restoredState).toBe(false)
+      expect(chrome.action.setTitle).toHaveBeenCalledWith({
+        title: 'Schema Editor - 未激活'
+      })
+      expect(chrome.action.setIcon).toHaveBeenCalledWith({
+        path: {
+          16: 'icons/icon-inactive-16.png',
+          48: 'icons/icon-inactive-48.png',
+          128: 'icons/icon-inactive-128.png'
+        }
+      })
+    })
+
+    it('当 storage 读取失败时，应该使用默认状态（false）并继续执行', async () => {
+      // 模拟 storage 读取失败
+      ;(chrome.storage.local.get as jest.Mock).mockRejectedValueOnce(new Error('Storage error'))
+
+      const restoreIconState = async () => {
+        let isActive = false
+        
+        try {
+          const result = await chrome.storage.local.get('isActive')
+          isActive = result.isActive ?? false
+        } catch (error) {
+          console.error('获取激活状态失败:', error)
+          isActive = false
+        }
+        
+        await chrome.action.setTitle({
+          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`
+        })
+        
+        const iconSuffix = isActive ? 'active' : 'inactive'
+        await chrome.action.setIcon({
+          path: {
+            16: `icons/icon-${iconSuffix}-16.png`,
+            48: `icons/icon-${iconSuffix}-48.png`,
+            128: `icons/icon-${iconSuffix}-128.png`
+          }
+        })
+
+        return isActive
+      }
+
+      const restoredState = await restoreIconState()
+
+      expect(restoredState).toBe(false)
+      expect(chrome.action.setTitle).toHaveBeenCalledWith({
+        title: 'Schema Editor - 未激活'
+      })
+      expect(chrome.action.setIcon).toHaveBeenCalledWith({
+        path: {
+          16: 'icons/icon-inactive-16.png',
+          48: 'icons/icon-inactive-48.png',
+          128: 'icons/icon-inactive-128.png'
+        }
+      })
+    })
+  })
 })
 

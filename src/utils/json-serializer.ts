@@ -70,19 +70,7 @@ export const deserializeJson = (input: string): JsonProcessResult => {
         parsed = nextParsed
         parseCount++
       } catch (error) {
-        // 如果解析失败，尝试修复后再解析一次
-        const fixed = tryFixJsonString(parsed)
-        if (fixed !== parsed) {
-          try {
-            parsed = JSON.parse(fixed)
-            parseCount++
-            continue
-          } catch {
-            // 修复后仍然失败，退出循环
-            break
-          }
-        }
-        // 无法修复，退出循环
+        // 解析失败，说明字符串格式有问题或已经是最终结果
         break
       }
     }
@@ -124,30 +112,41 @@ export const deserializeJson = (input: string): JsonProcessResult => {
  * @returns 修复后的字符串
  */
 export const tryFixJsonString = (input: string): string => {
-  let fixed = input.trim()
+  const trimmed = input.trim()
   
-  // 策略1: 移除首尾的额外引号
-  // "{"key":"value"}" -> {"key":"value"}
-  if (fixed.startsWith('"') && fixed.endsWith('"')) {
-    fixed = fixed.slice(1, -1)
+  // 策略1: 尝试直接解析（可能已经是有效JSON）
+  try {
+    JSON.parse(trimmed)
+    return trimmed
+  } catch {
+    // 继续尝试修复
   }
   
-  // 策略2: 替换文本形式的转义引号
-  // [{\"key\":\"value\"}] -> [{"key":"value"}]
-  // 检查是否包含 \" 模式（真实的反斜杠加引号）
-  if (fixed.includes('\\')) {
-    // 尝试替换所有的 \" 为 "
-    const withoutEscapes = fixed.replace(/\\"/g, '"')
-    
-    // 验证替换后是否能成为有效JSON
+  // 策略2: 移除首尾的额外引号（针对过度序列化）
+  if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
     try {
-      JSON.parse(withoutEscapes)
-      return withoutEscapes
+      const unquoted = trimmed.slice(1, -1)
+      // 需要处理转义的引号：\" -> "，转义的反斜杠：\\\\ -> \\
+      const unescaped = unquoted.replace(/\\"/g, '"').replace(/\\\\/g, '\\')
+      JSON.parse(unescaped)
+      return unescaped
     } catch {
-      // 替换后仍无效，保持原样
+      // 修复失败，继续尝试其他策略
     }
   }
   
-  return fixed
+  // 策略3: 处理文本形式的转义符（不在引号包裹内）
+  // 例如：[{\"key\":\"value\"}] -> [{"key":"value"}]
+  if (trimmed.includes('\\') && !trimmed.startsWith('"')) {
+    try {
+      const unescaped = trimmed.replace(/\\"/g, '"').replace(/\\\\/g, '\\')
+      JSON.parse(unescaped)
+      return unescaped
+    } catch {
+      // 修复失败，返回原始输入
+    }
+  }
+  
+  return trimmed
 }
 

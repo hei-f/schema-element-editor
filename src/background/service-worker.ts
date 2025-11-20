@@ -78,24 +78,15 @@ chrome.runtime.onMessage.addListener((message: Message, _sender: chrome.runtime.
   return false
 })
 
-/**
- * 扩展安装或更新时
- */
-chrome.runtime.onInstalled.addListener(async (details: chrome.runtime.InstalledDetails) => {
-  console.log('Schema Editor已安装/更新:', details.reason)
-  
-  // 初始化存储和图标状态
-  const isActive = await storage.getActiveState()
-  updateIconState(isActive)
-})
-
-/**
- * Service Worker启动时恢复图标状态
- */
-chrome.runtime.onStartup.addListener(async () => {
-  const isActive = await storage.getActiveState()
-  updateIconState(isActive)
-})
-
 console.log('Background Service Worker已启动')
+
+/**
+ * Service Worker启动/恢复时立即恢复图标状态
+ * 解决 MV3 Service Worker 从休眠恢复后图标状态不一致的问题
+ */
+;(async () => {
+  const isActive = await storage.getActiveState()
+  updateIconState(isActive)
+  console.log('图标状态已恢复:', isActive)
+})()
 

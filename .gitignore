@@ -16,6 +16,10 @@ releases/
 # 编辑器
 .vscode/
 .idea/
+.cursor/*
+!.cursor/rules/
+.cursor/rules/*
+!.cursor/rules/publish.mdc
 *.swp
 *.swo
 *~

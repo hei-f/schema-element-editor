@@ -23,7 +23,7 @@ class StorageManager {
     searchConfig: {
       searchDepthDown: 5,
       searchDepthUp: 0,
-      throttleInterval: 16
+      throttleInterval: 100
     },
     getFunctionName: '__getContentById',
     updateFunctionName: '__updateContentById',

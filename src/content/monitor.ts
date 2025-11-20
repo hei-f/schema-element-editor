@@ -182,7 +182,7 @@ export class ElementMonitor {
     
     // 节流检查
     const now = Date.now()
-    const throttleInterval = this.searchConfig?.throttleInterval ?? 16
+    const throttleInterval = this.searchConfig?.throttleInterval ?? 100
     if (now - this.lastSearchTime < throttleInterval) {
       return
     }

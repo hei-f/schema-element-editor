@@ -28,7 +28,7 @@ describe('Element Detector测试', () => {
     mockGetSearchConfig.mockResolvedValue({
       searchDepthDown: 5,
       searchDepthUp: 3,
-      throttleInterval: 16
+      throttleInterval: 100
     })
     
     // Mock document.elementsFromPoint
@@ -521,7 +521,7 @@ describe('Element Detector测试', () => {
       mockGetSearchConfig.mockResolvedValue({
         searchDepthDown: 1,
         searchDepthUp: 3,
-        throttleInterval: 16
+        throttleInterval: 100
       })
 
       const level0 = document.createElement('div')

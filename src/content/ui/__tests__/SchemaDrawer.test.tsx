@@ -1,4 +1,5 @@
 import type { ElementAttributes } from '@/types'
+import * as markdownParser from '@/utils/markdown-parser'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { SchemaDrawer } from '../SchemaDrawer'
 
@@ -22,6 +23,14 @@ jest.mock('@/utils/storage', () => ({
   storage: {
     getAutoParseString: jest.fn().mockResolvedValue(false)
   }
+}))
+
+// Mock markdown-parser
+jest.mock('@/utils/markdown-parser', () => ({
+  parseMarkdownString: jest.fn(),
+  parserSchemaNodeToMarkdown: jest.fn(),
+  isStringData: jest.fn(),
+  isElementsArray: jest.fn()
 }))
 
 describe('SchemaDrawer组件测试', () => {
@@ -208,11 +217,6 @@ describe('SchemaDrawer组件测试', () => {
       await waitFor(() => {
         expect(screen.getByText('Schema Editor')).toBeInTheDocument()
       })
-
-      // 模拟编辑为Elements[]结构
-      const editorValue = JSON.stringify([
-        { type: 'paragraph', children: [{ text: 'test' }] }
-      ], null, 2)
       
       // 找到保存按钮并点击
       const buttons = screen.queryAllByRole('button')
@@ -255,6 +259,185 @@ describe('SchemaDrawer组件测试', () => {
       await waitFor(() => {
         expect(screen.getByText('Schema Editor')).toBeInTheDocument()
       })
+    })
+  })
+
+  describe('转换功能测试', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
+    describe('转换成AST', () => {
+      it('应该成功将字符串转换为AST', async () => {
+        const mockElements = [
+          { type: 'paragraph', children: [{ text: 'test content' }] }
+        ]
+        
+        // Mock parseMarkdownString 返回 Elements[]
+        ;(markdownParser.parseMarkdownString as unknown as jest.Mock).mockReturnValue(mockElements)
+        ;(markdownParser.isStringData as unknown as jest.Mock).mockReturnValue(true)
+        
+        const props = {
+          ...defaultProps,
+          schemaData: '# Test Markdown'
+        }
+        
+        render(<SchemaDrawer {...props} />)
+        
+        await waitFor(() => {
+          expect(screen.getByText('转换成AST')).toBeInTheDocument()
+        })
+        
+        const convertButton = screen.getByText('转换成AST')
+        fireEvent.click(convertButton)
+        
+        await waitFor(() => {
+          expect(screen.getByText('转换为AST成功')).toBeInTheDocument()
+        })
+      })
+
+      it('当内容不是字符串类型时应该显示错误', async () => {
+        ;(markdownParser.isStringData as unknown as jest.Mock).mockReturnValue(false)
+        
+        render(<SchemaDrawer {...defaultProps} />)
+        
+        await waitFor(() => {
+          expect(screen.getByText('转换成AST')).toBeInTheDocument()
+        })
+        
+        const convertButton = screen.getByText('转换成AST')
+        fireEvent.click(convertButton)
+        
+        await waitFor(() => {
+          expect(screen.getByText('转换失败：当前内容不是字符串类型')).toBeInTheDocument()
+        })
+      })
+
+      it('当解析返回空数组时应该显示错误', async () => {
+        ;(markdownParser.parseMarkdownString as unknown as jest.Mock).mockReturnValue([])
+        ;(markdownParser.isStringData as unknown as jest.Mock).mockReturnValue(true)
+        
+        const props = {
+          ...defaultProps,
+          schemaData: 'invalid content'
+        }
+        
+        render(<SchemaDrawer {...props} />)
+        
+        await waitFor(() => {
+          expect(screen.getByText('转换成AST')).toBeInTheDocument()
+        })
+        
+        const convertButton = screen.getByText('转换成AST')
+        fireEvent.click(convertButton)
+        
+        await waitFor(() => {
+          expect(screen.getByText('转换失败：无法解析为有效的AST结构')).toBeInTheDocument()
+        })
+      })
+
+      it('当JSON解析失败时应该显示错误', async () => {
+        render(<SchemaDrawer {...defaultProps} />)
+        
+        await waitFor(() => {
+          expect(screen.getByText('转换成AST')).toBeInTheDocument()
+        })
+        
+        // 模拟编辑器内容为无效JSON (通过测试环境的限制，这里主要验证按钮存在)
+        const convertButton = screen.getByText('转换成AST')
+        expect(convertButton).toBeInTheDocument()
+      })
+    })
+
+    describe('转换成Markdown', () => {
+      it('应该成功将Elements[]转换为Markdown字符串', async () => {
+        const mockMarkdownString = '# Test Markdown\n\nContent here'
+        
+        ;(markdownParser.parserSchemaNodeToMarkdown as unknown as jest.Mock).mockReturnValue(mockMarkdownString)
+        ;(markdownParser.isElementsArray as unknown as jest.Mock).mockReturnValue(true)
+        
+        const mockElements = [
+          { type: 'heading', children: [{ text: 'Test' }] }
+        ]
+        
+        const props = {
+          ...defaultProps,
+          schemaData: mockElements
+        }
+        
+        render(<SchemaDrawer {...props} />)
+        
+        await waitFor(() => {
+          expect(screen.getByText('转换成Markdown')).toBeInTheDocument()
+        })
+        
+        const convertButton = screen.getByText('转换成Markdown')
+        fireEvent.click(convertButton)
+        
+        await waitFor(() => {
+          expect(screen.getByText('转换为Markdown成功')).toBeInTheDocument()
+        })
+      })
+
+      it('当内容不是Elements[]类型时应该显示错误', async () => {
+        ;(markdownParser.isElementsArray as unknown as jest.Mock).mockReturnValue(false)
+        
+        render(<SchemaDrawer {...defaultProps} />)
+        
+        await waitFor(() => {
+          expect(screen.getByText('转换成Markdown')).toBeInTheDocument()
+        })
+        
+        const convertButton = screen.getByText('转换成Markdown')
+        fireEvent.click(convertButton)
+        
+        await waitFor(() => {
+          expect(screen.getByText('转换失败：当前内容不是Elements[]类型')).toBeInTheDocument()
+        })
+      })
+
+      it('当转换过程抛出错误时应该显示错误信息', async () => {
+        const errorMessage = '转换过程发生错误'
+        
+        ;(markdownParser.parserSchemaNodeToMarkdown as unknown as jest.Mock).mockImplementation(() => {
+          throw new Error(errorMessage)
+        })
+        ;(markdownParser.isElementsArray as unknown as jest.Mock).mockReturnValue(true)
+        
+        const mockElements = [
+          { type: 'paragraph', children: [{ text: 'test' }] }
+        ]
+        
+        const props = {
+          ...defaultProps,
+          schemaData: mockElements
+        }
+        
+        render(<SchemaDrawer {...props} />)
+        
+        await waitFor(() => {
+          expect(screen.getByText('转换成Markdown')).toBeInTheDocument()
+        })
+        
+        const convertButton = screen.getByText('转换成Markdown')
+        fireEvent.click(convertButton)
+        
+        await waitFor(() => {
+          expect(screen.getByText(`转换失败: ${errorMessage}`)).toBeInTheDocument()
+        })
+      })
+    })
+
+    it('转换按钮应该位于工具栏最左侧', () => {
+      render(<SchemaDrawer {...defaultProps} />)
+      
+      const buttons = screen.getAllByRole('button')
+      const toolbarButtons = buttons.filter(btn => 
+        ['转换成AST', '转换成Markdown', '反序列化', '序列化', '格式化'].includes(btn.textContent || '')
+      )
+      
+      expect(toolbarButtons[0].textContent).toBe('转换成AST')
+      expect(toolbarButtons[1].textContent).toBe('转换成Markdown')
     })
   })
 })

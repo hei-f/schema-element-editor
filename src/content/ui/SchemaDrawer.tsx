@@ -149,6 +149,55 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   }
 
   /**
+   * 转换为AST
+   */
+  const handleConvertToAST = () => {
+    try {
+      const parsed = JSON.parse(editorValue)
+      
+      if (!isStringData(parsed)) {
+        message.error('转换失败：当前内容不是字符串类型')
+        return
+      }
+      
+      const elements = parseMarkdownString(parsed)
+      
+      if (elements.length > 0) {
+        const formatted = JSON.stringify(elements, null, 2)
+        setEditorValue(formatted)
+        setIsModified(true)
+        message.success('转换为AST成功')
+      } else {
+        message.error('转换失败：无法解析为有效的AST结构')
+      }
+    } catch (error: any) {
+      message.error(`转换失败: ${error.message}`)
+    }
+  }
+
+  /**
+   * 转换为Markdown
+   */
+  const handleConvertToMarkdown = () => {
+    try {
+      const parsed = JSON.parse(editorValue)
+      
+      if (!isElementsArray(parsed)) {
+        message.error('转换失败：当前内容不是Elements[]类型')
+        return
+      }
+      
+      const markdownString = parserSchemaNodeToMarkdown(parsed)
+      const formatted = JSON.stringify(markdownString, null, 2)
+      setEditorValue(formatted)
+      setIsModified(true)
+      message.success('转换为Markdown成功')
+    } catch (error: any) {
+      message.error(`转换失败: ${error.message}`)
+    }
+  }
+
+  /**
    * 验证并保存
    */
   const handleSave = async () => {
@@ -244,6 +293,12 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
             )}
           </ParamsContainer>
           <ButtonGroup>
+            <Button size="small" onClick={handleConvertToAST}>
+              转换成AST
+            </Button>
+            <Button size="small" onClick={handleConvertToMarkdown}>
+              转换成Markdown
+            </Button>
             <Button size="small" onClick={handleDeserialize}>
               反序列化
             </Button>

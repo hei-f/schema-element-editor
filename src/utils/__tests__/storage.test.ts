@@ -104,7 +104,7 @@ describe('Storage工具测试', () => {
         searchConfig: {
           searchDepthDown: 5,
           searchDepthUp: 0,
-          throttleInterval: 16
+          throttleInterval: 100
         },
         getFunctionName: '__getContentById',
         updateFunctionName: '__updateContentById',
@@ -160,7 +160,7 @@ describe('Storage工具测试', () => {
         searchConfig: {
           searchDepthDown: 5,
           searchDepthUp: 0,
-          throttleInterval: 16
+          throttleInterval: 100
         },
         getFunctionName: '__getContentById',
         updateFunctionName: '__updateContentById',
@@ -177,7 +177,7 @@ describe('Storage工具测试', () => {
       expect(result).toEqual({
         searchDepthDown: 5,
         searchDepthUp: 0,
-        throttleInterval: 16
+        throttleInterval: 100
       })
     })
 
@@ -219,7 +219,7 @@ describe('Storage工具测试', () => {
         searchConfig: {
           searchDepthDown: 5,
           searchDepthUp: 0,
-          throttleInterval: 16
+          throttleInterval: 100
         }
       })
 
@@ -243,7 +243,7 @@ describe('Storage工具测试', () => {
         searchConfig: {
           searchDepthDown: 5,
           searchDepthUp: 0,
-          throttleInterval: 16
+          throttleInterval: 100
         }
       })
 
@@ -255,7 +255,7 @@ describe('Storage工具测试', () => {
         searchConfig: {
           searchDepthDown: 8,
           searchDepthUp: 0,
-          throttleInterval: 16
+          throttleInterval: 100
         }
       })
     })
@@ -265,7 +265,7 @@ describe('Storage工具测试', () => {
         searchConfig: {
           searchDepthDown: 5,
           searchDepthUp: 0,
-          throttleInterval: 16
+          throttleInterval: 100
         }
       })
 
