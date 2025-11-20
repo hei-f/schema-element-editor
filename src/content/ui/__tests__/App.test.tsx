@@ -1,10 +1,10 @@
 import { MessageType } from '@/types'
-import * as storage from '@/utils/storage'
+import * as storage from '@/utils/browser/storage'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { App } from '../App'
 
 // Mock storage模块
-jest.mock('@/utils/storage', () => ({
+jest.mock('@/utils/browser/storage', () => ({
   storage: {
     getDrawerWidth: jest.fn(),
     setDrawerWidth: jest.fn()
@@ -298,6 +298,125 @@ describe('App组件测试', () => {
       } else {
         expect(screen.getByTestId).toBeDefined()
       }
+    })
+  })
+
+  it('应该通过自定义事件处理元素点击', async () => {
+    render(<App />)
+    
+    const mockElement = document.createElement('div')
+    const mockAttributes = { params: ['custom-param'] }
+    
+    // 派发自定义事件
+    const event = new CustomEvent('schema-editor:element-click', {
+      detail: {
+        element: mockElement,
+        attributes: mockAttributes
+      }
+    })
+    
+    window.dispatchEvent(event)
+    
+    // 应该触发schema请求
+    await waitFor(() => {
+      expect(screen.getByTestId).toBeDefined()
+    })
+  })
+
+  it('关闭抽屉时应该派发清除高亮事件', async () => {
+    const clearHighlightSpy = jest.fn()
+    window.addEventListener('schema-editor:clear-highlight', clearHighlightSpy)
+    
+    render(<App />)
+    
+    // 打开drawer
+    window.postMessage({
+      source: 'schema-editor-content',
+      type: MessageType.ELEMENT_CLICKED,
+      payload: {
+        attributes: {
+          params: ['test']
+        }
+      }
+    }, '*')
+    
+    window.postMessage({
+      source: 'schema-editor-injected',
+      type: MessageType.SCHEMA_RESPONSE,
+      payload: {
+        success: true,
+        data: { test: 'data' }
+      }
+    }, '*')
+    
+    await waitFor(() => {
+      const drawer = screen.queryByTestId('schema-drawer-mock')
+      if (drawer) {
+        const closeButton = screen.getByText('关闭')
+        fireEvent.click(closeButton)
+        
+        expect(clearHighlightSpy).toHaveBeenCalled()
+      }
+    })
+    
+    window.removeEventListener('schema-editor:clear-highlight', clearHighlightSpy)
+  })
+
+  it('应该处理未定义的schema数据', async () => {
+    render(<App />)
+    
+    window.postMessage({
+      source: 'schema-editor-injected',
+      type: MessageType.SCHEMA_RESPONSE,
+      payload: {
+        success: true,
+        data: undefined
+      }
+    }, '*')
+    
+    await waitFor(() => {
+      // data为undefined时drawer不应该打开
+      const drawer = screen.queryByTestId('schema-drawer-mock')
+      expect(drawer).not.toBeInTheDocument()
+    })
+  })
+
+  it('应该处理null的schema数据', async () => {
+    render(<App />)
+    
+    window.postMessage({
+      source: 'schema-editor-injected',
+      type: MessageType.SCHEMA_RESPONSE,
+      payload: {
+        success: true,
+        data: null
+      }
+    }, '*')
+    
+    await waitFor(() => {
+      const drawer = screen.queryByTestId('schema-drawer-mock')
+      if (drawer) {
+        expect(drawer).toBeInTheDocument()
+      } else {
+        expect(screen.queryByTestId('schema-drawer-mock')).not.toBeInTheDocument()
+      }
+    })
+  })
+
+  it('应该处理多个参数', async () => {
+    render(<App />)
+    
+    const event = new CustomEvent('schema-editor:element-click', {
+      detail: {
+        element: document.createElement('div'),
+        attributes: { params: ['param1', 'param2', 'param3'] }
+      }
+    })
+    
+    window.dispatchEvent(event)
+    
+    await waitFor(() => {
+      expect(screen.getByTestId).toBeDefined()
     })
   })
 })

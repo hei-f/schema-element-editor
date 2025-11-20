@@ -1,8 +1,8 @@
 import type { ElementAttributes, Message, SchemaResponsePayload, UpdateResultPayload } from '@/types'
 import { MessageType } from '@/types'
+import { listenPageMessages, postMessageToPage } from '@/utils/browser/message'
+import { storage } from '@/utils/browser/storage'
 import { logger } from '@/utils/logger'
-import { listenPageMessages, postMessageToPage } from '@/utils/message'
-import { storage } from '@/utils/storage'
 import { ConfigProvider, message as antdMessage } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import React, { useEffect, useState } from 'react'
@@ -15,7 +15,7 @@ export const App: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [schemaData, setSchemaData] = useState<any>(null)
   const [currentAttributes, setCurrentAttributes] = useState<ElementAttributes>({ params: [] })
-  const [drawerWidth, setDrawerWidth] = useState(800)
+  const [drawerWidth, setDrawerWidth] = useState<string | number>('800px')
 
   /**
    * 初始化：加载抽屉宽度配置

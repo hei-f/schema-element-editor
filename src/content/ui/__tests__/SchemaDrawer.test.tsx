@@ -1,5 +1,5 @@
 import type { ElementAttributes } from '@/types'
-import * as markdownParser from '@/utils/markdown-parser'
+import * as markdownParser from '@/utils/schema/transformers'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { SchemaDrawer } from '../SchemaDrawer'
 
@@ -14,23 +14,33 @@ jest.mock('@monaco-editor/react', () => {
 })
 
 // Mock monaco-loader
-jest.mock('@/utils/monaco-loader', () => ({
+jest.mock('@/utils/browser/monaco', () => ({
   configureMonaco: jest.fn()
 }))
 
 // Mock storage
-jest.mock('@/utils/storage', () => ({
+jest.mock('@/utils/browser/storage', () => ({
   storage: {
-    getAutoParseString: jest.fn().mockResolvedValue(false)
+    getAutoParseString: jest.fn().mockResolvedValue(false),
+    getToolbarButtons: jest.fn().mockResolvedValue({
+      convertToAST: true,
+      convertToMarkdown: true,
+      deserialize: true,
+      serialize: true,
+      format: true
+    })
   }
 }))
 
-// Mock markdown-parser
-jest.mock('@/utils/markdown-parser', () => ({
+// Mock schema transformers
+jest.mock('@/utils/schema/transformers', () => ({
   parseMarkdownString: jest.fn(),
   parserSchemaNodeToMarkdown: jest.fn(),
   isStringData: jest.fn(),
-  isElementsArray: jest.fn()
+  isElementsArray: jest.fn(),
+  formatJsonString: jest.fn(),
+  convertToASTString: jest.fn(),
+  convertToMarkdownString: jest.fn()
 }))
 
 describe('SchemaDrawer组件测试', () => {
@@ -79,6 +89,12 @@ describe('SchemaDrawer组件测试', () => {
   })
 
   it('格式化按钮应该格式化JSON', async () => {
+    // Mock formatJsonString 返回成功结果
+    ;(markdownParser.formatJsonString as jest.Mock).mockReturnValue({
+      success: true,
+      data: JSON.stringify(mockSchemaData, null, 2)
+    })
+    
     render(<SchemaDrawer {...defaultProps} />)
     
     // 等待组件完成初始化
@@ -264,9 +280,6 @@ describe('SchemaDrawer组件测试', () => {
     it('转换成Markdown后保存应该直接保存字符串，避免多次转义', async () => {
       const mockMarkdownString = '好的，我们继续。\n\n```apaasify\n[]\n```'
       const mockOnSave = jest.fn().mockResolvedValue(undefined)
-      const mockElements = [
-        { type: 'paragraph', children: [{ text: '测试内容' }] }
-      ]
       
       // Mock isStringData返回true
       ;(markdownParser.isStringData as unknown as jest.Mock).mockImplementation((data: any) => {
@@ -283,13 +296,6 @@ describe('SchemaDrawer组件测试', () => {
         ...defaultProps,
         schemaData: mockMarkdownString, // 原始数据是字符串
         onSave: mockOnSave
-      }
-      
-      // 模拟编辑器实例
-      const mockEditorInstance = {
-        getValue: jest.fn().mockReturnValue(JSON.stringify(mockMarkdownString)),
-        setValue: jest.fn(),
-        onDidChangeModelContent: jest.fn()
       }
       
       render(<SchemaDrawer {...props} />)
@@ -361,10 +367,6 @@ describe('SchemaDrawer组件测试', () => {
 
     it('原始数据是字符串且转换为Elements[]后保存应该转换回Markdown', async () => {
       const mockMarkdownString = '# 标题\n\n内容'
-      const mockElements = [
-        { type: 'heading', level: 1, children: [{ text: '标题' }] },
-        { type: 'paragraph', children: [{ text: '内容' }] }
-      ]
       const mockOnSave = jest.fn().mockResolvedValue(undefined)
       
       // Mock isElementsArray返回true
@@ -421,9 +423,11 @@ describe('SchemaDrawer组件测试', () => {
           { type: 'paragraph', children: [{ text: 'test content' }] }
         ]
         
-        // Mock parseMarkdownString 返回 Elements[]
-        ;(markdownParser.parseMarkdownString as unknown as jest.Mock).mockReturnValue(mockElements)
-        ;(markdownParser.isStringData as unknown as jest.Mock).mockReturnValue(true)
+        // Mock convertToASTString 返回成功结果
+        ;(markdownParser.convertToASTString as jest.Mock).mockReturnValue({
+          success: true,
+          data: JSON.stringify(mockElements, null, 2)
+        })
         
         const props = {
           ...defaultProps,
@@ -445,7 +449,10 @@ describe('SchemaDrawer组件测试', () => {
       })
 
       it('当内容不是字符串类型时应该显示错误', async () => {
-        ;(markdownParser.isStringData as unknown as jest.Mock).mockReturnValue(false)
+        ;(markdownParser.convertToASTString as jest.Mock).mockReturnValue({
+          success: false,
+          error: '当前内容不是字符串类型'
+        })
         
         render(<SchemaDrawer {...defaultProps} />)
         
@@ -462,8 +469,10 @@ describe('SchemaDrawer组件测试', () => {
       })
 
       it('当解析返回空数组时应该显示错误', async () => {
-        ;(markdownParser.parseMarkdownString as unknown as jest.Mock).mockReturnValue([])
-        ;(markdownParser.isStringData as unknown as jest.Mock).mockReturnValue(true)
+        ;(markdownParser.convertToASTString as jest.Mock).mockReturnValue({
+          success: false,
+          error: '无法解析为有效的AST结构'
+        })
         
         const props = {
           ...defaultProps,
@@ -501,8 +510,10 @@ describe('SchemaDrawer组件测试', () => {
       it('应该成功将Elements[]转换为Markdown字符串', async () => {
         const mockMarkdownString = '# Test Markdown\n\nContent here'
         
-        ;(markdownParser.parserSchemaNodeToMarkdown as unknown as jest.Mock).mockReturnValue(mockMarkdownString)
-        ;(markdownParser.isElementsArray as unknown as jest.Mock).mockReturnValue(true)
+        ;(markdownParser.convertToMarkdownString as jest.Mock).mockReturnValue({
+          success: true,
+          data: JSON.stringify(mockMarkdownString, null, 2)
+        })
         
         const mockElements = [
           { type: 'heading', children: [{ text: 'Test' }] }
@@ -528,7 +539,10 @@ describe('SchemaDrawer组件测试', () => {
       })
 
       it('当内容不是Elements[]类型时应该显示错误', async () => {
-        ;(markdownParser.isElementsArray as unknown as jest.Mock).mockReturnValue(false)
+        ;(markdownParser.convertToMarkdownString as jest.Mock).mockReturnValue({
+          success: false,
+          error: '当前内容不是Elements[]类型'
+        })
         
         render(<SchemaDrawer {...defaultProps} />)
         
@@ -547,10 +561,10 @@ describe('SchemaDrawer组件测试', () => {
       it('当转换过程抛出错误时应该显示错误信息', async () => {
         const errorMessage = '转换过程发生错误'
         
-        ;(markdownParser.parserSchemaNodeToMarkdown as unknown as jest.Mock).mockImplementation(() => {
-          throw new Error(errorMessage)
+        ;(markdownParser.convertToMarkdownString as jest.Mock).mockReturnValue({
+          success: false,
+          error: errorMessage
         })
-        ;(markdownParser.isElementsArray as unknown as jest.Mock).mockReturnValue(true)
         
         const mockElements = [
           { type: 'paragraph', children: [{ text: 'test' }] }
@@ -571,7 +585,7 @@ describe('SchemaDrawer组件测试', () => {
         fireEvent.click(convertButton)
         
         await waitFor(() => {
-          expect(screen.getByText(`转换失败: ${errorMessage}`)).toBeInTheDocument()
+          expect(screen.getByText(`转换失败：${errorMessage}`)).toBeInTheDocument()
         })
       })
     })

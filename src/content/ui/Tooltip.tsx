@@ -1,4 +1,5 @@
 import type { ElementAttributes } from '@/types'
+import { formatTooltipContent } from '@/utils/ui/tooltip'
 import React from 'react'
 import { TooltipContainer } from './styles'
 
@@ -22,17 +23,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
 }: TooltipProps) => {
   if (!visible) return null
 
-  const renderContent = () => {
-    if (isValid) {
-      const lines: string[] = []
-      attributes.params.forEach((param: string, index: number) => {
-        lines.push(`params${index + 1}: ${param}`)
-      })
-      return lines.join('\n')
-    }
-    return '非法目标'
-  }
-
   return (
     <TooltipContainer
       $isValid={isValid}
@@ -41,7 +31,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
         top: `${position.y + 15}px`
       }}
     >
-      {renderContent()}
+      {formatTooltipContent(attributes, isValid)}
     </TooltipContainer>
   )
 }

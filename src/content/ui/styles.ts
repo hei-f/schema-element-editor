@@ -123,3 +123,53 @@ export const AttributeTag = styled.span`
   cursor: help;
 `
 
+/**
+ * 参数标签
+ */
+export const ParamLabel = styled.span`
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-right: 4px;
+  flex-shrink: 0;
+`
+
+/**
+ * 抽屉底部按钮组（右对齐 + 间距）
+ */
+export const DrawerFooter = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+`
+
+/**
+ * 错误边界容器
+ */
+export const ErrorContainer = styled.div`
+  padding: 20px;
+  color: #ff4d4f;
+  background: #fff1f0;
+  border: 1px solid #ffccc7;
+  border-radius: 4px;
+`
+
+/**
+ * 重试按钮
+ */
+export const RetryButton = styled.button`
+  padding: 8px 16px;
+  background: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  
+  &:hover {
+    background: #40a9ff;
+  }
+  
+  &:active {
+    background: #096dd9;
+  }
+`
+

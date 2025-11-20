@@ -1,18 +1,28 @@
 import type { ElementAttributes } from '@/types'
-import { deserializeJson, serializeJson } from '@/utils/json-serializer'
-import { isElementsArray, isStringData, parseMarkdownString, parserSchemaNodeToMarkdown } from '@/utils/markdown-parser'
-import { storage } from '@/utils/storage'
+import { storage } from '@/utils/browser/storage'
+import { deserializeJson, serializeJson } from '@/utils/schema/serializer'
+import {
+  convertToASTString,
+  convertToMarkdownString,
+  formatJsonString,
+  isElementsArray,
+  isStringData,
+  parseMarkdownString,
+  parserSchemaNodeToMarkdown
+} from '@/utils/schema/transformers'
 import Editor from '@monaco-editor/react'
-import { Button, Drawer, Space, Tooltip, message } from 'antd'
+import { Button, Drawer, Tooltip, message } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { MonacoErrorBoundary } from './MonacoErrorBoundary'
 import {
   AttributeTag,
   ButtonGroup,
   DrawerContentContainer,
+  DrawerFooter,
   EditorContainer,
   EditorToolbar,
   ParamItem,
+  ParamLabel,
   ParamsContainer
 } from './styles'
 
@@ -22,7 +32,7 @@ interface SchemaDrawerProps {
   attributes: ElementAttributes
   onClose: () => void
   onSave: (data: any) => Promise<void>
-  width: number
+  width: number | string
 }
 
 /**
@@ -40,6 +50,28 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   const [isModified, setIsModified] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [wasStringData, setWasStringData] = useState(false)
+  const [toolbarButtons, setToolbarButtons] = useState({
+    convertToAST: true,
+    convertToMarkdown: true,
+    deserialize: true,
+    serialize: true,
+    format: true
+  })
+
+  /**
+   * 加载工具栏按钮配置
+   */
+  useEffect(() => {
+    const loadToolbarConfig = async () => {
+      try {
+        const config = await storage.getToolbarButtons()
+        setToolbarButtons(config)
+      } catch (error) {
+        console.error('加载工具栏配置失败:', error)
+      }
+    }
+    loadToolbarConfig()
+  }, [])
 
   /**
    * 当schemaData变化时，更新编辑器内容
@@ -96,13 +128,13 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
    * 格式化JSON
    */
   const handleFormat = () => {
-    try {
-      const parsed = JSON.parse(editorValue)
-      const formatted = JSON.stringify(parsed, null, 2)
-      setEditorValue(formatted)
+    const result = formatJsonString(editorValue)
+    
+    if (result.success && result.data) {
+      setEditorValue(result.data)
       message.success('格式化成功')
-    } catch (error: any) {
-      message.error(`格式化失败: ${error.message}`)
+    } else {
+      message.error(`格式化失败: ${result.error}`)
     }
   }
 
@@ -152,26 +184,14 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
    * 转换为AST
    */
   const handleConvertToAST = () => {
-    try {
-      const parsed = JSON.parse(editorValue)
-      
-      if (!isStringData(parsed)) {
-        message.error('转换失败：当前内容不是字符串类型')
-        return
-      }
-      
-      const elements = parseMarkdownString(parsed)
-      
-      if (elements.length > 0) {
-        const formatted = JSON.stringify(elements, null, 2)
-        setEditorValue(formatted)
-        setIsModified(true)
-        message.success('转换为AST成功')
-      } else {
-        message.error('转换失败：无法解析为有效的AST结构')
-      }
-    } catch (error: any) {
-      message.error(`转换失败: ${error.message}`)
+    const result = convertToASTString(editorValue)
+    
+    if (result.success && result.data) {
+      setEditorValue(result.data)
+      setIsModified(true)
+      message.success('转换为AST成功')
+    } else {
+      message.error(`转换失败：${result.error}`)
     }
   }
 
@@ -179,21 +199,14 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
    * 转换为Markdown
    */
   const handleConvertToMarkdown = () => {
-    try {
-      const parsed = JSON.parse(editorValue)
-      
-      if (!isElementsArray(parsed)) {
-        message.error('转换失败：当前内容不是Elements[]类型')
-        return
-      }
-      
-      const markdownString = parserSchemaNodeToMarkdown(parsed)
-      const formatted = JSON.stringify(markdownString, null, 2)
-      setEditorValue(formatted)
+    const result = convertToMarkdownString(editorValue)
+    
+    if (result.success && result.data) {
+      setEditorValue(result.data)
       setIsModified(true)
       message.success('转换为Markdown成功')
-    } catch (error: any) {
-      message.error(`转换失败: ${error.message}`)
+    } else {
+      message.error(`转换失败：${result.error}`)
     }
   }
 
@@ -270,14 +283,12 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         header: { position: 'relative' }
       }}
       footer={
-        <div style={{ textAlign: 'right' }}>
-          <Space>
-            <Button onClick={onClose}>关闭</Button>
-            <Button type="primary" onClick={handleSave} loading={isSaving} disabled={!isModified}>
-              {isSaving ? '保存中...' : '保存'}
-            </Button>
-          </Space>
-        </div>
+        <DrawerFooter>
+          <Button onClick={onClose}>关闭</Button>
+          <Button type="primary" onClick={handleSave} loading={isSaving} disabled={!isModified}>
+            {isSaving ? '保存中...' : '保存'}
+          </Button>
+        </DrawerFooter>
       }
     >
       <DrawerContentContainer>
@@ -287,9 +298,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
               <>
                 {attributes.params.map((param: string, index: number) => (
                   <ParamItem key={index}>
-                    <span style={{ fontSize: '12px', color: '#8c8c8c', marginRight: '4px', flexShrink: 0 }}>
-                      params{index + 1}:
-                    </span>
+                    <ParamLabel>params{index + 1}:</ParamLabel>
                     <Tooltip title={param} placement="topLeft">
                       <AttributeTag>{param}</AttributeTag>
                     </Tooltip>
@@ -299,21 +308,31 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
             )}
           </ParamsContainer>
           <ButtonGroup>
-            <Button size="small" onClick={handleConvertToAST}>
-              转换成AST
-            </Button>
-            <Button size="small" onClick={handleConvertToMarkdown}>
-              转换成Markdown
-            </Button>
-            <Button size="small" onClick={handleDeserialize}>
-              反序列化
-            </Button>
-            <Button size="small" onClick={handleSerialize}>
-              序列化
-            </Button>
-            <Button size="small" onClick={handleFormat}>
-              格式化
-            </Button>
+            {toolbarButtons.convertToAST && (
+              <Button size="small" onClick={handleConvertToAST}>
+                转换成AST
+              </Button>
+            )}
+            {toolbarButtons.convertToMarkdown && (
+              <Button size="small" onClick={handleConvertToMarkdown}>
+                转换成Markdown
+              </Button>
+            )}
+            {toolbarButtons.deserialize && (
+              <Button size="small" onClick={handleDeserialize}>
+                反序列化
+              </Button>
+            )}
+            {toolbarButtons.serialize && (
+              <Button size="small" onClick={handleSerialize}>
+                序列化
+              </Button>
+            )}
+            {toolbarButtons.format && (
+              <Button size="small" onClick={handleFormat}>
+                格式化
+              </Button>
+            )}
           </ButtonGroup>
         </EditorToolbar>
 

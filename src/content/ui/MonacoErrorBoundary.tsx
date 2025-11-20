@@ -1,4 +1,5 @@
 import React from 'react'
+import { ErrorContainer, RetryButton } from './styles'
 
 interface Props {
   children: React.ReactNode
@@ -135,29 +136,15 @@ export class MonacoErrorBoundary extends React.Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ 
-          padding: '20px', 
-          color: '#ff4d4f',
-          background: '#fff1f0',
-          border: '1px solid #ffccc7',
-          borderRadius: '4px'
-        }}>
+        <ErrorContainer>
           <h3>编辑器加载失败</h3>
           <p>{this.state.error?.message || '未知错误'}</p>
-          <button 
+          <RetryButton 
             onClick={() => this.setState({ hasError: false, error: null })}
-            style={{
-              padding: '8px 16px',
-              background: '#1890ff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
           >
             重试
-          </button>
-        </div>
+          </RetryButton>
+        </ErrorContainer>
       )
     }
 
