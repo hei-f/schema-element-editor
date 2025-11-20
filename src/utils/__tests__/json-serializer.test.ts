@@ -1,4 +1,4 @@
-import { deserializeJson, serializeJson } from '@/utils/json-serializer'
+import { deserializeJson, serializeJson } from '@/utils/schema/serializer'
 
 describe('JSON序列化工具测试', () => {
   describe('serializeJson', () => {

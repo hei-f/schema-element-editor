@@ -1,4 +1,12 @@
-import { isElementsArray, isStringData, parseMarkdownString, parserSchemaNodeToMarkdown } from '../markdown-parser'
+import {
+  convertToASTString,
+  convertToMarkdownString,
+  formatJsonString,
+  isElementsArray,
+  isStringData,
+  parseMarkdownString,
+  parserSchemaNodeToMarkdown
+} from '../schema/transformers'
 
 describe('Markdown解析工具测试', () => {
   describe('parseMarkdownString', () => {
@@ -179,6 +187,104 @@ console.log('Hello');
         expect(typeof convertedMarkdown).toBe('string')
         expect(convertedMarkdown.length).toBeGreaterThan(0)
       })
+    })
+  })
+
+  describe('formatJsonString', () => {
+    it('应该格式化有效的JSON字符串', () => {
+      const input = '{"name":"test","value":123}'
+      const result = formatJsonString(input)
+      
+      expect(result.success).toBe(true)
+      expect(result.data).toContain('"name"')
+      expect(result.data).toContain('"test"')
+      expect(result.data).toContain('"value"')
+    })
+
+    it('应该处理数组格式', () => {
+      const input = '[1,2,3]'
+      const result = formatJsonString(input)
+      
+      expect(result.success).toBe(true)
+      expect(result.data).toBeTruthy()
+    })
+
+    it('应该拒绝无效的JSON', () => {
+      const input = '{invalid json}'
+      const result = formatJsonString(input)
+      
+      expect(result.success).toBe(false)
+      expect(result.error).toBeTruthy()
+    })
+  })
+
+  describe('convertToASTString', () => {
+    it('应该将字符串转换为AST结构', () => {
+      const markdown = '# 标题\n\n这是内容'
+      const input = JSON.stringify(markdown)
+      const result = convertToASTString(input)
+      
+      expect(result.success).toBe(true)
+      expect(result.data).toBeTruthy()
+    })
+
+    it('应该拒绝非字符串类型的数据', () => {
+      const input = JSON.stringify({ key: 'value' })
+      const result = convertToASTString(input)
+      
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('不是字符串类型')
+    })
+
+    it('应该处理空字符串', () => {
+      const input = JSON.stringify('')
+      const result = convertToASTString(input)
+      
+      // 空字符串解析为空数组，应该失败
+      expect(result.success).toBe(false)
+    })
+
+    it('应该处理无效的JSON格式', () => {
+      const input = 'not a json'
+      const result = convertToASTString(input)
+      
+      expect(result.success).toBe(false)
+      expect(result.error).toBeTruthy()
+    })
+  })
+
+  describe('convertToMarkdownString', () => {
+    it('应该将Elements数组转换为Markdown字符串', () => {
+      const markdown = '# 标题\n\n这是内容'
+      const elements = parseMarkdownString(markdown)
+      const input = JSON.stringify(elements)
+      const result = convertToMarkdownString(input)
+      
+      expect(result.success).toBe(true)
+      expect(result.data).toBeTruthy()
+    })
+
+    it('应该拒绝非Elements数组', () => {
+      const input = JSON.stringify({ key: 'value' })
+      const result = convertToMarkdownString(input)
+      
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('不是Elements[]类型')
+    })
+
+    it('应该拒绝空数组', () => {
+      const input = JSON.stringify([])
+      const result = convertToMarkdownString(input)
+      
+      expect(result.success).toBe(false)
+    })
+
+    it('应该处理无效的JSON', () => {
+      const input = 'invalid json'
+      const result = convertToMarkdownString(input)
+      
+      expect(result.success).toBe(false)
+      expect(result.error).toBeTruthy()
     })
   })
 })

@@ -1,3 +1,4 @@
+import { storage } from '../browser/storage'
 import {
   addCandidateHighlight,
   findElementWithSchemaParams,
@@ -5,20 +6,21 @@ import {
   hasValidAttributes,
   isVisibleElement,
   removeCandidateHighlight
-} from '../element-detector'
-import { storage } from '../storage'
+} from '../ui/dom'
 
 // Mock storage模块
-jest.mock('../storage', () => ({
+jest.mock('../browser/storage', () => ({
   storage: {
     getAttributeName: jest.fn(),
-    getSearchConfig: jest.fn()
+    getSearchConfig: jest.fn(),
+    getHighlightColor: jest.fn()
   }
 }))
 
 describe('Element Detector测试', () => {
   const mockGetAttributeName = storage.getAttributeName as jest.Mock
   const mockGetSearchConfig = storage.getSearchConfig as jest.Mock
+  const mockGetHighlightColor = storage.getHighlightColor as jest.Mock
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -30,6 +32,8 @@ describe('Element Detector测试', () => {
       searchDepthUp: 3,
       throttleInterval: 100
     })
+    // 默认高亮颜色
+    mockGetHighlightColor.mockResolvedValue('#39C5BB')
     
     // Mock document.elementsFromPoint
     document.elementsFromPoint = jest.fn(() => [])
@@ -547,10 +551,10 @@ describe('Element Detector测试', () => {
   })
 
   describe('候选高亮函数', () => {
-    it('addCandidateHighlight应该添加虚线高亮样式', () => {
+    it('addCandidateHighlight应该添加虚线高亮样式', async () => {
       const element = document.createElement('div')
       
-      addCandidateHighlight(element)
+      await addCandidateHighlight(element)
       
       expect(element.style.outline).toContain('dashed')
       expect(element.style.outlineOffset).toBe('2px')
@@ -567,11 +571,10 @@ describe('Element Detector测试', () => {
     expect(element.style.outlineOffset).toBe('')
   })
 
-    it('候选高亮样式应该与正常高亮样式不同', () => {
+    it('候选高亮样式应该与正常高亮样式不同', async () => {
       const element1 = document.createElement('div')
-      const element2 = document.createElement('div')
       
-      addCandidateHighlight(element1)
+      await addCandidateHighlight(element1)
       // addHighlight在原有代码中已存在，这里只验证样式不同
       
       expect(element1.style.outline).toContain('dashed')

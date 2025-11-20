@@ -1,10 +1,20 @@
 import type { ElementAttributes, ElementPosition } from '@/types'
-import { storage } from './storage'
+import { storage } from '../browser/storage'
 
 /** 扩展UI元素的选择器 */
 const UI_ELEMENT_SELECTOR = '[data-schema-editor-ui]'
 /** 扩展UI元素的属性名 */
 const UI_ELEMENT_ATTR = 'data-schema-editor-ui'
+
+/**
+ * 将 hex 颜色转换为 rgba 格式
+ */
+function hexToRgba(hex: string, alpha: number): string {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
 
 /**
  * 检查元素是否可见
@@ -242,10 +252,11 @@ export function isClickInside(
 /**
  * 为元素添加高亮效果
  */
-export function addHighlight(element: HTMLElement): void {
-  element.style.outline = '2px solid #38C5BB'
+export async function addHighlight(element: HTMLElement): Promise<void> {
+  const color = await storage.getHighlightColor()
+  element.style.outline = `2px solid ${color}`
   element.style.outlineOffset = '2px'
-  element.style.boxShadow = '0 0 10px rgba(56, 197, 187, 0.5)'
+  element.style.boxShadow = `0 0 10px ${hexToRgba(color, 0.5)}`
 }
 
 /**
@@ -260,10 +271,11 @@ export function removeHighlight(element: HTMLElement): void {
 /**
  * 为候选元素添加高亮效果
  */
-export function addCandidateHighlight(element: HTMLElement): void {
-  element.style.outline = '2px dashed rgba(56, 197, 187, 0.5)'
+export async function addCandidateHighlight(element: HTMLElement): Promise<void> {
+  const color = await storage.getHighlightColor()
+  element.style.outline = `2px dashed ${hexToRgba(color, 0.5)}`
   element.style.outlineOffset = '2px'
-  element.style.boxShadow = '0 0 5px rgba(56, 197, 187, 0.3)'
+  element.style.boxShadow = `0 0 5px ${hexToRgba(color, 0.3)}`
 }
 
 /**

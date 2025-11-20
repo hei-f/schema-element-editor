@@ -1,5 +1,5 @@
 import { MessageType } from '@/types'
-import { postMessageToPage, sendMessageToBackground } from '../message'
+import { postMessageToPage, sendMessageToBackground } from '../browser/message'
 
 describe('Message工具测试', () => {
   beforeEach(() => {

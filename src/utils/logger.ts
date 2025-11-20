@@ -1,4 +1,4 @@
-import { storage } from './storage'
+import { storage } from './browser/storage'
 
 /**
  * 日志工具类

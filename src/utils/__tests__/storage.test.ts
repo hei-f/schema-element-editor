@@ -1,4 +1,4 @@
-import { storage } from '../storage';
+import { storage } from '../browser/storage';
 
 describe('Storage工具测试', () => {
   beforeEach(() => {
@@ -40,14 +40,14 @@ describe('Storage工具测试', () => {
   describe('getDrawerWidth', () => {
     it('应该返回默认宽度800', async () => {
       const result = await storage.getDrawerWidth()
-      expect(result).toBe(800)
+      expect(result).toBe('800px')
     })
 
     it('应该返回存储的宽度', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ drawerWidth: 1200 })
       
       const result = await storage.getDrawerWidth()
-      expect(result).toBe(1200)
+      expect(result).toBe('1200px')
     })
   })
 
@@ -99,7 +99,7 @@ describe('Storage工具测试', () => {
       
       expect(result).toEqual({
         isActive: false,
-        drawerWidth: 800,
+        drawerWidth: '800px',
         attributeName: 'id',
         searchConfig: {
           searchDepthDown: 5,
@@ -109,7 +109,15 @@ describe('Storage工具测试', () => {
         getFunctionName: '__getContentById',
         updateFunctionName: '__updateContentById',
         autoParseString: true,
-        enableDebugLog: false
+        enableDebugLog: false,
+        toolbarButtons: {
+          convertToAST: true,
+          convertToMarkdown: true,
+          deserialize: true,
+          serialize: true,
+          format: true
+        },
+        highlightColor: '#39C5BB'
       })
     })
 
@@ -132,7 +140,7 @@ describe('Storage工具测试', () => {
       
       expect(result).toEqual({
         isActive: true,
-        drawerWidth: 1000,
+        drawerWidth: '1000px',
         attributeName: 'custom-attr',
         searchConfig: {
           searchDepthDown: 10,
@@ -142,7 +150,15 @@ describe('Storage工具测试', () => {
         getFunctionName: 'myGetFn',
         updateFunctionName: 'myUpdateFn',
         autoParseString: true,
-        enableDebugLog: false
+        enableDebugLog: false,
+        toolbarButtons: {
+          convertToAST: true,
+          convertToMarkdown: true,
+          deserialize: true,
+          serialize: true,
+          format: true
+        },
+        highlightColor: '#39C5BB'
       })
     })
 
@@ -155,7 +171,7 @@ describe('Storage工具测试', () => {
       
       expect(result).toEqual({
         isActive: true,
-        drawerWidth: 800,
+        drawerWidth: '800px',
         attributeName: 'id',
         searchConfig: {
           searchDepthDown: 5,
@@ -165,7 +181,15 @@ describe('Storage工具测试', () => {
         getFunctionName: '__getContentById',
         updateFunctionName: '__updateContentById',
         autoParseString: true,
-        enableDebugLog: false
+        enableDebugLog: false,
+        toolbarButtons: {
+          convertToAST: true,
+          convertToMarkdown: true,
+          deserialize: true,
+          serialize: true,
+          format: true
+        },
+        highlightColor: '#39C5BB'
       })
     })
   })
@@ -357,7 +381,7 @@ describe('Storage工具测试', () => {
       
       expect(result).toEqual({
         isActive: true,
-        drawerWidth: 1000,
+        drawerWidth: '1000px',
         attributeName: 'test-params',
         searchConfig: {
           searchDepthDown: 3,
@@ -367,7 +391,15 @@ describe('Storage工具测试', () => {
         getFunctionName: 'getMySchema',
         updateFunctionName: 'updateMySchema',
         autoParseString: true,
-        enableDebugLog: false
+        enableDebugLog: false,
+        toolbarButtons: {
+          convertToAST: true,
+          convertToMarkdown: true,
+          deserialize: true,
+          serialize: true,
+          format: true
+        },
+        highlightColor: '#39C5BB'
       })
     })
   })

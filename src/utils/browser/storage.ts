@@ -1,35 +1,13 @@
-import type { SearchConfig, StorageData } from '@/types'
+import { DEFAULT_VALUES, STORAGE_KEYS } from '@/constants/defaults'
+import type { SearchConfig, StorageData, ToolbarButtonsConfig } from '@/types'
 
 /**
  * 存储管理器类
  * 封装Chrome Storage API，提供类型安全的存储操作
  */
 class StorageManager {
-  private readonly STORAGE_KEYS = {
-    IS_ACTIVE: 'isActive',
-    DRAWER_WIDTH: 'drawerWidth',
-    ATTRIBUTE_NAME: 'attributeName',
-    SEARCH_CONFIG: 'searchConfig',
-    GET_FUNCTION_NAME: 'getFunctionName',
-    UPDATE_FUNCTION_NAME: 'updateFunctionName',
-    AUTO_PARSE_STRING: 'autoParseString',
-    ENABLE_DEBUG_LOG: 'enableDebugLog'
-  }
-
-  private readonly DEFAULT_VALUES: StorageData = {
-    isActive: false,
-    drawerWidth: 800,
-    attributeName: 'id',
-    searchConfig: {
-      searchDepthDown: 5,
-      searchDepthUp: 0,
-      throttleInterval: 100
-    },
-    getFunctionName: '__getContentById',
-    updateFunctionName: '__updateContentById',
-    autoParseString: true,
-    enableDebugLog: false
-  }
+  private readonly STORAGE_KEYS = STORAGE_KEYS
+  private readonly DEFAULT_VALUES = DEFAULT_VALUES
 
   /**
    * 获取激活状态
@@ -70,10 +48,16 @@ class StorageManager {
   /**
    * 获取抽屉宽度
    */
-  async getDrawerWidth(): Promise<number> {
+  async getDrawerWidth(): Promise<string | number> {
     try {
       const result = await chrome.storage.local.get(this.STORAGE_KEYS.DRAWER_WIDTH)
-      return result[this.STORAGE_KEYS.DRAWER_WIDTH] ?? this.DEFAULT_VALUES.drawerWidth
+      const width = result[this.STORAGE_KEYS.DRAWER_WIDTH] ?? this.DEFAULT_VALUES.drawerWidth
+      
+      if (typeof width === 'number') {
+        return `${width}px`
+      }
+      
+      return width
     } catch (error) {
       console.error('获取抽屉宽度失败:', error)
       return this.DEFAULT_VALUES.drawerWidth
@@ -83,7 +67,7 @@ class StorageManager {
   /**
    * 设置抽屉宽度
    */
-  async setDrawerWidth(width: number): Promise<void> {
+  async setDrawerWidth(width: string | number): Promise<void> {
     try {
       await chrome.storage.local.set({
         [this.STORAGE_KEYS.DRAWER_WIDTH]: width
@@ -240,10 +224,70 @@ class StorageManager {
   }
 
   /**
+   * 获取工具栏按钮配置
+   */
+  async getToolbarButtons(): Promise<ToolbarButtonsConfig> {
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.TOOLBAR_BUTTONS)
+      return result[this.STORAGE_KEYS.TOOLBAR_BUTTONS] ?? this.DEFAULT_VALUES.toolbarButtons
+    } catch (error) {
+      console.error('获取工具栏按钮配置失败:', error)
+      return this.DEFAULT_VALUES.toolbarButtons
+    }
+  }
+
+  /**
+   * 设置工具栏按钮配置
+   */
+  async setToolbarButtons(config: Partial<ToolbarButtonsConfig>): Promise<void> {
+    try {
+      const currentConfig = await this.getToolbarButtons()
+      const newConfig = { ...currentConfig, ...config }
+      await chrome.storage.local.set({
+        [this.STORAGE_KEYS.TOOLBAR_BUTTONS]: newConfig
+      })
+    } catch (error) {
+      console.error('设置工具栏按钮配置失败:', error)
+    }
+  }
+
+  /**
+   * 获取高亮框颜色
+   */
+  async getHighlightColor(): Promise<string> {
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.HIGHLIGHT_COLOR)
+      const color = result[this.STORAGE_KEYS.HIGHLIGHT_COLOR]
+      
+      if (!color || typeof color !== 'string') {
+        return this.DEFAULT_VALUES.highlightColor
+      }
+      
+      return color
+    } catch (error) {
+      console.error('获取高亮框颜色失败:', error)
+      return this.DEFAULT_VALUES.highlightColor
+    }
+  }
+
+  /**
+   * 设置高亮框颜色
+   */
+  async setHighlightColor(color: string): Promise<void> {
+    try {
+      await chrome.storage.local.set({
+        [this.STORAGE_KEYS.HIGHLIGHT_COLOR]: color
+      })
+    } catch (error) {
+      console.error('设置高亮框颜色失败:', error)
+    }
+  }
+
+  /**
    * 获取所有存储数据
    */
   async getAllData(): Promise<StorageData> {
-    const [isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog] = await Promise.all([
+    const [isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor] = await Promise.all([
       this.getActiveState(),
       this.getDrawerWidth(),
       this.getAttributeName(),
@@ -251,9 +295,11 @@ class StorageManager {
       this.getGetFunctionName(),
       this.getUpdateFunctionName(),
       this.getAutoParseString(),
-      this.getEnableDebugLog()
+      this.getEnableDebugLog(),
+      this.getToolbarButtons(),
+      this.getHighlightColor()
     ])
-    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog }
+    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor }
   }
 }
 
