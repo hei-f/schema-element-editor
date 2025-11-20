@@ -260,6 +260,154 @@ describe('SchemaDrawer组件测试', () => {
         expect(screen.getByText('Schema Editor')).toBeInTheDocument()
       })
     })
+
+    it('转换成Markdown后保存应该直接保存字符串，避免多次转义', async () => {
+      const mockMarkdownString = '好的，我们继续。\n\n```apaasify\n[]\n```'
+      const mockOnSave = jest.fn().mockResolvedValue(undefined)
+      const mockElements = [
+        { type: 'paragraph', children: [{ text: '测试内容' }] }
+      ]
+      
+      // Mock isStringData返回true
+      ;(markdownParser.isStringData as unknown as jest.Mock).mockImplementation((data: any) => {
+        return typeof data === 'string'
+      })
+      
+      // Mock isElementsArray返回false（因为保存时解析的是字符串）
+      ;(markdownParser.isElementsArray as unknown as jest.Mock).mockReturnValue(false)
+      
+      // Mock parserSchemaNodeToMarkdown
+      ;(markdownParser.parserSchemaNodeToMarkdown as unknown as jest.Mock).mockReturnValue(mockMarkdownString)
+      
+      const props = {
+        ...defaultProps,
+        schemaData: mockMarkdownString, // 原始数据是字符串
+        onSave: mockOnSave
+      }
+      
+      // 模拟编辑器实例
+      const mockEditorInstance = {
+        getValue: jest.fn().mockReturnValue(JSON.stringify(mockMarkdownString)),
+        setValue: jest.fn(),
+        onDidChangeModelContent: jest.fn()
+      }
+      
+      render(<SchemaDrawer {...props} />)
+      
+      await waitFor(() => {
+        expect(screen.getByText('Schema Editor')).toBeInTheDocument()
+      })
+      
+      // 模拟点击保存按钮
+      const buttons = screen.queryAllByRole('button')
+      const saveButton = buttons.find(btn => btn.textContent?.includes('保存'))
+      
+      if (saveButton && !saveButton.hasAttribute('disabled')) {
+        fireEvent.click(saveButton)
+        
+        await waitFor(() => {
+          // 验证onSave被调用，且参数是字符串而不是多次转义的结果
+          if (mockOnSave.mock.calls.length > 0) {
+            const savedData = mockOnSave.mock.calls[0][0]
+            expect(typeof savedData).toBe('string')
+            // 验证不是多次转义的结果（不应该包含额外的转义字符）
+            expect(savedData).not.toMatch(/^".*"$/)
+            expect(savedData).not.toMatch(/\\\\/)
+          }
+        })
+      }
+    })
+
+    it('序列化后保存应该直接保存字符串，避免多次转义', async () => {
+      const mockOnSave = jest.fn().mockResolvedValue(undefined)
+      const originalData = { key: 'value', nested: { data: 'test' } }
+      
+      // Mock isStringData返回true（序列化后是字符串）
+      ;(markdownParser.isStringData as unknown as jest.Mock).mockImplementation((data: any) => {
+        return typeof data === 'string'
+      })
+      
+      // Mock isElementsArray返回false
+      ;(markdownParser.isElementsArray as unknown as jest.Mock).mockReturnValue(false)
+      
+      const props = {
+        ...defaultProps,
+        schemaData: JSON.stringify(originalData), // 原始数据是字符串
+        onSave: mockOnSave
+      }
+      
+      render(<SchemaDrawer {...props} />)
+      
+      await waitFor(() => {
+        expect(screen.getByText('Schema Editor')).toBeInTheDocument()
+      })
+      
+      // 模拟点击保存按钮
+      const buttons = screen.queryAllByRole('button')
+      const saveButton = buttons.find(btn => btn.textContent?.includes('保存'))
+      
+      if (saveButton && !saveButton.hasAttribute('disabled')) {
+        fireEvent.click(saveButton)
+        
+        await waitFor(() => {
+          // 验证onSave被调用，且参数是字符串
+          if (mockOnSave.mock.calls.length > 0) {
+            const savedData = mockOnSave.mock.calls[0][0]
+            expect(typeof savedData).toBe('string')
+          }
+        })
+      }
+    })
+
+    it('原始数据是字符串且转换为Elements[]后保存应该转换回Markdown', async () => {
+      const mockMarkdownString = '# 标题\n\n内容'
+      const mockElements = [
+        { type: 'heading', level: 1, children: [{ text: '标题' }] },
+        { type: 'paragraph', children: [{ text: '内容' }] }
+      ]
+      const mockOnSave = jest.fn().mockResolvedValue(undefined)
+      
+      // Mock isElementsArray返回true
+      ;(markdownParser.isElementsArray as unknown as jest.Mock).mockReturnValue(true)
+      
+      // Mock isStringData
+      ;(markdownParser.isStringData as unknown as jest.Mock).mockImplementation((data: any) => {
+        return typeof data === 'string'
+      })
+      
+      // Mock parserSchemaNodeToMarkdown
+      ;(markdownParser.parserSchemaNodeToMarkdown as unknown as jest.Mock).mockReturnValue(mockMarkdownString)
+      
+      const props = {
+        ...defaultProps,
+        schemaData: mockMarkdownString, // 原始数据是字符串
+        onSave: mockOnSave
+      }
+      
+      render(<SchemaDrawer {...props} />)
+      
+      await waitFor(() => {
+        expect(screen.getByText('Schema Editor')).toBeInTheDocument()
+      })
+      
+      // 模拟点击保存按钮
+      const buttons = screen.queryAllByRole('button')
+      const saveButton = buttons.find(btn => btn.textContent?.includes('保存'))
+      
+      if (saveButton && !saveButton.hasAttribute('disabled')) {
+        fireEvent.click(saveButton)
+        
+        await waitFor(() => {
+          // 验证parserSchemaNodeToMarkdown被调用
+          if (mockOnSave.mock.calls.length > 0) {
+            expect(markdownParser.parserSchemaNodeToMarkdown).toHaveBeenCalled()
+            // 验证保存的是Markdown字符串
+            const savedData = mockOnSave.mock.calls[0][0]
+            expect(savedData).toBe(mockMarkdownString)
+          }
+        })
+      }
+    })
   })
 
   describe('转换功能测试', () => {

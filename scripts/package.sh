@@ -26,9 +26,15 @@ mkdir -p "$RELEASE_DIR"
 PACKAGE_NAME="SchemaEditor-v${VERSION}"
 ZIP_FILE="${RELEASE_DIR}/${PACKAGE_NAME}.zip"
 
+# 删除旧的zip文件（避免zip命令的更新模式导致旧文件残留）
+if [ -f "$ZIP_FILE" ]; then
+  echo "🗑️  删除旧的发布包..."
+  rm "$ZIP_FILE"
+fi
+
 echo "📦 打包文件..."
 cd dist
-zip -r "../${ZIP_FILE}" . -x "*.DS_Store"
+zip -r "../${ZIP_FILE}" . -x "*.DS_Store" -x "*.py" -x ".vite/*"
 cd ..
 
 echo ""

@@ -49,7 +49,21 @@ const HeaderContent = styled.div`
 const HeaderActions = styled.div`
   display: flex;
   align-items: center;
+  gap: 12px;
   padding-top: 4px;
+`
+
+const VersionTag = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
 `
 
 /**
@@ -61,12 +75,15 @@ export const OptionsApp: React.FC = () => {
   const [attributeName, setAttributeName] = useState('id')
   const [getFunctionName, setGetFunctionName] = useState('__getContentById')
   const [updateFunctionName, setUpdateFunctionName] = useState('__updateContentById')
+  const [version, setVersion] = useState('')
 
   /**
    * 加载配置
    */
   useEffect(() => {
     loadSettings()
+    const manifest = chrome.runtime.getManifest()
+    setVersion(manifest.version)
   }, [])
 
   const loadSettings = async () => {
@@ -158,6 +175,7 @@ export const OptionsApp: React.FC = () => {
           </Paragraph>
         </HeaderContent>
         <HeaderActions>
+          {version && <VersionTag>v{version}</VersionTag>}
           <Button onClick={handleCheckUpdate}>
             检查更新
           </Button>

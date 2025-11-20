@@ -243,9 +243,9 @@ export function isClickInside(
  * 为元素添加高亮效果
  */
 export function addHighlight(element: HTMLElement): void {
-  element.style.outline = '2px solid #1890ff'
+  element.style.outline = '2px solid #38C5BB'
   element.style.outlineOffset = '2px'
-  element.style.boxShadow = '0 0 10px rgba(24, 144, 255, 0.5)'
+  element.style.boxShadow = '0 0 10px rgba(56, 197, 187, 0.5)'
 }
 
 /**
@@ -261,9 +261,9 @@ export function removeHighlight(element: HTMLElement): void {
  * 为候选元素添加高亮效果
  */
 export function addCandidateHighlight(element: HTMLElement): void {
-  element.style.outline = '2px dashed rgba(24, 144, 255, 0.5)'
+  element.style.outline = '2px dashed rgba(56, 197, 187, 0.5)'
   element.style.outlineOffset = '2px'
-  element.style.boxShadow = '0 0 5px rgba(24, 144, 255, 0.3)'
+  element.style.boxShadow = '0 0 5px rgba(56, 197, 187, 0.3)'
 }
 
 /**

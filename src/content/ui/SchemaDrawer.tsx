@@ -219,8 +219,14 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
           } catch (error: any) {
             message.error(`转换为Markdown失败: ${error.message}`)
           }
+        } else if (isStringData(parsed)) {
+          // 已经是字符串，直接保存（避免多次序列化）
+          await onSave(parsed)
+          setIsModified(false)
+          message.success('保存成功')
+          onClose()
         } else {
-          // 其他类型（对象、数组、字符串等），序列化为 JSON 字符串
+          // 其他类型（对象、数组等），序列化为 JSON 字符串
           const jsonString = JSON.stringify(parsed)
           await onSave(jsonString)
           setIsModified(false)

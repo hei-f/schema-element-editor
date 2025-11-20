@@ -556,16 +556,16 @@ describe('Element Detector测试', () => {
       expect(element.style.outlineOffset).toBe('2px')
     })
 
-    it('removeCandidateHighlight应该移除高亮样式', () => {
-      const element = document.createElement('div')
-      element.style.outline = '2px dashed rgba(24, 144, 255, 0.5)'
-      element.style.outlineOffset = '2px'
-      
-      removeCandidateHighlight(element)
-      
-      expect(element.style.outline).toBe('')
-      expect(element.style.outlineOffset).toBe('')
-    })
+  it('removeCandidateHighlight应该移除高亮样式', () => {
+    const element = document.createElement('div')
+    element.style.outline = '2px dashed rgba(56, 197, 187, 0.5)'
+    element.style.outlineOffset = '2px'
+    
+    removeCandidateHighlight(element)
+    
+    expect(element.style.outline).toBe('')
+    expect(element.style.outlineOffset).toBe('')
+  })
 
     it('候选高亮样式应该与正常高亮样式不同', () => {
       const element1 = document.createElement('div')

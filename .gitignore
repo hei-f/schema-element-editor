@@ -8,6 +8,7 @@ dist/
 # TypeScript 增量编译缓存
 *.tsbuildinfo
 .tsbuildinfo
+.tsbuildinfo.*
 
 # 发布文件
 releases/
@@ -43,4 +44,7 @@ pnpm-debug.log*
 # 临时文件
 *.tmp
 *.temp
+
+# 测试覆盖率报告
+coverage/
 

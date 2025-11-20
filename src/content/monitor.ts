@@ -24,6 +24,8 @@ export class ElementMonitor {
   private lastSearchTime: number = 0
   private searchConfig: SearchConfig | null = null
   private candidateElements: HTMLElement[] = []
+  private lastMouseX: number = 0
+  private lastMouseY: number = 0
 
   /**
    * 启动监听
@@ -132,6 +134,17 @@ export class ElementMonitor {
       if (!this.isControlPressed) {
         this.isControlPressed = true
         console.log('🎮 Alt/Option 键已按下，hover 检测已启用')
+        
+        // 如果有有效的鼠标位置，立即触发一次检测
+        if (this.lastMouseX !== 0 || this.lastMouseY !== 0) {
+          const mockMouseEvent = new MouseEvent('mousemove', {
+            clientX: this.lastMouseX,
+            clientY: this.lastMouseY,
+            bubbles: true,
+            cancelable: true
+          })
+          this.performSearch(mockMouseEvent)
+        }
       }
     }
   }
@@ -158,6 +171,10 @@ export class ElementMonitor {
    */
   private handleMouseMove = (event: MouseEvent): void => {
     if (!this.isActive) return
+    
+    // 记录鼠标位置，供按键时使用
+    this.lastMouseX = event.clientX
+    this.lastMouseY = event.clientY
     
     // 只有在按住 Alt/Option 键时才进行检测
     if (!this.isControlPressed) {

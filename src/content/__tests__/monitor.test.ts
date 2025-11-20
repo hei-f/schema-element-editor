@@ -252,6 +252,109 @@ describe('ElementMonitor测试', () => {
 
       expect(requestAnimationFrame).not.toHaveBeenCalled()
     })
+
+    it('应该在按下Alt键时立即触发检测（有鼠标位置）', async () => {
+      const targetElement = document.createElement('div')
+      mockFindElementWithSchemaParams.mockResolvedValue({
+        target: targetElement,
+        candidates: [targetElement]
+      })
+      mockGetElementAttributes.mockResolvedValue({ params: ['param1'] })
+      mockHasValidAttributes.mockReturnValue(true)
+
+      await monitor.start()
+
+      // 先按下Alt键并移动鼠标，记录位置
+      const keyDownEvent1 = new KeyboardEvent('keydown', { altKey: true })
+      document.dispatchEvent(keyDownEvent1)
+
+      const target = document.createElement('div')
+      document.body.appendChild(target)
+
+      const mouseEvent = new MouseEvent('mousemove', { clientX: 150, clientY: 200, altKey: true, bubbles: true })
+      Object.defineProperty(mouseEvent, 'target', { value: target, configurable: true })
+      document.dispatchEvent(mouseEvent)
+
+      // 释放Alt键
+      const keyUpEvent = new KeyboardEvent('keyup', { altKey: false })
+      document.dispatchEvent(keyUpEvent)
+
+      // 清除之前的调用记录
+      jest.clearAllMocks()
+
+      // 再次按下Alt键
+      const keyDownEvent2 = new KeyboardEvent('keydown', { altKey: true })
+      document.dispatchEvent(keyDownEvent2)
+
+      // 执行所有异步操作
+      await Promise.resolve()
+
+      // 应该立即触发检测，使用之前记录的鼠标位置
+      expect(mockFindElementWithSchemaParams).toHaveBeenCalledWith(150, 200)
+
+      document.body.removeChild(target)
+    })
+
+    it('应该在按下Alt键时不触发检测（无鼠标位置）', async () => {
+      await monitor.start()
+
+      // 直接按下Alt键（没有先移动鼠标）
+      const keyDownEvent = new KeyboardEvent('keydown', { altKey: true })
+      document.dispatchEvent(keyDownEvent)
+
+      // 执行所有异步操作
+      await Promise.resolve()
+
+      // 不应该触发检测，因为没有有效的鼠标位置
+      expect(mockFindElementWithSchemaParams).not.toHaveBeenCalled()
+    })
+
+    it('应该在鼠标移动时记录位置供后续使用', async () => {
+      const targetElement = document.createElement('div')
+      mockFindElementWithSchemaParams.mockResolvedValue({
+        target: targetElement,
+        candidates: [targetElement]
+      })
+      mockGetElementAttributes.mockResolvedValue({ params: ['param1'] })
+      mockHasValidAttributes.mockReturnValue(true)
+
+      await monitor.start()
+
+      // 按下Alt键
+      const keyDownEvent1 = new KeyboardEvent('keydown', { altKey: true })
+      document.dispatchEvent(keyDownEvent1)
+
+      const target = document.createElement('div')
+      document.body.appendChild(target)
+
+      // 移动鼠标到位置 (300, 400)
+      const mouseEvent = new MouseEvent('mousemove', { clientX: 300, clientY: 400, altKey: true, bubbles: true })
+      Object.defineProperty(mouseEvent, 'target', { value: target, configurable: true })
+      document.dispatchEvent(mouseEvent)
+
+      jest.runAllTimers()
+      await Promise.resolve()
+
+      // 验证第一次搜索使用了正确的位置
+      expect(mockFindElementWithSchemaParams).toHaveBeenCalledWith(300, 400)
+
+      // 释放Alt键
+      const keyUpEvent = new KeyboardEvent('keyup', { altKey: false })
+      document.dispatchEvent(keyUpEvent)
+
+      jest.clearAllMocks()
+
+      // 再次按下Alt键
+      const keyDownEvent2 = new KeyboardEvent('keydown', { altKey: true })
+      document.dispatchEvent(keyDownEvent2)
+
+      await Promise.resolve()
+
+      // 应该使用之前记录的位置 (300, 400)
+      expect(mockFindElementWithSchemaParams).toHaveBeenCalledWith(300, 400)
+
+      document.body.removeChild(target)
+    })
   })
 
   describe('元素点击处理', () => {
