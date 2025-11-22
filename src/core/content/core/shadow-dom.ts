@@ -1,3 +1,4 @@
+import { logger } from '@/shared/utils/logger'
 import ReactDOM from 'react-dom/client'
 
 /**
@@ -12,10 +13,8 @@ const loadAndInjectCSS = async (shadowRoot: ShadowRoot, url: string, sourceName:
     styleElement.textContent = cssText
     styleElement.setAttribute('data-source', sourceName)
     shadowRoot.appendChild(styleElement)
-    
-    console.log(`✅ 已加载CSS: ${sourceName}`)
   } catch (error) {
-    console.error(`❌ 加载CSS失败: ${sourceName}`, error)
+    logger.error(`❌ 加载CSS失败: ${sourceName}`, error)
   }
 }
 
@@ -23,8 +22,6 @@ const loadAndInjectCSS = async (shadowRoot: ShadowRoot, url: string, sourceName:
  * 加载所有必需的CSS到Shadow DOM
  */
 const loadAllStyles = async (shadowRoot: ShadowRoot): Promise<void> => {
-  console.log('🔍 开始加载所有CSS...')
-  
   // 1. 加载Monaco Editor CSS（从node_modules）
   await loadAndInjectCSS(
     shadowRoot,
@@ -41,7 +38,6 @@ const loadAllStyles = async (shadowRoot: ShadowRoot): Promise<void> => {
   
   // 3. 复制页面中已注入的style标签（styled-components等）
   const existingStyles = document.querySelectorAll('head > style')
-  console.log(`📊 找到 ${existingStyles.length} 个现有style标签`)
   
   existingStyles.forEach((style) => {
     const clonedStyle = style.cloneNode(true) as HTMLStyleElement
@@ -58,7 +54,6 @@ const loadAllStyles = async (shadowRoot: ShadowRoot): Promise<void> => {
           clonedStyle.setAttribute('data-shadow-copied', 'true')
           clonedStyle.setAttribute('data-dynamic', 'true')
           shadowRoot.appendChild(clonedStyle)
-          console.log(`✅ 已复制动态样式`)
         }
       })
     })
@@ -68,8 +63,6 @@ const loadAllStyles = async (shadowRoot: ShadowRoot): Promise<void> => {
     childList: true,
     subtree: false
   })
-  
-  console.log('✅ 所有CSS加载完成')
 }
 
 /**
@@ -80,8 +73,6 @@ export const createShadowRoot = async (): Promise<{
   root: ReactDOM.Root
   shadowRoot: ShadowRoot
 }> => {
-  console.log('🚀 开始创建Shadow DOM...')
-  
   // 创建容器
   const container = document.createElement('div')
   container.id = 'schema-editor-root'
@@ -99,7 +90,6 @@ export const createShadowRoot = async (): Promise<{
 
   // 创建Shadow DOM
   const shadowRoot = container.attachShadow({ mode: 'open' })
-  console.log('✅ Shadow DOM已创建')
 
   // 加载所有CSS
   await loadAllStyles(shadowRoot)
@@ -119,7 +109,6 @@ export const createShadowRoot = async (): Promise<{
 
   // 创建React Root
   const root = ReactDOM.createRoot(reactContainer)
-  console.log('✅ React Root已创建')
 
   return { container, root, shadowRoot }
 }

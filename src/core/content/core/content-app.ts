@@ -111,7 +111,6 @@ export class SchemaEditorContent {
     // 移除UI容器（完全清除DOM元素）
     if (this.container && this.container.parentNode) {
       this.container.parentNode.removeChild(this.container)
-      logger.log('✅ UI容器已移除')
     }
   }
 
@@ -131,16 +130,12 @@ export class SchemaEditorContent {
         React.createElement(App, { shadowRoot })
       )
     )
-
-    logger.log('React UI已初始化')
   }
 
   /**
    * 处理元素点击
    */
   private handleElementClick(element: HTMLElement, attrs: ElementAttributes): void {
-    logger.log('元素点击事件:', element, attrs)
-
     // 触发自定义事件，通知React应用
     const event = new CustomEvent('schema-editor:element-click', {
       detail: { element, attributes: attrs }

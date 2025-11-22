@@ -8,7 +8,6 @@ import { logger } from '@/shared/utils/logger'
 export const injectPageScript = (): void => {
   // 检查是否已经注入过
   if ((window as any).__SCHEMA_EDITOR_INJECTED__) {
-    logger.log('⏭️ Injected script已存在，跳过注入')
     // 即使已注入，也要同步配置（配置可能已更新）
     syncConfigToInjectedScript()
     return
@@ -17,7 +16,6 @@ export const injectPageScript = (): void => {
   const script = document.createElement('script')
   script.src = chrome.runtime.getURL('injected.js')
   script.onload = async () => {
-    logger.log('✅ Injected script已成功注入')
     script.remove()
     
     await syncConfigToInjectedScript()
@@ -47,8 +45,6 @@ export const syncConfigToInjectedScript = async (): Promise<void> => {
       },
       '*'
     )
-    
-    logger.log('⚙️ 配置已同步到injected script:', { getFunctionName, updateFunctionName })
   } catch (error) {
     logger.error('❌ 同步配置失败:', error)
   }

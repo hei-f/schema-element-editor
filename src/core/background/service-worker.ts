@@ -1,5 +1,6 @@
 import { MessageType, type Message } from '@/shared/types'
 import { storage } from '@/shared/utils/browser/storage'
+import { logger } from '@/shared/utils/logger'
 
 /**
  * 更新图标状态显示
@@ -25,11 +26,11 @@ function updateIconState(isActive: boolean) {
  * 监听扩展图标点击事件
  */
 chrome.action.onClicked.addListener(async (_tab: chrome.tabs.Tab) => {
-  console.log('扩展图标被点击')
+  logger.log('扩展图标被点击')
   
   // 切换激活状态
   const newState = await storage.toggleActiveState()
-  console.log('激活状态已切换:', newState)
+  logger.log('激活状态已切换:', newState)
   
   // 更新图标状态
   updateIconState(newState)
@@ -37,7 +38,7 @@ chrome.action.onClicked.addListener(async (_tab: chrome.tabs.Tab) => {
   // 通知所有标签页的content script
   try {
     const tabs = await chrome.tabs.query({})
-    console.log(`通知 ${tabs.length} 个标签页激活状态变更`)
+    logger.log(`通知 ${tabs.length} 个标签页激活状态变更`)
     
     for (const tab of tabs) {
       if (tab.id) {
@@ -48,12 +49,12 @@ chrome.action.onClicked.addListener(async (_tab: chrome.tabs.Tab) => {
           } as Message)
         } catch (error) {
           // 某些特殊页面（如 chrome://, edge:// 等）无法接收消息，忽略这些错误
-          console.debug(`标签页 ${tab.id} 无法接收消息:`, error)
+          logger.warn(`标签页 ${tab.id} 无法接收消息:`, error)
         }
       }
     }
   } catch (error) {
-    console.error('查询标签页失败:', error)
+    logger.error('查询标签页失败:', error)
   }
 })
 
@@ -61,7 +62,7 @@ chrome.action.onClicked.addListener(async (_tab: chrome.tabs.Tab) => {
  * 监听来自content script的消息
  */
 chrome.runtime.onMessage.addListener((message: Message, _sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
-  console.log('Background收到消息:', message)
+  logger.log('Background收到消息:', message)
   
   // 这里可以添加更多的消息处理逻辑
   switch (message.type) {
@@ -78,7 +79,7 @@ chrome.runtime.onMessage.addListener((message: Message, _sender: chrome.runtime.
   return false
 })
 
-console.log('Background Service Worker已启动')
+logger.log('Background Service Worker已启动')
 
 /**
  * Service Worker启动/恢复时立即恢复图标状态
@@ -87,6 +88,6 @@ console.log('Background Service Worker已启动')
 ;(async () => {
   const isActive = await storage.getActiveState()
   updateIconState(isActive)
-  console.log('图标状态已恢复:', isActive)
+  logger.log('图标状态已恢复:', isActive)
 })()
 

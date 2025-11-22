@@ -1,4 +1,5 @@
 import { storage } from '@/shared/utils/browser/storage'
+import { logger } from '@/shared/utils/logger'
 import { Modal } from 'antd'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -64,7 +65,7 @@ export const useDraftManagement = ({
         setShowDraftNotification(false)
       }
     } catch (error) {
-      console.error('检查草稿失败:', error)
+      logger.error('检查草稿失败:', error)
     }
   }, [paramsKey])
 
@@ -168,7 +169,7 @@ export const useDraftManagement = ({
           setDraftAutoSaveStatus('idle')
         }, 2000)
       } catch (error) {
-        console.error('自动保存草稿失败:', error)
+        logger.error('自动保存草稿失败:', error)
         setDraftAutoSaveStatus('idle')
       }
     }, autoSaveDebounce)

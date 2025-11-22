@@ -2,6 +2,7 @@ import { DEFAULT_VALUES, STORAGE_KEYS } from '@/shared/constants/defaults'
 import { draftManager } from '@/shared/managers/draft-manager'
 import { favoritesManager } from '@/shared/managers/favorites-manager'
 import type { Draft, Favorite, SearchConfig, StorageData, ToolbarButtonsConfig } from '@/shared/types'
+import { logger } from '@/shared/utils/logger'
 import { SIMPLE_STORAGE_FIELDS, type StorageFieldName } from './storage-config'
 
 /**
@@ -455,7 +456,7 @@ class StorageManager {
       )
       
       if (cleanedCount > 0) {
-        console.log(`已清理 ${cleanedCount} 个最少使用的收藏`)
+        logger.log(`已清理 ${cleanedCount} 个最少使用的收藏`)
       }
     } catch (error) {
       console.error('清理收藏失败:', error)

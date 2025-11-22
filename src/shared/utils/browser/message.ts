@@ -1,4 +1,5 @@
 import type { Message } from '@/shared/types'
+import { logger } from '@/shared/utils/logger'
 
 /**
  * 发送消息到Background Service Worker
@@ -8,7 +9,7 @@ export async function sendMessageToBackground<T = any>(message: Message): Promis
     const response = await chrome.runtime.sendMessage(message)
     return response
   } catch (error) {
-    console.error('发送消息到Background失败:', error)
+    logger.error('发送消息到Background失败:', error)
     throw error
   }
 }
@@ -24,7 +25,7 @@ export async function sendMessageToContent<T = any>(
     const response = await chrome.tabs.sendMessage(tabId, message)
     return response
   } catch (error) {
-    console.error('发送消息到Content Script失败:', error)
+    logger.error('发送消息到Content Script失败:', error)
     throw error
   }
 }
@@ -57,7 +58,6 @@ export function postMessageToPage(message: Message): void {
     type: message.type,
     payload: message.payload
   }
-  console.log('📤 postMessageToPage发送消息:', fullMessage)
   
   window.postMessage(fullMessage, '*')
 }

@@ -1,3 +1,4 @@
+import { logger } from '@/shared/utils/logger'
 import { loader } from '@monaco-editor/react'
 import * as monaco from 'monaco-editor'
 
@@ -38,7 +39,7 @@ export function configureMonaco(): boolean {
         return worker as any
       }
     }
-    console.log('📝 Monaco Editor 已加载（主线程模式，无Worker支持）')
+    logger.log('📝 Monaco Editor 已加载（主线程模式，无Worker支持）')
     
     // 使用本地加载的monaco实例
     loader.config({ monaco })
@@ -54,7 +55,7 @@ export function configureMonaco(): boolean {
     return true
   } else {
     // 页面已有配置，不覆盖，使用页面的配置
-    console.log('📝 Monaco Editor 已加载（使用页面现有配置）')
+    logger.log('📝 Monaco Editor 已加载（使用页面现有配置）')
     
     // 使用本地加载的monaco实例
     loader.config({ monaco })

@@ -8,11 +8,9 @@ import { MessageType } from '@/shared/types'
  */
 describe('Background Service Worker', () => {
   let mockStorage: any
-  let onClickedListener: ((tab: chrome.tabs.Tab) => void) | null = null
 
   beforeEach(() => {
     jest.clearAllMocks()
-    onClickedListener = null
 
     // Mock storage
     mockStorage = {
@@ -35,11 +33,6 @@ describe('Background Service Worker', () => {
     ;(chrome.storage.local.set as jest.Mock).mockImplementation((items: any) => {
       Object.assign(mockStorage, items)
       return Promise.resolve()
-    })
-
-    // 捕获 onClicked listener
-    ;(chrome.action.onClicked.addListener as jest.Mock).mockImplementation((listener: any) => {
-      onClickedListener = listener
     })
   })
 

@@ -3,7 +3,6 @@ import type { ElementAttributes, Message, SchemaResponsePayload, UpdateResultPay
 import { MessageType } from '@/shared/types'
 import { listenPageMessages, postMessageToPage } from '@/shared/utils/browser/message'
 import { storage } from '@/shared/utils/browser/storage'
-import { logger } from '@/shared/utils/logger'
 import { ConfigProvider, message as antdMessage } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import React, { useEffect, useState } from 'react'
@@ -37,8 +36,6 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
    */
   useEffect(() => {
     const cleanup = listenPageMessages((msg: Message) => {
-      logger.log('React App收到页面消息:', msg)
-
       switch (msg.type) {
         case MessageType.SCHEMA_RESPONSE:
           handleSchemaResponse(msg.payload as SchemaResponsePayload)
@@ -61,8 +58,7 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
    */
   useEffect(() => {
     const handleElementClick = (event: CustomEvent) => {
-      const { element, attributes } = event.detail
-      logger.log('元素被点击:', element, attributes)
+      const { attributes } = event.detail
 
       setCurrentAttributes(attributes)
       requestSchema(attributes)
@@ -81,7 +77,6 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
   const requestSchema = (attributes: ElementAttributes) => {
     const params = attributes.params.join(',')
     const payload = { params }
-    logger.log('📤 App准备发送GET_SCHEMA消息:', payload)
     
     postMessageToPage({
       type: MessageType.GET_SCHEMA,

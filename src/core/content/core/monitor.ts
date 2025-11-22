@@ -1,5 +1,6 @@
 import type { ElementAttributes, SearchConfig } from '@/shared/types'
 import { storage } from '@/shared/utils/browser/storage'
+import { logger } from '@/shared/utils/logger'
 import {
   addHighlight,
   findElementWithSchemaParams,
@@ -34,7 +35,7 @@ export class ElementMonitor {
     if (this.isActive) return
     
     this.isActive = true
-    console.log('元素监听器已启动 (按住 Alt/Option 键启用检测)')
+    logger.log('元素监听器已启动 (按住 Alt/Option 键启用检测)')
     
     // 加载搜索配置
     this.searchConfig = await storage.getSearchConfig()
@@ -58,7 +59,7 @@ export class ElementMonitor {
     
     this.isActive = false
     this.isControlPressed = false
-    console.log('元素监听器已停止')
+    logger.log('元素监听器已停止')
     
     // 移除事件监听
     document.removeEventListener('mousemove', this.handleMouseMove, true)
@@ -133,7 +134,6 @@ export class ElementMonitor {
     if (event.altKey) {
       if (!this.isControlPressed) {
         this.isControlPressed = true
-        console.log('🎮 Alt/Option 键已按下，hover 检测已启用')
         
         // 如果有有效的鼠标位置，立即触发一次检测
         if (this.lastMouseX !== 0 || this.lastMouseY !== 0) {
@@ -159,7 +159,6 @@ export class ElementMonitor {
     if (!event.altKey) {
       if (this.isControlPressed) {
         this.isControlPressed = false
-        console.log('🎮 Alt/Option 键已释放，hover 检测已禁用')
         // 清理当前高亮
         this.clearHighlight()
       }

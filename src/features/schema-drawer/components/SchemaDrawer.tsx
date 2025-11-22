@@ -2,6 +2,7 @@ import { FavoritesManager } from '@/features/favorites/components/FavoritesManag
 import type { ElementAttributes } from '@/shared/types'
 import { ContentType } from '@/shared/types'
 import { storage } from '@/shared/utils/browser/storage'
+import { logger } from '@/shared/utils/logger'
 import { parseMarkdownString } from '@/shared/utils/schema/transformers'
 import {
   DeleteOutlined,
@@ -178,7 +179,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         setToolbarButtons(toolbarConfig)
         setAutoSaveDraft(autoSave)
       } catch (error) {
-        console.error('加载配置失败:', error)
+        logger.error('加载配置失败:', error)
       }
     }
     loadConfigs()
@@ -235,7 +236,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
             isFirstLoadRef.current = false
           }, 100)
         } catch (error) {
-          console.error('处理Schema数据失败:', error)
+          logger.error('处理Schema数据失败:', error)
           setWasStringData(false)
           const formatted = JSON.stringify(schemaData)
           setEditorValue(formatted)
@@ -370,9 +371,9 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   /**
    * 处理编辑器挂载
    */
-  const handleEditorDidMount = () => {
-    console.log('Monaco Editor 已挂载')
-  }
+  // const handleEditorDidMount = () => {
+    // Monaco Editor 挂载完成
+  // }
 
   return (
     <>
@@ -479,7 +480,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
                 defaultLanguage="json"
                 value={editorValue}
                 onChange={handleEditorChange}
-                onMount={handleEditorDidMount}
+                // onMount={handleEditorDidMount}
                 theme="vs"
                 options={{
                   fontSize: 16,
