@@ -1,13 +1,11 @@
 ;(function () {
   // 检测是否已经注入，避免重复注入
   if (window.__SCHEMA_EDITOR_INJECTED__) {
-    console.log('Schema Editor injected script已存在，跳过重复注入')
     return
   }
   
   // 设置全局标记
   window.__SCHEMA_EDITOR_INJECTED__ = true
-  console.log('Schema Editor injected script已加载')
 
   const MESSAGE_SOURCE = {
     FROM_CONTENT: 'schema-editor-content',
@@ -20,14 +18,15 @@
     update: '__updateContentById'
   }
 
-  console.log('⚙️ 初始函数名配置:', functionNames)
+  /** 预览容器和 React root */
+  let previewContainer = null
+  let previewRoot = null
 
   window.addEventListener('message', (event) => {
     if (event.source !== window) return
     if (!event.data || event.data.source !== MESSAGE_SOURCE.FROM_CONTENT) return
 
     const { type, payload } = event.data
-    console.log('📥 injected script收到消息:', { type, payload })
 
     switch (type) {
       case 'CONFIG_SYNC':
@@ -39,13 +38,21 @@
       case 'UPDATE_SCHEMA':
         handleUpdateSchema(payload)
         break
+      case 'CHECK_PREVIEW_FUNCTION':
+        handleCheckPreviewFunction()
+        break
+      case 'RENDER_PREVIEW':
+        handleRenderPreview(payload)
+        break
+      case 'CLEAR_PREVIEW':
+        handleClearPreview()
+        break
       default:
         console.warn('未知的消息类型:', type)
     }
   })
 
   function handleConfigSync(payload) {
-    console.log('⚙️ 收到配置同步消息:', payload)
     const { getFunctionName, updateFunctionName } = payload || {}
     
     if (getFunctionName) {
@@ -54,16 +61,10 @@
     if (updateFunctionName) {
       functionNames.update = updateFunctionName
     }
-    
-    console.log('✅ 函数名配置已更新:', functionNames)
   }
 
   function handleGetSchema(payload) {
-    console.log('🔍 handleGetSchema 收到 payload:', payload)
-    console.log('🔍 payload 类型:', typeof payload, payload)
-    
     const { params } = payload || {}
-    console.log('🔍 解构后:', { params })
 
     try {
       const getFn = window[functionNames.get]
@@ -115,6 +116,154 @@
         success: false,
         error: error.message || '更新Schema时发生错误'
       })
+    }
+  }
+
+  /**
+   * 检查预览函数是否存在
+   */
+  function handleCheckPreviewFunction() {
+    const exists = typeof window.__previewContent === 'function'
+    sendResponse('PREVIEW_FUNCTION_RESULT', {
+      exists
+    })
+  }
+
+  /**
+   * 渲染预览内容
+   */
+  function handleRenderPreview(payload) {
+    const { data, position } = payload || {}
+
+    try {
+      // 检查预览函数
+      if (typeof window.__previewContent !== 'function') {
+        return
+      }
+
+      // 创建或更新预览容器
+      if (!previewContainer) {
+        createPreviewContainer(position)
+      } else {
+        updatePreviewPosition(position)
+      }
+
+      // 渲染预览内容
+      renderPreviewContent(data)
+    } catch (error) {
+      console.error('渲染预览失败:', error)
+    }
+  }
+
+  /**
+   * 创建预览容器
+   */
+  function createPreviewContainer(position) {
+    // 创建容器元素
+    previewContainer = document.createElement('div')
+    previewContainer.id = 'schema-editor-preview-container'
+    previewContainer.style.cssText = `
+      position: fixed;
+      left: ${position.left}px;
+      top: ${position.top}px;
+      width: ${position.width}px;
+      height: ${position.height}px;
+      z-index: 2147483646;
+      background: #f5f5f5;
+      border-right: 1px solid #e8e8e8;
+      overflow: auto;
+      padding: 16px;
+      box-sizing: border-box;
+    `
+    
+    document.body.appendChild(previewContainer)
+  }
+
+  /**
+   * 更新预览容器位置
+   */
+  function updatePreviewPosition(position) {
+    if (!previewContainer) return
+    
+    previewContainer.style.left = `${position.left}px`
+    previewContainer.style.top = `${position.top}px`
+    previewContainer.style.width = `${position.width}px`
+    previewContainer.style.height = `${position.height}px`
+  }
+
+  /**
+   * 渲染预览内容
+   */
+  function renderPreviewContent(data) {
+    if (!previewContainer) return
+    
+    try {
+      // 调用页面提供的预览函数
+      const reactNode = window.__previewContent(data)
+      
+      // 如果页面使用 React 18+，需要使用 ReactDOM.createRoot
+      // 如果页面使用 React 17-，需要使用 ReactDOM.render
+      // 这里假设页面会自己处理渲染，我们只是提供容器
+      
+      // 检查是否有 ReactDOM
+      if (window.ReactDOM) {
+        // 清理旧的 root
+        if (previewRoot && previewRoot.unmount) {
+          previewRoot.unmount()
+        }
+        
+        // React 18+ API
+        if (window.ReactDOM.createRoot) {
+          previewRoot = window.ReactDOM.createRoot(previewContainer)
+          previewRoot.render(reactNode)
+        } 
+        // React 17- API
+        else if (window.ReactDOM.render) {
+          window.ReactDOM.render(reactNode, previewContainer)
+        }
+      } else {
+        // 如果没有 ReactDOM，直接设置 innerHTML（不推荐，但作为后备方案）
+        console.warn('ReactDOM 不可用，尝试直接设置 HTML')
+        if (typeof reactNode === 'string') {
+          previewContainer.innerHTML = reactNode
+        } else {
+          previewContainer.innerHTML = '<div style="color: #999;">无法渲染预览内容（ReactDOM 不可用）</div>'
+        }
+      }
+    } catch (error) {
+      console.error('渲染预览内容失败:', error)
+      previewContainer.innerHTML = `
+        <div style="color: red; padding: 20px;">
+          <div style="font-weight: bold; margin-bottom: 8px;">预览渲染错误</div>
+          <div style="font-size: 12px;">${error.message || '未知错误'}</div>
+        </div>
+      `
+    }
+  }
+
+  /**
+   * 清除预览
+   */
+  function handleClearPreview() {
+    try {
+      // 清理 React root
+      if (previewRoot) {
+        if (previewRoot.unmount) {
+          previewRoot.unmount()
+        } else if (previewRoot._internalRoot) {
+          // React 17- 的清理方式
+          window.ReactDOM.unmountComponentAtNode(previewContainer)
+        }
+        previewRoot = null
+      }
+      
+      // 移除容器
+      if (previewContainer && previewContainer.parentNode) {
+        previewContainer.parentNode.removeChild(previewContainer)
+      }
+      previewContainer = null
+    } catch (error) {
+      console.error('清除预览失败:', error)
     }
   }
 
