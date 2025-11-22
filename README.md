@@ -2,13 +2,14 @@
 
 Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 
-![Version](https://img.shields.io/badge/version-1.1.1-blue)
+![Version](https://img.shields.io/badge/version-1.2.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 ## 功能
 
 - 🎯 **智能元素检测**: 按住 Alt/Option 键时自动检测和高亮目标元素
-- 📝 **Schema编辑器**: 内置Monaco编辑器，支持JSON格式化和校验
+- 📝 **Schema编辑器**: 内置CodeMirror编辑器，支持JSON格式化和校验
+- 👁️ **实时预览**: 支持在编辑时实时预览Schema效果，可自定义预览组件
 - 🤖 **智能解析**: 自动解析 Markdown 字符串为结构化数据，完美适配 AI 智能体对话场景
 - 💾 **实时更新**: 修改后直接同步到页面
 - 💿 **草稿功能**: 支持手动保存和自动保存草稿，防止数据丢失
@@ -18,7 +19,7 @@ Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 
 ## 技术栈
 
-React 18 + TypeScript + Vite + Ant Design 5 + Monaco Editor + Chrome Extension MV3
+React 18 + TypeScript + Vite + Ant Design 5 + CodeMirror + Chrome Extension MV3
 
 ## 开发
 
@@ -85,6 +86,28 @@ window.__updateContentById = (schema: any, params: string) => {
 ```
 
 函数名可在配置页面自定义。
+
+### 预览功能 (v1.2.0+)
+
+插件支持实时预览Schema效果。页面可提供 `__previewContent` 函数自定义预览渲染：
+
+```typescript
+// 预览函数（可选）
+window.__previewContent = (data: any) => {
+  // 返回 React 组件或 JSX
+  return React.createElement('div', { 
+    style: { padding: '20px' } 
+  }, JSON.stringify(data, null, 2))
+}
+```
+
+使用方式：
+1. 在编辑器工具栏点击"预览"按钮开启预览
+2. 预览区域会在抽屉左侧显示
+3. 可拖拽分隔条调整预览/编辑器宽度
+4. 支持手动更新或自动更新预览（可在配置页面设置）
+
+如果页面未提供 `__previewContent` 函数，预览按钮将被禁用。
 
 ### 元素标记
 
