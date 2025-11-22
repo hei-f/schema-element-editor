@@ -9,6 +9,9 @@ export default {
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^@shared/(.*)$': '<rootDir>/src/shared/$1',
+    '^@features/(.*)$': '<rootDir>/src/features/$1',
+    '^@core/(.*)$': '<rootDir>/src/core/$1',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.svg$': '<rootDir>/test/__mocks__/fileMock.ts',
     '^monaco-editor$': '<rootDir>/test/__mocks__/fileMock.ts',
@@ -16,19 +19,20 @@ export default {
     '^@monaco-editor/react$': '<rootDir>/test/__mocks__/monacoMock.ts',
     '\\?worker$': '<rootDir>/test/__mocks__/fileMock.ts',
     '^@/utils/monaco-loader$': '<rootDir>/test/__mocks__/monacoLoaderMock.ts',
+    '^@shared/utils/monaco-loader$': '<rootDir>/test/__mocks__/monacoLoaderMock.ts',
     '^@ant-design/md-editor$': '<rootDir>/test/__mocks__/mdEditorMock.ts'
   },
   setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
-    '!src/types/**',
+    '!src/shared/types/**',
     '!src/**/*.stories.tsx',
-    '!src/background/**', // 排除background (Chrome Service Worker环境难以测试)
-    '!src/content/index.tsx', // 排除content入口 (需要完整DOM环境)
-    '!src/content/monitor.ts', // 排除monitor (需要完整浏览器环境)
-    '!src/options/index.tsx', // 排除options入口
-    '!src/utils/monaco-loader.ts' // 排除monaco-loader (需要worker环境)
+    '!src/core/background/**',
+    '!src/core/content/index.tsx',
+    '!src/core/content/core/monitor.ts',
+    '!src/features/options-page/index.tsx',
+    '!src/shared/utils/browser/monaco-loader.ts'
   ],
   coverageThreshold: {
     global: {
