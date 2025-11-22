@@ -5,6 +5,8 @@ import { defineConfig } from 'vite'
 import manifest from './src/manifest.json'
 
 export default defineConfig({
+  // Chrome扩展需要使用相对路径，不能使用绝对路径
+  base: './',
   plugins: [
     react(),
     crx({ manifest: manifest as any })
