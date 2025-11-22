@@ -4,8 +4,8 @@
  */
 
 // 导出主组件
+export { CodeMirrorEditor } from './components/CodeMirrorEditor'
 export { DrawerToolbar } from './components/DrawerToolbar'
-export { MonacoErrorBoundary } from './components/MonacoErrorBoundary'
 export { SchemaDrawer } from './components/SchemaDrawer'
 
 // 导出Hooks

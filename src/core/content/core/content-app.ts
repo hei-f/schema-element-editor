@@ -1,7 +1,6 @@
 import { App } from '@/shared/components/ContentApp'
 import { MessageType, type ElementAttributes, type Message } from '@/shared/types'
 import { listenChromeMessages } from '@/shared/utils/browser/message'
-import { configureMonaco } from '@/shared/utils/browser/monaco'
 import { storage } from '@/shared/utils/browser/storage'
 import { logger } from '@/shared/utils/logger'
 import React from 'react'
@@ -87,15 +86,13 @@ export class SchemaEditorContent {
     if (!this.isInitialized) {
       // 注入页面脚本
       injectPageScript()
-      // 配置Monaco Editor（不再依赖全局CSS）
-      configureMonaco()
       this.isInitialized = true
     }
     
     // 启动元素监听器
     this.monitor.start()
 
-    // 懒加载React UI（首次需要时才创建，Monaco CSS将在Shadow DOM创建时注入）
+    // 懒加载React UI（首次需要时才创建）
     if (!this.reactRoot) {
       this.initReactUI()
     }
