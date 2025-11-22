@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Schema Editor",
-  "version": "1.0.10",
+  "version": "1.1.0",
   "description": "DOM元素Schema查看和编辑工具",
   "permissions": [
     "storage",
@@ -11,13 +11,13 @@
     "<all_urls>"
   ],
   "background": {
-    "service_worker": "src/background/service-worker.ts",
+    "service_worker": "src/core/background/service-worker.ts",
     "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["src/content/index.tsx"],
+      "js": ["src/core/content/index.tsx"],
       "run_at": "document_idle"
     }
   ],
@@ -29,7 +29,7 @@
     },
     "default_title": "Schema Editor - 点击激活/停用"
   },
-  "options_page": "src/options/options.html",
+  "options_page": "src/features/options-page/options.html",
   "icons": {
     "16": "icons/icon-active-16.png",
     "48": "icons/icon-active-48.png",
@@ -37,7 +37,11 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["injected.js"],
+      "resources": [
+        "injected.js",
+        "node_modules/monaco-editor/min/vs/editor/editor.main.css",
+        "node_modules/antd/dist/reset.css"
+      ],
       "matches": ["<all_urls>"]
     }
   ]
