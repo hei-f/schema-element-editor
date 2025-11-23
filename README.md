@@ -2,12 +2,13 @@
 
 Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 
-![Version](https://img.shields.io/badge/version-1.3.0-blue)
+![Version](https://img.shields.io/badge/version-1.4.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 ## 功能
 
 - 🎯 **智能元素检测**: 按住 Alt/Option 键时自动检测和高亮目标元素
+- 🔦 **批量高亮**: 支持快捷键（Alt+字母/数字）一键高亮页面所有可编辑元素，可配置快捷键和数量上限
 - 📝 **Schema编辑器**: 内置CodeMirror编辑器，支持JSON格式化和校验
 - 👁️ **实时预览**: 支持在编辑时实时预览Schema效果，可自定义预览组件
 - 🤖 **智能解析**: 自动解析 Markdown 字符串为结构化数据，完美适配 AI 智能体对话场景
@@ -64,7 +65,14 @@ npm run test:page
 
 ## 使用
 
-点击工具栏图标激活插件（绿色=激活，灰色=未激活）。按住 Alt/Option 键悬停元素显示高亮，点击打开编辑器。
+点击工具栏图标激活插件（绿色=激活，灰色=未激活）。
+
+### 基础操作
+
+- **单元素高亮**: 按住 Alt/Option 键悬停元素显示高亮，点击打开编辑器
+- **批量高亮**: 按住 Alt/Option 键 + 配置的快捷键（默认A），高亮页面所有可编辑元素。松开 Alt 键清除高亮
+  - 可在配置页面自定义快捷键（支持字母和数字）
+  - 可配置最大高亮数量（100-1000，默认500）
 
 ## 页面集成
 
