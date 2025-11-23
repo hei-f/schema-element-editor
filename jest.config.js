@@ -20,7 +20,10 @@ export default {
     '\\?worker$': '<rootDir>/test/__mocks__/fileMock.ts',
     '^@/utils/monaco-loader$': '<rootDir>/test/__mocks__/monacoLoaderMock.ts',
     '^@shared/utils/monaco-loader$': '<rootDir>/test/__mocks__/monacoLoaderMock.ts',
-    '^@ant-design/md-editor$': '<rootDir>/test/__mocks__/mdEditorMock.ts'
+    '^@ant-design/md-editor$': '<rootDir>/test/__mocks__/mdEditorMock.ts',
+    '^@lezer/highlight$': '<rootDir>/test/__mocks__/lezerMock.ts',
+    '^@codemirror/language$': '<rootDir>/test/__mocks__/codemirrorLanguageMock.ts',
+    '^@codemirror/lang-json$': '<rootDir>/test/__mocks__/codemirrorLangJsonMock.ts'
   },
   setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
   collectCoverageFrom: [

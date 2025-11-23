@@ -91,6 +91,18 @@ export interface PreviewConfig {
 }
 
 /**
+ * 高亮所有元素配置接口
+ */
+export interface HighlightAllConfig {
+  /** 是否启用功能 */
+  enabled: boolean
+  /** 快捷键字符（单个小写字母，配合 Alt 使用） */
+  keyBinding: string
+  /** 最大高亮元素数量 */
+  maxHighlightCount: number
+}
+
+/**
  * 存储数据接口
  */
 export interface StorageData {
@@ -124,6 +136,12 @@ export interface StorageData {
   draftAutoSaveDebounce: number
   /** 预览配置 */
   previewConfig: PreviewConfig
+  /** 历史记录上限 */
+  maxHistoryCount: number
+  /** 高亮所有元素配置 */
+  highlightAllConfig: HighlightAllConfig
+  /** 启用 AST 类型提示 */
+  enableAstTypeHints: boolean
 }
 
 /**
@@ -152,6 +170,52 @@ export interface Favorite {
   sourceParams: string
   /** 最后使用时间（用于LRU算法） */
   lastUsedTime: number
+}
+
+/**
+ * 历史记录条目类型枚举
+ */
+export enum HistoryEntryType {
+  /** 📄 初始加载 */
+  Initial = 'initial',
+  /** ✏️ 自动记录 */
+  AutoSave = 'auto',
+  /** 💾 保存版本 */
+  Save = 'save',
+  /** 📝 加载草稿 */
+  Draft = 'draft',
+  /** ⭐ 应用收藏 */
+  Favorite = 'favorite',
+  /** 🔄 手动记录 */
+  Manual = 'manual'
+}
+
+/**
+ * 历史记录条目接口
+ */
+export interface HistoryEntry {
+  /** 唯一ID（时间戳字符串） */
+  id: string
+  /** 编辑器内容 */
+  content: string
+  /** 时间戳（毫秒） */
+  timestamp: number
+  /** 版本类型 */
+  type: HistoryEntryType
+  /** 自定义描述（可选） */
+  description?: string
+}
+
+/**
+ * sessionStorage 存储的历史数据结构
+ */
+export interface EditHistoryStorage {
+  /** 普通历史列表（受限制） */
+  entries: HistoryEntry[]
+  /** 特殊版本（不计入限制） */
+  specialEntries: HistoryEntry[]
+  /** 当前版本索引（在合并列表中） */
+  currentIndex: number
 }
 
 /**

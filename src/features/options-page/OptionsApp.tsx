@@ -1,10 +1,12 @@
-import { DEFAULT_VALUES, FORM_FIELD_NAMES } from '@/shared/constants/defaults'
+import { DEFAULT_VALUES } from '@/shared/constants/defaults'
+import { FORM_PATHS } from '@/shared/constants/form-paths'
 import { storage } from '@/shared/utils/browser/storage'
+import { getChangedFieldPath, getValueByPath, pathToString } from '@/shared/utils/form-path'
 import { CheckCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { Button, Collapse, Form, Input, InputNumber, message, Slider, Space, Switch, Tooltip, Typography } from 'antd'
+import { Alert, Button, Collapse, Form, Input, InputNumber, message, Slider, Space, Switch, Tooltip, Typography } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { ColorPickerField } from './components/ColorPickerField'
-import { DEBOUNCE_FIELDS, FIELD_GROUPS, FIELD_STORAGE_MAP } from './config/field-config'
+import { FIELD_PATH_STORAGE_MAP, findFieldGroup, isDebounceField } from './config/field-config'
 import {
   AutoSaveHint,
   CodeBlock,
@@ -56,72 +58,78 @@ export const OptionsApp: React.FC = () => {
 
   const loadSettings = async () => {
     try {
-      const name = await storage.getAttributeName()
+      const attributeName = await storage.getAttributeName()
       const searchConfig = await storage.getSearchConfig()
-      const getFn = await storage.getGetFunctionName()
-      const updateFn = await storage.getUpdateFunctionName()
-      const autoParse = await storage.getAutoParseString()
-      const debugLog = await storage.getEnableDebugLog()
+      const getFunctionName = await storage.getGetFunctionName()
+      const updateFunctionName = await storage.getUpdateFunctionName()
+      const autoParseString = await storage.getAutoParseString()
+      const enableDebugLog = await storage.getEnableDebugLog()
       const toolbarButtons = await storage.getToolbarButtons()
       const drawerWidth = await storage.getDrawerWidth()
       const highlightColor = await storage.getHighlightColor()
       const maxFavoritesCount = await storage.getMaxFavoritesCount()
       const autoSaveDraft = await storage.getAutoSaveDraft()
       const previewConfig = await storage.getPreviewConfig()
+      const maxHistoryCount = await storage.getMaxHistoryCount()
+      const highlightAllConfig = await storage.getHighlightAllConfig()
+      const enableAstTypeHints = await storage.getEnableAstTypeHints()
       
-      setAttributeName(name)
-      setGetFunctionName(getFn)
-      setUpdateFunctionName(updateFn)
-      form.setFieldsValue({ 
-        [FORM_FIELD_NAMES.ATTRIBUTE_NAME]: name,
-        [FORM_FIELD_NAMES.DRAWER_WIDTH]: drawerWidth,
-        [FORM_FIELD_NAMES.SEARCH_DEPTH_DOWN]: searchConfig.searchDepthDown,
-        [FORM_FIELD_NAMES.SEARCH_DEPTH_UP]: searchConfig.searchDepthUp,
-        [FORM_FIELD_NAMES.THROTTLE_INTERVAL]: searchConfig.throttleInterval,
-        [FORM_FIELD_NAMES.GET_FUNCTION_NAME]: getFn,
-        [FORM_FIELD_NAMES.UPDATE_FUNCTION_NAME]: updateFn,
-        [FORM_FIELD_NAMES.AUTO_PARSE_STRING]: autoParse,
-        [FORM_FIELD_NAMES.ENABLE_DEBUG_LOG]: debugLog,
-        [FORM_FIELD_NAMES.TOOLBAR_BUTTON_AST_RAW_STRING_TOGGLE]: toolbarButtons.astRawStringToggle,
-        [FORM_FIELD_NAMES.TOOLBAR_BUTTON_DESERIALIZE]: toolbarButtons.deserialize,
-        [FORM_FIELD_NAMES.TOOLBAR_BUTTON_SERIALIZE]: toolbarButtons.serialize,
-        [FORM_FIELD_NAMES.TOOLBAR_BUTTON_FORMAT]: toolbarButtons.format,
-        [FORM_FIELD_NAMES.TOOLBAR_BUTTON_PREVIEW]: toolbarButtons.preview,
-        [FORM_FIELD_NAMES.HIGHLIGHT_COLOR]: highlightColor,
-        [FORM_FIELD_NAMES.MAX_FAVORITES_COUNT]: maxFavoritesCount,
-        [FORM_FIELD_NAMES.AUTO_SAVE_DRAFT]: autoSaveDraft,
-        [FORM_FIELD_NAMES.PREVIEW_WIDTH]: previewConfig.previewWidth,
-        [FORM_FIELD_NAMES.PREVIEW_UPDATE_DELAY]: previewConfig.updateDelay,
-        [FORM_FIELD_NAMES.PREVIEW_REMEMBER_STATE]: previewConfig.rememberState,
-        [FORM_FIELD_NAMES.PREVIEW_AUTO_UPDATE]: previewConfig.autoUpdate
+      setAttributeName(attributeName)
+      setGetFunctionName(getFunctionName)
+      setUpdateFunctionName(updateFunctionName)
+      
+      form.setFieldsValue({
+        attributeName,
+        drawerWidth,
+        searchConfig,
+        getFunctionName,
+        updateFunctionName,
+        autoParseString,
+        enableDebugLog,
+        toolbarButtons,
+        highlightColor,
+        maxFavoritesCount,
+        autoSaveDraft,
+        previewConfig,
+        maxHistoryCount,
+        highlightAllConfig,
+        enableAstTypeHints
       })
     } catch (error) {
       message.error('加载配置失败')
     }
   }
 
-  const saveField = React.useCallback(async (fieldName: string, allValues: any) => {
+  const saveField = React.useCallback(async (fieldPath: string[], allValues: any) => {
     try {
-      for (const [groupName, group] of Object.entries(FIELD_GROUPS)) {
-        if (group.fields.has(fieldName)) {
-          await group.save(allValues)
-          
-          if (groupName === 'functionNames') {
-            setGetFunctionName(allValues[FORM_FIELD_NAMES.GET_FUNCTION_NAME])
-            setUpdateFunctionName(allValues[FORM_FIELD_NAMES.UPDATE_FUNCTION_NAME])
-          }
-          
-          message.success('已保存', 1.5)
-          return
+      // 查找字段所属的分组
+      const fieldGroup = findFieldGroup(fieldPath)
+      
+      if (fieldGroup) {
+        // 如果属于分组，使用分组的保存方法
+        await fieldGroup.save(allValues)
+        
+        // 更新特定的 state
+        if (fieldPath[0] === 'getFunctionName' || fieldPath[0] === 'updateFunctionName') {
+          setGetFunctionName(allValues.getFunctionName)
+          setUpdateFunctionName(allValues.updateFunctionName)
         }
+        
+        message.success('已保存', 1.5)
+        return
       }
       
-      const storageMethod = FIELD_STORAGE_MAP[fieldName]
+      // 独立字段的保存逻辑
+      const pathKey = pathToString(fieldPath)
+      const storageMethod = FIELD_PATH_STORAGE_MAP[pathKey]
+      
       if (storageMethod && (storage as any)[storageMethod]) {
-        await (storage as any)[storageMethod](allValues[fieldName])
+        const fieldValue = getValueByPath(allValues, fieldPath)
+        await (storage as any)[storageMethod](fieldValue)
         
-        if (fieldName === FORM_FIELD_NAMES.ATTRIBUTE_NAME) {
-          setAttributeName(allValues[fieldName])
+        // 更新特定的 state
+        if (pathKey === 'attributeName') {
+          setAttributeName(fieldValue)
         }
         
         message.success('已保存', 1.5)
@@ -132,34 +140,35 @@ export const OptionsApp: React.FC = () => {
   }, [])
 
   const debouncedSave = React.useCallback(
-    (fieldName: string, allValues: any) => {
-      const existingTimeout = timeoutMapRef.current.get(fieldName)
+    (fieldPath: string[], allValues: any) => {
+      const pathKey = pathToString(fieldPath)
+      const existingTimeout = timeoutMapRef.current.get(pathKey)
       if (existingTimeout) {
         clearTimeout(existingTimeout)
       }
       
       const newTimeout = setTimeout(async () => {
         try {
-          await form.validateFields([fieldName])
-          await saveField(fieldName, allValues)
+          await form.validateFields([fieldPath])
+          await saveField(fieldPath, allValues)
         } catch (error) {
           // 验证失败，不保存
         }
-        timeoutMapRef.current.delete(fieldName)
+        timeoutMapRef.current.delete(pathKey)
       }, 500)
       
-      timeoutMapRef.current.set(fieldName, newTimeout)
+      timeoutMapRef.current.set(pathKey, newTimeout)
     },
     [saveField, form]
   )
 
   const handleValuesChange = (changedValues: any, allValues: any) => {
-    const fieldName = Object.keys(changedValues)[0]
+    const fieldPath = getChangedFieldPath(changedValues)
     
-    if (DEBOUNCE_FIELDS.has(fieldName)) {
-      debouncedSave(fieldName, allValues)
+    if (isDebounceField(fieldPath)) {
+      debouncedSave(fieldPath, allValues)
     } else {
-      saveField(fieldName, allValues)
+      saveField(fieldPath, allValues)
     }
   }
 
@@ -173,7 +182,7 @@ export const OptionsApp: React.FC = () => {
           </PageDescription>
         </HeaderContent>
         <HeaderActions>
-          <VersionTag>v1.2.0</VersionTag>
+          <VersionTag>v1.5.0</VersionTag>
           <Button onClick={openReleasePage}>
             检查更新
           </Button>
@@ -190,33 +199,11 @@ export const OptionsApp: React.FC = () => {
           form={form}
           layout="vertical"
           onValuesChange={handleValuesChange}
-          initialValues={{ 
-            [FORM_FIELD_NAMES.ATTRIBUTE_NAME]: DEFAULT_VALUES.attributeName,
-            [FORM_FIELD_NAMES.DRAWER_WIDTH]: DEFAULT_VALUES.drawerWidth,
-            [FORM_FIELD_NAMES.SEARCH_DEPTH_DOWN]: DEFAULT_VALUES.searchConfig.searchDepthDown,
-            [FORM_FIELD_NAMES.SEARCH_DEPTH_UP]: DEFAULT_VALUES.searchConfig.searchDepthUp,
-            [FORM_FIELD_NAMES.THROTTLE_INTERVAL]: DEFAULT_VALUES.searchConfig.throttleInterval,
-            [FORM_FIELD_NAMES.GET_FUNCTION_NAME]: DEFAULT_VALUES.getFunctionName,
-            [FORM_FIELD_NAMES.UPDATE_FUNCTION_NAME]: DEFAULT_VALUES.updateFunctionName,
-            [FORM_FIELD_NAMES.AUTO_PARSE_STRING]: DEFAULT_VALUES.autoParseString,
-            [FORM_FIELD_NAMES.ENABLE_DEBUG_LOG]: DEFAULT_VALUES.enableDebugLog,
-            [FORM_FIELD_NAMES.HIGHLIGHT_COLOR]: DEFAULT_VALUES.highlightColor,
-            [FORM_FIELD_NAMES.TOOLBAR_BUTTON_AST_RAW_STRING_TOGGLE]: DEFAULT_VALUES.toolbarButtons.astRawStringToggle,
-            [FORM_FIELD_NAMES.TOOLBAR_BUTTON_DESERIALIZE]: DEFAULT_VALUES.toolbarButtons.deserialize,
-            [FORM_FIELD_NAMES.TOOLBAR_BUTTON_SERIALIZE]: DEFAULT_VALUES.toolbarButtons.serialize,
-            [FORM_FIELD_NAMES.TOOLBAR_BUTTON_FORMAT]: DEFAULT_VALUES.toolbarButtons.format,
-            [FORM_FIELD_NAMES.TOOLBAR_BUTTON_PREVIEW]: DEFAULT_VALUES.toolbarButtons.preview,
-            [FORM_FIELD_NAMES.MAX_FAVORITES_COUNT]: DEFAULT_VALUES.maxFavoritesCount,
-            [FORM_FIELD_NAMES.AUTO_SAVE_DRAFT]: DEFAULT_VALUES.autoSaveDraft,
-            [FORM_FIELD_NAMES.PREVIEW_WIDTH]: DEFAULT_VALUES.previewConfig.previewWidth,
-            [FORM_FIELD_NAMES.PREVIEW_UPDATE_DELAY]: DEFAULT_VALUES.previewConfig.updateDelay,
-            [FORM_FIELD_NAMES.PREVIEW_REMEMBER_STATE]: DEFAULT_VALUES.previewConfig.rememberState,
-            [FORM_FIELD_NAMES.PREVIEW_AUTO_UPDATE]: DEFAULT_VALUES.previewConfig.autoUpdate
-          }}
+          initialValues={DEFAULT_VALUES}
         >
           <Form.Item
             label="属性名称"
-            name={FORM_FIELD_NAMES.ATTRIBUTE_NAME}
+            name={FORM_PATHS.attributeName}
             rules={[
               { required: true, message: '请输入属性名称' },
               { pattern: /^[a-z][a-z0-9-]*$/, message: '属性名只能包含小写字母、数字和连字符，且必须以小写字母开头' }
@@ -229,7 +216,7 @@ export const OptionsApp: React.FC = () => {
           <SectionTitle level={5}>API函数配置</SectionTitle>
           <Form.Item
             label="获取Schema函数名"
-            name={FORM_FIELD_NAMES.GET_FUNCTION_NAME}
+            name={FORM_PATHS.getFunctionName}
             rules={[
               { required: true, message: '请输入函数名' },
               { pattern: /^[a-zA-Z_$][a-zA-Z0-9_$]*$/, message: '必须是有效的JavaScript函数名' }
@@ -241,7 +228,7 @@ export const OptionsApp: React.FC = () => {
 
           <Form.Item
             label="更新Schema函数名"
-            name={FORM_FIELD_NAMES.UPDATE_FUNCTION_NAME}
+            name={FORM_PATHS.updateFunctionName}
             rules={[
               { required: true, message: '请输入函数名' },
               { pattern: /^[a-zA-Z_$][a-zA-Z0-9_$]*$/, message: '必须是有效的JavaScript函数名' }
@@ -254,7 +241,7 @@ export const OptionsApp: React.FC = () => {
           <SectionTitle level={5}>搜索配置</SectionTitle>
           <Form.Item
             label="向下搜索深度"
-            name={FORM_FIELD_NAMES.SEARCH_DEPTH_DOWN}
+            name={FORM_PATHS.searchConfig.searchDepthDown}
             extra="查找子元素的最大层数，设置为 0 则不向下搜索"
           >
             <FullWidthInputNumber min={0} />
@@ -262,7 +249,7 @@ export const OptionsApp: React.FC = () => {
 
           <Form.Item
             label="向上搜索深度"
-            name={FORM_FIELD_NAMES.SEARCH_DEPTH_UP}
+            name={FORM_PATHS.searchConfig.searchDepthUp}
             extra="查找父元素的最大层数，设置为 0 则不向上搜索"
           >
             <FullWidthInputNumber min={0} />
@@ -270,7 +257,7 @@ export const OptionsApp: React.FC = () => {
 
           <Form.Item
             label="节流间隔 (毫秒)"
-            name={FORM_FIELD_NAMES.THROTTLE_INTERVAL}
+            name={FORM_PATHS.searchConfig.throttleInterval}
             extra="控制鼠标移动检测频率，建议范围 8-200ms"
           >
             <FullWidthInputNumber min={8} />
@@ -287,7 +274,7 @@ export const OptionsApp: React.FC = () => {
                     </Tooltip>
                   </Space>
                 }
-                name={FORM_FIELD_NAMES.AUTO_PARSE_STRING}
+                name={FORM_PATHS.autoParseString}
                 valuePropName="checked"
                 extra="自动将字符串类型的Schema数据解析为Markdown Elements结构"
               >
@@ -296,7 +283,7 @@ export const OptionsApp: React.FC = () => {
 
               <Form.Item
                 label="启用调试日志"
-                name={FORM_FIELD_NAMES.ENABLE_DEBUG_LOG}
+                name={FORM_PATHS.enableDebugLog}
                 valuePropName="checked"
                 extra="在浏览器控制台显示插件的调试日志信息"
               >
@@ -307,7 +294,7 @@ export const OptionsApp: React.FC = () => {
             <Panel header="外观配置" key="appearance">
               <Form.Item
                 label="抽屉宽度"
-                name={FORM_FIELD_NAMES.DRAWER_WIDTH}
+                name={FORM_PATHS.drawerWidth}
                 rules={[
                   { required: true, message: '请输入抽屉宽度' },
                   { pattern: /^\d+(%|px)$/, message: '宽度格式必须为数字+px或%' }
@@ -319,11 +306,74 @@ export const OptionsApp: React.FC = () => {
 
               <Form.Item
                 label="高亮框颜色"
-                name={FORM_FIELD_NAMES.HIGHLIGHT_COLOR}
+                name={FORM_PATHS.highlightColor}
                 extra="设置鼠标悬停时元素高亮框的颜色"
               >
                 <ColorPickerField />
               </Form.Item>
+
+              <Typography.Title level={5} style={{ marginTop: 24, marginBottom: 16 }}>
+                快捷键高亮所有元素
+              </Typography.Title>
+
+              <Form.Item
+                label="启用功能"
+                name={FORM_PATHS.highlightAllConfig.enabled}
+                valuePropName="checked"
+                extra="按住 Alt 键并按下配置的快捷键，高亮页面上所有合法元素"
+              >
+                <Switch />
+              </Form.Item>
+
+              <Form.Item
+                label="快捷键"
+                name={FORM_PATHS.highlightAllConfig.keyBinding}
+                rules={[
+                  { required: true, message: '请输入快捷键' },
+                  { pattern: /^[a-zA-Z0-9]$/, message: '请输入单个字母或数字' }
+                ]}
+                extra="输入单个字母或数字（0-9、A-Z），使用时按 Alt + [字符]"
+                normalize={(value) => value?.toLowerCase()}
+              >
+                <Input
+                  placeholder="a"
+                  maxLength={1}
+                  style={{ width: 80 }}
+                  prefix="Alt +"
+                />
+              </Form.Item>
+
+              <Form.Item
+                label="最大高亮数量"
+                name={FORM_PATHS.highlightAllConfig.maxHighlightCount}
+                rules={[
+                  { required: true, message: '请输入最大高亮数量' },
+                  { type: 'number', min: 100, max: 1000, message: '请输入 100-1000 之间的数字' }
+                ]}
+                extra="避免页面卡顿，建议 100-1000 之间"
+              >
+                <InputNumber
+                  min={100}
+                  max={1000}
+                  step={50}
+                  style={{ width: 150 }}
+                  addonAfter="个"
+                />
+              </Form.Item>
+
+              <Alert
+                message="使用说明"
+                description={
+                  <div>
+                    <p>1. 按住 Alt 键并按下配置的快捷键（默认 A），高亮所有带有 data-{attributeName} 属性的元素</p>
+                    <p>2. 松开 Alt 键，自动清除所有高亮</p>
+                    <p>3. 高亮时会显示每个元素的参数值标签</p>
+                  </div>
+                }
+                type="info"
+                showIcon
+                style={{ marginTop: 16 }}
+              />
             </Panel>
 
             <Panel 
@@ -341,7 +391,7 @@ export const OptionsApp: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span>AST/RawString切换:</span>
                   <Form.Item
-                    name={FORM_FIELD_NAMES.TOOLBAR_BUTTON_AST_RAW_STRING_TOGGLE}
+                    name={FORM_PATHS.toolbarButtons.astRawStringToggle}
                     valuePropName="checked"
                     style={{ marginBottom: 0 }}
                   >
@@ -352,7 +402,7 @@ export const OptionsApp: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span>反序列化:</span>
                   <Form.Item
-                    name={FORM_FIELD_NAMES.TOOLBAR_BUTTON_DESERIALIZE}
+                    name={FORM_PATHS.toolbarButtons.deserialize}
                     valuePropName="checked"
                     style={{ marginBottom: 0 }}
                   >
@@ -363,7 +413,7 @@ export const OptionsApp: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span>序列化:</span>
                   <Form.Item
-                    name={FORM_FIELD_NAMES.TOOLBAR_BUTTON_SERIALIZE}
+                    name={FORM_PATHS.toolbarButtons.serialize}
                     valuePropName="checked"
                     style={{ marginBottom: 0 }}
                   >
@@ -374,7 +424,7 @@ export const OptionsApp: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span>格式化:</span>
                   <Form.Item
-                    name={FORM_FIELD_NAMES.TOOLBAR_BUTTON_FORMAT}
+                    name={FORM_PATHS.toolbarButtons.format}
                     valuePropName="checked"
                     style={{ marginBottom: 0 }}
                   >
@@ -385,12 +435,26 @@ export const OptionsApp: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span>预览:</span>
                   <Form.Item
-                    name={FORM_FIELD_NAMES.TOOLBAR_BUTTON_PREVIEW}
+                    name={FORM_PATHS.toolbarButtons.preview}
                     valuePropName="checked"
                     style={{ marginBottom: 0 }}
                   >
                     <Switch />
                   </Form.Item>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>AST类型提示:</span>
+                  <Form.Item
+                    name={FORM_PATHS.enableAstTypeHints}
+                    valuePropName="checked"
+                    style={{ marginBottom: 0 }}
+                  >
+                    <Switch />
+                  </Form.Item>
+                  <Tooltip title="编辑 AST (Elements[]) 类型数据时，提供字段名和类型的智能补全">
+                    <QuestionCircleOutlined style={{ color: '#999', cursor: 'pointer' }} />
+                  </Tooltip>
                 </div>
               </div>
             </Panel>
@@ -400,7 +464,7 @@ export const OptionsApp: React.FC = () => {
               
               <Form.Item
                 label="草稿自动保存"
-                name={FORM_FIELD_NAMES.AUTO_SAVE_DRAFT}
+                name={FORM_PATHS.autoSaveDraft}
                 valuePropName="checked"
                 extra="开启后，编辑器内容变化时会自动保存草稿"
               >
@@ -411,7 +475,7 @@ export const OptionsApp: React.FC = () => {
               
               <Form.Item
                 label="最大收藏数量"
-                name={FORM_FIELD_NAMES.MAX_FAVORITES_COUNT}
+                name={FORM_PATHS.maxFavoritesCount}
                 rules={[
                   { required: true, message: '请输入最大收藏数量' },
                   { type: 'number', min: 10, max: 200, message: '最大收藏数量必须在10-200之间' }
@@ -425,7 +489,7 @@ export const OptionsApp: React.FC = () => {
             <Panel header="实时预览配置" key="preview">
               <Form.Item
                 label="自动更新预览"
-                name={FORM_FIELD_NAMES.PREVIEW_AUTO_UPDATE}
+                name={FORM_PATHS.previewConfig.autoUpdate}
                 valuePropName="checked"
                 extra="编辑器内容变化时自动更新预览（使用下面设置的延迟）"
               >
@@ -434,7 +498,7 @@ export const OptionsApp: React.FC = () => {
               
               <Form.Item
                 label="更新延迟（毫秒）"
-                name={FORM_FIELD_NAMES.PREVIEW_UPDATE_DELAY}
+                name={FORM_PATHS.previewConfig.updateDelay}
                 extra="编辑后多久更新预览，避免频繁渲染"
               >
                 <InputNumber 
@@ -447,7 +511,7 @@ export const OptionsApp: React.FC = () => {
               
               <Form.Item
                 label="预览区域宽度"
-                name={FORM_FIELD_NAMES.PREVIEW_WIDTH}
+                name={FORM_PATHS.previewConfig.previewWidth}
                 extra="预览区域占抽屉的百分比（10-60%）"
               >
                 <Slider 
@@ -463,12 +527,41 @@ export const OptionsApp: React.FC = () => {
               </Form.Item>
                             <Form.Item
                 label="记住预览状态"
-                name={FORM_FIELD_NAMES.PREVIEW_REMEMBER_STATE}
+                name={FORM_PATHS.previewConfig.rememberState}
                 valuePropName="checked"
                 extra="下次打开抽屉时自动恢复预览状态"
               >
                 <Switch />
               </Form.Item>
+            </Panel>
+
+            {/* 编辑历史配置 */}
+            <Panel header="📜 编辑历史配置" key="history">
+              <Form.Item
+                label="历史记录上限"
+                name={FORM_PATHS.maxHistoryCount}
+                extra="编辑历史的最大保存数量（不包含保存/草稿/收藏等特殊版本）"
+                rules={[
+                  { required: true, message: '请输入历史记录上限' },
+                  { type: 'number', min: 10, max: 200, message: '请输入 10-200 之间的数字' }
+                ]}
+              >
+                <InputNumber
+                  min={10}
+                  max={200}
+                  step={10}
+                  style={{ width: '100%' }}
+                  addonAfter="条"
+                />
+              </Form.Item>
+              
+              <Alert
+                message="提示"
+                description="历史记录保存在浏览器的 sessionStorage 中，关闭标签页后会自动清除。特殊版本（如保存、加载草稿、应用收藏）不计入上限。"
+                type="info"
+                showIcon
+                style={{ marginTop: 16 }}
+              />
             </Panel>
           </StyledCollapse>
         </Form>

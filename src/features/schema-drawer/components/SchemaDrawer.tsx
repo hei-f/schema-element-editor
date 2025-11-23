@@ -1,6 +1,6 @@
 import { FavoritesManager } from '@/features/favorites/components/FavoritesManager'
-import type { ElementAttributes, PreviewFunctionResultPayload } from '@/shared/types'
-import { ContentType, MessageType } from '@/shared/types'
+import type { ElementAttributes, HistoryEntry, PreviewFunctionResultPayload } from '@/shared/types'
+import { ContentType, HistoryEntryType, MessageType } from '@/shared/types'
 import { listenPageMessages, postMessageToPage } from '@/shared/utils/browser/message'
 import { storage } from '@/shared/utils/browser/storage'
 import { logger } from '@/shared/utils/logger'
@@ -17,6 +17,7 @@ import { Button, Drawer, Space, Tooltip, message } from 'antd'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useContentDetection } from '../hooks/useContentDetection'
 import { useDraftManagement } from '../hooks/useDraftManagement'
+import { useEditHistory } from '../hooks/useEditHistory'
 import { useFavoritesManagement } from '../hooks/useFavoritesManagement'
 import { useLightNotifications } from '../hooks/useLightNotifications'
 import { useSchemaSave } from '../hooks/useSchemaSave'
@@ -32,8 +33,9 @@ import {
 } from '../styles/drawer.styles'
 import { EditorContainer } from '../styles/editor.styles'
 import { LightSuccessNotification } from '../styles/notifications.styles'
-import { CodeMirrorEditor } from './CodeMirrorEditor'
+import { CodeMirrorEditor, CodeMirrorEditorHandle } from './CodeMirrorEditor'
 import { DrawerToolbar } from './DrawerToolbar'
+import { HistoryDropdown } from './HistoryDropdown'
 
 interface SchemaDrawerProps {
   open: boolean
@@ -81,13 +83,20 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   const [previewWidth, setPreviewWidth] = useState(40) // 预览区域宽度百分比
   const [isDragging, setIsDragging] = useState(false)
   
+  // 历史记录配置
+  const [maxHistoryCount, setMaxHistoryCount] = useState(50)
+  
+  // AST 类型提示配置
+  const [enableAstTypeHints, setEnableAstTypeHints] = useState(true)
+  
   const paramsKey = attributes.params.join(',')
   const isFirstLoadRef = useRef(true)
+  const editorRef = useRef<CodeMirrorEditorHandle>(null) // 编辑器命令式 API
   const previewPlaceholderRef = useRef<HTMLDivElement>(null)
   const previewContainerRef = useRef<HTMLDivElement>(null)
 
   /** 内容类型检测 */
-  const { 
+  const {
     contentType, 
     canParse, 
     detectContentType, 
@@ -106,17 +115,56 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     onSaveSuccess: () => {
       setIsModified(false)
       message.success('保存成功')
+      // 记录保存版本
+      recordSpecialVersion(HistoryEntryType.Save, '保存版本')
       onClose()
     },
     onSave
   })
 
+  /** 历史版本加载回调（解耦设计） */
+  const handleLoadHistoryVersion = useCallback((content: string, entry: HistoryEntry) => {
+    // 1. 使用命令式 API 更新编辑器
+    editorRef.current?.setValue(content)
+    setEditorValue(content)
+    setIsModified(true)
+    
+    // 2. 更新内容类型检测
+    const result = detectContentType(content)
+    updateContentType(result)
+    
+    // 3. 预览会自动更新（因为 editorValue 变化会触发现有的 useEffect）
+    // 无需显式调用预览更新，保持解耦
+    
+    // 4. 显示轻量提示
+    showLightNotification(`已切换到: ${entry.description || '历史版本'}`)
+  }, [detectContentType, updateContentType, showLightNotification])
+
+  /** 编辑历史管理 */
+  const {
+    history,
+    currentIndex,
+    hasHistory,
+    recordChange,
+    recordSpecialVersion,
+    loadHistoryVersion,
+    clearHistory
+  } = useEditHistory({
+    paramsKey,
+    editorValue,
+    maxHistoryCount,
+    onLoadVersion: handleLoadHistoryVersion
+  })
+
   /** 加载草稿内容的回调 */
   const handleLoadDraftContent = useCallback((content: string) => {
+    // 使用命令式 API 更新编辑器
+    editorRef.current?.setValue(content)
     setEditorValue(content)
     setIsModified(true)
     const result = detectContentType(content)
     updateContentType(result)
+    // 不再立即记录特殊版本，让用户编辑后自然触发 recordChange
   }, [detectContentType, updateContentType])
 
   /** 草稿管理 */
@@ -143,10 +191,13 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
 
   /** 应用收藏内容的回调 */
   const handleApplyFavoriteContent = useCallback((content: string) => {
+    // 使用命令式 API 更新编辑器
+    editorRef.current?.setValue(content)
     setEditorValue(content)
     setIsModified(true)
     const result = detectContentType(content)
     updateContentType(result)
+    // 不再立即记录特殊版本，让用户编辑后自然触发 recordChange
   }, [detectContentType, updateContentType])
 
   /** 收藏管理 */
@@ -189,14 +240,18 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   useEffect(() => {
     const loadConfigs = async () => {
       try {
-        const [toolbarConfig, autoSave, preview] = await Promise.all([
+        const [toolbarConfig, autoSave, preview, historyCount, astHints] = await Promise.all([
           storage.getToolbarButtons(),
           storage.getAutoSaveDraft(),
-          storage.getPreviewConfig()
+          storage.getPreviewConfig(),
+          storage.getMaxHistoryCount(),
+          storage.getEnableAstTypeHints()
         ])
         setToolbarButtons(toolbarConfig)
         setAutoSaveDraft(autoSave)
         setPreviewConfig(preview)
+        setMaxHistoryCount(historyCount)
+        setEnableAstTypeHints(astHints)
       } catch (error) {
         logger.error('加载配置失败:', error)
       }
@@ -229,6 +284,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
             
             if (elements.length > 0) {
               const formatted = JSON.stringify(elements, null, 2)
+              // 使用命令式 API 更新编辑器
+              editorRef.current?.setValue(formatted)
               setEditorValue(formatted)
               setIsModified(false)
               const result = detectContentType(formatted)
@@ -237,6 +294,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
               message.warning('Markdown解析失败，显示原始字符串')
               setWasStringData(false)
               const formatted = JSON.stringify(schemaData, null, 2)
+              // 使用命令式 API 更新编辑器
+              editorRef.current?.setValue(formatted)
               setEditorValue(formatted)
               setIsModified(false)
               const result = detectContentType(formatted)
@@ -245,23 +304,41 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
           } else {
             setWasStringData(false)
             const formatted = JSON.stringify(schemaData, null, 2)
+            // 使用命令式 API 更新编辑器
+            editorRef.current?.setValue(formatted)
             setEditorValue(formatted)
             setIsModified(false)
-            const result = detectContentType(formatted)
-            updateContentType(result)
-          }
-          
+          const result = detectContentType(formatted)
+          updateContentType(result)
+        }
+        
+        // 记录初始版本（在设置完编辑器值之后）
+        if (isFirstLoadRef.current) {
           setTimeout(() => {
-            isFirstLoadRef.current = false
-          }, 100)
+            recordSpecialVersion(HistoryEntryType.Initial, '初始加载')
+          }, 200)
+        }
+        
+        setTimeout(() => {
+          isFirstLoadRef.current = false
+        }, 100)
         } catch (error) {
           logger.error('处理Schema数据失败:', error)
           setWasStringData(false)
           const formatted = JSON.stringify(schemaData)
+          // 使用命令式 API 更新编辑器
+          editorRef.current?.setValue(formatted)
           setEditorValue(formatted)
           setIsModified(false)
           const result = detectContentType(formatted)
           updateContentType(result)
+          
+          // 记录初始版本（在设置完编辑器值之后）
+          if (isFirstLoadRef.current) {
+            setTimeout(() => {
+              recordSpecialVersion(HistoryEntryType.Initial, '初始加载')
+            }, 200)
+          }
           
           setTimeout(() => {
             isFirstLoadRef.current = false
@@ -274,18 +351,25 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   }, [schemaData, open, detectContentType, updateContentType])
 
   /**
+   * 监听编辑器变化，自动记录历史（防抖）
+   */
+  useEffect(() => {
+    if (editorValue && !isFirstLoadRef.current) {
+      recordChange(editorValue)
+    }
+  }, [editorValue, recordChange])
+
+  /**
    * 处理编辑器内容变化
    */
-  const handleEditorChange = (value: string | undefined) => {
+  const handleEditorChange = useCallback((value: string | undefined) => {
     if (value !== undefined) {
       setEditorValue(value)
       setIsModified(true)
       debouncedDetectContent(value)
-      
-      // Hook内部会判断是否启用自动保存和是否首次加载
       debouncedAutoSaveDraft(value)
     }
-  }
+  }, [debouncedDetectContent, debouncedAutoSaveDraft])
 
   /**
    * 格式化JSON
@@ -294,6 +378,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     const result = schemaTransformer.formatJson(editorValue)
     
     if (result.success && result.data) {
+      // 使用命令式 API 更新编辑器
+      editorRef.current?.setValue(result.data)
       setEditorValue(result.data)
       showLightNotification('格式化成功')
     } else {
@@ -308,6 +394,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     const result = schemaTransformer.serializeJson(editorValue)
     
     if (result.success && result.data) {
+      // 使用命令式 API 更新编辑器
+      editorRef.current?.setValue(result.data)
       setEditorValue(result.data)
       setIsModified(true)
       showLightNotification('序列化成功')
@@ -325,6 +413,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     const result = schemaTransformer.deserializeJson(editorValue)
     
     if (result.success && result.data) {
+      // 使用命令式 API 更新编辑器
+      editorRef.current?.setValue(result.data)
       setEditorValue(result.data)
       setIsModified(true)
       const detectResult = detectContentType(result.data)
@@ -349,6 +439,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     const result = schemaTransformer.convertToAST(editorValue)
     
     if (result.success && result.data) {
+      // 使用命令式 API 更新编辑器
+      editorRef.current?.setValue(result.data)
       setEditorValue(result.data)
       setIsModified(true)
       showLightNotification('转换为AST成功')
@@ -366,6 +458,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     const result = schemaTransformer.convertToMarkdown(editorValue)
     
     if (result.success && result.data) {
+      // 使用命令式 API 更新编辑器
+      editorRef.current?.setValue(result.data)
       setEditorValue(result.data)
       setIsModified(true)
       showLightNotification('转换为RawString成功')
@@ -519,7 +613,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     setPreviewEnabled(false)
     logger.log('预览已清除')
   }
-
+  
   /**
    * 开始拖拽分隔条
    */
@@ -627,6 +721,15 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
             </DrawerTitleLeft>
             <DrawerTitleActions>
               <Space size="small">
+                {/* 历史按钮 */}
+                <HistoryDropdown
+                  history={history}
+                  currentIndex={currentIndex}
+                  onLoadVersion={loadHistoryVersion}
+                  onClearHistory={clearHistory}
+                  disabled={!hasHistory}
+                />
+                
                 {toolbarButtons.preview && (
                   <Tooltip title={
                     !hasPreviewFunction 
@@ -650,7 +753,9 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
                 {hasDraft && (
                   <>
                     <Tooltip title="加载草稿">
-                      <Button size="small" type="text" icon={<FileTextOutlined />} onClick={handleLoadDraft} />
+                      <Button size="small" type="text" icon={<FileTextOutlined />} onClick={handleLoadDraft}>
+                        草稿
+                      </Button>
                     </Tooltip>
                     <Tooltip title="删除草稿">
                       <Button size="small" type="text" danger icon={<DeleteOutlined />} onClick={handleDeleteDraft} />
@@ -658,7 +763,9 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
                   </>
                 )}
                 <Tooltip title="添加到收藏">
-                  <Button size="small" type="text" icon={<StarOutlined />} onClick={handleOpenAddFavorite} />
+                  <Button size="small" type="text" icon={<StarOutlined />} onClick={handleOpenAddFavorite}>
+                    收藏
+                  </Button>
                 </Tooltip>
                 <Tooltip title="浏览收藏">
                   <Button size="small" type="text" icon={<FolderOpenOutlined />} onClick={handleOpenFavorites} />
@@ -693,6 +800,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
                 onClick={async () => {
                   try {
                     await handleSave()
+                    // 保存成功后记录特殊版本 - 临时禁用
+                    // recordSpecialVersion(HistoryEntryType.Save, '保存版本')
                   } catch (error: any) {
                     message.error(error.message || '保存失败')
                   }
@@ -792,11 +901,14 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
                     </LightSuccessNotification>
                   ))}
                   <CodeMirrorEditor
+                    ref={editorRef}
                     height="100%"
-                    value={editorValue}
+                    defaultValue={editorValue}
                     onChange={handleEditorChange}
                     theme="light"
                     placeholder="在此输入 JSON Schema..."
+                    enableAstHints={enableAstTypeHints}
+                    isAstContent={() => contentType === ContentType.Ast}
                   />
                 </EditorContainer>
               </div>
@@ -827,11 +939,14 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
               </LightSuccessNotification>
             ))}
             <CodeMirrorEditor
+              ref={editorRef}
               height="100%"
-              value={editorValue}
+              defaultValue={editorValue}
               onChange={handleEditorChange}
               theme="light"
               placeholder="在此输入 JSON Schema..."
+              enableAstHints={enableAstTypeHints}
+              isAstContent={() => contentType === ContentType.Ast}
             />
           </EditorContainer>
             </>

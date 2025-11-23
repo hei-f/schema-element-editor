@@ -1,5 +1,5 @@
 import { MessageType } from '@/shared/types'
-import { postMessageToPage, sendMessageToBackground } from '../browser/message'
+import { listenChromeMessages, listenPageMessages, postMessageToPage, sendMessageToBackground, sendMessageToContent } from '../browser/message'
 
 describe('Message工具测试', () => {
   beforeEach(() => {
@@ -179,6 +179,170 @@ describe('Message工具测试', () => {
       const call = (window.postMessage as jest.Mock).mock.calls[0]
       expect(call[0].payload).toHaveProperty('success')
       expect(call[0].payload).toHaveProperty('data')
+    })
+  })
+
+  describe('sendMessageToContent', () => {
+    it('应该发送消息到content script', async () => {
+      const tabId = 123
+      const message = {
+        type: MessageType.GET_SCHEMA,
+        payload: { params: 'test-param' }
+      }
+
+      ;(chrome.tabs.sendMessage as jest.Mock).mockResolvedValue({ success: true })
+
+      await sendMessageToContent(tabId, message)
+
+      expect(chrome.tabs.sendMessage).toHaveBeenCalledWith(tabId, message)
+    })
+
+    it('应该返回响应数据', async () => {
+      const tabId = 456
+      const message = {
+        type: MessageType.UPDATE_SCHEMA,
+        payload: { schema: {}, params: 'test' }
+      }
+      const mockResponse = { data: { key: 'value' } }
+
+      ;(chrome.tabs.sendMessage as jest.Mock).mockResolvedValue(mockResponse)
+
+      const result = await sendMessageToContent(tabId, message)
+
+      expect(result).toEqual(mockResponse)
+    })
+
+    it('应该处理发送失败', async () => {
+      const tabId = 789
+      const message = {
+        type: MessageType.GET_SCHEMA,
+        payload: { params: 'test' }
+      }
+
+      ;(chrome.tabs.sendMessage as jest.Mock).mockRejectedValue(new Error('Tab not found'))
+
+      await expect(sendMessageToContent(tabId, message)).rejects.toThrow('Tab not found')
+    })
+  })
+
+  describe('listenChromeMessages', () => {
+    it('应该监听同步消息', () => {
+      const handler = jest.fn()
+      const message = { type: MessageType.GET_SCHEMA, payload: {} }
+      const sender = {} as chrome.runtime.MessageSender
+
+      listenChromeMessages(handler)
+
+      // 获取注册的监听器
+      const listener = (chrome.runtime.onMessage.addListener as jest.Mock).mock.calls[0][0]
+      const sendResponse = jest.fn()
+
+      const result = listener(message, sender, sendResponse)
+
+      expect(handler).toHaveBeenCalledWith(message, sender)
+      expect(result).toBe(false)
+    })
+
+    it('应该监听异步消息', () => {
+      const handler = jest.fn().mockResolvedValue(undefined)
+      const message = { type: MessageType.UPDATE_SCHEMA, payload: {} }
+      const sender = {} as chrome.runtime.MessageSender
+
+      listenChromeMessages(handler)
+
+      const listener = (chrome.runtime.onMessage.addListener as jest.Mock).mock.calls[0][0]
+      const sendResponse = jest.fn()
+
+      const result = listener(message, sender, sendResponse)
+
+      expect(handler).toHaveBeenCalledWith(message, sender)
+      expect(result).toBe(true) // 异步消息应该返回true保持通道开启
+    })
+  })
+
+  describe('listenPageMessages', () => {
+    it('应该监听来自页面的消息', () => {
+      const handler = jest.fn()
+      const cleanup = listenPageMessages(handler)
+
+      const event = new MessageEvent('message', {
+        data: {
+          source: 'schema-editor-injected',
+          type: MessageType.GET_SCHEMA,
+          payload: {}
+        },
+        source: window
+      })
+
+      window.dispatchEvent(event)
+
+      expect(handler).toHaveBeenCalledWith({
+        source: 'schema-editor-injected',
+        type: MessageType.GET_SCHEMA,
+        payload: {}
+      })
+
+      cleanup()
+    })
+
+    it('应该忽略非当前窗口的消息', () => {
+      const handler = jest.fn()
+      const cleanup = listenPageMessages(handler)
+
+      const event = new MessageEvent('message', {
+        data: {
+          source: 'schema-editor-injected',
+          type: MessageType.GET_SCHEMA,
+          payload: {}
+        },
+        source: {} as Window
+      })
+
+      window.dispatchEvent(event)
+
+      expect(handler).not.toHaveBeenCalled()
+
+      cleanup()
+    })
+
+    it('应该忽略非injected script的消息', () => {
+      const handler = jest.fn()
+      const cleanup = listenPageMessages(handler)
+
+      const event = new MessageEvent('message', {
+        data: {
+          source: 'other-source',
+          type: MessageType.GET_SCHEMA,
+          payload: {}
+        },
+        source: window
+      })
+
+      window.dispatchEvent(event)
+
+      expect(handler).not.toHaveBeenCalled()
+
+      cleanup()
+    })
+
+    it('应该正确清理监听器', () => {
+      const handler = jest.fn()
+      const cleanup = listenPageMessages(handler)
+
+      cleanup()
+
+      const event = new MessageEvent('message', {
+        data: {
+          source: 'schema-editor-injected',
+          type: MessageType.GET_SCHEMA,
+          payload: {}
+        },
+        source: window
+      })
+
+      window.dispatchEvent(event)
+
+      expect(handler).not.toHaveBeenCalled()
     })
   })
 

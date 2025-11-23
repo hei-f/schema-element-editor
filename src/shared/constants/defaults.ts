@@ -34,7 +34,14 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     updateDelay: 500,
     rememberState: false,
     autoUpdate: false
-  }
+  },
+  maxHistoryCount: 50,
+  highlightAllConfig: {
+    enabled: true,
+    keyBinding: 'a',
+    maxHighlightCount: 500
+  },
+  enableAstTypeHints: true
 } as const
 
 /**
@@ -57,69 +64,10 @@ export const STORAGE_KEYS = {
   DRAFT_AUTO_SAVE_DEBOUNCE: 'draftAutoSaveDebounce',
   PREVIEW_CONFIG: 'previewConfig',
   DRAFTS_PREFIX: 'draft:',
-  FAVORITES: 'favorites'
+  FAVORITES: 'favorites',
+  MAX_HISTORY_COUNT: 'maxHistoryCount',
+  HIGHLIGHT_ALL_CONFIG: 'highlightAllConfig',
+  ENABLE_AST_TYPE_HINTS: 'enableAstTypeHints'
 } as const
 
-/**
- * 表单字段名常量
- */
-export const FORM_FIELD_NAMES = {
-  ATTRIBUTE_NAME: 'attributeName',
-  DRAWER_WIDTH: 'drawerWidth',
-  SEARCH_DEPTH_DOWN: 'searchDepthDown',
-  SEARCH_DEPTH_UP: 'searchDepthUp',
-  THROTTLE_INTERVAL: 'throttleInterval',
-  GET_FUNCTION_NAME: 'getFunctionName',
-  UPDATE_FUNCTION_NAME: 'updateFunctionName',
-  AUTO_PARSE_STRING: 'autoParseString',
-  ENABLE_DEBUG_LOG: 'enableDebugLog',
-  HIGHLIGHT_COLOR: 'highlightColor',
-  TOOLBAR_BUTTON_AST_RAW_STRING_TOGGLE: 'toolbarButtonAstRawStringToggle',
-  TOOLBAR_BUTTON_DESERIALIZE: 'toolbarButtonDeserialize',
-  TOOLBAR_BUTTON_SERIALIZE: 'toolbarButtonSerialize',
-  TOOLBAR_BUTTON_FORMAT: 'toolbarButtonFormat',
-  TOOLBAR_BUTTON_PREVIEW: 'toolbarButtonPreview',
-  MAX_FAVORITES_COUNT: 'maxFavoritesCount',
-  AUTO_SAVE_DRAFT: 'autoSaveDraft',
-  PREVIEW_WIDTH: 'previewWidth',
-  PREVIEW_UPDATE_DELAY: 'previewUpdateDelay',
-  PREVIEW_REMEMBER_STATE: 'previewRememberState',
-  PREVIEW_AUTO_UPDATE: 'previewAutoUpdate'
-} as const
-
-/**
- * 表单字段分组（按保存策略分类）
- */
-export const FORM_FIELD_GROUPS = {
-  INPUT_FIELDS: [
-    FORM_FIELD_NAMES.ATTRIBUTE_NAME,
-    FORM_FIELD_NAMES.DRAWER_WIDTH,
-    FORM_FIELD_NAMES.GET_FUNCTION_NAME,
-    FORM_FIELD_NAMES.UPDATE_FUNCTION_NAME
-  ],
-  NUMBER_FIELDS: [
-    FORM_FIELD_NAMES.SEARCH_DEPTH_DOWN,
-    FORM_FIELD_NAMES.SEARCH_DEPTH_UP,
-    FORM_FIELD_NAMES.THROTTLE_INTERVAL
-  ],
-  COLOR_FIELDS: [
-    FORM_FIELD_NAMES.HIGHLIGHT_COLOR
-  ],
-  SWITCH_FIELDS: [
-    FORM_FIELD_NAMES.AUTO_PARSE_STRING,
-    FORM_FIELD_NAMES.ENABLE_DEBUG_LOG,
-    FORM_FIELD_NAMES.TOOLBAR_BUTTON_AST_RAW_STRING_TOGGLE,
-    FORM_FIELD_NAMES.TOOLBAR_BUTTON_DESERIALIZE,
-    FORM_FIELD_NAMES.TOOLBAR_BUTTON_SERIALIZE,
-    FORM_FIELD_NAMES.TOOLBAR_BUTTON_FORMAT,
-    FORM_FIELD_NAMES.TOOLBAR_BUTTON_PREVIEW,
-    FORM_FIELD_NAMES.AUTO_SAVE_DRAFT,
-    FORM_FIELD_NAMES.PREVIEW_REMEMBER_STATE,
-    FORM_FIELD_NAMES.PREVIEW_AUTO_UPDATE
-  ],
-  DRAFT_AND_FAVORITES_FIELDS: [
-    FORM_FIELD_NAMES.MAX_FAVORITES_COUNT,
-    FORM_FIELD_NAMES.AUTO_SAVE_DRAFT
-  ]
-} as const
 

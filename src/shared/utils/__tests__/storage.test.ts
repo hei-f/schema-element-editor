@@ -114,13 +114,26 @@ describe('Storage工具测试', () => {
           astRawStringToggle: true,
           deserialize: false,
           serialize: false,
-          format: true
+          format: true,
+          preview: true
         },
         highlightColor: '#39C5BB',
         maxFavoritesCount: 50,
         draftRetentionDays: 1,
         autoSaveDraft: false,
-        draftAutoSaveDebounce: 3000
+        draftAutoSaveDebounce: 3000,
+        previewConfig: {
+          previewWidth: 40,
+          updateDelay: 500,
+          rememberState: false,
+          autoUpdate: false
+        },
+        maxHistoryCount: 50,
+        highlightAllConfig: {
+          enabled: true,
+          keyBinding: 'a',
+          maxHighlightCount: 500
+        }
       })
     })
 
@@ -158,13 +171,26 @@ describe('Storage工具测试', () => {
           astRawStringToggle: true,
           deserialize: false,
           serialize: false,
-          format: true
+          format: true,
+          preview: true
         },
         highlightColor: '#39C5BB',
         maxFavoritesCount: 50,
         draftRetentionDays: 1,
         autoSaveDraft: false,
-        draftAutoSaveDebounce: 3000
+        draftAutoSaveDebounce: 3000,
+        previewConfig: {
+          previewWidth: 40,
+          updateDelay: 500,
+          rememberState: false,
+          autoUpdate: false
+        },
+        maxHistoryCount: 50,
+        highlightAllConfig: {
+          enabled: true,
+          keyBinding: 'a',
+          maxHighlightCount: 500
+        }
       })
     })
 
@@ -192,13 +218,26 @@ describe('Storage工具测试', () => {
           astRawStringToggle: true,
           deserialize: false,
           serialize: false,
-          format: true
+          format: true,
+          preview: true
         },
         highlightColor: '#39C5BB',
         maxFavoritesCount: 50,
         draftRetentionDays: 1,
         autoSaveDraft: false,
-        draftAutoSaveDebounce: 3000
+        draftAutoSaveDebounce: 3000,
+        previewConfig: {
+          previewWidth: 40,
+          updateDelay: 500,
+          rememberState: false,
+          autoUpdate: false
+        },
+        maxHistoryCount: 50,
+        highlightAllConfig: {
+          enabled: true,
+          keyBinding: 'a',
+          maxHighlightCount: 500
+        }
       })
     })
   })
@@ -405,13 +444,26 @@ describe('Storage工具测试', () => {
           astRawStringToggle: true,
           deserialize: false,
           serialize: false,
-          format: true
+          format: true,
+          preview: true
         },
         highlightColor: '#39C5BB',
         maxFavoritesCount: 50,
         draftRetentionDays: 1,
         autoSaveDraft: false,
-        draftAutoSaveDebounce: 3000
+        draftAutoSaveDebounce: 3000,
+        previewConfig: {
+          previewWidth: 40,
+          updateDelay: 500,
+          rememberState: false,
+          autoUpdate: false
+        },
+        maxHistoryCount: 50,
+        highlightAllConfig: {
+          enabled: true,
+          keyBinding: 'a',
+          maxHighlightCount: 500
+        }
       })
     })
   })
@@ -454,7 +506,8 @@ describe('Storage工具测试', () => {
         astRawStringToggle: true,
         deserialize: false,
         serialize: false,
-        format: true
+        format: true,
+        preview: true
       })
     })
 
@@ -712,7 +765,8 @@ describe('Storage工具测试', () => {
         astRawStringToggle: true,
         deserialize: false,
         serialize: false,
-        format: true
+        format: true,
+        preview: true
       })
     })
 
@@ -728,6 +782,437 @@ describe('Storage工具测试', () => {
       
       const result = await storage.getDraft('test-key')
       expect(result).toBeNull()
+    })
+  })
+
+  describe('未覆盖方法补充测试', () => {
+    beforeEach(() => {
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({})
+      ;(chrome.storage.local.set as jest.Mock).mockResolvedValue(undefined)
+    })
+
+    it('toggleActiveState应该切换激活状态', async () => {
+      // 初始状态为false
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValueOnce({
+        'isActive': false
+      })
+
+      const newState = await storage.toggleActiveState()
+      
+      expect(newState).toBe(true)
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'isActive': true
+      })
+    })
+
+    it('toggleActiveState应该从true切换到false', async () => {
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValueOnce({
+        'isActive': true
+      })
+
+      const newState = await storage.toggleActiveState()
+      
+      expect(newState).toBe(false)
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'isActive': false
+      })
+    })
+
+    it('setDrawerWidth应该设置抽屉宽度', async () => {
+      await storage.setDrawerWidth('500px')
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'drawerWidth': '500px'
+      })
+    })
+
+    it('setDrawerWidth应该支持数字类型', async () => {
+      await storage.setDrawerWidth(600)
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'drawerWidth': 600
+      })
+    })
+
+    it('getDrawerWidth应该支持transformer转换数字为带px的字符串', async () => {
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'drawerWidth': 500
+      })
+
+      const width = await storage.getDrawerWidth()
+      expect(width).toBe('500px')
+    })
+
+    it('setSearchConfig应该合并现有配置', async () => {
+      const existingConfig = {
+        searchDepthDown: 5,
+        searchDepthUp: 3,
+        throttleInterval: 200
+      }
+      
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValueOnce({
+        'searchConfig': existingConfig
+      })
+
+      await storage.setSearchConfig({ searchDepthDown: 10 })
+
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'searchConfig': {
+          ...existingConfig,
+          searchDepthDown: 10
+        }
+      })
+    })
+
+    it('setSearchConfig失败时应该捕获错误', async () => {
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({})
+      ;(chrome.storage.local.set as jest.Mock).mockRejectedValue(new Error('Set error'))
+
+      await expect(storage.setSearchConfig({ searchDepthDown: 10 })).resolves.not.toThrow()
+    })
+
+    it('setAttributeName应该设置属性名', async () => {
+      await storage.setAttributeName('custom-attr')
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'attributeName': 'custom-attr'
+      })
+    })
+
+    it('setFunctionNames应该同时设置两个函数名', async () => {
+      await storage.setFunctionNames('getFunc', 'updateFunc')
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'getFunctionName': 'getFunc',
+        'updateFunctionName': 'updateFunc'
+      })
+    })
+
+    it('getAutoParseString应该返回配置值', async () => {
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'autoParseString': true
+      })
+
+      const result = await storage.getAutoParseString()
+      expect(result).toBe(true)
+    })
+
+    it('setAutoParseString应该设置配置', async () => {
+      await storage.setAutoParseString(false)
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'autoParseString': false
+      })
+    })
+
+    it('getEnableDebugLog应该返回配置值', async () => {
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'enableDebugLog': true
+      })
+
+      const result = await storage.getEnableDebugLog()
+      expect(result).toBe(true)
+    })
+
+    it('setEnableDebugLog应该设置配置', async () => {
+      await storage.setEnableDebugLog(true)
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'enableDebugLog': true
+      })
+    })
+
+    it('getHighlightColor应该返回颜色值', async () => {
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'highlightColor': '#FF5733'
+      })
+
+      const result = await storage.getHighlightColor()
+      expect(result).toBe('#FF5733')
+    })
+
+    it('getHighlightColor应该使用validator验证颜色值', async () => {
+      // 返回无效的空字符串
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'highlightColor': ''
+      })
+
+      const result = await storage.getHighlightColor()
+      // 应该返回默认值
+      expect(result).toBe('#39C5BB')
+    })
+
+    it('setHighlightColor应该设置颜色', async () => {
+      await storage.setHighlightColor('#00FF00')
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'highlightColor': '#00FF00'
+      })
+    })
+
+    it('getMaxFavoritesCount应该返回数量', async () => {
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'maxFavoritesCount': 100
+      })
+
+      const result = await storage.getMaxFavoritesCount()
+      expect(result).toBe(100)
+    })
+
+    it('setMaxFavoritesCount应该设置数量', async () => {
+      await storage.setMaxFavoritesCount(200)
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'maxFavoritesCount': 200
+      })
+    })
+
+    it('getDraftRetentionDays应该返回天数', async () => {
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'draftRetentionDays': 14
+      })
+
+      const result = await storage.getDraftRetentionDays()
+      expect(result).toBe(14)
+    })
+
+    it('setDraftRetentionDays应该设置天数', async () => {
+      await storage.setDraftRetentionDays(30)
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'draftRetentionDays': 30
+      })
+    })
+
+    it('getAutoSaveDraft应该返回配置', async () => {
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'autoSaveDraft': true
+      })
+
+      const result = await storage.getAutoSaveDraft()
+      expect(result).toBe(true)
+    })
+
+    it('setAutoSaveDraft应该设置配置', async () => {
+      await storage.setAutoSaveDraft(false)
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'autoSaveDraft': false
+      })
+    })
+
+    it('getMaxHistoryCount应该返回数量', async () => {
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'maxHistoryCount': 100
+      })
+
+      const result = await storage.getMaxHistoryCount()
+      expect(result).toBe(100)
+    })
+
+    it('setMaxHistoryCount应该设置数量', async () => {
+      await storage.setMaxHistoryCount(150)
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'maxHistoryCount': 150
+      })
+    })
+
+    it('deleteDraft应该删除指定草稿', async () => {
+      await storage.deleteDraft('test-params')
+      
+      expect(chrome.storage.local.remove).toHaveBeenCalledWith('draft:test-params')
+    })
+
+    it('deleteDraft失败时应该捕获错误', async () => {
+      ;(chrome.storage.local.remove as jest.Mock).mockRejectedValue(new Error('Remove error'))
+
+      await expect(storage.deleteDraft('test-key')).resolves.not.toThrow()
+    })
+  })
+
+  describe('高亮所有元素配置', () => {
+    it('getHighlightAllConfig应该返回默认配置', async () => {
+      const result = await storage.getHighlightAllConfig()
+      
+      expect(result).toEqual({
+        enabled: true,
+        keyBinding: 'a',
+        maxHighlightCount: 500
+      })
+    })
+
+    it('getHighlightAllConfig应该返回存储的配置', async () => {
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'highlightAllConfig': {
+          enabled: false,
+          keyBinding: 'h',
+          maxHighlightCount: 300
+        }
+      })
+
+      const result = await storage.getHighlightAllConfig()
+      expect(result).toEqual({
+        enabled: false,
+        keyBinding: 'h',
+        maxHighlightCount: 300
+      })
+    })
+
+    it('getHighlightAllConfig应该验证配置格式', async () => {
+      // 返回无效配置（keyBinding不是单个字母）
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'highlightAllConfig': {
+          enabled: true,
+          keyBinding: 'ab', // 无效：多个字符
+          maxHighlightCount: 500
+        }
+      })
+
+      const result = await storage.getHighlightAllConfig()
+      // 应该返回默认值
+      expect(result).toEqual({
+        enabled: true,
+        keyBinding: 'a',
+        maxHighlightCount: 500
+      })
+    })
+
+    it('getHighlightAllConfig应该验证keyBinding必须是字母或数字', async () => {
+      // 返回无效配置（keyBinding是特殊字符）
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'highlightAllConfig': {
+          enabled: true,
+          keyBinding: '@', // 无效：特殊字符
+          maxHighlightCount: 500
+        }
+      })
+
+      const result = await storage.getHighlightAllConfig()
+      // 应该返回默认值
+      expect(result).toEqual({
+        enabled: true,
+        keyBinding: 'a',
+        maxHighlightCount: 500
+      })
+    })
+
+    it('getHighlightAllConfig应该接受大写字母', async () => {
+      // 大写字母是有效的
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'highlightAllConfig': {
+          enabled: true,
+          keyBinding: 'H',
+          maxHighlightCount: 300
+        }
+      })
+
+      const result = await storage.getHighlightAllConfig()
+      // 应该接受大写字母
+      expect(result).toEqual({
+        enabled: true,
+        keyBinding: 'H',
+        maxHighlightCount: 300
+      })
+    })
+
+    it('getHighlightAllConfig应该接受数字', async () => {
+      // 数字是有效的
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'highlightAllConfig': {
+          enabled: true,
+          keyBinding: '1',
+          maxHighlightCount: 400
+        }
+      })
+
+      const result = await storage.getHighlightAllConfig()
+      // 应该接受数字
+      expect(result).toEqual({
+        enabled: true,
+        keyBinding: '1',
+        maxHighlightCount: 400
+      })
+    })
+
+    it('getHighlightAllConfig应该验证maxHighlightCount范围', async () => {
+      // 返回无效配置（maxHighlightCount超出范围）
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'highlightAllConfig': {
+          enabled: true,
+          keyBinding: 'a',
+          maxHighlightCount: 50 // 无效：小于100
+        }
+      })
+
+      const result = await storage.getHighlightAllConfig()
+      // 应该返回默认值
+      expect(result).toEqual({
+        enabled: true,
+        keyBinding: 'a',
+        maxHighlightCount: 500
+      })
+    })
+
+    it('getHighlightAllConfig应该验证maxHighlightCount上限', async () => {
+      // 返回无效配置（maxHighlightCount超出上限）
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'highlightAllConfig': {
+          enabled: true,
+          keyBinding: 'a',
+          maxHighlightCount: 1500 // 无效：大于1000
+        }
+      })
+
+      const result = await storage.getHighlightAllConfig()
+      // 应该返回默认值
+      expect(result).toEqual({
+        enabled: true,
+        keyBinding: 'a',
+        maxHighlightCount: 500
+      })
+    })
+
+    it('setHighlightAllConfig应该设置配置', async () => {
+      const config = {
+        enabled: false,
+        keyBinding: 'h',
+        maxHighlightCount: 300
+      }
+      
+      await storage.setHighlightAllConfig(config)
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'highlightAllConfig': config
+      })
+    })
+
+    it('setHighlightAllConfig应该接受边界值', async () => {
+      const config = {
+        enabled: true,
+        keyBinding: 'z',
+        maxHighlightCount: 100 // 最小值
+      }
+      
+      await storage.setHighlightAllConfig(config)
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'highlightAllConfig': config
+      })
+    })
+
+    it('setHighlightAllConfig应该接受最大边界值', async () => {
+      const config = {
+        enabled: true,
+        keyBinding: 'a',
+        maxHighlightCount: 1000 // 最大值
+      }
+      
+      await storage.setHighlightAllConfig(config)
+      
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        'highlightAllConfig': config
+      })
     })
   })
 })

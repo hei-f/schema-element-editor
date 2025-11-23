@@ -42,7 +42,7 @@ export const FavoritePreviewModal: React.FC<FavoritePreviewModalProps> = ({
       <PreviewEditorContainer>
         <CodeMirrorEditor
           height="100%"
-          value={content}
+          defaultValue={content}
           theme="light"
           readOnly={true}
         />

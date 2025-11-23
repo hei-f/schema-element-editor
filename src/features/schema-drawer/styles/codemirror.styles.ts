@@ -124,6 +124,103 @@ export const EditorWrapper = styled.div<{ $height?: string }>`
     background-color: #2c2c2c;
     border-color: #555;
   }
+  
+  /* 自动补全面板样式 */
+  .cm-tooltip.cm-tooltip-autocomplete {
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    padding: 4px 0;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  /* 补全选项样式 */
+  .cm-tooltip-autocomplete > ul {
+    font-family: Monaco, Menlo, Consolas, monospace;
+    font-size: 14px;
+  }
+  
+  .cm-tooltip-autocomplete > ul > li {
+    padding: 6px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #333;
+  }
+  
+  /* 选中的补全项 */
+  .cm-tooltip-autocomplete > ul > li[aria-selected] {
+    background-color: #0066ff;
+    color: #ffffff;
+  }
+  
+  /* 补全项标签 */
+  .cm-completionLabel {
+    flex: 1;
+    font-weight: 500;
+  }
+  
+  /* 补全项详情 */
+  .cm-completionDetail {
+    font-size: 12px;
+    color: #666;
+    font-style: italic;
+  }
+  
+  .cm-tooltip-autocomplete > ul > li[aria-selected] .cm-completionDetail {
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  /* 补全信息面板 */
+  .cm-completionInfo {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px 12px;
+    max-width: 320px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    color: #333;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  
+  .cm-completionInfo.cm-completionInfo-right {
+    margin-left: 8px;
+  }
+  
+  .cm-completionInfo.cm-completionInfo-left {
+    margin-right: 8px;
+  }
+  
+  /* 补全项图标 */
+  .cm-completionIcon {
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    opacity: 0.7;
+  }
+  
+  .cm-completionIcon-property::before {
+    content: "📝";
+  }
+  
+  .cm-completionIcon-value::before {
+    content: "💎";
+  }
+  
+  .cm-completionIcon-keyword::before {
+    content: "🔑";
+  }
+  
+  .cm-completionIcon-type::before {
+    content: "📋";
+  }
 `
 
 /**

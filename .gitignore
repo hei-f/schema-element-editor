@@ -48,5 +48,7 @@ pnpm-debug.log*
 # 测试覆盖率报告
 coverage/
 
-docs/PREVIEW_FEATURE.md
-docs/ROADMAP.md
+# 文档文件（除了 README）
+*.md
+!README.md
+docs/*.md

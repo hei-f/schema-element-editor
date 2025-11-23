@@ -40,13 +40,13 @@ export const parserMarkdownToSlateNode = (markdown: string): { schema: Elements[
       const children: any[] = []
       
       const boldRegex = /\*\*(.*?)\*\*/g
-      const italicRegex = /\*(.*?)\*/g
+      // const italicRegex = /\*(.*?)\*/g  // 暂未使用
       
-      let lastIndex = 0
+      // let lastIndex = 0  // 暂未使用
       let match
       
       const processText = (text: string) => {
-        let processed = text
+        // let processed = text  // 暂未使用
         const parts: any[] = []
         let current = 0
         

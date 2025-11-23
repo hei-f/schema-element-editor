@@ -1,97 +1,130 @@
-import { FORM_FIELD_NAMES } from '@/shared/constants/defaults'
+import { FORM_PATHS } from '@/shared/constants/form-paths'
 import { storage } from '@/shared/utils/browser/storage'
+import { pathEqual } from '@/shared/utils/form-path'
+
+/**
+ * 字段分组接口
+ */
+interface FieldGroup {
+  /** 字段路径数组 */
+  fieldPaths: readonly (readonly string[])[]
+  /** 保存函数 */
+  save: (allValues: any) => Promise<void>
+}
 
 /**
  * 字段分组配置 - 需要组合保存的字段
  */
-export const FIELD_GROUPS = {
+export const FIELD_GROUPS: Record<string, FieldGroup> = {
   searchConfig: {
-    fields: new Set<string>([
-      FORM_FIELD_NAMES.SEARCH_DEPTH_DOWN,
-      FORM_FIELD_NAMES.SEARCH_DEPTH_UP,
-      FORM_FIELD_NAMES.THROTTLE_INTERVAL
-    ]),
+    fieldPaths: [
+      FORM_PATHS.searchConfig.searchDepthDown,
+      FORM_PATHS.searchConfig.searchDepthUp,
+      FORM_PATHS.searchConfig.throttleInterval
+    ],
     save: async (allValues: any) => {
-      await storage.setSearchConfig({
-        searchDepthDown: allValues[FORM_FIELD_NAMES.SEARCH_DEPTH_DOWN],
-        searchDepthUp: allValues[FORM_FIELD_NAMES.SEARCH_DEPTH_UP],
-        throttleInterval: allValues[FORM_FIELD_NAMES.THROTTLE_INTERVAL]
-      })
+      await storage.setSearchConfig(allValues.searchConfig)
     }
   },
   functionNames: {
-    fields: new Set<string>([
-      FORM_FIELD_NAMES.GET_FUNCTION_NAME,
-      FORM_FIELD_NAMES.UPDATE_FUNCTION_NAME
-    ]),
+    fieldPaths: [
+      FORM_PATHS.getFunctionName,
+      FORM_PATHS.updateFunctionName
+    ],
     save: async (allValues: any) => {
       await storage.setFunctionNames(
-        allValues[FORM_FIELD_NAMES.GET_FUNCTION_NAME],
-        allValues[FORM_FIELD_NAMES.UPDATE_FUNCTION_NAME]
+        allValues.getFunctionName,
+        allValues.updateFunctionName
       )
     }
   },
   toolbarButtons: {
-    fields: new Set<string>([
-      FORM_FIELD_NAMES.TOOLBAR_BUTTON_AST_RAW_STRING_TOGGLE,
-      FORM_FIELD_NAMES.TOOLBAR_BUTTON_DESERIALIZE,
-      FORM_FIELD_NAMES.TOOLBAR_BUTTON_SERIALIZE,
-      FORM_FIELD_NAMES.TOOLBAR_BUTTON_FORMAT,
-      FORM_FIELD_NAMES.TOOLBAR_BUTTON_PREVIEW
-    ]),
+    fieldPaths: [
+      FORM_PATHS.toolbarButtons.astRawStringToggle,
+      FORM_PATHS.toolbarButtons.deserialize,
+      FORM_PATHS.toolbarButtons.serialize,
+      FORM_PATHS.toolbarButtons.format,
+      FORM_PATHS.toolbarButtons.preview
+    ],
     save: async (allValues: any) => {
-      await storage.setToolbarButtons({
-        astRawStringToggle: allValues[FORM_FIELD_NAMES.TOOLBAR_BUTTON_AST_RAW_STRING_TOGGLE],
-        deserialize: allValues[FORM_FIELD_NAMES.TOOLBAR_BUTTON_DESERIALIZE],
-        serialize: allValues[FORM_FIELD_NAMES.TOOLBAR_BUTTON_SERIALIZE],
-        format: allValues[FORM_FIELD_NAMES.TOOLBAR_BUTTON_FORMAT],
-        preview: allValues[FORM_FIELD_NAMES.TOOLBAR_BUTTON_PREVIEW]
-      })
+      await storage.setToolbarButtons(allValues.toolbarButtons)
     }
   },
   previewConfig: {
-    fields: new Set<string>([
-      FORM_FIELD_NAMES.PREVIEW_WIDTH,
-      FORM_FIELD_NAMES.PREVIEW_UPDATE_DELAY,
-      FORM_FIELD_NAMES.PREVIEW_REMEMBER_STATE,
-      FORM_FIELD_NAMES.PREVIEW_AUTO_UPDATE
-    ]),
+    fieldPaths: [
+      FORM_PATHS.previewConfig.previewWidth,
+      FORM_PATHS.previewConfig.updateDelay,
+      FORM_PATHS.previewConfig.rememberState,
+      FORM_PATHS.previewConfig.autoUpdate
+    ],
     save: async (allValues: any) => {
-      await storage.setPreviewConfig({
-        previewWidth: allValues[FORM_FIELD_NAMES.PREVIEW_WIDTH],
-        updateDelay: allValues[FORM_FIELD_NAMES.PREVIEW_UPDATE_DELAY],
-        rememberState: allValues[FORM_FIELD_NAMES.PREVIEW_REMEMBER_STATE],
-        autoUpdate: allValues[FORM_FIELD_NAMES.PREVIEW_AUTO_UPDATE]
-      })
+      await storage.setPreviewConfig(allValues.previewConfig)
+    }
+  },
+  highlightAllConfig: {
+    fieldPaths: [
+      FORM_PATHS.highlightAllConfig.enabled,
+      FORM_PATHS.highlightAllConfig.keyBinding,
+      FORM_PATHS.highlightAllConfig.maxHighlightCount
+    ],
+    save: async (allValues: any) => {
+      await storage.setHighlightAllConfig(allValues.highlightAllConfig)
     }
   }
 }
 
 /**
- * 需要防抖保存的字段集合
+ * 需要防抖保存的字段路径集合
  */
-export const DEBOUNCE_FIELDS = new Set<string>([
-  FORM_FIELD_NAMES.ATTRIBUTE_NAME,
-  FORM_FIELD_NAMES.DRAWER_WIDTH,
-  FORM_FIELD_NAMES.SEARCH_DEPTH_DOWN,
-  FORM_FIELD_NAMES.SEARCH_DEPTH_UP,
-  FORM_FIELD_NAMES.THROTTLE_INTERVAL,
-  FORM_FIELD_NAMES.GET_FUNCTION_NAME,
-  FORM_FIELD_NAMES.UPDATE_FUNCTION_NAME,
-  FORM_FIELD_NAMES.MAX_FAVORITES_COUNT,
-  FORM_FIELD_NAMES.HIGHLIGHT_COLOR
-])
+export const DEBOUNCE_FIELD_PATHS: readonly (readonly string[])[] = [
+  FORM_PATHS.attributeName,
+  FORM_PATHS.drawerWidth,
+  FORM_PATHS.searchConfig.searchDepthDown,
+  FORM_PATHS.searchConfig.searchDepthUp,
+  FORM_PATHS.searchConfig.throttleInterval,
+  FORM_PATHS.getFunctionName,
+  FORM_PATHS.updateFunctionName,
+  FORM_PATHS.maxFavoritesCount,
+  FORM_PATHS.highlightColor,
+  FORM_PATHS.maxHistoryCount,
+  FORM_PATHS.highlightAllConfig.keyBinding,
+  FORM_PATHS.highlightAllConfig.maxHighlightCount
+]
 
 /**
- * 独立字段与 storage 方法的映射
+ * 独立字段路径与 storage 方法的映射
  */
-export const FIELD_STORAGE_MAP: Record<string, string> = {
-  [FORM_FIELD_NAMES.ATTRIBUTE_NAME]: 'setAttributeName',
-  [FORM_FIELD_NAMES.DRAWER_WIDTH]: 'setDrawerWidth',
-  [FORM_FIELD_NAMES.AUTO_PARSE_STRING]: 'setAutoParseString',
-  [FORM_FIELD_NAMES.ENABLE_DEBUG_LOG]: 'setEnableDebugLog',
-  [FORM_FIELD_NAMES.HIGHLIGHT_COLOR]: 'setHighlightColor',
-  [FORM_FIELD_NAMES.MAX_FAVORITES_COUNT]: 'setMaxFavoritesCount',
-  [FORM_FIELD_NAMES.AUTO_SAVE_DRAFT]: 'setAutoSaveDraft'
+export const FIELD_PATH_STORAGE_MAP: Record<string, string> = {
+  'attributeName': 'setAttributeName',
+  'drawerWidth': 'setDrawerWidth',
+  'autoParseString': 'setAutoParseString',
+  'enableDebugLog': 'setEnableDebugLog',
+  'highlightColor': 'setHighlightColor',
+  'maxFavoritesCount': 'setMaxFavoritesCount',
+  'autoSaveDraft': 'setAutoSaveDraft',
+  'maxHistoryCount': 'setMaxHistoryCount',
+  'enableAstTypeHints': 'setEnableAstTypeHints'
 }
 
+/**
+ * 根据字段路径查找所属的字段组
+ * @param path 字段路径数组
+ * @returns 找到的字段组，如果没有找到则返回 null
+ */
+export function findFieldGroup(path: readonly string[]): FieldGroup | null {
+  for (const group of Object.values(FIELD_GROUPS)) {
+    if (group.fieldPaths.some(fieldPath => pathEqual(fieldPath as string[], path as string[]))) {
+      return group
+    }
+  }
+  return null
+}
+
+/**
+ * 判断字段是否需要防抖保存
+ * @param path 字段路径数组
+ * @returns 是否需要防抖
+ */
+export function isDebounceField(path: readonly string[]): boolean {
+  return DEBOUNCE_FIELD_PATHS.some(debouncePath => pathEqual(debouncePath as string[], path as string[]))
+}

@@ -49,6 +49,13 @@ describe('Logger工具测试', () => {
       logger.info('info')
       expect(consoleInfoSpy).not.toHaveBeenCalled()
     })
+
+    it('应该支持多个参数', () => {
+      const { logger } = require('../logger')
+      logger.log('test', 123, { data: 'value' })
+      // 由于默认禁用，不应有输出
+      expect(consoleLogSpy).not.toHaveBeenCalled()
+    })
   })
 
   describe('error方法', () => {
@@ -70,6 +77,35 @@ describe('Logger工具测试', () => {
         error,
         { code: 500 }
       )
+    })
+
+    it('应该支持无参数调用', () => {
+      const { logger } = require('../logger')
+      logger.error()
+      expect(consoleErrorSpy).toHaveBeenCalledWith()
+    })
+
+    it('应该支持各种类型的参数', () => {
+      const { logger } = require('../logger')
+      logger.error('Error:', null, undefined, true, false, 0, '', [1, 2], { a: 1 })
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error:', null, undefined, true, false, 0, '', [1, 2], { a: 1 }
+      )
+    })
+  })
+
+  describe('初始化', () => {
+    it('init应该是一个异步方法', () => {
+      const { logger } = require('../logger')
+      const result = logger.init()
+      expect(result).toBeInstanceOf(Promise)
+    })
+
+    it('init应该可以被调用多次而不报错', async () => {
+      const { logger } = require('../logger')
+      await expect(logger.init()).resolves.not.toThrow()
+      await expect(logger.init()).resolves.not.toThrow()
+      await expect(logger.init()).resolves.not.toThrow()
     })
   })
 
@@ -99,5 +135,51 @@ describe('Logger工具测试', () => {
       expect(typeof logger.init).toBe('function')
     })
   })
+
+  describe('边界情况', () => {
+    it('log应该处理非常长的参数', () => {
+      const { logger } = require('../logger')
+      const longString = 'a'.repeat(10000)
+      logger.log(longString)
+      expect(consoleLogSpy).not.toHaveBeenCalled() // 默认禁用
+    })
+
+    it('warn应该处理大量参数', () => {
+      const { logger } = require('../logger')
+      const args = Array.from({ length: 100 }, (_, i) => `arg${i}`)
+      logger.warn(...args)
+      expect(consoleWarnSpy).not.toHaveBeenCalled() // 默认禁用
+    })
+
+    it('info应该处理特殊字符', () => {
+      const { logger } = require('../logger')
+      logger.info('特殊字符: \n\r\t\'\"\\', '🎉', '👍')
+      expect(consoleInfoSpy).not.toHaveBeenCalled() // 默认禁用
+    })
+
+    it('error应该处理非常长的错误信息', () => {
+      const { logger } = require('../logger')
+      const longError = 'error '.repeat(1000)
+      logger.error(longError)
+      expect(consoleErrorSpy).toHaveBeenCalled()
+    })
+
+    it('所有方法都应该处理undefined和null', () => {
+      const { logger } = require('../logger')
+      logger.log(null, undefined)
+      logger.warn(null, undefined)
+      logger.info(null, undefined)
+      logger.error(null, undefined)
+      
+      // error始终输出
+      expect(consoleErrorSpy).toHaveBeenCalledWith(null, undefined)
+      // 其他方法默认不输出
+      expect(consoleLogSpy).not.toHaveBeenCalled()
+      expect(consoleWarnSpy).not.toHaveBeenCalled()
+      expect(consoleInfoSpy).not.toHaveBeenCalled()
+    })
+  })
 })
+
+
 

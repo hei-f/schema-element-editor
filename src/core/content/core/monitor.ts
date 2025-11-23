@@ -1,4 +1,4 @@
-import type { ElementAttributes, SearchConfig } from '@/shared/types'
+import type { ElementAttributes, HighlightAllConfig, SearchConfig } from '@/shared/types'
 import { storage } from '@/shared/utils/browser/storage'
 import { logger } from '@/shared/utils/logger'
 import {
@@ -7,9 +7,13 @@ import {
   getElementAttributes,
   getMousePosition,
   hasValidAttributes,
+  isVisibleElement,
   removeCandidateHighlight,
   removeHighlight
 } from '@/shared/utils/ui/dom'
+
+/** 扩展UI元素的选择器 */
+const UI_ELEMENT_SELECTOR = '[data-schema-editor-ui]'
 
 /**
  * 元素监听器类
@@ -27,6 +31,12 @@ export class ElementMonitor {
   private candidateElements: HTMLElement[] = []
   private lastMouseX: number = 0
   private lastMouseY: number = 0
+  
+  // 高亮所有元素相关属性
+  private highlightAllConfig: HighlightAllConfig | null = null
+  private isHighlightingAll: boolean = false
+  private highlightAllElements: HTMLElement[] = []
+  private highlightAllBoxes: HTMLElement[] = []
 
   /**
    * 启动监听
@@ -40,11 +50,15 @@ export class ElementMonitor {
     // 加载搜索配置
     this.searchConfig = await storage.getSearchConfig()
     
+    // 加载高亮所有元素配置
+    this.highlightAllConfig = await storage.getHighlightAllConfig()
+    
     // 添加事件监听
     document.addEventListener('mousemove', this.handleMouseMove, true)
     document.addEventListener('click', this.handleClick, true)
     document.addEventListener('keydown', this.handleKeyDown, true)
     document.addEventListener('keyup', this.handleKeyUp, true)
+    document.addEventListener('scroll', this.handleScroll, true)
     window.addEventListener('schema-editor:clear-highlight', this.handleClearHighlight)
     
     // 创建tooltip元素
@@ -66,6 +80,7 @@ export class ElementMonitor {
     document.removeEventListener('click', this.handleClick, true)
     document.removeEventListener('keydown', this.handleKeyDown, true)
     document.removeEventListener('keyup', this.handleKeyUp, true)
+    document.removeEventListener('scroll', this.handleScroll, true)  // 移除滚动监听
     window.removeEventListener('schema-editor:clear-highlight', this.handleClearHighlight)
     
     // 清理当前高亮
@@ -132,8 +147,34 @@ export class ElementMonitor {
     
     // 检测 Alt 键（Mac 上是 Option 键）
     if (event.altKey) {
+      // 检测高亮所有元素快捷键
+      // 使用 event.code 而不是 event.key，因为 Mac 上 Alt+A 会产生特殊字符 'å'
+      const keyCode = event.code.toLowerCase()
+      const keyBinding = this.highlightAllConfig?.keyBinding.toLowerCase()
+      
+      // 根据输入类型构建期望的 code
+      // 字母: 'a' → 'keya'
+      // 数字: '1' → 'digit1'
+      const isDigit = /^[0-9]$/.test(keyBinding || '')
+      const expectedCode = isDigit ? `digit${keyBinding}` : `key${keyBinding}`
+      
+      if (
+        this.highlightAllConfig?.enabled &&
+        keyCode === expectedCode &&
+        !this.isHighlightingAll  // 防止重复触发
+      ) {
+        event.preventDefault()
+        this.highlightAll()
+        return
+      }
+      
       if (!this.isControlPressed) {
         this.isControlPressed = true
+        
+        // 如果正在高亮所有元素，不执行单元素高亮
+        if (this.isHighlightingAll) {
+          return
+        }
         
         // 如果有有效的鼠标位置，立即触发一次检测
         if (this.lastMouseX !== 0 || this.lastMouseY !== 0) {
@@ -162,6 +203,21 @@ export class ElementMonitor {
         // 清理当前高亮
         this.clearHighlight()
       }
+      
+      // 清除高亮所有元素
+      if (this.isHighlightingAll) {
+        this.clearAllHighlights()
+      }
+    }
+  }
+
+  /**
+   * 处理滚动事件
+   */
+  private handleScroll = (): void => {
+    // 如果正在高亮所有元素，滚动时自动清除
+    if (this.isHighlightingAll) {
+      this.clearAllHighlights()
     }
   }
 
@@ -214,6 +270,11 @@ export class ElementMonitor {
    * 执行搜索
    */
   private async performSearch(event: MouseEvent): Promise<void> {
+    // 如果正在高亮所有元素，不执行单元素搜索
+    if (this.isHighlightingAll) {
+      return
+    }
+    
     // 清理之前的高亮
     this.clearHighlight()
     
@@ -349,6 +410,138 @@ export class ElementMonitor {
       removeCandidateHighlight(element)
     }
     this.candidateElements = []
+  }
+
+  /**
+   * 高亮所有合法元素
+   */
+  private async highlightAll(): Promise<void> {
+    if (!this.highlightAllConfig) return
+    
+    // 清除单元素高亮（如果存在）
+    this.clearHighlight()
+    
+    this.isHighlightingAll = true
+    
+    const attributeName = await storage.getAttributeName()
+    const dataAttrName = `data-${attributeName}`
+    const highlightColor = await storage.getHighlightColor()
+    
+    // 查找所有合法元素
+    const allElements = document.querySelectorAll(`[${dataAttrName}]`)
+    
+    logger.log(`找到 ${allElements.length} 个合法元素`)
+    
+    // 应用数量限制
+    const maxCount = this.highlightAllConfig.maxHighlightCount
+    const elementsToHighlight = Array.from(allElements).slice(0, maxCount)
+    
+    if (allElements.length > maxCount) {
+      logger.log(`仅高亮前 ${maxCount} 个元素`)
+    }
+    
+    elementsToHighlight.forEach((el) => {
+      const element = el as HTMLElement
+      
+      // 跳过不可见元素
+      if (!isVisibleElement(element)) return
+      
+      // 跳过插件自己的元素
+      if (element.closest(UI_ELEMENT_SELECTOR)) return
+      
+      // 获取属性值
+      const attrValue = element.getAttribute(dataAttrName) || ''
+      if (!attrValue) return
+      
+      // 解析参数
+      const params = attrValue.split(',').map(s => s.trim()).filter(Boolean)
+      if (params.length === 0) return
+      
+      // 添加高亮框和标签
+      this.addHighlightBox(element, params, highlightColor)
+      this.highlightAllElements.push(element)
+    })
+  }
+
+  /**
+   * 为元素添加高亮框和标签
+   */
+  private addHighlightBox(element: HTMLElement, params: string[], color: string): void {
+    const rect = element.getBoundingClientRect()
+    
+    // 创建高亮框容器
+    const container = document.createElement('div')
+    container.className = 'schema-editor-highlight-all'
+    container.setAttribute('data-schema-editor-ui', 'true')
+    container.style.cssText = `
+      position: fixed;
+      left: ${rect.left}px;
+      top: ${rect.top}px;
+      width: ${rect.width}px;
+      height: ${rect.height}px;
+      border: 2px solid ${color};
+      box-shadow: 0 0 10px ${this.hexToRgba(color, 0.5)};
+      pointer-events: none;
+      z-index: 999998;
+      box-sizing: border-box;
+    `
+    
+    // 创建标签
+    const label = document.createElement('div')
+    label.className = 'schema-editor-highlight-label'
+    label.style.cssText = `
+      position: absolute;
+      top: -26px;
+      left: 0;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      font-size: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      border-radius: 6px;
+      white-space: nowrap;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    `
+    
+    // 格式化标签内容（单行显示）
+    const labelText = params.map((param, index) => `params${index + 1}: ${param}`).join(', ')
+    label.textContent = labelText
+    
+    container.appendChild(label)
+    document.body.appendChild(container)
+    
+    this.highlightAllBoxes.push(container)
+  }
+
+  /**
+   * 清除所有高亮
+   */
+  private clearAllHighlights(): void {
+    // 移除所有高亮框
+    this.highlightAllBoxes.forEach(box => {
+      if (box.parentNode) {
+        box.parentNode.removeChild(box)
+      }
+    })
+    
+    this.highlightAllBoxes = []
+    this.highlightAllElements = []
+    this.isHighlightingAll = false
+    
+    logger.log('已清除所有高亮')
+  }
+
+  /**
+   * 将 hex 颜色转换为 rgba 格式
+   */
+  private hexToRgba(hex: string, alpha: number): string {
+    const r = parseInt(hex.slice(1, 3), 16)
+    const g = parseInt(hex.slice(3, 5), 16)
+    const b = parseInt(hex.slice(5, 7), 16)
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
   }
 }
 

@@ -22,7 +22,7 @@ describe('Injected Script 集成测试', () => {
     global.chrome = {
       storage: {
         local: {
-          get: jest.fn((keys: string[], callback: (result: any) => void) => {
+          get: jest.fn((_keys: string[], callback: (result: any) => void) => {
             callback(mockStorage)
           })
         }
