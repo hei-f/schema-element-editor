@@ -140,6 +140,8 @@ export interface StorageData {
   maxHistoryCount: number
   /** 高亮所有元素配置 */
   highlightAllConfig: HighlightAllConfig
+  /** 启用 AST 类型提示 */
+  enableAstTypeHints: boolean
 }
 
 /**

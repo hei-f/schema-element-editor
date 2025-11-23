@@ -40,7 +40,8 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     enabled: true,
     keyBinding: 'a',
     maxHighlightCount: 500
-  }
+  },
+  enableAstTypeHints: true
 } as const
 
 /**
@@ -65,7 +66,8 @@ export const STORAGE_KEYS = {
   DRAFTS_PREFIX: 'draft:',
   FAVORITES: 'favorites',
   MAX_HISTORY_COUNT: 'maxHistoryCount',
-  HIGHLIGHT_ALL_CONFIG: 'highlightAllConfig'
+  HIGHLIGHT_ALL_CONFIG: 'highlightAllConfig',
+  ENABLE_AST_TYPE_HINTS: 'enableAstTypeHints'
 } as const
 
 

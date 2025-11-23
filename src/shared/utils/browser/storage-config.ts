@@ -1,4 +1,5 @@
 import { DEFAULT_VALUES, STORAGE_KEYS } from '@/shared/constants/defaults'
+import type { HighlightAllConfig, PreviewConfig } from '@/shared/types'
 
 /**
  * 存储字段配置接口
@@ -91,7 +92,7 @@ export const SIMPLE_STORAGE_FIELDS = {
   previewConfig: {
     key: STORAGE_KEYS.PREVIEW_CONFIG,
     defaultValue: DEFAULT_VALUES.previewConfig
-  } as StorageFieldConfig<import('@/shared/types').PreviewConfig>,
+  } as StorageFieldConfig<PreviewConfig>,
 
   maxHistoryCount: {
     key: STORAGE_KEYS.MAX_HISTORY_COUNT,
@@ -104,7 +105,7 @@ export const SIMPLE_STORAGE_FIELDS = {
   highlightAllConfig: {
     key: STORAGE_KEYS.HIGHLIGHT_ALL_CONFIG,
     defaultValue: DEFAULT_VALUES.highlightAllConfig,
-    validator: (value: any): value is import('@/shared/types').HighlightAllConfig => {
+    validator: (value: any): value is HighlightAllConfig => {
       return (
         value &&
         typeof value.enabled === 'boolean' &&
@@ -116,7 +117,12 @@ export const SIMPLE_STORAGE_FIELDS = {
         value.maxHighlightCount <= 1000
       )
     }
-  } as StorageFieldConfig<import('@/shared/types').HighlightAllConfig>
+  } as StorageFieldConfig<HighlightAllConfig>,
+
+  enableAstTypeHints: {
+    key: STORAGE_KEYS.ENABLE_AST_TYPE_HINTS,
+    defaultValue: DEFAULT_VALUES.enableAstTypeHints
+  } as StorageFieldConfig<boolean>
 }
 
 /**

@@ -93,7 +93,10 @@ export const FORM_PATHS = {
     keyBinding: ['highlightAllConfig', 'keyBinding'],
     /** 最大高亮数量 */
     maxHighlightCount: ['highlightAllConfig', 'maxHighlightCount']
-  }
+  },
+  
+  /** 启用 AST 类型提示 */
+  enableAstTypeHints: ['enableAstTypeHints']
 }
 
 /**

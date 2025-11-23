@@ -1,7 +1,7 @@
 import { DEFAULT_VALUES, STORAGE_KEYS } from '@/shared/constants/defaults'
 import { draftManager } from '@/shared/managers/draft-manager'
 import { favoritesManager } from '@/shared/managers/favorites-manager'
-import type { Draft, Favorite, HighlightAllConfig, SearchConfig, StorageData, ToolbarButtonsConfig } from '@/shared/types'
+import type { Draft, Favorite, HighlightAllConfig, PreviewConfig, SearchConfig, StorageData, ToolbarButtonsConfig } from '@/shared/types'
 import { logger } from '@/shared/utils/logger'
 import { SIMPLE_STORAGE_FIELDS, type StorageFieldName } from './storage-config'
 
@@ -233,7 +233,7 @@ class StorageManager {
    * 获取所有存储数据
    */
   async getAllData(): Promise<StorageData> {
-    const [isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig] = await Promise.all([
+    const [isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig, enableAstTypeHints] = await Promise.all([
       this.getActiveState(),
       this.getDrawerWidth(),
       this.getAttributeName(),
@@ -250,9 +250,10 @@ class StorageManager {
       this.getDraftAutoSaveDebounce(),
       this.getPreviewConfig(),
       this.getMaxHistoryCount(),
-      this.getHighlightAllConfig()
+      this.getHighlightAllConfig(),
+      this.getEnableAstTypeHints()
     ])
-    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig }
+    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig, enableAstTypeHints }
   }
 
   /**
@@ -314,14 +315,14 @@ class StorageManager {
   /**
    * 获取预览配置
    */
-  async getPreviewConfig(): Promise<import('@/shared/types').PreviewConfig> {
-    return this.getSimple<import('@/shared/types').PreviewConfig>('previewConfig')
+  async getPreviewConfig(): Promise<PreviewConfig> {
+    return this.getSimple<PreviewConfig>('previewConfig')
   }
 
   /**
    * 设置预览配置
    */
-  async setPreviewConfig(config: import('@/shared/types').PreviewConfig): Promise<void> {
+  async setPreviewConfig(config: PreviewConfig): Promise<void> {
     return this.setSimple('previewConfig', config)
   }
 
@@ -506,6 +507,20 @@ class StorageManager {
    */
   async setHighlightAllConfig(config: HighlightAllConfig): Promise<void> {
     return this.setSimple('highlightAllConfig', config)
+  }
+
+  /**
+   * 获取 AST 类型提示启用状态
+   */
+  async getEnableAstTypeHints(): Promise<boolean> {
+    return this.getSimple<boolean>('enableAstTypeHints')
+  }
+
+  /**
+   * 设置 AST 类型提示启用状态
+   */
+  async setEnableAstTypeHints(enabled: boolean): Promise<void> {
+    return this.setSimple('enableAstTypeHints', enabled)
   }
 }
 
