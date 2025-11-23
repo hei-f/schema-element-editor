@@ -237,7 +237,7 @@ alwaysApply: false
 生成适用于GitHub Release的内容：
 - **Title格式**：`v{版本号}`
 - **Description要求**：
-  - 使用Markdown格式
+  - 使用代码块包裹的Markdown格式
   - 简洁明了，只概括核心改动点
   - 使用列表形式，每项一行
   - 分类展示（如：新增功能、问题修复、性能优化等）
