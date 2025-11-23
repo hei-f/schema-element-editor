@@ -91,6 +91,18 @@ export interface PreviewConfig {
 }
 
 /**
+ * 高亮所有元素配置接口
+ */
+export interface HighlightAllConfig {
+  /** 是否启用功能 */
+  enabled: boolean
+  /** 快捷键字符（单个小写字母，配合 Alt 使用） */
+  keyBinding: string
+  /** 最大高亮元素数量 */
+  maxHighlightCount: number
+}
+
+/**
  * 存储数据接口
  */
 export interface StorageData {
@@ -126,6 +138,8 @@ export interface StorageData {
   previewConfig: PreviewConfig
   /** 历史记录上限 */
   maxHistoryCount: number
+  /** 高亮所有元素配置 */
+  highlightAllConfig: HighlightAllConfig
 }
 
 /**

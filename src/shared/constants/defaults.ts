@@ -35,7 +35,12 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     rememberState: false,
     autoUpdate: false
   },
-  maxHistoryCount: 50
+  maxHistoryCount: 50,
+  highlightAllConfig: {
+    enabled: true,
+    keyBinding: 'a',
+    maxHighlightCount: 500
+  }
 } as const
 
 /**
@@ -59,7 +64,8 @@ export const STORAGE_KEYS = {
   PREVIEW_CONFIG: 'previewConfig',
   DRAFTS_PREFIX: 'draft:',
   FAVORITES: 'favorites',
-  MAX_HISTORY_COUNT: 'maxHistoryCount'
+  MAX_HISTORY_COUNT: 'maxHistoryCount',
+  HIGHLIGHT_ALL_CONFIG: 'highlightAllConfig'
 } as const
 
 

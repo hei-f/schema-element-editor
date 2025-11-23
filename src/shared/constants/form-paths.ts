@@ -83,7 +83,17 @@ export const FORM_PATHS = {
   },
   
   /** 最大历史记录数量 */
-  maxHistoryCount: ['maxHistoryCount']
+  maxHistoryCount: ['maxHistoryCount'],
+  
+  /** 高亮所有元素配置 */
+  highlightAllConfig: {
+    /** 是否启用 */
+    enabled: ['highlightAllConfig', 'enabled'],
+    /** 快捷键 */
+    keyBinding: ['highlightAllConfig', 'keyBinding'],
+    /** 最大高亮数量 */
+    maxHighlightCount: ['highlightAllConfig', 'maxHighlightCount']
+  }
 }
 
 /**
