@@ -71,6 +71,7 @@ export const OptionsApp: React.FC = () => {
       const autoSaveDraft = await storage.getAutoSaveDraft()
       const previewConfig = await storage.getPreviewConfig()
       const maxHistoryCount = await storage.getMaxHistoryCount()
+      const highlightAllConfig = await storage.getHighlightAllConfig()
       
       setAttributeName(attributeName)
       setGetFunctionName(getFunctionName)
@@ -89,7 +90,8 @@ export const OptionsApp: React.FC = () => {
         maxFavoritesCount,
         autoSaveDraft,
         previewConfig,
-        maxHistoryCount
+        maxHistoryCount,
+        highlightAllConfig
       })
     } catch (error) {
       message.error('加载配置失败')
@@ -307,6 +309,69 @@ export const OptionsApp: React.FC = () => {
               >
                 <ColorPickerField />
               </Form.Item>
+
+              <Typography.Title level={5} style={{ marginTop: 24, marginBottom: 16 }}>
+                快捷键高亮所有元素
+              </Typography.Title>
+
+              <Form.Item
+                label="启用功能"
+                name={FORM_PATHS.highlightAllConfig.enabled}
+                valuePropName="checked"
+                extra="按住 Alt 键并按下配置的快捷键，高亮页面上所有合法元素"
+              >
+                <Switch />
+              </Form.Item>
+
+              <Form.Item
+                label="快捷键"
+                name={FORM_PATHS.highlightAllConfig.keyBinding}
+                rules={[
+                  { required: true, message: '请输入快捷键' },
+                  { pattern: /^[a-zA-Z0-9]$/, message: '请输入单个字母或数字' }
+                ]}
+                extra="输入单个字母或数字（0-9、A-Z），使用时按 Alt + [字符]"
+                normalize={(value) => value?.toLowerCase()}
+              >
+                <Input
+                  placeholder="a"
+                  maxLength={1}
+                  style={{ width: 80 }}
+                  prefix="Alt +"
+                />
+              </Form.Item>
+
+              <Form.Item
+                label="最大高亮数量"
+                name={FORM_PATHS.highlightAllConfig.maxHighlightCount}
+                rules={[
+                  { required: true, message: '请输入最大高亮数量' },
+                  { type: 'number', min: 100, max: 1000, message: '请输入 100-1000 之间的数字' }
+                ]}
+                extra="避免页面卡顿，建议 100-1000 之间"
+              >
+                <InputNumber
+                  min={100}
+                  max={1000}
+                  step={50}
+                  style={{ width: 150 }}
+                  addonAfter="个"
+                />
+              </Form.Item>
+
+              <Alert
+                message="使用说明"
+                description={
+                  <div>
+                    <p>1. 按住 Alt 键并按下配置的快捷键（默认 A），高亮所有带有 data-{attributeName} 属性的元素</p>
+                    <p>2. 松开 Alt 键，自动清除所有高亮</p>
+                    <p>3. 高亮时会显示每个元素的参数值标签</p>
+                  </div>
+                }
+                type="info"
+                showIcon
+                style={{ marginTop: 16 }}
+              />
             </Panel>
 
             <Panel 

@@ -60,6 +60,16 @@ export const FIELD_GROUPS: Record<string, FieldGroup> = {
     save: async (allValues: any) => {
       await storage.setPreviewConfig(allValues.previewConfig)
     }
+  },
+  highlightAllConfig: {
+    fieldPaths: [
+      FORM_PATHS.highlightAllConfig.enabled,
+      FORM_PATHS.highlightAllConfig.keyBinding,
+      FORM_PATHS.highlightAllConfig.maxHighlightCount
+    ],
+    save: async (allValues: any) => {
+      await storage.setHighlightAllConfig(allValues.highlightAllConfig)
+    }
   }
 }
 
@@ -76,7 +86,9 @@ export const DEBOUNCE_FIELD_PATHS: readonly (readonly string[])[] = [
   FORM_PATHS.updateFunctionName,
   FORM_PATHS.maxFavoritesCount,
   FORM_PATHS.highlightColor,
-  FORM_PATHS.maxHistoryCount
+  FORM_PATHS.maxHistoryCount,
+  FORM_PATHS.highlightAllConfig.keyBinding,
+  FORM_PATHS.highlightAllConfig.maxHighlightCount
 ]
 
 /**
