@@ -6,8 +6,8 @@ import { linter, lintGutter } from '@codemirror/lint'
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search'
 import { EditorSelection, EditorState } from '@codemirror/state'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { EditorView, highlightActiveLine, highlightActiveLineGutter, hoverTooltip, keymap, lineNumbers, placeholder, tooltips } from '@codemirror/view'
-import React, { useEffect, useRef, useState } from 'react'
+import { EditorView, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers, placeholder } from '@codemirror/view'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import {
   EditorWrapper,
   jsonDarkHighlight,
@@ -16,12 +16,26 @@ import {
 } from '../styles/codemirror.styles'
 
 interface CodeMirrorEditorProps {
-  value: string
+  /** 初始值 */
+  defaultValue: string
+  /** 内容变化回调 */
   onChange?: (value: string) => void
   height?: string
   theme?: 'light' | 'dark'
   readOnly?: boolean
   placeholder?: string
+}
+
+/**
+ * 暴露给父组件的命令式 API
+ */
+export interface CodeMirrorEditorHandle {
+  /** 获取当前值 */
+  getValue: () => string
+  /** 设置新值（用于外部更新：加载草稿、应用收藏等） */
+  setValue: (value: string) => void
+  /** 聚焦编辑器 */
+  focus: () => void
 }
 
 /**
@@ -39,60 +53,6 @@ const indentationGuides = EditorView.baseTheme({
   },
   '.dark .cm-indent-guide': {
     backgroundColor: '#444',
-  }
-})
-
-/**
- * JSON Hover Tooltip
- * 鼠标悬停时显示 JSON 节点信息
- */
-const jsonHoverTooltip = hoverTooltip((view, pos) => {
-  const { state } = view
-  
-  // 获取当前位置的文本
-  const line = state.doc.lineAt(pos)
-  const textBefore = state.doc.sliceString(line.from, pos)
-  const textAfter = state.doc.sliceString(pos, line.to)
-  
-  // 简单的值类型检测
-  let tooltipText = ''
-  
-  // 检测数字
-  const numberMatch = (textBefore + textAfter).match(/(-?\d+\.?\d*)/)
-  if (numberMatch) {
-    tooltipText = `数字: ${numberMatch[1]}`
-  }
-  
-  // 检测字符串
-  const stringMatch = textAfter.match(/^[^"]*"([^"]*)"/)
-  if (stringMatch) {
-    const str = stringMatch[1]
-    tooltipText = `字符串 (${str.length} 字符)`
-  }
-  
-  // 检测布尔值
-  if (/\btrue\b/.test(textBefore + textAfter)) {
-    tooltipText = '布尔值: true'
-  } else if (/\bfalse\b/.test(textBefore + textAfter)) {
-    tooltipText = '布尔值: false'
-  }
-  
-  // 检测 null
-  if (/\bnull\b/.test(textBefore + textAfter)) {
-    tooltipText = '空值: null'
-  }
-  
-  if (!tooltipText) return null
-  
-  return {
-    pos,
-    above: true,
-    create() {
-      const dom = document.createElement('div')
-      dom.className = 'cm-tooltip-hover'
-      dom.textContent = tooltipText
-      return { dom }
-    }
   }
 })
 
@@ -173,18 +133,20 @@ const multiCursorKeymap = [
 
 /**
  * CodeMirror 6 编辑器组件
- * 专门为Shadow DOM优化,支持代码折叠
+ * 使用 forwardRef + useImperativeHandle 暴露命令式 API
+ * 避免使用 useEffect 监听 value 导致的循环问题
  */
-export const CodeMirrorEditor: React.FC<CodeMirrorEditorProps> = ({
-  value,
+export const CodeMirrorEditor = forwardRef<CodeMirrorEditorHandle, CodeMirrorEditorProps>(({
+  defaultValue,
   onChange,
   height = '100%',
   theme = 'light',
   readOnly = false,
   placeholder: placeholderText = ''
-}) => {
+}, ref) => {
   const editorRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef<EditorView | null>(null)
+  const onChangeRef = useRef(onChange)
   
   // 选中文本统计状态
   const [selectionStats, setSelectionStats] = useState({
@@ -193,12 +155,42 @@ export const CodeMirrorEditor: React.FC<CodeMirrorEditorProps> = ({
     selected: false
   })
 
+  // 更新 onChange ref
+  useEffect(() => {
+    onChangeRef.current = onChange
+  }, [onChange])
+
+  // 暴露命令式 API
+  useImperativeHandle(ref, () => ({
+    getValue: () => {
+      return viewRef.current?.state.doc.toString() || ''
+    },
+    setValue: (value: string) => {
+      if (!viewRef.current) return
+      const view = viewRef.current
+      
+      // 替换整个文档内容，并将光标移到开头
+      view.dispatch({
+        changes: {
+          from: 0,
+          to: view.state.doc.length,
+          insert: value
+        },
+        // 将光标重置到文档开头，避免 RangeError
+        selection: EditorSelection.cursor(0)
+      })
+    },
+    focus: () => {
+      viewRef.current?.focus()
+    }
+  }), [])
+
   useEffect(() => {
     if (!editorRef.current) return
 
     // 创建编辑器状态
     const state = EditorState.create({
-      doc: value,
+      doc: defaultValue,
       extensions: [
         // 基础设置
         lineNumbers(),
@@ -226,9 +218,6 @@ export const CodeMirrorEditor: React.FC<CodeMirrorEditorProps> = ({
         highlightSelectionMatches(),
         // 缩进引导线
         indentationGuides,
-        // Tooltip 悬停提示
-        jsonHoverTooltip,
-        tooltips({ position: 'absolute' }),
         // 占位符
         placeholderText ? placeholder(placeholderText) : [],
         // 键盘快捷键
@@ -255,9 +244,10 @@ export const CodeMirrorEditor: React.FC<CodeMirrorEditorProps> = ({
         ...(theme === 'dark' ? [oneDark] : []),
         // 变化监听
         EditorView.updateListener.of((update: any) => {
-          if (update.docChanged && onChange) {
+          if (update.docChanged) {
             const newValue = update.state.doc.toString()
-            onChange(newValue)
+            // 直接调用回调，不需要标记
+            onChangeRef.current?.(newValue)
           }
           
           // 更新选中文本统计
@@ -319,23 +309,9 @@ export const CodeMirrorEditor: React.FC<CodeMirrorEditorProps> = ({
       view.destroy()
       viewRef.current = null
     }
-  }, [theme, readOnly, placeholderText]) // 主题、只读状态或占位符变化时重新创建
+  }, [theme, readOnly, placeholderText]) // 移除 defaultValue，只在初始挂载时使用
 
-  // 处理外部value变化
-  useEffect(() => {
-    if (!viewRef.current) return
-    
-    const currentValue = viewRef.current.state.doc.toString()
-    if (value !== currentValue) {
-      viewRef.current.dispatch({
-        changes: {
-          from: 0,
-          to: currentValue.length,
-          insert: value
-        }
-      })
-    }
-  }, [value])
+  // 不再需要监听 value 的 useEffect！
 
   // 处理主题变化
   useEffect(() => {
@@ -368,5 +344,5 @@ export const CodeMirrorEditor: React.FC<CodeMirrorEditorProps> = ({
       )}
     </>
   )
-}
+})
 
