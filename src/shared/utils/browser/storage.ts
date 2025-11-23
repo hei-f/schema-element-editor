@@ -1,7 +1,7 @@
 import { DEFAULT_VALUES, STORAGE_KEYS } from '@/shared/constants/defaults'
 import { draftManager } from '@/shared/managers/draft-manager'
 import { favoritesManager } from '@/shared/managers/favorites-manager'
-import type { Draft, Favorite, SearchConfig, StorageData, ToolbarButtonsConfig } from '@/shared/types'
+import type { Draft, Favorite, HighlightAllConfig, SearchConfig, StorageData, ToolbarButtonsConfig } from '@/shared/types'
 import { logger } from '@/shared/utils/logger'
 import { SIMPLE_STORAGE_FIELDS, type StorageFieldName } from './storage-config'
 
@@ -233,7 +233,7 @@ class StorageManager {
    * 获取所有存储数据
    */
   async getAllData(): Promise<StorageData> {
-    const [isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount] = await Promise.all([
+    const [isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig] = await Promise.all([
       this.getActiveState(),
       this.getDrawerWidth(),
       this.getAttributeName(),
@@ -249,9 +249,10 @@ class StorageManager {
       this.getAutoSaveDraft(),
       this.getDraftAutoSaveDebounce(),
       this.getPreviewConfig(),
-      this.getMaxHistoryCount()
+      this.getMaxHistoryCount(),
+      this.getHighlightAllConfig()
     ])
-    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount }
+    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig }
   }
 
   /**
@@ -491,6 +492,20 @@ class StorageManager {
    */
   async setMaxHistoryCount(count: number): Promise<void> {
     return this.setSimple('maxHistoryCount', count)
+  }
+
+  /**
+   * 获取高亮所有元素配置
+   */
+  async getHighlightAllConfig(): Promise<HighlightAllConfig> {
+    return this.getSimple<HighlightAllConfig>('highlightAllConfig')
+  }
+
+  /**
+   * 设置高亮所有元素配置
+   */
+  async setHighlightAllConfig(config: HighlightAllConfig): Promise<void> {
+    return this.setSimple('highlightAllConfig', config)
   }
 }
 

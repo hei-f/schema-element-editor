@@ -99,7 +99,24 @@ export const SIMPLE_STORAGE_FIELDS = {
     validator: (value: any): value is number => {
       return typeof value === 'number' && value >= 10 && value <= 200
     }
-  } as StorageFieldConfig<number>
+  } as StorageFieldConfig<number>,
+
+  highlightAllConfig: {
+    key: STORAGE_KEYS.HIGHLIGHT_ALL_CONFIG,
+    defaultValue: DEFAULT_VALUES.highlightAllConfig,
+    validator: (value: any): value is import('@/shared/types').HighlightAllConfig => {
+      return (
+        value &&
+        typeof value.enabled === 'boolean' &&
+        typeof value.keyBinding === 'string' &&
+        value.keyBinding.length === 1 &&
+        /^[a-zA-Z0-9]$/.test(value.keyBinding) &&  // 支持字母和数字
+        typeof value.maxHighlightCount === 'number' &&
+        value.maxHighlightCount >= 100 &&
+        value.maxHighlightCount <= 1000
+      )
+    }
+  } as StorageFieldConfig<import('@/shared/types').HighlightAllConfig>
 }
 
 /**
