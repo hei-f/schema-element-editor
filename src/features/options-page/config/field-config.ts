@@ -102,7 +102,8 @@ export const FIELD_PATH_STORAGE_MAP: Record<string, string> = {
   'highlightColor': 'setHighlightColor',
   'maxFavoritesCount': 'setMaxFavoritesCount',
   'autoSaveDraft': 'setAutoSaveDraft',
-  'maxHistoryCount': 'setMaxHistoryCount'
+  'maxHistoryCount': 'setMaxHistoryCount',
+  'enableAstTypeHints': 'setEnableAstTypeHints'
 }
 
 /**

@@ -72,6 +72,7 @@ export const OptionsApp: React.FC = () => {
       const previewConfig = await storage.getPreviewConfig()
       const maxHistoryCount = await storage.getMaxHistoryCount()
       const highlightAllConfig = await storage.getHighlightAllConfig()
+      const enableAstTypeHints = await storage.getEnableAstTypeHints()
       
       setAttributeName(attributeName)
       setGetFunctionName(getFunctionName)
@@ -91,7 +92,8 @@ export const OptionsApp: React.FC = () => {
         autoSaveDraft,
         previewConfig,
         maxHistoryCount,
-        highlightAllConfig
+        highlightAllConfig,
+        enableAstTypeHints
       })
     } catch (error) {
       message.error('加载配置失败')
@@ -439,6 +441,20 @@ export const OptionsApp: React.FC = () => {
                   >
                     <Switch />
                   </Form.Item>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>AST类型提示:</span>
+                  <Form.Item
+                    name={FORM_PATHS.enableAstTypeHints}
+                    valuePropName="checked"
+                    style={{ marginBottom: 0 }}
+                  >
+                    <Switch />
+                  </Form.Item>
+                  <Tooltip title="编辑 AST (Elements[]) 类型数据时，提供字段名和类型的智能补全">
+                    <QuestionCircleOutlined style={{ color: '#999', cursor: 'pointer' }} />
+                  </Tooltip>
                 </div>
               </div>
             </Panel>
