@@ -111,7 +111,7 @@ describe('OptionsApp组件测试', () => {
       render(<OptionsApp />)
       
       await waitFor(() => {
-        expect(screen.getByText(/v1\.5\.0/)).toBeInTheDocument()
+        expect(screen.getByText(/v1\.5\.1/)).toBeInTheDocument()
       })
     })
 

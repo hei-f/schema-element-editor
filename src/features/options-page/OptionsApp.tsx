@@ -182,7 +182,7 @@ export const OptionsApp: React.FC = () => {
           </PageDescription>
         </HeaderContent>
         <HeaderActions>
-          <VersionTag>v1.5.0</VersionTag>
+          <VersionTag>v1.5.1</VersionTag>
           <Button onClick={openReleasePage}>
             检查更新
           </Button>
