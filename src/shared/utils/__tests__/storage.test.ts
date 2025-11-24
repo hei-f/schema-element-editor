@@ -110,6 +110,7 @@ describe('Storage工具测试', () => {
         updateFunctionName: '__updateContentById',
         autoParseString: true,
         enableDebugLog: false,
+        enableAstTypeHints: true,
         toolbarButtons: {
           astRawStringToggle: true,
           deserialize: false,
@@ -167,6 +168,7 @@ describe('Storage工具测试', () => {
         updateFunctionName: 'myUpdateFn',
         autoParseString: true,
         enableDebugLog: false,
+        enableAstTypeHints: true,
         toolbarButtons: {
           astRawStringToggle: true,
           deserialize: false,
@@ -214,6 +216,7 @@ describe('Storage工具测试', () => {
         updateFunctionName: '__updateContentById',
         autoParseString: true,
         enableDebugLog: false,
+        enableAstTypeHints: true,
         toolbarButtons: {
           astRawStringToggle: true,
           deserialize: false,
@@ -440,6 +443,7 @@ describe('Storage工具测试', () => {
         updateFunctionName: 'updateMySchema',
         autoParseString: true,
         enableDebugLog: false,
+        enableAstTypeHints: true,
         toolbarButtons: {
           astRawStringToggle: true,
           deserialize: false,
