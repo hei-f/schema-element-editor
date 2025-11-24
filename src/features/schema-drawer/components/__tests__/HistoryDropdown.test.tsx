@@ -1,4 +1,5 @@
 import { HistoryEntryType } from '@/shared/types'
+import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HistoryDropdown } from '../HistoryDropdown'
@@ -22,6 +23,14 @@ describe('HistoryDropdown组件测试', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    
+    // 初始化 shadowRootManager
+    const mockShadowRoot = document.createElement('div') as unknown as ShadowRoot
+    shadowRootManager.init(mockShadowRoot)
+  })
+  
+  afterEach(() => {
+    shadowRootManager.reset()
   })
 
   describe('基本渲染', () => {

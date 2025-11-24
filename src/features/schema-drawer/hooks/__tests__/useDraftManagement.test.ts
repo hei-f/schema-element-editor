@@ -1,4 +1,5 @@
 import { storage } from '@/shared/utils/browser/storage'
+import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { Modal } from 'antd'
 import { useDraftManagement } from '../useDraftManagement'
@@ -41,11 +42,16 @@ describe('useDraftManagement Hook 测试', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest.useFakeTimers()
+    
+    // 初始化 shadowRootManager
+    const mockShadowRoot = document.createElement('div') as unknown as ShadowRoot
+    shadowRootManager.init(mockShadowRoot)
   })
 
   afterEach(() => {
     jest.runOnlyPendingTimers()
     jest.useRealTimers()
+    shadowRootManager.reset()
   })
 
   describe('初始化', () => {
