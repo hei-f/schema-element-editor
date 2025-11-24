@@ -44,7 +44,8 @@ export const FIELD_GROUPS: Record<string, FieldGroup> = {
       FORM_PATHS.toolbarButtons.deserialize,
       FORM_PATHS.toolbarButtons.serialize,
       FORM_PATHS.toolbarButtons.format,
-      FORM_PATHS.toolbarButtons.preview
+      FORM_PATHS.toolbarButtons.preview,
+      FORM_PATHS.toolbarButtons.importExport
     ],
     save: async (allValues: any) => {
       await storage.setToolbarButtons(allValues.toolbarButtons)
@@ -69,6 +70,14 @@ export const FIELD_GROUPS: Record<string, FieldGroup> = {
     ],
     save: async (allValues: any) => {
       await storage.setHighlightAllConfig(allValues.highlightAllConfig)
+    }
+  },
+  exportConfig: {
+    fieldPaths: [
+      FORM_PATHS.exportConfig.customFileName
+    ],
+    save: async (allValues: any) => {
+      await storage.setExportConfig(allValues.exportConfig)
     }
   }
 }

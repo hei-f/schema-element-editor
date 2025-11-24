@@ -73,6 +73,7 @@ export const OptionsApp: React.FC = () => {
       const maxHistoryCount = await storage.getMaxHistoryCount()
       const highlightAllConfig = await storage.getHighlightAllConfig()
       const enableAstTypeHints = await storage.getEnableAstTypeHints()
+      const exportConfig = await storage.getExportConfig()
       
       setAttributeName(attributeName)
       setGetFunctionName(getFunctionName)
@@ -93,7 +94,8 @@ export const OptionsApp: React.FC = () => {
         previewConfig,
         maxHistoryCount,
         highlightAllConfig,
-        enableAstTypeHints
+        enableAstTypeHints,
+        exportConfig
       })
     } catch (error) {
       message.error('加载配置失败')
@@ -444,6 +446,20 @@ export const OptionsApp: React.FC = () => {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>导入导出:</span>
+                  <Form.Item
+                    name={FORM_PATHS.toolbarButtons.importExport}
+                    valuePropName="checked"
+                    style={{ marginBottom: 0 }}
+                  >
+                    <Switch />
+                  </Form.Item>
+                  <Tooltip title="在标题栏显示导入/导出按钮">
+                    <QuestionCircleOutlined style={{ color: '#999', cursor: 'pointer' }} />
+                  </Tooltip>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span>AST类型提示:</span>
                   <Form.Item
                     name={FORM_PATHS.enableAstTypeHints}
@@ -453,6 +469,20 @@ export const OptionsApp: React.FC = () => {
                     <Switch />
                   </Form.Item>
                   <Tooltip title="编辑 AST (Elements[]) 类型数据时，提供字段名和类型的智能补全">
+                    <QuestionCircleOutlined style={{ color: '#999', cursor: 'pointer' }} />
+                  </Tooltip>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>导出时自定义文件名:</span>
+                  <Form.Item
+                    name={FORM_PATHS.exportConfig.customFileName}
+                    valuePropName="checked"
+                    style={{ marginBottom: 0 }}
+                  >
+                    <Switch />
+                  </Form.Item>
+                  <Tooltip title="开启后，点击导出时会弹窗让您自定义文件名">
                     <QuestionCircleOutlined style={{ color: '#999', cursor: 'pointer' }} />
                   </Tooltip>
                 </div>

@@ -116,7 +116,11 @@ describe('Storage工具测试', () => {
           deserialize: false,
           serialize: false,
           format: true,
-          preview: true
+          preview: true,
+          importExport: true
+        },
+        exportConfig: {
+          customFileName: false
         },
         highlightColor: '#39C5BB',
         maxFavoritesCount: 50,
@@ -174,7 +178,11 @@ describe('Storage工具测试', () => {
           deserialize: false,
           serialize: false,
           format: true,
-          preview: true
+          preview: true,
+          importExport: true
+        },
+        exportConfig: {
+          customFileName: false
         },
         highlightColor: '#39C5BB',
         maxFavoritesCount: 50,
@@ -222,7 +230,11 @@ describe('Storage工具测试', () => {
           deserialize: false,
           serialize: false,
           format: true,
-          preview: true
+          preview: true,
+          importExport: true
+        },
+        exportConfig: {
+          customFileName: false
         },
         highlightColor: '#39C5BB',
         maxFavoritesCount: 50,
@@ -449,7 +461,11 @@ describe('Storage工具测试', () => {
           deserialize: false,
           serialize: false,
           format: true,
-          preview: true
+          preview: true,
+          importExport: true
+        },
+        exportConfig: {
+          customFileName: false
         },
         highlightColor: '#39C5BB',
         maxFavoritesCount: 50,
@@ -511,7 +527,8 @@ describe('Storage工具测试', () => {
         deserialize: false,
         serialize: false,
         format: true,
-        preview: true
+        preview: true,
+        importExport: true
       })
     })
 
@@ -769,7 +786,8 @@ describe('Storage工具测试', () => {
         deserialize: false,
         serialize: false,
         format: true,
-        preview: true
+        preview: true,
+        importExport: true
       })
     })
 

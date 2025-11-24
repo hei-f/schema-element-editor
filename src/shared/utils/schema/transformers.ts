@@ -1,6 +1,6 @@
 import { logger } from '@/shared/utils/logger'
-import type { Elements } from '@ant-design/md-editor'
-import { parserMarkdownToSlateNode, parserSlateNodeToMarkdown } from '@ant-design/md-editor'
+import type { Elements } from '@ant-design/agentic-ui'
+import { parserMarkdownToSlateNode, parserSlateNodeToMarkdown } from '@ant-design/agentic-ui'
 
 /**
  * 转换结果类型

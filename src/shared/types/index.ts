@@ -74,6 +74,8 @@ export interface ToolbarButtonsConfig {
   format: boolean
   /** 预览按钮 */
   preview: boolean
+  /** 导入导出按钮 */
+  importExport: boolean
 }
 
 /**
@@ -100,6 +102,14 @@ export interface HighlightAllConfig {
   keyBinding: string
   /** 最大高亮元素数量 */
   maxHighlightCount: number
+}
+
+/**
+ * 导出配置接口
+ */
+export interface ExportConfig {
+  /** 导出时是否自定义文件名 */
+  customFileName: boolean
 }
 
 /**
@@ -142,6 +152,8 @@ export interface StorageData {
   highlightAllConfig: HighlightAllConfig
   /** 启用 AST 类型提示 */
   enableAstTypeHints: boolean
+  /** 导出配置 */
+  exportConfig: ExportConfig
 }
 
 /**

@@ -8,20 +8,24 @@ import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { parseMarkdownString } from '@/shared/utils/schema/transformers'
 import {
   DeleteOutlined,
+  DownloadOutlined,
   EyeInvisibleOutlined,
   EyeOutlined,
   FileTextOutlined,
   FolderOpenOutlined,
-  StarOutlined
+  StarOutlined,
+  UploadOutlined
 } from '@ant-design/icons'
-import { Button, Drawer, Space, Tooltip, message } from 'antd'
+import { Button, Drawer, Space, Tooltip, Upload, message } from 'antd'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useContentDetection } from '../hooks/useContentDetection'
 import { useDraftManagement } from '../hooks/useDraftManagement'
 import { useEditHistory } from '../hooks/useEditHistory'
 import { useFavoritesManagement } from '../hooks/useFavoritesManagement'
+import { useFileImportExport } from '../hooks/useFileImportExport'
 import { useLightNotifications } from '../hooks/useLightNotifications'
 import { useSchemaSave } from '../hooks/useSchemaSave'
+import type { ExportMetadata } from '../types/export'
 import { schemaTransformer } from '../services/schema-transformer'
 import {
   DraftAutoSaveSuccess,
@@ -66,7 +70,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     deserialize: true,
     serialize: true,
     format: true,
-    preview: true
+    preview: true,
+    importExport: true
   })
   const [autoSaveDraft, setAutoSaveDraft] = useState(false)
   
@@ -87,6 +92,11 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   
   // AST 类型提示配置
   const [enableAstTypeHints, setEnableAstTypeHints] = useState(true)
+  
+  // 导出配置
+  const [exportConfig, setExportConfig] = useState({
+    customFileName: false
+  })
   
   const paramsKey = attributes.params.join(',')
   const isFirstLoadRef = useRef(true)
@@ -138,6 +148,34 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     // 4. 显示轻量提示
     showLightNotification(`已切换到: ${entry.description || '历史版本'}`)
   }, [detectContentType, updateContentType, showLightNotification])
+
+  /** 导入成功回调 */
+  const handleImportSuccess = useCallback((content: string, metadata?: ExportMetadata) => {
+    // 1. 使用命令式 API 更新编辑器
+    editorRef.current?.setValue(content)
+    setEditorValue(content)
+    setIsModified(true)
+    
+    // 2. 恢复 wasStringData 状态
+    if (metadata?.wasStringData !== undefined) {
+      setWasStringData(metadata.wasStringData)
+    }
+    
+    // 3. 触发内容类型检测
+    const result = detectContentType(content)
+    updateContentType(result)
+  }, [detectContentType, updateContentType])
+
+  /** 文件导入导出功能 */
+  const { handleExport, handleImport } = useFileImportExport({
+    editorValue,
+    paramsKey,
+    wasStringData,
+    canParse,
+    customFileName: exportConfig.customFileName,
+    onImportSuccess: handleImportSuccess,
+    showLightNotification
+  })
 
   /** 编辑历史管理 */
   const {
@@ -205,22 +243,23 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     favoritesModalVisible,
     addFavoriteModalVisible,
     favoriteNameInput,
-    previewModalVisible,
-    previewContent,
-    previewTitle,
+    editModalVisible,
+    editingFavoriteId,
+    editingName,
+    editingContent,
     setFavoriteNameInput,
     handleOpenAddFavorite,
     handleAddFavorite,
     handleOpenFavorites,
     handleApplyFavorite,
     handleDeleteFavorite,
-    handlePreviewFavorite,
+    handleEditFavorite,
+    handleSaveEdit,
     closeFavoritesModal,
     closeAddFavoriteModal,
-    closePreviewModal
+    closeEditModal
   } = useFavoritesManagement({
     editorValue,
-    paramsKey,
     isModified,
     onApplyFavorite: handleApplyFavoriteContent,
     onShowLightNotification: showLightNotification,
@@ -239,18 +278,20 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   useEffect(() => {
     const loadConfigs = async () => {
       try {
-        const [toolbarConfig, autoSave, preview, historyCount, astHints] = await Promise.all([
+        const [toolbarConfig, autoSave, preview, historyCount, astHints, expConfig] = await Promise.all([
           storage.getToolbarButtons(),
           storage.getAutoSaveDraft(),
           storage.getPreviewConfig(),
           storage.getMaxHistoryCount(),
-          storage.getEnableAstTypeHints()
+          storage.getEnableAstTypeHints(),
+          storage.getExportConfig()
         ])
         setToolbarButtons(toolbarConfig)
         setAutoSaveDraft(autoSave)
         setPreviewConfig(preview)
         setMaxHistoryCount(historyCount)
         setEnableAstTypeHints(astHints)
+        setExportConfig(expConfig)
       } catch (error) {
         logger.error('加载配置失败:', error)
       }
@@ -720,6 +761,36 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
             </DrawerTitleLeft>
             <DrawerTitleActions>
               <Space size="small">
+                {/* 导入导出按钮 */}
+                {toolbarButtons.importExport && (
+                  <>
+                    <Upload
+                      accept=".json"
+                      showUploadList={false}
+                      beforeUpload={handleImport}
+                      maxCount={1}
+                    >
+                      <Tooltip title="导入 JSON 文件">
+                        <Button icon={<UploadOutlined />} size="small" type="text">
+                          导入
+                        </Button>
+                      </Tooltip>
+                    </Upload>
+                    
+                    <Tooltip title="导出为 JSON 文件">
+                      <Button 
+                        icon={<DownloadOutlined />} 
+                        size="small"
+                        type="text"
+                        onClick={handleExport}
+                        disabled={!canParse}
+                      >
+                        导出
+                      </Button>
+                    </Tooltip>
+                  </>
+                )}
+                
                 {/* 历史按钮 */}
                 <HistoryDropdown
                   history={history}
@@ -790,12 +861,13 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         footer={
           <DrawerFooter>
             <Space>
-              <Button onClick={handleSaveDraft}>
+              <Button onClick={handleSaveDraft} size="small">
                 保存草稿
               </Button>
-              <Button onClick={onClose}>关闭</Button>
+              <Button onClick={onClose} size="small">关闭</Button>
               <Button 
                 type="primary" 
+                size="small"
                 onClick={async () => {
                   try {
                     await handleSave()
@@ -958,17 +1030,19 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         favoriteNameInput={favoriteNameInput}
         favoritesModalVisible={favoritesModalVisible}
         favoritesList={favoritesList}
-        previewModalVisible={previewModalVisible}
-        previewTitle={previewTitle}
-        previewContent={previewContent}
+        editModalVisible={editModalVisible}
+        editingFavoriteId={editingFavoriteId}
+        editingName={editingName}
+        editingContent={editingContent}
         onAddFavoriteInputChange={setFavoriteNameInput}
         onAddFavorite={handleAddFavorite}
         onCloseAddFavoriteModal={closeAddFavoriteModal}
         onCloseFavoritesModal={closeFavoritesModal}
-        onPreviewFavorite={handlePreviewFavorite}
+        onEditFavorite={handleEditFavorite}
         onApplyFavorite={handleApplyFavorite}
         onDeleteFavorite={handleDeleteFavorite}
-        onClosePreviewModal={closePreviewModal}
+        onSaveEdit={handleSaveEdit}
+        onCloseEditModal={closeEditModal}
       />
     </>
   )

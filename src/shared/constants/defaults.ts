@@ -22,7 +22,8 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     deserialize: false,
     serialize: false,
     format: true,
-    preview: true
+    preview: true,
+    importExport: true
   },
   highlightColor: '#39C5BB',
   maxFavoritesCount: 50,
@@ -41,7 +42,10 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     keyBinding: 'a',
     maxHighlightCount: 500
   },
-  enableAstTypeHints: true
+  enableAstTypeHints: true,
+  exportConfig: {
+    customFileName: false
+  }
 } as const
 
 /**
@@ -67,7 +71,8 @@ export const STORAGE_KEYS = {
   FAVORITES: 'favorites',
   MAX_HISTORY_COUNT: 'maxHistoryCount',
   HIGHLIGHT_ALL_CONFIG: 'highlightAllConfig',
-  ENABLE_AST_TYPE_HINTS: 'enableAstTypeHints'
+  ENABLE_AST_TYPE_HINTS: 'enableAstTypeHints',
+  EXPORT_CONFIG: 'exportConfig'
 } as const
 
 

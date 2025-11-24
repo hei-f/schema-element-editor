@@ -61,7 +61,9 @@ export const FORM_PATHS = {
     /** 格式化按钮 */
     format: ['toolbarButtons', 'format'],
     /** 预览按钮 */
-    preview: ['toolbarButtons', 'preview']
+    preview: ['toolbarButtons', 'preview'],
+    /** 导入导出按钮 */
+    importExport: ['toolbarButtons', 'importExport']
   },
   
   /** 最大收藏数量 */
@@ -96,7 +98,13 @@ export const FORM_PATHS = {
   },
   
   /** 启用 AST 类型提示 */
-  enableAstTypeHints: ['enableAstTypeHints']
+  enableAstTypeHints: ['enableAstTypeHints'],
+  
+  /** 导出配置 */
+  exportConfig: {
+    /** 导出时自定义文件名 */
+    customFileName: ['exportConfig', 'customFileName']
+  }
 }
 
 /**
