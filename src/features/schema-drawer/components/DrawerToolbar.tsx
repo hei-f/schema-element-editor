@@ -1,8 +1,19 @@
 import type { ElementAttributes, ToolbarButtonsConfig } from '@/shared/types'
 import { ContentType } from '@/shared/types'
 import { Button, Segmented, Tooltip } from 'antd'
-import React from 'react'
-import { AttributeTag, ButtonGroup, ParamItem, ParamLabel, ParamsContainer, EditorToolbar as StyledEditorToolbar } from '../styles/toolbar.styles'
+import { CopyOutlined, CheckOutlined } from '@ant-design/icons'
+import React, { useState } from 'react'
+import { 
+  AttributeTag, 
+  AttributeTagWrapper,
+  ButtonGroup, 
+  CopyIconWrapper,
+  ParamItem, 
+  ParamLabel, 
+  ParamsContainer, 
+  StyledCopyIcon,
+  EditorToolbar as StyledEditorToolbar 
+} from '../styles/toolbar.styles'
 
 interface DrawerToolbarProps {
   attributes: ElementAttributes
@@ -32,6 +43,30 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
   onSegmentChange,
   onRenderPreview
 }) => {
+  // 复制状态管理: { [index: number]: 'idle' | 'copied' }
+  const [copyStatus, setCopyStatus] = useState<Record<number, 'idle' | 'copied'>>({})
+
+  /**
+   * 处理复制操作
+   */
+  const handleCopy = async (param: string, index: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    
+    try {
+      await navigator.clipboard.writeText(param)
+      
+      // 设置为已复制状态
+      setCopyStatus(prev => ({ ...prev, [index]: 'copied' }))
+      
+      // 2秒后恢复为idle状态
+      setTimeout(() => {
+        setCopyStatus(prev => ({ ...prev, [index]: 'idle' }))
+      }, 2000)
+    } catch (err) {
+      console.error('复制失败:', err)
+    }
+  }
+
   return (
     <StyledEditorToolbar>
       <ParamsContainer>
@@ -41,7 +76,21 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
               <ParamItem key={index}>
                 <ParamLabel>params{index + 1}:</ParamLabel>
                 <Tooltip title={param} placement="topLeft">
-                  <AttributeTag>{param}</AttributeTag>
+                  <AttributeTagWrapper>
+                    <AttributeTag>{param}</AttributeTag>
+                    <CopyIconWrapper 
+                      className="copy-icon-wrapper"
+                      onClick={(e) => handleCopy(param, index, e)}
+                    >
+                      <StyledCopyIcon $isSuccess={copyStatus[index] === 'copied'}>
+                        {copyStatus[index] === 'copied' ? (
+                          <CheckOutlined />
+                        ) : (
+                          <CopyOutlined />
+                        )}
+                      </StyledCopyIcon>
+                    </CopyIconWrapper>
+                  </AttributeTagWrapper>
                 </Tooltip>
               </ParamItem>
             ))}

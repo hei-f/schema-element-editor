@@ -37,6 +37,19 @@ export const ParamItem = styled.div`
 `
 
 /**
+ * 属性标签包装器（支持复制功能）
+ */
+export const AttributeTagWrapper = styled.span`
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  
+  &:hover .copy-icon-wrapper {
+    opacity: 1;
+  }
+`
+
+/**
  * 按钮组
  */
 export const ButtonGroup = styled.div`
@@ -54,6 +67,7 @@ export const AttributeTag = styled.span`
   border: 1px solid #91d5ff;
   border-radius: 4px;
   font-size: 12px;
+  line-height: 16px;
   color: #0050b3;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   max-width: 100%;
@@ -71,5 +85,59 @@ export const ParamLabel = styled.span`
   color: #8c8c8c;
   margin-right: 4px;
   flex-shrink: 0;
+`
+
+/**
+ * 复制图标包装器
+ */
+export const CopyIconWrapper = styled.span`
+  position: absolute;
+  right: 4px;
+  top: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 16px;
+  opacity: 0;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
+  z-index: 1;
+  padding: 0 3px;
+  background-color: rgba(230, 247, 255, 0.95);
+  border-radius: 3px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  
+  &:hover {
+    opacity: 1 !important;
+    background-color: rgba(230, 247, 255, 1);
+  }
+`
+
+/**
+ * 复制图标样式
+ */
+export const StyledCopyIcon = styled.span<{ $isSuccess?: boolean }>`
+  font-size: 12px;
+  color: ${props => props.$isSuccess ? '#52c41a' : '#0050b3'};
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 16px;
+  line-height: 1;
+  vertical-align: middle;
+  transition: color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+  
+  &:hover {
+    color: ${props => props.$isSuccess ? '#52c41a' : '#003a8c'};
+    transform: scale(1.1);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+  
+  svg {
+    display: block;
+  }
 `
 
