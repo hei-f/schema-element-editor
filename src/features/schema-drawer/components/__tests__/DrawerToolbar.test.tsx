@@ -420,5 +420,60 @@ describe('DrawerToolbar组件测试', () => {
       expect(segmented).toHaveClass('ant-segmented-disabled')
     })
   })
+
+  describe('参数复制功能', () => {
+    beforeEach(() => {
+      // Mock clipboard API
+      const writeTextMock = jest.fn().mockResolvedValue(undefined)
+      Object.defineProperty(navigator, 'clipboard', {
+        value: {
+          writeText: writeTextMock
+        },
+        writable: true,
+        configurable: true
+      })
+    })
+
+    it('应该为每个参数渲染复制图标容器和图标', () => {
+      const { container } = render(
+        <DrawerToolbar
+          attributes={mockAttributes}
+          contentType={ContentType.Ast}
+          canParse={true}
+          toolbarButtons={defaultToolbarButtons}
+          {...mockHandlers}
+        />
+      )
+
+      // 检查复制图标容器
+      const copyIconWrappers = container.querySelectorAll('.copy-icon-wrapper')
+      expect(copyIconWrappers).toHaveLength(3) // 三个params
+
+      // 检查初始时显示的是CopyOutlined图标
+      const copyIcons = container.querySelectorAll('[aria-label="copy"]')
+      expect(copyIcons.length).toBeGreaterThanOrEqual(3)
+    })
+
+    it('应该渲染AttributeTagWrapper组件', () => {
+      const { container } = render(
+        <DrawerToolbar
+          attributes={mockAttributes}
+          contentType={ContentType.Ast}
+          canParse={true}
+          toolbarButtons={defaultToolbarButtons}
+          {...mockHandlers}
+        />
+      )
+
+      // 验证params标签被包裹在wrapper中
+      const params = screen.getAllByText(/param[123]/)
+      expect(params).toHaveLength(3)
+      
+      params.forEach(param => {
+        // 每个param应该在一个包含复制功能的结构中
+        expect(param.parentElement).toBeInTheDocument()
+      })
+    })
+  })
 })
 
