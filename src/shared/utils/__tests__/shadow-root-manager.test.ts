@@ -183,11 +183,14 @@ describe('shadowRootManager', () => {
 
   describe('边界情况', () => {
     it('应该处理 null 初始化', () => {
+      // 允许设置null，但获取时应抛出错误
       expect(() => {
         shadowRootManager.init(null as any)
       }).not.toThrow()
       
-      expect(shadowRootManager.get()).toBeNull()
+      expect(() => {
+        shadowRootManager.get()
+      }).toThrow('ShadowRoot not initialized')
     })
 
     it('应该在快速连续调用时保持稳定', () => {

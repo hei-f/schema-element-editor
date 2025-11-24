@@ -35,8 +35,8 @@ class ShadowRootManager {
    * 获取适用于 Ant Design 组件 getContainer 的函数
    * 用于 Modal, Dropdown, Tooltip 等组件
    */
-  static getContainer(): HTMLElement {
-    return this.get() as unknown as HTMLElement
+  static getContainer = (): HTMLElement => {
+    return ShadowRootManager.get() as unknown as HTMLElement
   }
 
   /**
