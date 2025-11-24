@@ -151,7 +151,7 @@ export const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
       open={open}
       onOpenChange={setOpen}
       placement="bottomRight"
-      getPopupContainer={shadowRootManager.getContainer}
+      getPopupContainer={() => shadowRootManager.getContainer()}
       overlayStyle={{ maxHeight: '500px', overflow: 'auto' }}
     >
       <Button

@@ -24,12 +24,18 @@ describe('HistoryDropdown组件测试', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     
-    // 初始化 shadowRootManager
+    // 初始化 shadowRootManager，并将容器添加到 document.body
     const mockShadowRoot = document.createElement('div') as unknown as ShadowRoot
+    document.body.appendChild(mockShadowRoot as unknown as HTMLElement)
     shadowRootManager.init(mockShadowRoot)
   })
   
   afterEach(() => {
+    // 清理 shadowRoot 容器
+    const container = document.querySelector('div') as HTMLElement
+    if (container && container.parentNode === document.body) {
+      document.body.removeChild(container)
+    }
     shadowRootManager.reset()
   })
 
