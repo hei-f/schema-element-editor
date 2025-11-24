@@ -1,7 +1,7 @@
 import type { Favorite } from '@/shared/types'
 import React from 'react'
 import { AddFavoriteModal } from './AddFavoriteModal'
-import { FavoritePreviewModal } from './FavoritePreviewModal'
+import { FavoriteEditModal } from './FavoriteEditModal'
 import { FavoritesListModal } from './FavoritesListModal'
 
 interface FavoritesManagerProps {
@@ -9,17 +9,19 @@ interface FavoritesManagerProps {
   favoriteNameInput: string
   favoritesModalVisible: boolean
   favoritesList: Favorite[]
-  previewModalVisible: boolean
-  previewTitle: string
-  previewContent: string
+  editModalVisible: boolean
+  editingFavoriteId: string | null
+  editingName: string
+  editingContent: string
   onAddFavoriteInputChange: (value: string) => void
   onAddFavorite: () => Promise<void>
   onCloseAddFavoriteModal: () => void
   onCloseFavoritesModal: () => void
-  onPreviewFavorite: (favorite: Favorite) => void
+  onEditFavorite: (favorite: Favorite) => void
   onApplyFavorite: (favorite: Favorite) => void
   onDeleteFavorite: (id: string) => Promise<void>
-  onClosePreviewModal: () => void
+  onSaveEdit: (id: string, name: string, content: string) => Promise<void>
+  onCloseEditModal: () => void
 }
 
 /**
@@ -30,17 +32,19 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = ({
   favoriteNameInput,
   favoritesModalVisible,
   favoritesList,
-  previewModalVisible,
-  previewTitle,
-  previewContent,
+  editModalVisible,
+  editingFavoriteId,
+  editingName,
+  editingContent,
   onAddFavoriteInputChange,
   onAddFavorite,
   onCloseAddFavoriteModal,
   onCloseFavoritesModal,
-  onPreviewFavorite,
+  onEditFavorite,
   onApplyFavorite,
   onDeleteFavorite,
-  onClosePreviewModal
+  onSaveEdit,
+  onCloseEditModal
 }) => {
   return (
     <>
@@ -55,17 +59,19 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = ({
       <FavoritesListModal
         visible={favoritesModalVisible}
         favoritesList={favoritesList}
-        onPreview={onPreviewFavorite}
+        onEdit={onEditFavorite}
         onApply={onApplyFavorite}
         onDelete={onDeleteFavorite}
         onClose={onCloseFavoritesModal}
       />
 
-      <FavoritePreviewModal
-        visible={previewModalVisible}
-        title={previewTitle}
-        content={previewContent}
-        onClose={onClosePreviewModal}
+      <FavoriteEditModal
+        visible={editModalVisible}
+        favoriteId={editingFavoriteId}
+        initialName={editingName}
+        initialContent={editingContent}
+        onSave={onSaveEdit}
+        onClose={onCloseEditModal}
       />
     </>
   )

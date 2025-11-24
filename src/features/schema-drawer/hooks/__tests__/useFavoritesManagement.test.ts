@@ -24,7 +24,6 @@ describe('useFavoritesManagement Hook 测试', () => {
 
   const defaultProps = {
     editorValue: 'test content',
-    paramsKey: 'test-params',
     isModified: false,
     onApplyFavorite: mockOnApplyFavorite,
     onShowLightNotification: mockOnShowLightNotification,
@@ -37,7 +36,6 @@ describe('useFavoritesManagement Hook 测试', () => {
     name: '测试收藏',
     content: '{"test": "data"}',
     timestamp: Date.now(),
-    sourceParams: 'test-params',
     lastUsedTime: Date.now()
   }
 
@@ -61,9 +59,10 @@ describe('useFavoritesManagement Hook 测试', () => {
       expect(result.current.favoritesModalVisible).toBe(false)
       expect(result.current.addFavoriteModalVisible).toBe(false)
       expect(result.current.favoriteNameInput).toBe('')
-      expect(result.current.previewModalVisible).toBe(false)
-      expect(result.current.previewContent).toBe('')
-      expect(result.current.previewTitle).toBe('')
+      expect(result.current.editModalVisible).toBe(false)
+      expect(result.current.editingFavoriteId).toBe(null)
+      expect(result.current.editingName).toBe('')
+      expect(result.current.editingContent).toBe('')
     })
   })
 
@@ -143,7 +142,7 @@ describe('useFavoritesManagement Hook 测试', () => {
         await result.current.handleAddFavorite()
       })
 
-      expect(mockStorage.addFavorite).toHaveBeenCalledWith('My Favorite', 'test content', 'test-params')
+      expect(mockStorage.addFavorite).toHaveBeenCalledWith('My Favorite', 'test content')
       expect(mockOnShowLightNotification).toHaveBeenCalledWith('已添加到收藏')
       expect(result.current.addFavoriteModalVisible).toBe(false)
       expect(result.current.favoriteNameInput).toBe('')
@@ -161,7 +160,7 @@ describe('useFavoritesManagement Hook 测试', () => {
         await result.current.handleAddFavorite()
       })
 
-      expect(mockStorage.addFavorite).toHaveBeenCalledWith('My Favorite', 'test content', 'test-params')
+      expect(mockStorage.addFavorite).toHaveBeenCalledWith('My Favorite', 'test content')
     })
 
     it('添加失败时应该显示错误', async () => {
@@ -286,17 +285,18 @@ describe('useFavoritesManagement Hook 测试', () => {
     })
   })
 
-  describe('handlePreviewFavorite 预览收藏', () => {
-    it('应该格式化JSON内容并显示预览', () => {
+  describe('handleEditFavorite 编辑收藏', () => {
+    it('应该格式化JSON内容并打开编辑模态框', () => {
       const { result } = renderHook(() => useFavoritesManagement(defaultProps))
 
       act(() => {
-        result.current.handlePreviewFavorite(mockFavorite)
+        result.current.handleEditFavorite(mockFavorite)
       })
 
-      expect(result.current.previewModalVisible).toBe(true)
-      expect(result.current.previewTitle).toBe('测试收藏')
-      expect(result.current.previewContent).toBe(JSON.stringify(JSON.parse('{"test": "data"}'), null, 2))
+      expect(result.current.editModalVisible).toBe(true)
+      expect(result.current.editingFavoriteId).toBe('fav_1')
+      expect(result.current.editingName).toBe('测试收藏')
+      expect(result.current.editingContent).toBe(JSON.stringify(JSON.parse('{"test": "data"}'), null, 2))
     })
 
     it('非JSON内容应该直接显示', () => {
@@ -308,10 +308,10 @@ describe('useFavoritesManagement Hook 测试', () => {
       const { result } = renderHook(() => useFavoritesManagement(defaultProps))
 
       act(() => {
-        result.current.handlePreviewFavorite(nonJsonFavorite)
+        result.current.handleEditFavorite(nonJsonFavorite)
       })
 
-      expect(result.current.previewContent).toBe('plain text content')
+      expect(result.current.editingContent).toBe('plain text content')
     })
 
     it('格式化失败时应该显示原始内容', () => {
@@ -323,10 +323,10 @@ describe('useFavoritesManagement Hook 测试', () => {
       const { result } = renderHook(() => useFavoritesManagement(defaultProps))
 
       act(() => {
-        result.current.handlePreviewFavorite(invalidJsonFavorite)
+        result.current.handleEditFavorite(invalidJsonFavorite)
       })
 
-      expect(result.current.previewContent).toBe('{invalid json')
+      expect(result.current.editingContent).toBe('{invalid json')
     })
   })
 
@@ -351,14 +351,14 @@ describe('useFavoritesManagement Hook 测试', () => {
       expect(result.current.addFavoriteModalVisible).toBe(false)
     })
 
-    it('应该关闭预览对话框', () => {
+    it('应该关闭编辑对话框', () => {
       const { result } = renderHook(() => useFavoritesManagement(defaultProps))
 
       act(() => {
-        result.current.closePreviewModal()
+        result.current.closeEditModal()
       })
 
-      expect(result.current.previewModalVisible).toBe(false)
+      expect(result.current.editModalVisible).toBe(false)
     })
   })
 

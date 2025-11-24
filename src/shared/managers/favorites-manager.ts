@@ -44,6 +44,29 @@ export class FavoritesManager {
   }
 
   /**
+   * 更新收藏
+   */
+  async updateFavorite(
+    id: string,
+    name: string,
+    content: string,
+    getFavorites: () => Promise<Favorite[]>,
+    saveFavorites: (favorites: Favorite[]) => Promise<void>
+  ): Promise<void> {
+    const favorites = await getFavorites()
+    const favorite = favorites.find(fav => fav.id === id)
+    
+    if (favorite) {
+      favorite.name = name
+      favorite.content = content
+      favorite.lastUsedTime = Date.now()
+      await saveFavorites(favorites)
+    } else {
+      throw new Error('收藏不存在')
+    }
+  }
+
+  /**
    * 删除收藏
    */
   async deleteFavorite(

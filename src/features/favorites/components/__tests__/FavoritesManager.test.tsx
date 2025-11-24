@@ -13,9 +13,9 @@ jest.mock('../FavoritesListModal', () => ({
     visible ? <div data-testid="favorites-list-modal">FavoritesListModal</div> : null
 }))
 
-jest.mock('../FavoritePreviewModal', () => ({
-  FavoritePreviewModal: ({ visible }: any) => 
-    visible ? <div data-testid="preview-modal">FavoritePreviewModal</div> : null
+jest.mock('../FavoriteEditModal', () => ({
+  FavoriteEditModal: ({ visible }: any) => 
+    visible ? <div data-testid="edit-modal">FavoriteEditModal</div> : null
 }))
 
 const mockShadowRoot = document.createElement('div') as any
@@ -26,7 +26,6 @@ describe('FavoritesManager组件测试', () => {
     name: '测试收藏',
     content: '{"test": "data"}',
     timestamp: Date.now(),
-    sourceParams: 'test-params',
     lastUsedTime: Date.now()
   }
 
@@ -36,17 +35,19 @@ describe('FavoritesManager组件测试', () => {
     favoriteNameInput: '',
     favoritesModalVisible: false,
     favoritesList: [],
-    previewModalVisible: false,
-    previewTitle: '',
-    previewContent: '',
+    editModalVisible: false,
+    editingFavoriteId: null,
+    editingName: '',
+    editingContent: '',
     onAddFavoriteInputChange: jest.fn(),
     onAddFavorite: jest.fn(),
     onCloseAddFavoriteModal: jest.fn(),
     onCloseFavoritesModal: jest.fn(),
-    onPreviewFavorite: jest.fn(),
+    onEditFavorite: jest.fn(),
     onApplyFavorite: jest.fn(),
     onDeleteFavorite: jest.fn(),
-    onClosePreviewModal: jest.fn()
+    onSaveEdit: jest.fn(),
+    onCloseEditModal: jest.fn()
   }
 
   beforeEach(() => {
@@ -104,21 +105,21 @@ describe('FavoritesManager组件测试', () => {
     })
   })
 
-  describe('FavoritePreviewModal显示', () => {
-    it('应该在previewModalVisible为true时渲染FavoritePreviewModal', () => {
+  describe('FavoriteEditModal显示', () => {
+    it('应该在editModalVisible为true时渲染FavoriteEditModal', () => {
       const { getByTestId } = render(
-        <FavoritesManager {...defaultProps} previewModalVisible={true} />
+        <FavoritesManager {...defaultProps} editModalVisible={true} />
       )
       
-      expect(getByTestId('preview-modal')).toBeInTheDocument()
+      expect(getByTestId('edit-modal')).toBeInTheDocument()
     })
 
-    it('应该在previewModalVisible为false时不渲染FavoritePreviewModal', () => {
+    it('应该在editModalVisible为false时不渲染FavoriteEditModal', () => {
       const { queryByTestId } = render(
-        <FavoritesManager {...defaultProps} previewModalVisible={false} />
+        <FavoritesManager {...defaultProps} editModalVisible={false} />
       )
       
-      expect(queryByTestId('preview-modal')).not.toBeInTheDocument()
+      expect(queryByTestId('edit-modal')).not.toBeInTheDocument()
     })
   })
 
@@ -129,13 +130,13 @@ describe('FavoritesManager组件测试', () => {
           {...defaultProps}
           addFavoriteModalVisible={true}
           favoritesModalVisible={true}
-          previewModalVisible={true}
+          editModalVisible={true}
         />
       )
       
       expect(getByTestId('add-favorite-modal')).toBeInTheDocument()
       expect(getByTestId('favorites-list-modal')).toBeInTheDocument()
-      expect(getByTestId('preview-modal')).toBeInTheDocument()
+      expect(getByTestId('edit-modal')).toBeInTheDocument()
     })
 
     it('应该支持任意组合的modal显示', () => {
@@ -143,13 +144,13 @@ describe('FavoritesManager组件测试', () => {
         <FavoritesManager
           {...defaultProps}
           addFavoriteModalVisible={true}
-          previewModalVisible={true}
+          editModalVisible={true}
         />
       )
       
       expect(getByTestId('add-favorite-modal')).toBeInTheDocument()
       expect(queryByTestId('favorites-list-modal')).not.toBeInTheDocument()
-      expect(getByTestId('preview-modal')).toBeInTheDocument()
+      expect(getByTestId('edit-modal')).toBeInTheDocument()
     })
   })
 

@@ -1,7 +1,7 @@
 import { DEFAULT_VALUES, STORAGE_KEYS } from '@/shared/constants/defaults'
 import { draftManager } from '@/shared/managers/draft-manager'
 import { favoritesManager } from '@/shared/managers/favorites-manager'
-import type { Draft, Favorite, HighlightAllConfig, PreviewConfig, SearchConfig, StorageData, ToolbarButtonsConfig } from '@/shared/types'
+import type { Draft, ExportConfig, Favorite, HighlightAllConfig, PreviewConfig, SearchConfig, StorageData, ToolbarButtonsConfig } from '@/shared/types'
 import { logger } from '@/shared/utils/logger'
 import { SIMPLE_STORAGE_FIELDS, type StorageFieldName } from './storage-config'
 
@@ -253,7 +253,8 @@ class StorageManager {
       this.getHighlightAllConfig(),
       this.getEnableAstTypeHints()
     ])
-    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig, enableAstTypeHints }
+    const exportConfig = await this.getExportConfig()
+    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig, enableAstTypeHints, exportConfig }
   }
 
   /**
@@ -430,6 +431,24 @@ class StorageManager {
   }
 
   /**
+   * 更新收藏
+   */
+  async updateFavorite(id: string, name: string, content: string): Promise<void> {
+    try {
+      await favoritesManager.updateFavorite(
+        id,
+        name,
+        content,
+        () => this.getFavorites(),
+        (favorites) => this.saveFavorites(favorites)
+      )
+    } catch (error) {
+      console.error('更新收藏失败:', error)
+      throw error
+    }
+  }
+
+  /**
    * 删除收藏
    */
   async deleteFavorite(id: string): Promise<void> {
@@ -520,6 +539,35 @@ class StorageManager {
    */
   async setEnableAstTypeHints(enabled: boolean): Promise<void> {
     return this.setSimple('enableAstTypeHints', enabled)
+  }
+
+  /**
+   * 获取导出配置
+   */
+  async getExportConfig(): Promise<ExportConfig> {
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.EXPORT_CONFIG)
+      return result[this.STORAGE_KEYS.EXPORT_CONFIG] ?? this.DEFAULT_VALUES.exportConfig
+    } catch (error) {
+      console.error('获取导出配置失败:', error)
+      return this.DEFAULT_VALUES.exportConfig
+    }
+  }
+
+  /**
+   * 设置导出配置
+   */
+  async setExportConfig(config: Partial<ExportConfig>): Promise<void> {
+    try {
+      const currentConfig = await this.getExportConfig()
+      const newConfig = { ...currentConfig, ...config }
+      await chrome.storage.local.set({
+        [this.STORAGE_KEYS.EXPORT_CONFIG]: newConfig
+      })
+    } catch (error) {
+      console.error('设置导出配置失败:', error)
+      throw error
+    }
   }
 }
 

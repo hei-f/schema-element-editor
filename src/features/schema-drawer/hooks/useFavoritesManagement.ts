@@ -6,7 +6,6 @@ import { useCallback, useState } from 'react'
 
 interface UseFavoritesManagementProps {
   editorValue: string
-  paramsKey: string
   isModified: boolean
   onApplyFavorite: (content: string) => void
   /** 轻量提示回调 */
@@ -22,19 +21,21 @@ interface UseFavoritesManagementReturn {
   favoritesModalVisible: boolean
   addFavoriteModalVisible: boolean
   favoriteNameInput: string
-  previewModalVisible: boolean
-  previewContent: string
-  previewTitle: string
+  editModalVisible: boolean
+  editingFavoriteId: string | null
+  editingName: string
+  editingContent: string
   setFavoriteNameInput: (value: string) => void
   handleOpenAddFavorite: () => void
   handleAddFavorite: () => Promise<void>
   handleOpenFavorites: () => Promise<void>
   handleApplyFavorite: (favorite: Favorite) => void
   handleDeleteFavorite: (id: string) => Promise<void>
-  handlePreviewFavorite: (favorite: Favorite) => void
+  handleEditFavorite: (favorite: Favorite) => void
+  handleSaveEdit: (id: string, name: string, content: string) => Promise<void>
   closeFavoritesModal: () => void
   closeAddFavoriteModal: () => void
-  closePreviewModal: () => void
+  closeEditModal: () => void
 }
 
 /**
@@ -42,7 +43,6 @@ interface UseFavoritesManagementReturn {
  */
 export const useFavoritesManagement = ({
   editorValue,
-  paramsKey,
   isModified,
   onApplyFavorite,
   onShowLightNotification,
@@ -53,9 +53,10 @@ export const useFavoritesManagement = ({
   const [favoritesList, setFavoritesList] = useState<Favorite[]>([])
   const [addFavoriteModalVisible, setAddFavoriteModalVisible] = useState(false)
   const [favoriteNameInput, setFavoriteNameInput] = useState('')
-  const [previewModalVisible, setPreviewModalVisible] = useState(false)
-  const [previewContent, setPreviewContent] = useState('')
-  const [previewTitle, setPreviewTitle] = useState('')
+  const [editModalVisible, setEditModalVisible] = useState(false)
+  const [editingFavoriteId, setEditingFavoriteId] = useState<string | null>(null)
+  const [editingName, setEditingName] = useState('')
+  const [editingContent, setEditingContent] = useState('')
 
   /**
    * 打开添加收藏对话框
@@ -80,14 +81,14 @@ export const useFavoritesManagement = ({
     }
 
     try {
-      await storage.addFavorite(favoriteNameInput.trim(), editorValue, paramsKey)
+      await storage.addFavorite(favoriteNameInput.trim(), editorValue)
       onShowLightNotification('已添加到收藏')
       setAddFavoriteModalVisible(false)
       setFavoriteNameInput('')
     } catch (error) {
       onError?.('添加收藏失败')
     }
-  }, [favoriteNameInput, editorValue, paramsKey, onShowLightNotification, onWarning, onError])
+  }, [favoriteNameInput, editorValue, onShowLightNotification, onWarning, onError])
 
   /**
    * 打开收藏列表
@@ -149,41 +150,63 @@ export const useFavoritesManagement = ({
   }, [onShowLightNotification, onError])
 
   /**
-   * 预览收藏
+   * 编辑收藏
    */
-  const handlePreviewFavorite = useCallback((favorite: Favorite) => {
-    setPreviewTitle(favorite.name)
+  const handleEditFavorite = useCallback((favorite: Favorite) => {
+    setEditingFavoriteId(favorite.id)
+    setEditingName(favorite.name)
     try {
       const formatted = JSON.stringify(JSON.parse(favorite.content), null, 2)
-      setPreviewContent(formatted)
+      setEditingContent(formatted)
     } catch {
-      setPreviewContent(favorite.content)
+      setEditingContent(favorite.content)
     }
-    setPreviewModalVisible(true)
+    setEditModalVisible(true)
   }, [])
+
+  /**
+   * 保存编辑
+   */
+  const handleSaveEdit = useCallback(async (id: string, name: string, content: string) => {
+    try {
+      await storage.updateFavorite(id, name, content)
+      
+      // 刷新列表
+      const favorites = await storage.getFavorites()
+      setFavoritesList(favorites)
+      
+      onShowLightNotification('收藏已更新')
+      setEditModalVisible(false)
+    } catch (error) {
+      onError?.('更新收藏失败')
+      throw error
+    }
+  }, [onShowLightNotification, onError])
 
   const closeFavoritesModal = useCallback(() => setFavoritesModalVisible(false), [])
   const closeAddFavoriteModal = useCallback(() => setAddFavoriteModalVisible(false), [])
-  const closePreviewModal = useCallback(() => setPreviewModalVisible(false), [])
+  const closeEditModal = useCallback(() => setEditModalVisible(false), [])
 
   return {
     favoritesList,
     favoritesModalVisible,
     addFavoriteModalVisible,
     favoriteNameInput,
-    previewModalVisible,
-    previewContent,
-    previewTitle,
+    editModalVisible,
+    editingFavoriteId,
+    editingName,
+    editingContent,
     setFavoriteNameInput,
     handleOpenAddFavorite,
     handleAddFavorite,
     handleOpenFavorites,
     handleApplyFavorite,
     handleDeleteFavorite,
-    handlePreviewFavorite,
+    handleEditFavorite,
+    handleSaveEdit,
     closeFavoritesModal,
     closeAddFavoriteModal,
-    closePreviewModal
+    closeEditModal
   }
 }
 
