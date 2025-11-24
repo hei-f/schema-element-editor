@@ -13,7 +13,6 @@ describe('FavoritesManager 测试', () => {
     name: `Favorite ${id}`,
     content: `Content ${id}`,
     timestamp: Date.now(),
-    sourceParams: 'test-params',
     lastUsedTime: lastUsedTime || Date.now()
   })
 
@@ -49,14 +48,13 @@ describe('FavoritesManager 测试', () => {
       const mockGetter = jest.fn().mockResolvedValue(existingFavorites)
       const mockSaver = jest.fn().mockResolvedValue(undefined)
 
-      await manager.addFavorite('New Fav', 'new content', 'params', 10, mockGetter, mockSaver)
+      await manager.addFavorite('New Fav', 'new content', 10, mockGetter, mockSaver)
 
       expect(mockSaver).toHaveBeenCalled()
       const savedFavorites = mockSaver.mock.calls[0][0] as Favorite[]
       expect(savedFavorites).toHaveLength(2)
       expect(savedFavorites[0].name).toBe('New Fav')
       expect(savedFavorites[0].content).toBe('new content')
-      expect(savedFavorites[0].sourceParams).toBe('params')
     })
 
     it('应该生成唯一ID和时间戳', async () => {
@@ -64,7 +62,7 @@ describe('FavoritesManager 测试', () => {
       const mockSaver = jest.fn().mockResolvedValue(undefined)
       const beforeAdd = Date.now()
 
-      await manager.addFavorite('Test', 'content', 'params', 10, mockGetter, mockSaver)
+      await manager.addFavorite('Test', 'content', 10, mockGetter, mockSaver)
 
       const savedFavorites = mockSaver.mock.calls[0][0] as Favorite[]
       const favorite = savedFavorites[0]
@@ -84,7 +82,7 @@ describe('FavoritesManager 测试', () => {
       const mockGetter = jest.fn().mockResolvedValue(existingFavorites)
       const mockSaver = jest.fn().mockResolvedValue(undefined)
 
-      await manager.addFavorite('New', 'content', 'params', 3, mockGetter, mockSaver)
+      await manager.addFavorite('New', 'content', 3, mockGetter, mockSaver)
 
       const savedFavorites = mockSaver.mock.calls[0][0] as Favorite[]
       expect(savedFavorites).toHaveLength(3)
@@ -99,7 +97,7 @@ describe('FavoritesManager 测试', () => {
       const mockGetter = jest.fn().mockResolvedValue(existingFavorites)
       const mockSaver = jest.fn().mockResolvedValue(undefined)
 
-      await manager.addFavorite('New', 'content', 'params', 10, mockGetter, mockSaver)
+      await manager.addFavorite('New', 'content', 10, mockGetter, mockSaver)
 
       const savedFavorites = mockSaver.mock.calls[0][0] as Favorite[]
       expect(savedFavorites).toHaveLength(3)
@@ -254,12 +252,12 @@ describe('FavoritesManager 测试', () => {
 
       // 初始为空
       mockGetter.mockResolvedValueOnce([])
-      await manager.addFavorite('First', 'content1', 'params', 3, mockGetter, mockSaver)
+      await manager.addFavorite('First', 'content1', 3, mockGetter, mockSaver)
 
       // 添加第二个
       const firstFavorite = mockSaver.mock.calls[0][0][0]
       mockGetter.mockResolvedValueOnce([firstFavorite])
-      await manager.addFavorite('Second', 'content2', 'params', 3, mockGetter, mockSaver)
+      await manager.addFavorite('Second', 'content2', 3, mockGetter, mockSaver)
 
       // 更新使用时间
       const favorites = mockSaver.mock.calls[1][0]

@@ -412,14 +412,13 @@ class StorageManager {
   /**
    * 添加收藏
    */
-  async addFavorite(name: string, content: string, sourceParams: string): Promise<void> {
+  async addFavorite(name: string, content: string): Promise<void> {
     try {
       const maxCount = await this.getMaxFavoritesCount()
       
       await favoritesManager.addFavorite(
         name,
         content,
-        sourceParams,
         maxCount,
         () => this.getFavorites(),
         (favorites) => this.saveFavorites(favorites)

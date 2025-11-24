@@ -166,8 +166,6 @@ export interface Favorite {
   content: string
   /** 保存时间戳 */
   timestamp: number
-  /** 来源参数 */
-  sourceParams: string
   /** 最后使用时间（用于LRU算法） */
   lastUsedTime: number
 }

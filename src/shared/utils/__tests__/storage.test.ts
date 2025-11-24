@@ -713,7 +713,6 @@ describe('Storage工具测试', () => {
           name: 'Test',
           content: 'content',
           timestamp: Date.now(),
-          sourceParams: 'params',
           lastUsedTime: Date.now()
         }
       ]

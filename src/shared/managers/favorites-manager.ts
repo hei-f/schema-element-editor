@@ -19,7 +19,6 @@ export class FavoritesManager {
   async addFavorite(
     name: string,
     content: string,
-    sourceParams: string,
     maxCount: number,
     getFavorites: () => Promise<Favorite[]>,
     saveFavorites: (favorites: Favorite[]) => Promise<void>
@@ -32,7 +31,6 @@ export class FavoritesManager {
       name,
       content,
       timestamp: now,
-      sourceParams,
       lastUsedTime: now
     }
     
