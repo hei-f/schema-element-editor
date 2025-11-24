@@ -8,7 +8,12 @@ import React from 'react'
 jest.mock('antd', () => ({
   message: {
     error: jest.fn(),
-    success: jest.fn()
+    success: jest.fn(),
+    warning: jest.fn()
+  },
+  Modal: {
+    confirm: jest.fn(),
+    destroyAll: jest.fn()
   }
 }))
 
@@ -19,16 +24,18 @@ jest.mock('@/shared/utils/logger', () => ({
   }
 }))
 
+jest.mock('@/shared/utils/shadow-root-manager', () => ({
+  shadowRootManager: {
+    getContainer: () => document.body
+  }
+}))
+
 // Mock chrome.runtime
 global.chrome = {
   runtime: {
     getManifest: () => ({ version: '1.0.0' })
   }
 } as any
-
-// Test wrapper component
-const wrapper = ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children)
-
 
 describe('useFileImportExport', () => {
   const mockOnImportSuccess = jest.fn()
@@ -39,6 +46,7 @@ describe('useFileImportExport', () => {
     paramsKey: 'param1,param2',
     wasStringData: false,
     canParse: true,
+    customFileName: false,
     onImportSuccess: mockOnImportSuccess,
     showLightNotification: mockShowLightNotification
   }
@@ -48,22 +56,15 @@ describe('useFileImportExport', () => {
     // Mock URL.createObjectURL and revokeObjectURL
     global.URL.createObjectURL = jest.fn(() => 'blob:mock-url')
     global.URL.revokeObjectURL = jest.fn()
-    // Mock document.createElement
-    document.createElement = jest.fn((tagName) => {
-      if (tagName === 'a') {
-        return {
-          href: '',
-          download: '',
-          click: jest.fn()
-        } as any
-      }
-      return {} as any
-    })
+  })
+  
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   describe('handleExport', () => {
     it('应该成功导出文件', () => {
-      const { result } = renderHook(() => useFileImportExport(defaultProps), { wrapper })
+      const { result } = renderHook(() => useFileImportExport(defaultProps))
 
       act(() => {
         result.current.handleExport()
@@ -85,8 +86,7 @@ describe('useFileImportExport', () => {
         useFileImportExport({
           ...defaultProps,
           canParse: false
-        }),
-        { wrapper }
+        })
       )
 
       act(() => {
@@ -99,7 +99,7 @@ describe('useFileImportExport', () => {
 
     it('应该正确清理 Blob URL', () => {
       jest.useFakeTimers()
-      const { result } = renderHook(() => useFileImportExport(defaultProps), { wrapper })
+      const { result } = renderHook(() => useFileImportExport(defaultProps))
 
       act(() => {
         result.current.handleExport()
@@ -115,7 +115,7 @@ describe('useFileImportExport', () => {
 
   describe('handleImport', () => {
     it('应该成功导入带元数据的文件', async () => {
-      const { result } = renderHook(() => useFileImportExport(defaultProps), { wrapper })
+      const { result } = renderHook(() => useFileImportExport(defaultProps))
 
       const mockFile = new File(
         [
@@ -181,7 +181,7 @@ describe('useFileImportExport', () => {
     })
 
     it('应该成功导入普通 JSON 文件', async () => {
-      const { result } = renderHook(() => useFileImportExport(defaultProps), { wrapper })
+      const { result } = renderHook(() => useFileImportExport(defaultProps))
 
       const mockFileReader = {
         readAsText: jest.fn(function (this: any) {
@@ -218,7 +218,7 @@ describe('useFileImportExport', () => {
     })
 
     it('当文件过大时应该拒绝导入', () => {
-      const { result } = renderHook(() => useFileImportExport(defaultProps), { wrapper })
+      const { result } = renderHook(() => useFileImportExport(defaultProps))
 
       // 创建一个超过 10MB 的文件
       const largeFile = new File(['x'.repeat(11 * 1024 * 1024)], 'large.json', {
@@ -233,7 +233,7 @@ describe('useFileImportExport', () => {
     })
 
     it('当 JSON 格式错误时应该提示错误', async () => {
-      const { result } = renderHook(() => useFileImportExport(defaultProps), { wrapper })
+      const { result } = renderHook(() => useFileImportExport(defaultProps))
 
       const mockFileReader = {
         readAsText: jest.fn(function (this: any) {
@@ -263,7 +263,7 @@ describe('useFileImportExport', () => {
     })
 
     it('当文件读取失败时应该处理错误', async () => {
-      const { result } = renderHook(() => useFileImportExport(defaultProps), { wrapper })
+      const { result } = renderHook(() => useFileImportExport(defaultProps))
 
       const mockFileReader = {
         readAsText: jest.fn(function (this: any) {
@@ -291,7 +291,7 @@ describe('useFileImportExport', () => {
     })
 
     it('应该始终返回 false 以阻止默认上传行为', () => {
-      const { result } = renderHook(() => useFileImportExport(defaultProps), { wrapper })
+      const { result } = renderHook(() => useFileImportExport(defaultProps))
 
       const mockFile = new File(['test'], 'test.json', {
         type: 'application/json'
