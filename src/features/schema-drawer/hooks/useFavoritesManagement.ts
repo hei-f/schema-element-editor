@@ -158,7 +158,8 @@ export const useFavoritesManagement = ({
     try {
       const formatted = JSON.stringify(JSON.parse(favorite.content), null, 2)
       setEditingContent(formatted)
-    } catch {
+    } catch (error) {
+      console.debug('JSON 格式化失败，使用原始内容:', error)
       setEditingContent(favorite.content)
     }
     setEditModalVisible(true)

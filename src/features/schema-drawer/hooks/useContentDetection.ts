@@ -44,7 +44,8 @@ export const useContentDetection = (): UseContentDetectionReturn => {
       }
       
       return { type: ContentType.Other, canParse: true }
-    } catch {
+    } catch (error) {
+      console.debug('内容类型检测失败:', error)
       return { type: ContentType.Other, canParse: false }
     }
   }, [])

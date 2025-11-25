@@ -118,8 +118,8 @@ export const tryFixJsonString = (input: string): string => {
   try {
     JSON.parse(trimmed)
     return trimmed
-  } catch {
-    // 继续尝试修复
+  } catch (error) {
+    console.debug('JSON 解析失败，尝试修复:', error)
   }
   
   // 策略2: 移除首尾的额外引号（针对过度序列化）
@@ -130,8 +130,8 @@ export const tryFixJsonString = (input: string): string => {
       const unescaped = unquoted.replace(/\\"/g, '"').replace(/\\\\/g, '\\')
       JSON.parse(unescaped)
       return unescaped
-    } catch {
-      // 修复失败，继续尝试其他策略
+    } catch (error) {
+      console.debug('反转义修复失败，尝试其他策略:', error)
     }
   }
   
@@ -142,8 +142,8 @@ export const tryFixJsonString = (input: string): string => {
       const unescaped = trimmed.replace(/\\"/g, '"').replace(/\\\\/g, '\\')
       JSON.parse(unescaped)
       return unescaped
-    } catch {
-      // 修复失败，返回原始输入
+    } catch (error) {
+      console.debug('所有修复策略失败，返回原始输入:', error)
     }
   }
   
