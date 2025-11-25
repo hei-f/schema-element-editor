@@ -138,7 +138,8 @@ describe('Storage工具测试', () => {
           enabled: true,
           keyBinding: 'a',
           maxHighlightCount: 500
-        }
+        },
+        editorTheme: 'schemaEditorDark'
       })
     })
 
@@ -200,7 +201,8 @@ describe('Storage工具测试', () => {
           enabled: true,
           keyBinding: 'a',
           maxHighlightCount: 500
-        }
+        },
+        editorTheme: 'schemaEditorDark'
       })
     })
 
@@ -252,7 +254,8 @@ describe('Storage工具测试', () => {
           enabled: true,
           keyBinding: 'a',
           maxHighlightCount: 500
-        }
+        },
+        editorTheme: 'schemaEditorDark'
       })
     })
   })
@@ -483,7 +486,8 @@ describe('Storage工具测试', () => {
           enabled: true,
           keyBinding: 'a',
           maxHighlightCount: 500
-        }
+        },
+        editorTheme: 'schemaEditorDark'
       })
     })
   })

@@ -46,20 +46,20 @@ describe('HistoryDropdown组件测试', () => {
     it('应该渲染历史按钮', () => {
       render(<HistoryDropdown {...defaultProps} />)
       
-      expect(screen.getByRole('button', { name: /历史/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /history/ })).toBeInTheDocument()
     })
 
     it('应该在disabled为true时禁用按钮', () => {
       render(<HistoryDropdown {...defaultProps} disabled={true} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       expect(button).toBeDisabled()
     })
 
     it('应该在disabled为false时启用按钮', () => {
       render(<HistoryDropdown {...defaultProps} disabled={false} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       expect(button).not.toBeDisabled()
     })
   })
@@ -69,7 +69,7 @@ describe('HistoryDropdown组件测试', () => {
       const user = userEvent.setup()
       render(<HistoryDropdown {...defaultProps} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       // 验证历史记录的描述文本和清除按钮是否显示
@@ -89,7 +89,7 @@ describe('HistoryDropdown组件测试', () => {
       
       render(<HistoryDropdown {...defaultProps} history={multipleHistory} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       // 验证所有3个历史记录条目都显示了
@@ -106,7 +106,7 @@ describe('HistoryDropdown组件测试', () => {
       const user = userEvent.setup()
       render(<HistoryDropdown {...defaultProps} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       await waitFor(() => {
@@ -123,7 +123,7 @@ describe('HistoryDropdown组件测试', () => {
       
       render(<HistoryDropdown {...defaultProps} history={multipleHistory} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       await waitFor(() => {
@@ -141,7 +141,7 @@ describe('HistoryDropdown组件测试', () => {
       
       render(<HistoryDropdown {...defaultProps} history={multipleHistory} currentIndex={0} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       await waitFor(() => {
@@ -155,7 +155,7 @@ describe('HistoryDropdown组件测试', () => {
       const user = userEvent.setup()
       render(<HistoryDropdown {...defaultProps} history={[]} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       await waitFor(() => {
@@ -177,7 +177,7 @@ describe('HistoryDropdown组件测试', () => {
       
       render(<HistoryDropdown {...defaultProps} history={typedHistory} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       await waitFor(() => {
@@ -197,7 +197,7 @@ describe('HistoryDropdown组件测试', () => {
       
       render(<HistoryDropdown {...defaultProps} onLoadVersion={onLoadVersion} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       let historyItem: HTMLElement
@@ -220,7 +220,7 @@ describe('HistoryDropdown组件测试', () => {
       
       render(<HistoryDropdown {...defaultProps} onClearHistory={onClearHistory} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       await waitFor(() => {
@@ -239,7 +239,7 @@ describe('HistoryDropdown组件测试', () => {
       const user = userEvent.setup()
       render(<HistoryDropdown {...defaultProps} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       let historyItem: HTMLElement
@@ -267,7 +267,7 @@ describe('HistoryDropdown组件测试', () => {
       
       render(<HistoryDropdown {...defaultProps} history={recentHistory} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       await waitFor(() => {
@@ -283,7 +283,7 @@ describe('HistoryDropdown组件测试', () => {
       
       render(<HistoryDropdown {...defaultProps} history={minutesAgoHistory} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       await waitFor(() => {
@@ -299,7 +299,7 @@ describe('HistoryDropdown组件测试', () => {
       
       render(<HistoryDropdown {...defaultProps} history={hoursAgoHistory} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       await waitFor(() => {
@@ -317,7 +317,7 @@ describe('HistoryDropdown组件测试', () => {
       
       render(<HistoryDropdown {...defaultProps} history={noDescHistory} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       await waitFor(() => {
@@ -336,10 +336,10 @@ describe('HistoryDropdown组件测试', () => {
       
       render(<HistoryDropdown {...defaultProps} history={manyHistory} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       
-      // 验证按钮文本包含正确的历史记录数量
-      expect(button).toHaveTextContent('历史 (100)')
+      // 验证按钮存在（现在只显示图标，不显示数量文本）
+      expect(button).toBeInTheDocument()
       
       await user.click(button)
       
@@ -354,7 +354,7 @@ describe('HistoryDropdown组件测试', () => {
       const user = userEvent.setup()
       render(<HistoryDropdown {...defaultProps} currentIndex={999} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       await waitFor(() => {
@@ -368,7 +368,7 @@ describe('HistoryDropdown组件测试', () => {
       const user = userEvent.setup()
       render(<HistoryDropdown {...defaultProps} currentIndex={-1} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       await waitFor(() => {
@@ -383,7 +383,7 @@ describe('HistoryDropdown组件测试', () => {
       const user = userEvent.setup()
       render(<HistoryDropdown {...defaultProps} history={[]} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       await waitFor(() => {
@@ -395,7 +395,7 @@ describe('HistoryDropdown组件测试', () => {
       const user = userEvent.setup()
       render(<HistoryDropdown {...defaultProps} />)
       
-      const button = screen.getByRole('button', { name: /历史/ })
+      const button = screen.getByRole('button', { name: /history/ })
       await user.click(button)
       
       await waitFor(() => {
