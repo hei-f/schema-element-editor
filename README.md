@@ -98,7 +98,7 @@ window.__updateContentById = (schema: any, params: string) => {
 
 函数名可在配置页面自定义。
 
-### 扩展 API (v1.8.0+)
+### 扩展 API (v1.7.1+)
 
 除了核心 API（`__getContentById` 和 `__updateContentById`），插件还支持以下可选的扩展 API：
 
