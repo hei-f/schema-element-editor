@@ -2,14 +2,11 @@ import type { ElementAttributes, HighlightAllConfig, SearchConfig } from '@/shar
 import { storage } from '@/shared/utils/browser/storage'
 import { logger } from '@/shared/utils/logger'
 import {
-  addHighlight,
   findElementWithSchemaParams,
   getElementAttributes,
   getMousePosition,
   hasValidAttributes,
-  isVisibleElement,
-  removeCandidateHighlight,
-  removeHighlight
+  isVisibleElement
 } from '@/shared/utils/ui/dom'
 
 /** 扩展UI元素的选择器 */
@@ -28,15 +25,28 @@ export class ElementMonitor {
   private rafId: number | null = null
   private lastSearchTime: number = 0
   private searchConfig: SearchConfig | null = null
-  private candidateElements: HTMLElement[] = []
   private lastMouseX: number = 0
   private lastMouseY: number = 0
+  
+  // 单元素高亮相关属性
+  private highlightBox: HTMLElement | null = null
+  private currentHighlightedElement: HTMLElement | null = null
+  private highlightInitialRect: { left: number; top: number } | null = null
   
   // 高亮所有元素相关属性
   private highlightAllConfig: HighlightAllConfig | null = null
   private isHighlightingAll: boolean = false
   private highlightAllElements: HTMLElement[] = []
-  private highlightAllBoxes: HTMLElement[] = []
+  private highlightAllBoxes: Array<{
+    targetElement: HTMLElement
+    boxElement: HTMLElement
+    initialRect: { left: number; top: number }
+  }> = []
+  
+  // 滚动处理相关
+  private scrollStopTimer: number | null = null
+  private scrollUpdateRafId: number | null = null
+  private readonly SCROLL_STOP_DELAY = 150
 
   /**
    * 启动监听
@@ -215,10 +225,39 @@ export class ElementMonitor {
    * 处理滚动事件
    */
   private handleScroll = (): void => {
-    // 如果正在高亮所有元素，滚动时自动清除
-    if (this.isHighlightingAll) {
-      this.clearAllHighlights()
+    // 使用 RAF 优化性能，实时更新高亮框位置
+    if (this.scrollUpdateRafId) {
+      cancelAnimationFrame(this.scrollUpdateRafId)
     }
+    
+    this.scrollUpdateRafId = requestAnimationFrame(() => {
+      // 更新单元素高亮框位置
+      this.updateHighlightBoxPosition()
+      
+      // 更新所有高亮框位置
+      this.updateAllHighlightBoxPositions()
+    })
+    
+    // 清除之前的滚动停止定时器
+    if (this.scrollStopTimer) {
+      clearTimeout(this.scrollStopTimer)
+    }
+    
+    // 设置新的滚动停止定时器（debounce）
+    this.scrollStopTimer = window.setTimeout(() => {
+      // 滚动停止，重新检测鼠标位置的元素
+      if (this.isControlPressed && (this.lastMouseX !== 0 || this.lastMouseY !== 0)) {
+        // 创建模拟的鼠标事件
+        const mockMouseEvent = new MouseEvent('mousemove', {
+          clientX: this.lastMouseX,
+          clientY: this.lastMouseY,
+          bubbles: true,
+          cancelable: true
+        })
+        // 重新执行搜索（会走条件判断逻辑）
+        this.performSearch(mockMouseEvent)
+      }
+    }, this.SCROLL_STOP_DELAY)
   }
 
   /**
@@ -254,7 +293,7 @@ export class ElementMonitor {
     
     // 节流检查
     const now = Date.now()
-    const throttleInterval = this.searchConfig?.throttleInterval ?? 100
+    const throttleInterval = this.searchConfig?.throttleInterval ?? 16
     if (now - this.lastSearchTime < throttleInterval) {
       return
     }
@@ -275,9 +314,6 @@ export class ElementMonitor {
       return
     }
     
-    // 清理之前的高亮
-    this.clearHighlight()
-    
     // 使用新的智能搜索函数
     const { target } = await findElementWithSchemaParams(
       event.clientX,
@@ -285,7 +321,8 @@ export class ElementMonitor {
     )
     
     if (!target) {
-      // 没找到任何元素，显示"非法目标"
+      // 没找到任何元素，清理高亮并显示"非法目标"
+      this.clearHighlight()
       this.showTooltip({ params: [] }, false, event)
       return
     }
@@ -294,11 +331,20 @@ export class ElementMonitor {
     const attrs = await getElementAttributes(target)
     const isValid = hasValidAttributes(attrs)
     
+    // 条件卸载：检查是否是同一个元素
+    if (target === this.currentHighlightedElement) {
+      // 同一个元素，只更新 tooltip 位置，不重建高亮框
+      this.showTooltip(attrs, isValid, event)
+      return
+    }
+    
+    // 不同元素，需要重建高亮框
     // 设置当前元素
     this.currentElement = target
     
-    // 直接高亮目标元素
-    addHighlight(target)
+    // 创建高亮框
+    const color = await storage.getHighlightColor()
+    this.createHighlightBox(target, color)
     this.showTooltip(attrs, isValid, event)
   }
 
@@ -391,25 +437,16 @@ export class ElementMonitor {
    * 清理当前高亮
    */
   private clearHighlight(): void {
-    if (this.currentElement) {
-      removeHighlight(this.currentElement)
-      this.currentElement = null
-    }
-    this.clearCandidateHighlights()
+    // 移除高亮框
+    this.removeHighlightBox()
     
+    // 清除当前元素引用
+    this.currentElement = null
+    
+    // 隐藏 tooltip
     if (this.tooltipElement) {
       this.tooltipElement.style.display = 'none'
     }
-  }
-
-  /**
-   * 清除候选元素高亮
-   */
-  private clearCandidateHighlights(): void {
-    for (const element of this.candidateElements) {
-      removeCandidateHighlight(element)
-    }
-    this.candidateElements = []
   }
 
   /**
@@ -468,23 +505,13 @@ export class ElementMonitor {
    */
   private addHighlightBox(element: HTMLElement, params: string[], color: string): void {
     const rect = element.getBoundingClientRect()
+    const offset = 4 // outlineOffset + border
     
     // 创建高亮框容器
     const container = document.createElement('div')
     container.className = 'schema-editor-highlight-all'
     container.setAttribute('data-schema-editor-ui', 'true')
-    container.style.cssText = `
-      position: fixed;
-      left: ${rect.left}px;
-      top: ${rect.top}px;
-      width: ${rect.width}px;
-      height: ${rect.height}px;
-      border: 2px solid ${color};
-      box-shadow: 0 0 10px ${this.hexToRgba(color, 0.5)};
-      pointer-events: none;
-      z-index: 999998;
-      box-sizing: border-box;
-    `
+    container.style.cssText = this.createHighlightBoxStyle(rect, color, true)
     
     // 创建标签
     const label = document.createElement('div')
@@ -513,7 +540,12 @@ export class ElementMonitor {
     container.appendChild(label)
     document.body.appendChild(container)
     
-    this.highlightAllBoxes.push(container)
+    // 存储到数组中（包含目标元素、高亮框元素和初始位置）
+    this.highlightAllBoxes.push({
+      targetElement: element,
+      boxElement: container,
+      initialRect: { left: rect.left - offset, top: rect.top - offset }
+    })
   }
 
   /**
@@ -521,9 +553,9 @@ export class ElementMonitor {
    */
   private clearAllHighlights(): void {
     // 移除所有高亮框
-    this.highlightAllBoxes.forEach(box => {
-      if (box.parentNode) {
-        box.parentNode.removeChild(box)
+    this.highlightAllBoxes.forEach(item => {
+      if (item.boxElement.parentNode) {
+        item.boxElement.parentNode.removeChild(item.boxElement)
       }
     })
     
@@ -532,6 +564,111 @@ export class ElementMonitor {
     this.isHighlightingAll = false
     
     logger.log('已清除所有高亮')
+  }
+
+  /**
+   * 生成高亮框样式（模拟 outline + outlineOffset 效果）
+   */
+  private createHighlightBoxStyle(
+    rect: DOMRect,
+    color: string,
+    useTransform: boolean = true
+  ): string {
+    // outlineOffset: 2px + border: 2px = 每边偏移 4px
+    const offset = 4
+    const left = rect.left - offset
+    const top = rect.top - offset
+    const width = rect.width + offset * 2
+    const height = rect.height + offset * 2
+    
+    const baseStyle = `
+      position: fixed;
+      width: ${width}px;
+      height: ${height}px;
+      border: 2px solid ${color};
+      box-shadow: 0 0 10px ${this.hexToRgba(color, 0.5)};
+      pointer-events: none;
+      z-index: 999998;
+      box-sizing: border-box;
+    `
+    
+    if (useTransform) {
+      return baseStyle + `
+        left: 0;
+        top: 0;
+        transform: translate(${left}px, ${top}px);
+      `
+    } else {
+      return baseStyle + `
+        left: ${left}px;
+        top: ${top}px;
+      `
+    }
+  }
+
+  /**
+   * 创建单元素高亮框
+   */
+  private createHighlightBox(element: HTMLElement, color: string): void {
+    // 如果已存在高亮框，先移除
+    this.removeHighlightBox()
+    
+    const rect = element.getBoundingClientRect()
+    
+    // 创建高亮框元素
+    const box = document.createElement('div')
+    box.className = 'schema-editor-highlight-hover'
+    box.setAttribute('data-schema-editor-ui', 'true')
+    box.style.cssText = this.createHighlightBoxStyle(rect, color, true)
+    
+    document.body.appendChild(box)
+    
+    // 记录状态
+    this.highlightBox = box
+    this.currentHighlightedElement = element
+    this.highlightInitialRect = { left: rect.left, top: rect.top }
+  }
+
+  /**
+   * 移除单元素高亮框
+   */
+  private removeHighlightBox(): void {
+    if (this.highlightBox && this.highlightBox.parentNode) {
+      this.highlightBox.parentNode.removeChild(this.highlightBox)
+    }
+    this.highlightBox = null
+    this.currentHighlightedElement = null
+    this.highlightInitialRect = null
+  }
+
+  /**
+   * 更新单元素高亮框位置（使用 transform）
+   */
+  private updateHighlightBoxPosition(): void {
+    if (!this.highlightBox || !this.currentHighlightedElement || !this.highlightInitialRect) {
+      return
+    }
+    
+    const currentRect = this.currentHighlightedElement.getBoundingClientRect()
+    const offset = 4 // outlineOffset + border
+    const deltaX = currentRect.left - offset - this.highlightInitialRect.left
+    const deltaY = currentRect.top - offset - this.highlightInitialRect.top
+    
+    this.highlightBox.style.transform = `translate(${this.highlightInitialRect.left + deltaX}px, ${this.highlightInitialRect.top + deltaY}px)`
+  }
+
+  /**
+   * 更新所有高亮框位置
+   */
+  private updateAllHighlightBoxPositions(): void {
+    for (const item of this.highlightAllBoxes) {
+      const currentRect = item.targetElement.getBoundingClientRect()
+      const offset = 4
+      const deltaX = currentRect.left - offset - item.initialRect.left
+      const deltaY = currentRect.top - offset - item.initialRect.top
+      
+      item.boxElement.style.transform = `translate(${item.initialRect.left + deltaX}px, ${item.initialRect.top + deltaY}px)`
+    }
   }
 
   /**
