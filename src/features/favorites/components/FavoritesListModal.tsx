@@ -1,8 +1,9 @@
 import type { Favorite } from '@/shared/types'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import type { TableColumnsType } from 'antd'
-import { Button, Input, Modal, Space, Table } from 'antd'
+import { Button, Modal, Space, Table } from 'antd'
 import React, { useEffect, useMemo, useState } from 'react'
+import { FullWidthSearchInput, ListSearchContainer } from '../styles/modals.styles'
 
 interface FavoritesListModalProps {
   visible: boolean
@@ -101,15 +102,14 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
       width={800}
       getContainer={shadowRootManager.getContainer}
     >
-      <Space direction="vertical" style={{ width: '100%', marginBottom: 16 }}>
-        <Input.Search
+      <ListSearchContainer>
+        <FullWidthSearchInput
           placeholder="搜索收藏名称或内容..."
           value={searchKeyword}
           onChange={(e) => setSearchKeyword(e.target.value)}
           allowClear
-          style={{ width: '100%' }}
         />
-      </Space>
+      </ListSearchContainer>
       <Table
         dataSource={filteredFavoritesList}
         rowKey="id"

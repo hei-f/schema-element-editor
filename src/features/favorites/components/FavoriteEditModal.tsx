@@ -1,9 +1,9 @@
 import type { CodeMirrorEditorHandle } from '@/features/schema-drawer/components/CodeMirrorEditor'
 import { CodeMirrorEditor } from '@/features/schema-drawer/components/CodeMirrorEditor'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
-import { Button, Modal, Space } from 'antd'
+import { Button, Modal } from 'antd'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { EditModalContent, EditModalNameInput, EditorContainer, ErrorAlert } from '../styles/modals.styles'
+import { EditModalContent, EditModalNameInput, EditorContainer, ErrorAlert, FullWidthVerticalSpace } from '../styles/modals.styles'
 
 interface FavoriteEditModalProps {
   visible: boolean
@@ -196,7 +196,7 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = ({
       }}
     >
       <EditModalContent>
-        <Space direction="vertical" style={{ width: '100%' }} size="middle">
+        <FullWidthVerticalSpace>
           {/* 名称输入框 */}
           <div>
             <EditModalNameInput
@@ -228,7 +228,7 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = ({
               <ErrorAlert message={jsonError} type="error" showIcon />
             )}
           </div>
-        </Space>
+        </FullWidthVerticalSpace>
       </EditModalContent>
     </Modal>
   )

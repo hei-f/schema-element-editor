@@ -1,4 +1,4 @@
-import { Alert, Input } from 'antd'
+import { Alert, Input, Space } from 'antd'
 import styled from 'styled-components'
 
 /**
@@ -39,5 +39,32 @@ export const EditorContainer = styled.div`
  */
 export const ErrorAlert = styled(Alert)`
   margin-top: 8px;
+`
+
+/**
+ * 全宽垂直布局容器
+ */
+export const FullWidthVerticalSpace = styled(Space).attrs({
+  direction: 'vertical',
+  size: 'middle'
+})`
+  width: 100%;
+`
+
+/**
+ * 列表搜索区域容器
+ */
+export const ListSearchContainer = styled(Space).attrs({
+  direction: 'vertical'
+})`
+  width: 100%;
+  margin-bottom: 16px;
+`
+
+/**
+ * 全宽搜索输入框
+ */
+export const FullWidthSearchInput = styled(Input.Search)`
+  width: 100%;
 `
 
