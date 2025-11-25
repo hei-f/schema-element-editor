@@ -48,7 +48,7 @@ const mockStorage = storage as jest.Mocked<typeof storage>
 describe('OptionsApp组件测试', () => {
   const defaultMockValues = {
     attributeName: 'id',
-    searchConfig: { searchDepthDown: 5, searchDepthUp: 3, throttleInterval: 200 },
+    searchConfig: { limitUpwardSearch: false, searchDepthUp: 3, throttleInterval: 200 },
     getFunctionName: '__getContentById',
     updateFunctionName: '__updateContentById',
     autoParseString: true,
@@ -58,7 +58,8 @@ describe('OptionsApp组件测试', () => {
       deserialize: false,
       serialize: false,
       format: true,
-      preview: true
+      preview: true,
+      importExport: true
     },
     drawerWidth: '800px',
     highlightColor: '#39C5BB',

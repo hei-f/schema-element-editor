@@ -148,7 +148,7 @@ describe('Storage工具测试', () => {
         drawerWidth: 1000,
         attributeName: 'custom-attr',
         searchConfig: {
-          searchDepthDown: 10,
+          limitUpwardSearch: true,
           searchDepthUp: 5,
           throttleInterval: 8
         },
@@ -164,7 +164,7 @@ describe('Storage工具测试', () => {
         drawerWidth: '1000px',
         attributeName: 'custom-attr',
         searchConfig: {
-          searchDepthDown: 10,
+          limitUpwardSearch: true,
           searchDepthUp: 5,
           throttleInterval: 8
         },
@@ -289,14 +289,14 @@ describe('Storage工具测试', () => {
     it('应该处理部分存储的配置', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
         searchConfig: {
-          searchDepthDown: 8
+          searchDepthUp: 8
         }
       })
       
       const result = await storage.getSearchConfig()
       
       // 应该返回存储的值，因为我们存储的是整个对象
-      expect(result.searchDepthDown).toBe(8)
+      expect(result.searchDepthUp).toBe(8)
     })
   })
 
@@ -304,21 +304,21 @@ describe('Storage工具测试', () => {
     it('应该保存完整的搜索配置', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
         searchConfig: {
-          searchDepthDown: 5,
+          limitUpwardSearch: false,
           searchDepthUp: 0,
           throttleInterval: 100
         }
       })
 
       await storage.setSearchConfig({
-        searchDepthDown: 10,
+        limitUpwardSearch: true,
         searchDepthUp: 5,
         throttleInterval: 32
       })
       
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         searchConfig: {
-          searchDepthDown: 10,
+          limitUpwardSearch: true,
           searchDepthUp: 5,
           throttleInterval: 32
         }
@@ -328,20 +328,20 @@ describe('Storage工具测试', () => {
     it('应该支持部分更新搜索配置', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
         searchConfig: {
-          searchDepthDown: 5,
+          limitUpwardSearch: false,
           searchDepthUp: 0,
           throttleInterval: 100
         }
       })
 
       await storage.setSearchConfig({
-        searchDepthDown: 8
+        searchDepthUp: 8
       })
       
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         searchConfig: {
-          searchDepthDown: 8,
-          searchDepthUp: 0,
+          limitUpwardSearch: false,
+          searchDepthUp: 8,
           throttleInterval: 100
         }
       })
@@ -421,7 +421,7 @@ describe('Storage工具测试', () => {
           drawerWidth: 1000,
           attributeName: 'test-params',
           searchConfig: {
-            searchDepthDown: 3,
+            limitUpwardSearch: false,
             searchDepthUp: 2,
             throttleInterval: 20
           },
@@ -447,7 +447,7 @@ describe('Storage工具测试', () => {
         drawerWidth: '1000px',
         attributeName: 'test-params',
         searchConfig: {
-          searchDepthDown: 3,
+          limitUpwardSearch: false,
           searchDepthUp: 2,
           throttleInterval: 20
         },
@@ -866,7 +866,7 @@ describe('Storage工具测试', () => {
 
     it('setSearchConfig应该合并现有配置', async () => {
       const existingConfig = {
-        searchDepthDown: 5,
+        limitUpwardSearch: false,
         searchDepthUp: 3,
         throttleInterval: 200
       }
@@ -875,12 +875,12 @@ describe('Storage工具测试', () => {
         'searchConfig': existingConfig
       })
 
-      await storage.setSearchConfig({ searchDepthDown: 10 })
+      await storage.setSearchConfig({ searchDepthUp: 10 })
 
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         'searchConfig': {
           ...existingConfig,
-          searchDepthDown: 10
+          searchDepthUp: 10
         }
       })
     })
@@ -889,7 +889,7 @@ describe('Storage工具测试', () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({})
       ;(chrome.storage.local.set as jest.Mock).mockRejectedValue(new Error('Set error'))
 
-      await expect(storage.setSearchConfig({ searchDepthDown: 10 })).resolves.not.toThrow()
+      await expect(storage.setSearchConfig({ searchDepthUp: 10 })).resolves.not.toThrow()
     })
 
     it('setAttributeName应该设置属性名', async () => {

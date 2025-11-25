@@ -18,8 +18,6 @@ jest.mock('../FavoriteEditModal', () => ({
     visible ? <div data-testid="edit-modal">FavoriteEditModal</div> : null
 }))
 
-const mockShadowRoot = document.createElement('div') as any
-
 describe('FavoritesManager组件测试', () => {
   const mockFavorite: Favorite = {
     id: 'fav_1',
@@ -30,7 +28,6 @@ describe('FavoritesManager组件测试', () => {
   }
 
   const defaultProps = {
-    shadowRoot: mockShadowRoot,
     addFavoriteModalVisible: false,
     favoriteNameInput: '',
     favoritesModalVisible: false,
@@ -155,15 +152,6 @@ describe('FavoritesManager组件测试', () => {
   })
 
   describe('Props传递', () => {
-    it('应该接收shadowRoot prop', () => {
-      const customShadowRoot = document.createElement('div') as any
-      const { container } = render(
-        <FavoritesManager {...defaultProps} shadowRoot={customShadowRoot} />
-      )
-      
-      expect(container).toBeInTheDocument()
-    })
-
     it('应该接收favoritesList prop', () => {
       const favorites = [mockFavorite]
       const { container } = render(
@@ -176,18 +164,6 @@ describe('FavoritesManager组件测试', () => {
     it('应该接收favoriteNameInput prop', () => {
       const { container } = render(
         <FavoritesManager {...defaultProps} favoriteNameInput="测试名称" />
-      )
-      
-      expect(container).toBeInTheDocument()
-    })
-
-    it('应该接收previewTitle和previewContent props', () => {
-      const { container } = render(
-        <FavoritesManager
-          {...defaultProps}
-          previewTitle="预览标题"
-          previewContent="预览内容"
-        />
       )
       
       expect(container).toBeInTheDocument()
@@ -246,18 +222,6 @@ describe('FavoritesManager组件测试', () => {
       expect(container).toBeInTheDocument()
     })
 
-    it('应该处理空字符串的preview值', () => {
-      const { container } = render(
-        <FavoritesManager
-          {...defaultProps}
-          previewTitle=""
-          previewContent=""
-        />
-      )
-      
-      expect(container).toBeInTheDocument()
-    })
-
     it('应该处理非常长的favoriteNameInput', () => {
       const longInput = 'a'.repeat(1000)
       const { container } = render(
@@ -272,8 +236,6 @@ describe('FavoritesManager组件测试', () => {
         <FavoritesManager
           {...defaultProps}
           favoriteNameInput="<script>alert('xss')</script>"
-          previewTitle="测试@#$%"
-          previewContent="中文🎉"
         />
       )
       

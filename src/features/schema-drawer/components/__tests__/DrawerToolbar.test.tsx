@@ -13,7 +13,8 @@ describe('DrawerToolbar组件测试', () => {
     deserialize: true,
     serialize: true,
     format: true,
-    preview: true
+    preview: true,
+    importExport: true
   }
 
   const mockHandlers = {
@@ -73,7 +74,8 @@ describe('DrawerToolbar组件测试', () => {
             deserialize: true,
             serialize: false,
             format: true,
-            preview: false
+            preview: false,
+            importExport: true
           }}
           {...mockHandlers}
         />
@@ -346,7 +348,8 @@ describe('DrawerToolbar组件测试', () => {
             deserialize: false,
             serialize: false,
             format: false,
-            preview: false
+            preview: false,
+            importExport: false
           }}
           {...mockHandlers}
         />
@@ -455,7 +458,7 @@ describe('DrawerToolbar组件测试', () => {
     })
 
     it('应该渲染AttributeTagWrapper组件', () => {
-      const { container } = render(
+      render(
         <DrawerToolbar
           attributes={mockAttributes}
           contentType={ContentType.Ast}
