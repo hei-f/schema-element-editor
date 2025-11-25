@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS 变量隔离测试 - Shadow DOM Theme</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      padding: 20px;
+      background-color: #f0f2f5;
+    }
+    
+    .test-section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      color: #1890ff;
+      margin-bottom: 10px;
+    }
+    
+    h2 {
+      color: #262626;
+      font-size: 18px;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 10px;
+    }
+    
+    .description {
+      color: #8c8c8c;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    
+    .test-case {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #fafafa;
+      border-radius: 4px;
+      border-left: 3px solid #1890ff;
+    }
+    
+    .test-title {
+      font-weight: 600;
+      color: #262626;
+      margin-bottom: 8px;
+    }
+    
+    .expected {
+      color: #52c41a;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    
+    .warning {
+      color: #faad14;
+      background: #fffbe6;
+      padding: 12px;
+      border-radius: 4px;
+      border-left: 3px solid #faad14;
+      margin-bottom: 20px;
+    }
+    
+    code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+      font-size: 13px;
+    }
+    
+    .css-vars-display {
+      background: #262626;
+      color: #52c41a;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+      font-size: 12px;
+      line-height: 1.8;
+      margin-top: 10px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .button-group {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary {
+      background: #1890ff;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #40a9ff;
+    }
+    
+    .btn-danger {
+      background: #ff4d4f;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #ff7875;
+    }
+    
+    .btn-success {
+      background: #52c41a;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #73d13d;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔬 CSS 变量隔离测试 - Shadow DOM Theme</h1>
+  <p class="description">
+    此页面用于测试 Chrome 扩展插件在使用了 Ant Design 的宿主页面中，是否能正确隔离样式。
+  </p>
+
+  <!-- 测试说明 -->
+  <div class="test-section">
+    <h2>📋 测试说明</h2>
+    <div class="warning">
+      <strong>⚠️ 注意：</strong>本测试页面需要安装并激活 Schema Editor 插件。
+    </div>
+    <ol>
+      <li>本页面模拟一个使用了自定义 Ant Design 主题的宿主页面</li>
+      <li>点击下方按钮设置不同的 CSS 变量，模拟外部页面的主题污染</li>
+      <li>激活 Schema Editor 插件，观察插件 UI 是否受影响</li>
+      <li>检查插件内的组件样式是否保持默认的 Ant Design 主题</li>
+    </ol>
+  </div>
+
+  <!-- 测试用例 1：污染主色调 -->
+  <div class="test-section">
+    <div class="test-case">
+      <div class="test-title">测试用例 1：污染主色调 (Primary Color)</div>
+      <p>将页面的主色调 CSS 变量设置为红色，观察插件按钮是否受影响。</p>
+      <div class="expected">
+        ✅ 预期结果：插件内的按钮仍然是蓝色 (#1890ff)，不受红色污染
+      </div>
+      <div class="button-group">
+        <button class="btn-danger" onclick="setPrimaryColor('#ff0000')">设置为红色 (#ff0000)</button>
+        <button class="btn-primary" onclick="resetPrimaryColor()">重置为默认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 测试用例 2：污染边框颜色 -->
+  <div class="test-section">
+    <div class="test-case">
+      <div class="test-title">测试用例 2：污染边框颜色 (Border Color)</div>
+      <p>将页面的边框颜色设置为深紫色，观察插件组件边框是否受影响。</p>
+      <div class="expected">
+        ✅ 预期结果：插件内的边框保持灰色 (#d9d9d9)，不受紫色污染
+      </div>
+      <div class="button-group">
+        <button class="btn-primary" onclick="setBorderColor('#7c3aed')">设置为紫色 (#7c3aed)</button>
+        <button class="btn-primary" onclick="resetBorderColor()">重置为默认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 测试用例 3：污染字体大小 -->
+  <div class="test-section">
+    <div class="test-case">
+      <div class="test-title">测试用例 3：污染字体大小 (Font Size)</div>
+      <p>将页面的基础字体大小设置为 20px，观察插件文字大小是否受影响。</p>
+      <div class="expected">
+        ✅ 预期结果：插件内的文字保持 14px，不受 20px 污染
+      </div>
+      <div class="button-group">
+        <button class="btn-primary" onclick="setFontSize('20px')">设置为 20px</button>
+        <button class="btn-primary" onclick="resetFontSize()">重置为默认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 测试用例 4：污染圆角 -->
+  <div class="test-section">
+    <div class="test-case">
+      <div class="test-title">测试用例 4：污染圆角 (Border Radius)</div>
+      <p>将页面的圆角设置为 20px，观察插件按钮圆角是否受影响。</p>
+      <div class="expected">
+        ✅ 预期结果：插件内的按钮圆角保持 6px，不受 20px 污染
+      </div>
+      <div class="button-group">
+        <button class="btn-primary" onclick="setBorderRadius('20px')">设置为 20px</button>
+        <button class="btn-primary" onclick="resetBorderRadius()">重置为默认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 测试用例 5：全部污染 -->
+  <div class="test-section">
+    <div class="test-case">
+      <div class="test-title">测试用例 5：综合污染测试</div>
+      <p>同时设置多个 CSS 变量，模拟极端污染场景。</p>
+      <div class="expected">
+        ✅ 预期结果：插件内的所有组件样式保持独立，不受任何外部变量影响
+      </div>
+      <div class="button-group">
+        <button class="btn-danger" onclick="setAllPolluted()">污染所有变量</button>
+        <button class="btn-success" onclick="resetAll()">重置所有变量</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 当前 CSS 变量显示 -->
+  <div class="test-section">
+    <h2>🔍 当前页面 CSS 变量</h2>
+    <p class="description">下方显示当前页面设置的 Ant Design 相关 CSS 变量值：</p>
+    <div class="css-vars-display" id="cssVarsDisplay">
+      点击上方按钮后，这里会显示当前设置的 CSS 变量...
+    </div>
+    <div class="button-group">
+      <button class="btn-primary" onclick="displayCSSVars()">刷新显示</button>
+    </div>
+  </div>
+
+  <!-- 测试元素 -->
+  <div id="test-element" style="display: none;" data-content-id="test-123">
+    这是一个测试元素，用于激活插件
+  </div>
+
+  <script>
+    // 设置主色调
+    function setPrimaryColor(color) {
+      document.documentElement.style.setProperty('--ant-primary-color', color);
+      document.documentElement.style.setProperty('--ant-primary-color-hover', color);
+      document.documentElement.style.setProperty('--ant-primary-color-active', color);
+      displayCSSVars();
+      console.log('✅ 已设置主色调为:', color);
+    }
+
+    function resetPrimaryColor() {
+      document.documentElement.style.removeProperty('--ant-primary-color');
+      document.documentElement.style.removeProperty('--ant-primary-color-hover');
+      document.documentElement.style.removeProperty('--ant-primary-color-active');
+      displayCSSVars();
+      console.log('✅ 已重置主色调');
+    }
+
+    // 设置边框颜色
+    function setBorderColor(color) {
+      document.documentElement.style.setProperty('--ant-border-color-base', color);
+      document.documentElement.style.setProperty('--ant-border-color', color);
+      displayCSSVars();
+      console.log('✅ 已设置边框颜色为:', color);
+    }
+
+    function resetBorderColor() {
+      document.documentElement.style.removeProperty('--ant-border-color-base');
+      document.documentElement.style.removeProperty('--ant-border-color');
+      displayCSSVars();
+      console.log('✅ 已重置边框颜色');
+    }
+
+    // 设置字体大小
+    function setFontSize(size) {
+      document.documentElement.style.setProperty('--ant-font-size-base', size);
+      displayCSSVars();
+      console.log('✅ 已设置字体大小为:', size);
+    }
+
+    function resetFontSize() {
+      document.documentElement.style.removeProperty('--ant-font-size-base');
+      displayCSSVars();
+      console.log('✅ 已重置字体大小');
+    }
+
+    // 设置圆角
+    function setBorderRadius(radius) {
+      document.documentElement.style.setProperty('--ant-border-radius-base', radius);
+      displayCSSVars();
+      console.log('✅ 已设置圆角为:', radius);
+    }
+
+    function resetBorderRadius() {
+      document.documentElement.style.removeProperty('--ant-border-radius-base');
+      displayCSSVars();
+      console.log('✅ 已重置圆角');
+    }
+
+    // 污染所有变量
+    function setAllPolluted() {
+      setPrimaryColor('#ff0000');
+      setBorderColor('#7c3aed');
+      setFontSize('20px');
+      setBorderRadius('20px');
+      console.log('💣 已污染所有 CSS 变量');
+    }
+
+    // 重置所有变量
+    function resetAll() {
+      resetPrimaryColor();
+      resetBorderColor();
+      resetFontSize();
+      resetBorderRadius();
+      console.log('✅ 已重置所有 CSS 变量');
+    }
+
+    // 显示当前 CSS 变量
+    function displayCSSVars() {
+      const vars = [
+        '--ant-primary-color',
+        '--ant-primary-color-hover',
+        '--ant-primary-color-active',
+        '--ant-border-color-base',
+        '--ant-border-color',
+        '--ant-font-size-base',
+        '--ant-border-radius-base',
+      ];
+
+      const styles = getComputedStyle(document.documentElement);
+      let output = '<strong>页面根元素的 CSS 变量：</strong><br><br>';
+
+      vars.forEach(varName => {
+        const value = styles.getPropertyValue(varName) || '(未设置)';
+        output += `${varName}: <span style="color: #73d13d">${value}</span><br>`;
+      });
+
+      output += '<br><strong>说明：</strong><br>';
+      output += '• 这些变量设置在页面根元素上<br>';
+      output += '• CSS 变量会沿 DOM 树继承，包括穿透 Shadow DOM<br>';
+      output += '• 插件通过 ConfigProvider 的 theme 配置覆盖这些变量<br>';
+      output += '• 如果插件样式不受影响，说明隔离成功 ✅';
+
+      document.getElementById('cssVarsDisplay').innerHTML = output;
+    }
+
+    // 页面加载时显示初始状态
+    window.addEventListener('load', () => {
+      displayCSSVars();
+      console.log('📄 CSS 变量隔离测试页面已加载');
+      console.log('💡 提示：安装并激活 Schema Editor 插件，然后点击测试按钮');
+    });
+  </script>
+</body>
+</html>
+
