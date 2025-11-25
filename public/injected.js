@@ -18,6 +18,9 @@
     update: '__updateContentById'
   }
 
+  /** 预览函数名 */
+  let previewFunctionName = '__getContentPreview'
+
   /** 预览容器和 React root */
   let previewContainer = null
   let previewRoot = null
@@ -53,13 +56,16 @@
   })
 
   function handleConfigSync(payload) {
-    const { getFunctionName, updateFunctionName } = payload || {}
+    const { getFunctionName, updateFunctionName, previewFunctionName: previewFnName } = payload || {}
     
     if (getFunctionName) {
       functionNames.get = getFunctionName
     }
     if (updateFunctionName) {
       functionNames.update = updateFunctionName
+    }
+    if (previewFnName) {
+      previewFunctionName = previewFnName
     }
   }
 
@@ -123,9 +129,9 @@
    * 检查预览函数是否存在
    */
   function handleCheckPreviewFunction() {
-    const exists = typeof window.__previewContent === 'function'
+    const previewFn = window[previewFunctionName]
     sendResponse('PREVIEW_FUNCTION_RESULT', {
-      exists
+      exists: typeof previewFn === 'function'
     })
   }
 
@@ -136,8 +142,8 @@
     const { data, position } = payload || {}
 
     try {
-      // 检查预览函数
-      if (typeof window.__previewContent !== 'function') {
+      const previewFn = window[previewFunctionName]
+      if (typeof previewFn !== 'function') {
         return
       }
 
@@ -149,7 +155,7 @@
       }
 
       // 渲染预览内容
-      renderPreviewContent(data)
+      renderPreviewContent(data, previewFn)
     } catch (error) {
       console.error('渲染预览失败:', error)
     }
@@ -193,13 +199,19 @@
 
   /**
    * 渲染预览内容
+   * @param {any} data - 预览数据
+   * @param {Function} [previewFn] - 预览函数（可选，默认使用配置的函数）
    */
-  function renderPreviewContent(data) {
+  function renderPreviewContent(data, previewFn) {
     if (!previewContainer) return
     
     try {
-      // 调用页面提供的预览函数
-      const reactNode = window.__previewContent(data)
+      const fn = previewFn || window[previewFunctionName]
+      if (typeof fn !== 'function') {
+        console.error('预览函数不存在')
+        return
+      }
+      const reactNode = fn(data)
       
       // 如果页面使用 React 18+，需要使用 ReactDOM.createRoot
       // 如果页面使用 React 17-，需要使用 ReactDOM.render

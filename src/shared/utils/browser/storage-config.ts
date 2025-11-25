@@ -130,7 +130,12 @@ export const SIMPLE_STORAGE_FIELDS = {
     validator: (value: any): value is EditorTheme => {
       return ['light', 'dark', 'schemaEditorDark'].includes(value)
     }
-  } as StorageFieldConfig<EditorTheme>
+  } as StorageFieldConfig<EditorTheme>,
+
+  previewFunctionName: {
+    key: STORAGE_KEYS.PREVIEW_FUNCTION_NAME,
+    defaultValue: DEFAULT_VALUES.previewFunctionName
+  } as StorageFieldConfig<string>
 }
 
 /**

@@ -25,7 +25,7 @@ export enum MessageType {
   /** 检查预览函数是否存在 */
   CHECK_PREVIEW_FUNCTION = 'CHECK_PREVIEW_FUNCTION',
   /** 预览函数检查结果 */
-  PREVIEW_FUNCTION_RESULT = 'PREVIEW_FUNCTION_RESULT'
+  PREVIEW_FUNCTION_RESULT = 'PREVIEW_FUNCTION_RESULT',
 }
 
 /**
@@ -86,8 +86,6 @@ export interface PreviewConfig {
   previewWidth: number
   /** 更新延迟（毫秒，100-2000） */
   updateDelay: number
-  /** 是否记住预览状态 */
-  rememberState: boolean
   /** 是否自动更新预览 */
   autoUpdate: boolean
 }
@@ -161,6 +159,8 @@ export interface StorageData {
   exportConfig: ExportConfig
   /** 编辑器主题 */
   editorTheme: EditorTheme
+  /** 预览函数名 */
+  previewFunctionName: string
 }
 
 /**
@@ -284,6 +284,8 @@ export interface ConfigSyncPayload {
   getFunctionName: string
   /** 更新Schema的函数名 */
   updateFunctionName: string
+  /** 预览函数名 */
+  previewFunctionName: string
 }
 
 /**
@@ -324,6 +326,8 @@ export interface PreviewFunctionResultPayload {
   exists: boolean
 }
 
+
+
 /**
  * 获取Schema的函数类型
  * @template T Schema数据类型，不能是 null 或 undefined
@@ -337,6 +341,13 @@ export type GetSchemaFunction<T = unknown> = (params: string) => NonNullable<T>
 export type UpdateSchemaFunction<T = unknown> = (schema: NonNullable<T>, params: string) => boolean
 
 /**
+ * 预览函数类型
+ * @param data - 预览数据
+ * @returns React 节点
+ */
+export type PreviewFunction = (data: any) => React.ReactNode
+
+/**
  * 扩展window对象，添加页面提供的方法
  * 注意：实际函数名可通过配置自定义
  */
@@ -346,10 +357,10 @@ declare global {
     __getSchemaByParams?: GetSchemaFunction
     /** 默认的更新Schema函数 */
     __updateSchemaByParams?: UpdateSchemaFunction
-    /** 预览内容函数 - 返回 React 节点 */
-    __previewContent?: (data: any) => React.ReactNode
+    /** 预览内容函数 */
+    __getContentPreview?: PreviewFunction
     /** 支持自定义函数名的索引签名 */
-    [key: string]: GetSchemaFunction | UpdateSchemaFunction | any
+    [key: string]: GetSchemaFunction | UpdateSchemaFunction | PreviewFunction | any
   }
 }
 

@@ -88,7 +88,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   const [previewConfig, setPreviewConfig] = useState({
     previewWidth: 40,
     updateDelay: 500,
-    rememberState: false,
     autoUpdate: false
   })
   const [previewWidth, setPreviewWidth] = useState(40) // 预览区域宽度百分比
@@ -548,7 +547,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
    */
   const handleTogglePreview = () => {
     if (!hasPreviewFunction) {
-      message.warning('页面未提供 __previewContent 函数')
+      message.warning('页面未提供预览函数')
       return
     }
     

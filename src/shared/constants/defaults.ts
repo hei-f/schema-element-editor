@@ -15,6 +15,7 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
   },
   getFunctionName: '__getContentById',
   updateFunctionName: '__updateContentById',
+  previewFunctionName: '__getContentPreview',
   autoParseString: true,
   enableDebugLog: false,
   toolbarButtons: {
@@ -33,7 +34,6 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
   previewConfig: {
     previewWidth: 40,
     updateDelay: 500,
-    rememberState: false,
     autoUpdate: false
   },
   maxHistoryCount: 50,
@@ -46,7 +46,7 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
   exportConfig: {
     customFileName: false
   },
-  editorTheme: 'schemaEditorDark' as const
+  editorTheme: 'schemaEditorDark',
 } as const
 
 /**
@@ -74,7 +74,8 @@ export const STORAGE_KEYS = {
   HIGHLIGHT_ALL_CONFIG: 'highlightAllConfig',
   ENABLE_AST_TYPE_HINTS: 'enableAstTypeHints',
   EXPORT_CONFIG: 'exportConfig',
-  EDITOR_THEME: 'editorTheme'
+  EDITOR_THEME: 'editorTheme',
+  PREVIEW_FUNCTION_NAME: 'previewFunctionName'
 } as const
 
 

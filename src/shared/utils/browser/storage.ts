@@ -146,13 +146,14 @@ class StorageManager {
   }
 
   /**
-   * 设置函数名
+   * 设置函数名（核心 API + 扩展 API）
    */
-  async setFunctionNames(getFunctionName: string, updateFunctionName: string): Promise<void> {
+  async setFunctionNames(getFunctionName: string, updateFunctionName: string, previewFunctionName: string): Promise<void> {
     try {
       await chrome.storage.local.set({
         [this.STORAGE_KEYS.GET_FUNCTION_NAME]: getFunctionName,
-        [this.STORAGE_KEYS.UPDATE_FUNCTION_NAME]: updateFunctionName
+        [this.STORAGE_KEYS.UPDATE_FUNCTION_NAME]: updateFunctionName,
+        [this.STORAGE_KEYS.PREVIEW_FUNCTION_NAME]: previewFunctionName
       })
     } catch (error) {
       console.error('设置函数名失败:', error)
@@ -233,7 +234,7 @@ class StorageManager {
    * 获取所有存储数据
    */
   async getAllData(): Promise<StorageData> {
-    const [isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig, enableAstTypeHints, editorTheme] = await Promise.all([
+    const [isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig, enableAstTypeHints, editorTheme, previewFunctionName] = await Promise.all([
       this.getActiveState(),
       this.getDrawerWidth(),
       this.getAttributeName(),
@@ -252,10 +253,11 @@ class StorageManager {
       this.getMaxHistoryCount(),
       this.getHighlightAllConfig(),
       this.getEnableAstTypeHints(),
-      this.getEditorTheme()
+      this.getEditorTheme(),
+      this.getPreviewFunctionName()
     ])
     const exportConfig = await this.getExportConfig()
-    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig, enableAstTypeHints, exportConfig, editorTheme }
+    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig, enableAstTypeHints, exportConfig, editorTheme, previewFunctionName }
   }
 
   /**
@@ -583,6 +585,20 @@ class StorageManager {
    */
   async setEditorTheme(theme: EditorTheme): Promise<void> {
     return this.setSimple('editorTheme', theme)
+  }
+
+  /**
+   * 获取预览函数名
+   */
+  async getPreviewFunctionName(): Promise<string> {
+    return this.getSimple<string>('previewFunctionName')
+  }
+
+  /**
+   * 设置预览函数名
+   */
+  async setPreviewFunctionName(name: string): Promise<void> {
+    return this.setSimple('previewFunctionName', name)
   }
 }
 

@@ -7,7 +7,7 @@ import { storage } from '@/shared/utils/browser/storage'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { App as AntdApp, ConfigProvider, message as antdMessage } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { StyleSheetManager } from 'styled-components'
 
 interface AppProps {
@@ -25,6 +25,31 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
   const [schemaData, setSchemaData] = useState<any>(null)
   const [currentAttributes, setCurrentAttributes] = useState<ElementAttributes>({ params: [] })
   const [drawerWidth, setDrawerWidth] = useState<string | number>('800px')
+  const configSyncedRef = useRef(false)
+
+  /**
+   * 同步配置到注入脚本
+   */
+  const syncConfigToInjected = useCallback(async () => {
+    if (configSyncedRef.current) return
+    
+    const [getFunctionName, updateFunctionName, previewFunctionName] = await Promise.all([
+      storage.getGetFunctionName(),
+      storage.getUpdateFunctionName(),
+      storage.getPreviewFunctionName()
+    ])
+    
+    postMessageToPage({
+      type: MessageType.CONFIG_SYNC,
+      payload: {
+        getFunctionName,
+        updateFunctionName,
+        previewFunctionName
+      }
+    })
+    
+    configSyncedRef.current = true
+  }, [])
 
   /**
    * 初始化：加载抽屉宽度配置并清理过期草稿
@@ -34,7 +59,8 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
       setDrawerWidth(width)
     })
     storage.cleanExpiredDrafts()
-  }, [])
+    syncConfigToInjected()
+  }, [syncConfigToInjected])
 
   /**
    * 监听来自injected script的消息

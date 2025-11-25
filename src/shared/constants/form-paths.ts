@@ -41,6 +41,9 @@ export const FORM_PATHS = {
   /** 更新函数名 */
   updateFunctionName: ['updateFunctionName'],
   
+  /** 预览函数名 */
+  previewFunctionName: ['previewFunctionName'],
+  
   /** 自动解析字符串 */
   autoParseString: ['autoParseString'],
   
@@ -78,8 +81,6 @@ export const FORM_PATHS = {
     previewWidth: ['previewConfig', 'previewWidth'],
     /** 更新延迟 */
     updateDelay: ['previewConfig', 'updateDelay'],
-    /** 记住预览状态 */
-    rememberState: ['previewConfig', 'rememberState'],
     /** 自动更新预览 */
     autoUpdate: ['previewConfig', 'autoUpdate']
   },
@@ -104,7 +105,8 @@ export const FORM_PATHS = {
   exportConfig: {
     /** 导出时自定义文件名 */
     customFileName: ['exportConfig', 'customFileName']
-  }
+  },
+  
 }
 
 /**
