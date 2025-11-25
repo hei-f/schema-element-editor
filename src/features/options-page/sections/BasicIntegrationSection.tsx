@@ -1,11 +1,9 @@
 import { DEFAULT_VALUES } from '@/shared/constants/defaults'
 import { FORM_PATHS } from '@/shared/constants/form-paths'
-import { Form, Input, Divider, Typography } from 'antd'
+import { Form, Input } from 'antd'
 import React from 'react'
 import { SectionCard } from '../components/SectionCard'
-import { CodeBlock, ExampleLabel, ExampleSection } from '../styles/layout.styles'
-
-const { Text } = Typography
+import { CodeBlock, ExampleLabel, ExampleSection, FormSectionLabel } from '../styles/layout.styles'
 
 interface BasicIntegrationSectionProps {
   /** 当前属性名（用于动态示例） */
@@ -46,7 +44,7 @@ export const BasicIntegrationSection: React.FC<BasicIntegrationSectionProps> = (
         <Input placeholder={`例如: ${DEFAULT_VALUES.attributeName}`} />
       </Form.Item>
 
-      <Divider orientation="left"><Text type="secondary">核心 API（必需）</Text></Divider>
+      <FormSectionLabel>核心 API（必需）</FormSectionLabel>
 
       <Form.Item
         label="获取Schema函数名"
@@ -72,7 +70,7 @@ export const BasicIntegrationSection: React.FC<BasicIntegrationSectionProps> = (
         <Input placeholder={`例如: ${DEFAULT_VALUES.updateFunctionName}`} />
       </Form.Item>
 
-      <Divider orientation="left"><Text type="secondary">扩展 API（可选）</Text></Divider>
+      <FormSectionLabel>扩展 API（可选）</FormSectionLabel>
 
       <Form.Item
         label="预览函数名"

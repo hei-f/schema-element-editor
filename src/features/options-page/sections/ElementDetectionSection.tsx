@@ -4,7 +4,7 @@ import React from 'react'
 import { ColorPickerField } from '../components/ColorPickerField'
 import { SectionCard } from '../components/SectionCard'
 import { 
-  SectionTitle,
+  FormSectionLabel,
   FixedWidthInput,
   FixedWidthInputNumber,
   SpacedAlert
@@ -76,7 +76,7 @@ export const ElementDetectionSection: React.FC<ElementDetectionSectionProps> = (
         <ColorPickerField />
       </Form.Item>
 
-      <SectionTitle level={5}>快捷键高亮所有元素</SectionTitle>
+      <FormSectionLabel>快捷键高亮所有元素</FormSectionLabel>
 
       <Form.Item
         label="启用功能"

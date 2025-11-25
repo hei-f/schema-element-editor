@@ -5,8 +5,7 @@ import React from 'react'
 import { SectionCard } from '../components/SectionCard'
 import { 
   FixedWidthInputNumber,
-  SectionSubTitle, 
-  SectionTitle,
+  FormSectionLabel,
   InlineFormRow,
   FormLabel,
   ZeroMarginFormItem,
@@ -33,7 +32,7 @@ export const DataManagementSection: React.FC<DataManagementSectionProps> = (prop
       panelKey="data-management"
       onResetDefault={onResetDefault}
     >
-      <SectionTitle level={5} $noMarginTop>草稿配置</SectionTitle>
+      <FormSectionLabel $noMarginTop>草稿配置</FormSectionLabel>
       
       <Form.Item
         label="草稿自动保存"
@@ -44,7 +43,7 @@ export const DataManagementSection: React.FC<DataManagementSectionProps> = (prop
         <Switch />
       </Form.Item>
 
-      <SectionSubTitle level={5}>收藏配置</SectionSubTitle>
+      <FormSectionLabel>收藏配置</FormSectionLabel>
       
       <Form.Item
         label="最大收藏数量"
@@ -58,7 +57,7 @@ export const DataManagementSection: React.FC<DataManagementSectionProps> = (prop
         <FixedWidthInputNumber min={10} max={200} step={10} placeholder="50" $width={120} />
       </Form.Item>
 
-      <SectionSubTitle level={5}>历史记录配置</SectionSubTitle>
+      <FormSectionLabel>历史记录配置</FormSectionLabel>
 
       <Form.Item
         label="历史记录上限"
@@ -86,7 +85,7 @@ export const DataManagementSection: React.FC<DataManagementSectionProps> = (prop
         $marginBottom={24}
       />
 
-      <SectionSubTitle level={5}>导出配置</SectionSubTitle>
+      <FormSectionLabel>导出配置</FormSectionLabel>
 
       <InlineFormRow>
         <FormLabel>导出时自定义文件名:</FormLabel>

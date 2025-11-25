@@ -236,6 +236,17 @@ export const SectionDivider = styled.div`
 `
 
 /**
+ * 表单区块子标题
+ * 用于表单内部分组的标签，无分割线
+ */
+export const FormSectionLabel = styled.div<{ $noMarginTop?: boolean }>`
+  font-size: 13px;
+  color: #8c8c8c;
+  margin: ${props => props.$noMarginTop ? '0' : '24px'} 0 16px;
+  padding-left: 2px;
+`
+
+/**
  * 横向表单行容器
  * 用于将标签、输入框、帮助图标等元素横向排列
  */
@@ -243,6 +254,7 @@ export const InlineFormRow = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  position: relative;
 `
 
 /**
@@ -264,9 +276,6 @@ export const FormLabel = styled.span`
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  display: inline-block;
-  min-width: 90px;
-  text-align: right;
 `
 
 /**
@@ -282,10 +291,13 @@ export const ZeroMarginFormItem = styled(Form.Item)`
 /**
  * 帮助提示图标
  * 用于表单项旁的帮助说明，带悬停效果
+ * 使用绝对定位避免影响对齐
  */
 export const HelpTooltipIcon = styled(QuestionCircleOutlined)`
   color: #999;
   cursor: pointer;
+  position: absolute;
+  right: -20px;
   
   &:hover {
     color: #666;
