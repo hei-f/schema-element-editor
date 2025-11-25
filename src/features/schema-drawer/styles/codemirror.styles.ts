@@ -5,7 +5,7 @@ import { styled } from 'styled-components'
 /**
  * 编辑器容器样式
  */
-export const EditorWrapper = styled.div<{ $height?: string }>`
+export const EditorWrapper = styled.div<{ $height?: string; $isDark?: boolean }>`
   height: ${props => props.$height || '100%'};
   overflow: auto;
   
@@ -58,16 +58,18 @@ export const EditorWrapper = styled.div<{ $height?: string }>`
     background-color: #d7d4f0 !important;
   }
   
-  /* 括号匹配高亮 */
-  .cm-matchingBracket {
-    background-color: #d0f0d0;
-    outline: 1px solid #0b0;
-  }
-  
-  .cm-nonmatchingBracket {
-    background-color: #f0d0d0;
-    outline: 1px solid #b00;
-  }
+  /* 括号匹配高亮 - 仅为 light 主题设置，深色主题由各主题文件自行定义 */
+  ${props => !props.$isDark && `
+    .cm-matchingBracket {
+      background-color: #d0f0d0;
+      outline: 1px solid #0b0;
+    }
+    
+    .cm-nonmatchingBracket {
+      background-color: #f0d0d0;
+      outline: 1px solid #b00;
+    }
+  `}
   
   /* Linting 错误样式 */
   .cm-lintRange-error {
@@ -133,13 +135,18 @@ export const EditorWrapper = styled.div<{ $height?: string }>`
     border-radius: 6px;
     padding: 4px 0;
     max-height: 300px;
-    overflow-y: auto;
+    overflow: hidden; /* 移除滚动条，让内部 ul 处理 */
   }
   
   /* 补全选项样式 */
   .cm-tooltip-autocomplete > ul {
     font-family: Monaco, Menlo, Consolas, monospace;
     font-size: 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-height: 292px; /* 略小于面板高度，避免出现滚动条 */
+    overflow-y: auto;
   }
   
   .cm-tooltip-autocomplete > ul > li {
@@ -221,6 +228,44 @@ export const EditorWrapper = styled.div<{ $height?: string }>`
   .cm-completionIcon-type::before {
     content: "📋";
   }
+  
+  /* === 深色主题的补全面板样式 === */
+  /* CodeMirror 在应用 dark 主题时会自动添加 .cm-dark 类 */
+  .cm-editor.cm-dark ~ .cm-tooltip.cm-tooltip-autocomplete,
+  .cm-dark .cm-tooltip.cm-tooltip-autocomplete {
+    background-color: #252526;
+    border: 1px solid #454545;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+  
+  .cm-editor.cm-dark ~ .cm-tooltip-autocomplete > ul > li,
+  .cm-dark .cm-tooltip-autocomplete > ul > li {
+    color: #cccccc;
+  }
+  
+  .cm-editor.cm-dark ~ .cm-tooltip-autocomplete > ul > li[aria-selected],
+  .cm-dark .cm-tooltip-autocomplete > ul > li[aria-selected] {
+    background-color: #094771;
+    color: #ffffff;
+  }
+  
+  .cm-editor.cm-dark ~ .cm-tooltip-autocomplete .cm-completionDetail,
+  .cm-dark .cm-completionDetail {
+    color: #999;
+  }
+  
+  .cm-editor.cm-dark ~ .cm-tooltip-autocomplete > ul > li[aria-selected] .cm-completionDetail,
+  .cm-dark .cm-tooltip-autocomplete > ul > li[aria-selected] .cm-completionDetail {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .cm-editor.cm-dark ~ .cm-completionInfo,
+  .cm-dark .cm-completionInfo {
+    background-color: #1e1e1e;
+    border-color: #454545;
+    color: #cccccc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
 `
 
 /**
@@ -237,10 +282,10 @@ export const jsonLightHighlight = HighlightStyle.define([
   // 布尔值和 null - 蓝色
   { tag: tags.bool, color: '#0000ff', fontWeight: 'bold' },
   { tag: tags.null, color: '#0000ff', fontWeight: 'bold' },
-  // 括号 - 使用彩虹色
-  { tag: tags.brace, color: '#0098ff', fontWeight: 'bold' },      // {} - 蓝色
-  { tag: tags.squareBracket, color: '#d73a49', fontWeight: 'bold' }, // [] - 红色
-  { tag: tags.paren, color: '#6f42c1', fontWeight: 'bold' },      // () - 紫色
+  // 括号 - 不同类型不同颜色
+  { tag: tags.brace, color: '#0431fa', fontWeight: 'bold' },         // {} 花括号 - 蓝色
+  { tag: tags.squareBracket, color: '#319331', fontWeight: 'bold' }, // [] 方括号 - 绿色
+  { tag: tags.paren, color: '#9400d3', fontWeight: 'bold' },         // () 圆括号 - 紫色
   // 逗号和冒号
   { tag: tags.separator, color: '#000000' },
   { tag: tags.punctuation, color: '#000000' },
@@ -259,9 +304,10 @@ export const jsonDarkHighlight = HighlightStyle.define([
   { tag: tags.number, color: '#b5cea8' },
   { tag: tags.bool, color: '#569cd6', fontWeight: 'bold' },
   { tag: tags.null, color: '#569cd6', fontWeight: 'bold' },
-  { tag: tags.brace, color: '#ffd700', fontWeight: 'bold' },
-  { tag: tags.squareBracket, color: '#da70d6', fontWeight: 'bold' },
-  { tag: tags.paren, color: '#87ceeb', fontWeight: 'bold' },
+  // 括号 - 不同类型不同颜色
+  { tag: tags.brace, color: '#ffd700', fontWeight: 'bold' },         // {} 花括号 - 金色
+  { tag: tags.squareBracket, color: '#da70d6', fontWeight: 'bold' }, // [] 方括号 - 紫色
+  { tag: tags.paren, color: '#87ceeb', fontWeight: 'bold' },         // () 圆括号 - 天蓝
   { tag: tags.separator, color: '#d4d4d4' },
   { tag: tags.punctuation, color: '#d4d4d4' },
   { tag: tags.comment, color: '#6a9955', fontStyle: 'italic' },

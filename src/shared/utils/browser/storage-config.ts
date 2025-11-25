@@ -1,5 +1,5 @@
 import { DEFAULT_VALUES, STORAGE_KEYS } from '@/shared/constants/defaults'
-import type { HighlightAllConfig, PreviewConfig } from '@/shared/types'
+import type { EditorTheme, HighlightAllConfig, PreviewConfig } from '@/shared/types'
 
 /**
  * 存储字段配置接口
@@ -122,7 +122,15 @@ export const SIMPLE_STORAGE_FIELDS = {
   enableAstTypeHints: {
     key: STORAGE_KEYS.ENABLE_AST_TYPE_HINTS,
     defaultValue: DEFAULT_VALUES.enableAstTypeHints
-  } as StorageFieldConfig<boolean>
+  } as StorageFieldConfig<boolean>,
+
+  editorTheme: {
+    key: STORAGE_KEYS.EDITOR_THEME,
+    defaultValue: DEFAULT_VALUES.editorTheme,
+    validator: (value: any): value is EditorTheme => {
+      return ['light', 'dark', 'schemaEditorDark'].includes(value)
+    }
+  } as StorageFieldConfig<EditorTheme>
 }
 
 /**

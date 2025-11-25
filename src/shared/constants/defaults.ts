@@ -45,7 +45,8 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
   enableAstTypeHints: true,
   exportConfig: {
     customFileName: false
-  }
+  },
+  editorTheme: 'schemaEditorDark' as const
 } as const
 
 /**
@@ -72,7 +73,8 @@ export const STORAGE_KEYS = {
   MAX_HISTORY_COUNT: 'maxHistoryCount',
   HIGHLIGHT_ALL_CONFIG: 'highlightAllConfig',
   ENABLE_AST_TYPE_HINTS: 'enableAstTypeHints',
-  EXPORT_CONFIG: 'exportConfig'
+  EXPORT_CONFIG: 'exportConfig',
+  EDITOR_THEME: 'editorTheme'
 } as const
 
 

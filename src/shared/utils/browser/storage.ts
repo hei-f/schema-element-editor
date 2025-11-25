@@ -1,7 +1,7 @@
 import { DEFAULT_VALUES, STORAGE_KEYS } from '@/shared/constants/defaults'
 import { draftManager } from '@/shared/managers/draft-manager'
 import { favoritesManager } from '@/shared/managers/favorites-manager'
-import type { Draft, ExportConfig, Favorite, HighlightAllConfig, PreviewConfig, SearchConfig, StorageData, ToolbarButtonsConfig } from '@/shared/types'
+import type { Draft, EditorTheme, ExportConfig, Favorite, HighlightAllConfig, PreviewConfig, SearchConfig, StorageData, ToolbarButtonsConfig } from '@/shared/types'
 import { logger } from '@/shared/utils/logger'
 import { SIMPLE_STORAGE_FIELDS, type StorageFieldName } from './storage-config'
 
@@ -233,7 +233,7 @@ class StorageManager {
    * 获取所有存储数据
    */
   async getAllData(): Promise<StorageData> {
-    const [isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig, enableAstTypeHints] = await Promise.all([
+    const [isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig, enableAstTypeHints, editorTheme] = await Promise.all([
       this.getActiveState(),
       this.getDrawerWidth(),
       this.getAttributeName(),
@@ -251,10 +251,11 @@ class StorageManager {
       this.getPreviewConfig(),
       this.getMaxHistoryCount(),
       this.getHighlightAllConfig(),
-      this.getEnableAstTypeHints()
+      this.getEnableAstTypeHints(),
+      this.getEditorTheme()
     ])
     const exportConfig = await this.getExportConfig()
-    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig, enableAstTypeHints, exportConfig }
+    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig, enableAstTypeHints, exportConfig, editorTheme }
   }
 
   /**
@@ -568,6 +569,20 @@ class StorageManager {
       console.error('设置导出配置失败:', error)
       throw error
     }
+  }
+
+  /**
+   * 获取编辑器主题
+   */
+  async getEditorTheme(): Promise<EditorTheme> {
+    return this.getSimple<EditorTheme>('editorTheme')
+  }
+
+  /**
+   * 设置编辑器主题
+   */
+  async setEditorTheme(theme: EditorTheme): Promise<void> {
+    return this.setSimple('editorTheme', theme)
   }
 }
 

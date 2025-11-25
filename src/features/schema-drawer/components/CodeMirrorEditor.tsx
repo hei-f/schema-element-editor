@@ -5,8 +5,8 @@ import { bracketMatching, foldGutter, foldKeymap, indentOnInput, syntaxHighlight
 import { linter, lintGutter } from '@codemirror/lint'
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search'
 import { EditorSelection, EditorState } from '@codemirror/state'
-import { oneDark } from '@codemirror/theme-one-dark'
 import { EditorView, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers, placeholder } from '@codemirror/view'
+import type { EditorTheme } from '@/shared/types'
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import {
   EditorWrapper,
@@ -14,6 +14,8 @@ import {
   jsonLightHighlight,
   SelectionStats
 } from '../styles/codemirror.styles'
+import { schemaEditorDark, schemaEditorDarkHighlighting } from '../styles/schema-editor-dark-theme'
+import { simpleDark } from '../styles/simple-dark-theme'
 import { createAstCompletionSource } from '../utils/ast-completion'
 
 interface CodeMirrorEditorProps {
@@ -22,7 +24,7 @@ interface CodeMirrorEditorProps {
   /** 内容变化回调 */
   onChange?: (value: string) => void
   height?: string
-  theme?: 'light' | 'dark'
+  theme?: EditorTheme
   readOnly?: boolean
   placeholder?: string
   /** 是否启用 AST 类型提示 */
@@ -205,6 +207,19 @@ export const CodeMirrorEditor = forwardRef<CodeMirrorEditorHandle, CodeMirrorEdi
   useEffect(() => {
     if (!editorRef.current) return
 
+    // 根据主题选择语法高亮和基础主题
+    const getThemeExtensions = () => {
+      switch (theme) {
+        case 'dark':
+          return [simpleDark, syntaxHighlighting(jsonDarkHighlight)]
+        case 'schemaEditorDark':
+          return [schemaEditorDark, schemaEditorDarkHighlighting]
+        case 'light':
+        default:
+          return [syntaxHighlighting(jsonLightHighlight)]
+      }
+    }
+
     // 创建编辑器状态
     const state = EditorState.create({
       doc: defaultValue,
@@ -218,8 +233,8 @@ export const CodeMirrorEditor = forwardRef<CodeMirrorEditorHandle, CodeMirrorEdi
         // JSON Linting（实时错误检查）
         linter(jsonParseLinter()),
         lintGutter(),
-        // 自定义语法高亮
-        syntaxHighlighting(theme === 'dark' ? jsonDarkHighlight : jsonLightHighlight),
+        // 主题和语法高亮
+        ...getThemeExtensions(),
         // 代码折叠
         foldGutter({
           openText: '▼',
@@ -296,8 +311,6 @@ export const CodeMirrorEditor = forwardRef<CodeMirrorEditorHandle, CodeMirrorEdi
         // 只读模式
         EditorView.editable.of(!readOnly),
         EditorState.readOnly.of(readOnly),
-        // 主题
-        ...(theme === 'dark' ? [oneDark] : []),
         // 变化监听
         EditorView.updateListener.of((update: any) => {
           if (update.docChanged) {
@@ -383,11 +396,14 @@ export const CodeMirrorEditor = forwardRef<CodeMirrorEditorHandle, CodeMirrorEdi
     // 只读状态切换通过重新创建编辑器实现（在上面的 useEffect 中）
   }, [readOnly])
 
+  // 判断是否为深色主题
+  const isDarkTheme = theme !== 'light'
+
   return (
     <>
-      <EditorWrapper ref={editorRef} $height={height} />
+      <EditorWrapper ref={editorRef} $height={height} $isDark={isDarkTheme} />
       {selectionStats.selected && (
-        <SelectionStats className={theme === 'dark' ? 'dark' : ''}>
+        <SelectionStats className={isDarkTheme ? 'dark' : ''}>
           <div className="stat-item">
             <span className="label">选中:</span>
             <span className="value">{selectionStats.chars} 字符</span>

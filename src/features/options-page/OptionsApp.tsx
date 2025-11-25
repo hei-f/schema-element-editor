@@ -68,6 +68,7 @@ export const OptionsApp: React.FC = () => {
       const highlightAllConfig = await storage.getHighlightAllConfig()
       const enableAstTypeHints = await storage.getEnableAstTypeHints()
       const exportConfig = await storage.getExportConfig()
+      const editorTheme = await storage.getEditorTheme()
       
       setAttributeName(attributeName)
       setGetFunctionName(getFunctionName)
@@ -89,7 +90,8 @@ export const OptionsApp: React.FC = () => {
         maxHistoryCount,
         highlightAllConfig,
         enableAstTypeHints,
-        exportConfig
+        exportConfig,
+        editorTheme
       })
     } catch (error) {
       message.error('加载配置失败')

@@ -113,6 +113,11 @@ export interface ExportConfig {
 }
 
 /**
+ * 编辑器主题类型
+ */
+export type EditorTheme = 'light' | 'dark' | 'schemaEditorDark'
+
+/**
  * 存储数据接口
  */
 export interface StorageData {
@@ -154,6 +159,8 @@ export interface StorageData {
   enableAstTypeHints: boolean
   /** 导出配置 */
   exportConfig: ExportConfig
+  /** 编辑器主题 */
+  editorTheme: EditorTheme
 }
 
 /**
