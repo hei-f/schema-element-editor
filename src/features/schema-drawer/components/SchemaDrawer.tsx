@@ -1,5 +1,6 @@
 import { FavoritesManager } from '@/features/favorites/components/FavoritesManager'
-import type { ElementAttributes, HistoryEntry, PreviewFunctionResultPayload } from '@/shared/types'
+import { EDITOR_THEME_OPTIONS } from '@/shared/constants/editor-themes'
+import type { EditorTheme, ElementAttributes, HistoryEntry, PreviewFunctionResultPayload } from '@/shared/types'
 import { ContentType, HistoryEntryType, MessageType } from '@/shared/types'
 import { listenPageMessages, postMessageToPage } from '@/shared/utils/browser/message'
 import { storage } from '@/shared/utils/browser/storage'
@@ -7,6 +8,7 @@ import { logger } from '@/shared/utils/logger'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { parseMarkdownString } from '@/shared/utils/schema/transformers'
 import {
+  BgColorsOutlined,
   DeleteOutlined,
   DownloadOutlined,
   EyeInvisibleOutlined,
@@ -16,7 +18,7 @@ import {
   StarOutlined,
   UploadOutlined
 } from '@ant-design/icons'
-import { Button, Drawer, Space, Tooltip, Upload, message } from 'antd'
+import { Button, Drawer, Dropdown, Space, Tooltip, Upload, message } from 'antd'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useContentDetection } from '../hooks/useContentDetection'
 import { useDraftManagement } from '../hooks/useDraftManagement'
@@ -34,7 +36,12 @@ import {
   DrawerFooter,
   DrawerTitleActions,
   DrawerTitleContainer,
-  DrawerTitleLeft
+  DrawerTitleLeft,
+  PreviewEditorContainer,
+  PreviewEditorRow,
+  PreviewModeContainer,
+  PreviewPlaceholder,
+  PreviewResizer
 } from '../styles/drawer.styles'
 import { EditorContainer } from '../styles/editor.styles'
 import { LightSuccessNotification } from '../styles/notifications.styles'
@@ -97,6 +104,9 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   const [exportConfig, setExportConfig] = useState({
     customFileName: false
   })
+
+  // 编辑器主题
+  const [editorTheme, setEditorTheme] = useState<EditorTheme>('light')
   
   const paramsKey = attributes.params.join(',')
   const isFirstLoadRef = useRef(true)
@@ -278,13 +288,14 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   useEffect(() => {
     const loadConfigs = async () => {
       try {
-        const [toolbarConfig, autoSave, preview, historyCount, astHints, expConfig] = await Promise.all([
+        const [toolbarConfig, autoSave, preview, historyCount, astHints, expConfig, theme] = await Promise.all([
           storage.getToolbarButtons(),
           storage.getAutoSaveDraft(),
           storage.getPreviewConfig(),
           storage.getMaxHistoryCount(),
           storage.getEnableAstTypeHints(),
-          storage.getExportConfig()
+          storage.getExportConfig(),
+          storage.getEditorTheme()
         ])
         setToolbarButtons(toolbarConfig)
         setAutoSaveDraft(autoSave)
@@ -292,6 +303,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         setMaxHistoryCount(historyCount)
         setEnableAstTypeHints(astHints)
         setExportConfig(expConfig)
+        setEditorTheme(theme)
       } catch (error) {
         logger.error('加载配置失败:', error)
       }
@@ -352,13 +364,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
           updateContentType(result)
         }
         
-        // 记录初始版本（在设置完编辑器值之后）
-        if (isFirstLoadRef.current) {
-          setTimeout(() => {
-            recordSpecialVersion(HistoryEntryType.Initial, '初始加载')
-          }, 200)
-        }
-        
         setTimeout(() => {
           isFirstLoadRef.current = false
         }, 100)
@@ -373,13 +378,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
           const result = detectContentType(formatted)
           updateContentType(result)
           
-          // 记录初始版本（在设置完编辑器值之后）
-          if (isFirstLoadRef.current) {
-            setTimeout(() => {
-              recordSpecialVersion(HistoryEntryType.Initial, '初始加载')
-            }, 200)
-          }
-          
           setTimeout(() => {
             isFirstLoadRef.current = false
           }, 100)
@@ -391,15 +389,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   }, [schemaData, open, detectContentType, updateContentType])
 
   /**
-   * 监听编辑器变化，自动记录历史（防抖）
-   */
-  useEffect(() => {
-    if (editorValue && !isFirstLoadRef.current) {
-      recordChange(editorValue)
-    }
-  }, [editorValue, recordChange])
-
-  /**
    * 处理编辑器内容变化
    */
   const handleEditorChange = useCallback((value: string | undefined) => {
@@ -408,8 +397,10 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
       setIsModified(true)
       debouncedDetectContent(value)
       debouncedAutoSaveDraft(value)
+      // 用户手动编辑时记录历史
+      recordChange(value)
     }
-  }, [debouncedDetectContent, debouncedAutoSaveDraft])
+  }, [debouncedDetectContent, debouncedAutoSaveDraft, recordChange])
 
   /**
    * 格式化JSON
@@ -770,23 +761,18 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
                       beforeUpload={handleImport}
                       maxCount={1}
                     >
-                      <Tooltip title="导入 JSON 文件">
-                        <Button icon={<UploadOutlined />} size="small" type="text">
-                          导入
-                        </Button>
+                      <Tooltip title="导入">
+                        <Button icon={<UploadOutlined />} size="small" type="text" />
                       </Tooltip>
                     </Upload>
-                    
-                    <Tooltip title="导出为 JSON 文件">
+                    <Tooltip title="导出">
                       <Button 
                         icon={<DownloadOutlined />} 
                         size="small"
                         type="text"
                         onClick={handleExport}
                         disabled={!canParse}
-                      >
-                        导出
-                      </Button>
+                      />
                     </Tooltip>
                   </>
                 )}
@@ -803,10 +789,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
                 {toolbarButtons.preview && (
                   <Tooltip title={
                     !hasPreviewFunction 
-                      ? '页面未提供 __previewContent 函数' 
-                      : previewEnabled 
-                        ? '关闭预览' 
-                        : '开启预览'
+                      ? '页面未提供预览函数' 
+                      : previewEnabled ? '关闭预览' : '开启预览'
                   }>
                     <Button
                       size="small"
@@ -814,32 +798,45 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
                       icon={previewEnabled ? <EyeOutlined /> : <EyeInvisibleOutlined />}
                       onClick={handleTogglePreview}
                       disabled={!hasPreviewFunction}
-                    >
-                      预览
-                    </Button>
+                    />
                   </Tooltip>
                 )}
                 
                 {hasDraft && (
                   <>
                     <Tooltip title="加载草稿">
-                      <Button size="small" type="text" icon={<FileTextOutlined />} onClick={handleLoadDraft}>
-                        草稿
-                      </Button>
+                      <Button size="small" type="text" icon={<FileTextOutlined />} onClick={handleLoadDraft} />
                     </Tooltip>
                     <Tooltip title="删除草稿">
                       <Button size="small" type="text" danger icon={<DeleteOutlined />} onClick={handleDeleteDraft} />
                     </Tooltip>
                   </>
                 )}
-                <Tooltip title="添加到收藏">
-                  <Button size="small" type="text" icon={<StarOutlined />} onClick={handleOpenAddFavorite}>
-                    收藏
-                  </Button>
+                <Tooltip title="添加收藏">
+                  <Button size="small" type="text" icon={<StarOutlined />} onClick={handleOpenAddFavorite} />
                 </Tooltip>
                 <Tooltip title="浏览收藏">
                   <Button size="small" type="text" icon={<FolderOpenOutlined />} onClick={handleOpenFavorites} />
                 </Tooltip>
+                <Dropdown
+                  menu={{
+                    items: EDITOR_THEME_OPTIONS.map(t => ({
+                      key: t.value,
+                      label: t.label,
+                      onClick: () => {
+                        setEditorTheme(t.value)
+                        storage.setEditorTheme(t.value)
+                      }
+                    })),
+                    selectedKeys: [editorTheme]
+                  }}
+                  trigger={['click']}
+                  getPopupContainer={(node) => node.parentNode as HTMLElement}
+                >
+                  <Tooltip title="切换主题">
+                    <Button size="small" type="text" icon={<BgColorsOutlined />} />
+                  </Tooltip>
+                </Dropdown>
               </Space>
             </DrawerTitleActions>
           </DrawerTitleContainer>
@@ -889,80 +886,33 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         <DrawerContentContainer>
           {previewEnabled ? (
             // 预览模式：工具栏在顶部，预览和编辑器并排
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <PreviewModeContainer>
               {/* 工具栏横跨整个宽度 */}
-          <DrawerToolbar
-            attributes={attributes}
-            contentType={contentType}
-            canParse={canParse}
-            toolbarButtons={toolbarButtons}
+              <DrawerToolbar
+                attributes={attributes}
+                contentType={contentType}
+                canParse={canParse}
+                toolbarButtons={toolbarButtons}
                 previewEnabled={previewEnabled}
-            onFormat={handleFormat}
-            onSerialize={handleSerialize}
-            onDeserialize={handleDeserialize}
-            onSegmentChange={handleSegmentChange}
+                onFormat={handleFormat}
+                onSerialize={handleSerialize}
+                onDeserialize={handleDeserialize}
+                onSegmentChange={handleSegmentChange}
                 onRenderPreview={handleRenderPreview}
               />
               
               {/* 预览区域和编辑器并排 */}
-              <div 
-                ref={previewContainerRef} 
-                style={{ 
-                  display: 'flex', 
-                  flex: 1,
-                  width: '100%',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}
-              >
+              <PreviewEditorRow ref={previewContainerRef}>
                 {/* 左侧预览占位区域 */}
-                <div
-                  ref={previewPlaceholderRef}
-                  style={{
-                    width: `${previewWidth}%`,
-                    background: '#f5f5f5',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#999',
-                    fontSize: '14px',
-                    flexShrink: 0,
-                    position: 'relative'
-                  }}
-                >
+                <PreviewPlaceholder ref={previewPlaceholderRef} $width={previewWidth}>
                   预览区域（在主页面渲染）
-                </div>
+                </PreviewPlaceholder>
                 
                 {/* 可拖拽的分隔条 */}
-                <div
-                  style={{
-                    width: '8px',
-                    height: '100%',
-                    background: isDragging ? '#1890ff' : '#d9d9d9',
-                    cursor: 'col-resize',
-                    flexShrink: 0,
-                    position: 'relative',
-                    transition: 'background 0.2s',
-                    borderLeft: '1px solid #bfbfbf',
-                    borderRight: '1px solid #bfbfbf',
-                    userSelect: 'none',
-                    zIndex: 10
-                  }}
-                  onMouseDown={handleResizeStart}
-                  onMouseEnter={(e) => {
-                    if (!isDragging) {
-                      e.currentTarget.style.background = '#1890ff'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isDragging) {
-                      e.currentTarget.style.background = '#d9d9d9'
-                    }
-                  }}
-                />
+                <PreviewResizer $isDragging={isDragging} onMouseDown={handleResizeStart} />
                 
                 {/* 右侧编辑器（不包含工具栏） */}
-                <EditorContainer style={{ flex: 1, minWidth: 0 }}>
+                <PreviewEditorContainer>
                   {lightNotifications.map((notification, index) => (
                     <LightSuccessNotification 
                       key={notification.id} 
@@ -976,14 +926,14 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
                     height="100%"
                     defaultValue={editorValue}
                     onChange={handleEditorChange}
-                    theme="light"
+                    theme={editorTheme}
                     placeholder="在此输入 JSON Schema..."
                     enableAstHints={enableAstTypeHints}
                     isAstContent={() => contentType === ContentType.Ast}
                   />
-                </EditorContainer>
-              </div>
-            </div>
+                </PreviewEditorContainer>
+              </PreviewEditorRow>
+            </PreviewModeContainer>
           ) : (
             // 普通编辑模式
             <>
@@ -1014,7 +964,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
               height="100%"
               defaultValue={editorValue}
               onChange={handleEditorChange}
-              theme="light"
+              theme={editorTheme}
               placeholder="在此输入 JSON Schema..."
               enableAstHints={enableAstTypeHints}
               isAstContent={() => contentType === ContentType.Ast}

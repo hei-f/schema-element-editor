@@ -116,6 +116,7 @@ export const PreviewResizer = styled.div<{ $isDragging?: boolean }>`
   border-left: 1px solid #bfbfbf;
   border-right: 1px solid #bfbfbf;
   user-select: none;
+  z-index: 10;
   
   &:hover {
     background: #1890ff;
@@ -130,5 +131,51 @@ export const PreviewResizer = styled.div<{ $isDragging?: boolean }>`
     bottom: 0;
     cursor: col-resize;
   }
+`
+
+/**
+ * 预览模式主容器
+ */
+export const PreviewModeContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`
+
+/**
+ * 预览区域和编辑器并排容器
+ */
+export const PreviewEditorRow = styled.div`
+  display: flex;
+  flex: 1;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+`
+
+/**
+ * 预览占位区域
+ */
+export const PreviewPlaceholder = styled.div<{ $width: number }>`
+  width: ${props => props.$width}%;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 14px;
+  flex-shrink: 0;
+  position: relative;
+`
+
+/**
+ * 预览模式下的编辑器容器
+ */
+export const PreviewEditorContainer = styled.div`
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 `
 
