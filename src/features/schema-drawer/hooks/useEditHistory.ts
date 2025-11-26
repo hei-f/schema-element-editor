@@ -79,10 +79,22 @@ export const useEditHistory = ({
         setEntries(data.entries || [])
         setSpecialEntries(data.specialEntries || [])
         setCurrentIndex(data.currentIndex ?? -1)
+        lastRecordedContentRef.current = ''
         logger.log(`加载历史记录: ${data.entries.length} 条普通, ${data.specialEntries.length} 条特殊`)
+      } else {
+        // 没有存储的历史时，重置状态（避免显示其他 params 的历史）
+        setEntries([])
+        setSpecialEntries([])
+        setCurrentIndex(-1)
+        lastRecordedContentRef.current = ''
       }
     } catch (error) {
       logger.error('加载历史记录失败:', error)
+      // 加载失败时也重置状态
+      setEntries([])
+      setSpecialEntries([])
+      setCurrentIndex(-1)
+      lastRecordedContentRef.current = ''
     }
   }, [storageKey])
   
