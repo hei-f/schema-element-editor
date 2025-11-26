@@ -656,10 +656,13 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   const handleResizeStart = (e: React.MouseEvent) => {
     e.preventDefault()
     setIsDragging(true)
+    // 拖拽开始时隐藏预览容器，避免遮挡
+    postMessageToPage({ type: MessageType.HIDE_PREVIEW })
   }
 
   /**
    * 拖拽中 - 计算并更新预览宽度
+   * 拖拽过程中只更新宽度，拖拽结束后再更新预览位置（避免卡顿和不同步）
    */
   useEffect(() => {
     if (!isDragging) return
@@ -678,23 +681,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
       newWidth = Math.max(20, Math.min(80, newWidth))
 
       setPreviewWidth(newWidth)
-
-      // 实时更新预览容器位置
-      if (previewPlaceholderRef.current) {
-        const rect = previewPlaceholderRef.current.getBoundingClientRect()
-        postMessageToPage({
-          type: MessageType.RENDER_PREVIEW,
-          payload: {
-            data: JSON.parse(editorValue || '{}'),
-            position: {
-              left: rect.left,
-              top: rect.top,
-              width: rect.width,
-              height: rect.height
-            }
-          }
-        })
-      }
     }
 
     const handleMouseUp = () => {
@@ -705,6 +691,32 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         ...previewConfig,
         previewWidth: Math.round(previewWidth)
       })
+      
+      // 拖拽结束后更新预览位置并显示
+      // 使用 setTimeout 等待 React 完成渲染后再获取最终位置
+      setTimeout(() => {
+        if (previewPlaceholderRef.current) {
+          const rect = previewPlaceholderRef.current.getBoundingClientRect()
+          const result = schemaTransformer.prepareSaveData(editorValue || '{}', wasStringData)
+          if (result.success) {
+            // 先更新位置
+            postMessageToPage({
+              type: MessageType.RENDER_PREVIEW,
+              payload: {
+                data: result.data,
+                position: {
+                  left: rect.left,
+                  top: rect.top,
+                  width: rect.width,
+                  height: rect.height
+                }
+              }
+            })
+            // 然后显示预览容器
+            postMessageToPage({ type: MessageType.SHOW_PREVIEW })
+          }
+        }
+      }, 50)
     }
 
     document.addEventListener('mousemove', handleMouseMove)
@@ -714,7 +726,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [isDragging, previewWidth, editorValue, previewConfig])
+  }, [isDragging, previewWidth, editorValue, previewConfig, wasStringData])
 
   /**
    * 加载用户保存的预览宽度
