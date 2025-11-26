@@ -2,13 +2,14 @@
 
 Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 
-![Version](https://img.shields.io/badge/version-1.8.0-blue)
+![Version](https://img.shields.io/badge/version-1.9.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 ## 功能
 
 - 🎯 **智能元素检测**: 按住 Alt/Option 键时自动检测和高亮目标元素
 - 🔦 **批量高亮**: 支持快捷键（Alt+字母/数字）一键高亮页面所有可编辑元素，可配置快捷键和数量上限
+- 🔴 **录制模式**: 按 Alt+R 进入录制模式，轮询检测Schema变化并记录快照，支持多版本Diff对比
 - 📝 **Schema编辑器**: 内置CodeMirror编辑器，支持JSON格式化和校验
 - 🧠 **AST 智能补全**: 编辑 AST 类型数据时提供字段名和类型的智能提示，支持快捷键触发
 - 👁️ **实时预览**: 支持在编辑时实时预览Schema效果，可自定义预览组件
@@ -75,6 +76,10 @@ npm run test:page
 - **批量高亮**: 按住 Alt/Option 键 + 配置的快捷键（默认A），高亮页面所有可编辑元素。松开 Alt 键清除高亮
   - 可在配置页面自定义快捷键（支持字母和数字）
   - 可配置最大高亮数量（100-1000，默认500）
+- **录制模式** (v1.9.0+): 按住 Alt/Option 键 + R，进入录制模式（高亮框变红），点击元素以录制模式打开编辑器
+  - 录制模式下会自动轮询检测Schema变化，记录每个不同的版本快照
+  - 停止录制后，可选择任意两个版本进行Diff对比，支持原始/反序列化/AST三种对比模式
+  - 可在配置页面自定义快捷键、高亮颜色和轮询间隔
 
 ## 页面集成
 
