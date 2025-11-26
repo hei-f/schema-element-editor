@@ -269,8 +269,15 @@
         // 布尔和null测试
         'boolean-true': true,
         'boolean-false': false,
-        'null-value': null
+        'null-value': null,
+        
+        // 录制模式测试 - 动态变化的schema（JSON格式字符串，可被parse）
+        'recording-test': '"初始内容"'
       });
+
+      // 录制模式测试相关状态
+      const recordingTestTimerRef = useRef(null);
+      const recordingTestCountRef = useRef(0);
 
       useEffect(() => {
         // 初始化显示所有Schema数据
@@ -520,6 +527,80 @@
         addLog('info', '🚀 测试页面已加载', { message: '全局方法已注册' });
       }, []);
 
+      // 启动录制模式测试 - schema持续变化10秒
+      const startRecordingTest = () => {
+        // 清除之前的定时器
+        if (recordingTestTimerRef.current) {
+          clearInterval(recordingTestTimerRef.current);
+        }
+        
+        // 重置计数器
+        recordingTestCountRef.current = 0;
+        const startTime = Date.now();
+        
+        // 初始化schema（使用 JSON.stringify 包装，使其成为有效的 JSON 字符串）
+        schemaStore.current['recording-test'] = JSON.stringify('开始录制测试 - 时间: 0ms');
+        setSchemaData({ ...schemaStore.current });
+        
+        addLog('info', '🎬 开始录制模式测试', { duration: '10秒', interval: '100ms' });
+        
+        // 每100ms更新一次schema
+        recordingTestTimerRef.current = setInterval(() => {
+          const elapsed = Date.now() - startTime;
+          recordingTestCountRef.current++;
+          
+          // 构建不断增长的内容
+          const lines = [];
+          lines.push(`录制模式测试 - 已运行 ${elapsed}ms`);
+          lines.push(`更新次数: ${recordingTestCountRef.current}`);
+          lines.push('---');
+          
+          // 添加递增的数据行
+          for (let i = 1; i <= recordingTestCountRef.current; i++) {
+            lines.push(`数据行 ${i}: 内容_${i * 100}ms`);
+          }
+          
+          // 更新schema（使用 JSON.stringify 包装，使其成为有效的 JSON 字符串）
+          const newContent = lines.join('\n');
+          schemaStore.current['recording-test'] = JSON.stringify(newContent);
+          setSchemaData({ ...schemaStore.current });
+          
+          // 10秒后停止
+          if (elapsed >= 10000) {
+            clearInterval(recordingTestTimerRef.current);
+            recordingTestTimerRef.current = null;
+            
+            // 添加结束标记
+            const finalLines = [...lines, '---', '✅ 录制测试完成！'];
+            schemaStore.current['recording-test'] = JSON.stringify(finalLines.join('\n'));
+            setSchemaData({ ...schemaStore.current });
+            
+            addLog('success', '✅ 录制模式测试完成', { 
+              totalUpdates: recordingTestCountRef.current,
+              duration: `${elapsed}ms`
+            });
+          }
+        }, 100);
+      };
+
+      // 停止录制模式测试
+      const stopRecordingTest = () => {
+        if (recordingTestTimerRef.current) {
+          clearInterval(recordingTestTimerRef.current);
+          recordingTestTimerRef.current = null;
+          addLog('info', '⏹️ 录制模式测试已手动停止');
+        }
+      };
+
+      // 清理定时器
+      useEffect(() => {
+        return () => {
+          if (recordingTestTimerRef.current) {
+            clearInterval(recordingTestTimerRef.current);
+          }
+        };
+      }, []);
+
       const testElements = [
         // String类型测试
         {
@@ -691,6 +772,18 @@
           badge: 'success',
           badgeText: '有效',
           typeTag: 'Boolean'
+        },
+        
+        // 录制模式测试
+        {
+          id: 'test-recording',
+          title: '🎬 录制模式测试',
+          description: '点击"开始测试"按钮后，schema会持续变化5秒，用于测试录制功能',
+          attrs: { 'data-id': 'recording-test' },
+          schemaKey: 'recording-test',
+          badge: 'success',
+          badgeText: '有效',
+          typeTag: 'Recording'
         },
         
         // 无效测试
@@ -889,6 +982,59 @@
                     <div className="schema-title">💾 当前Schema数据：</div>
                     <pre className="schema-content">
                       {JSON.stringify(schemaData[elem.schemaKey], null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="section-title">🎬 录制模式测试</div>
+          <div className="test-section">
+            {testElements.filter(e => e.typeTag === 'Recording').map(elem => (
+              <div 
+                key={elem.id}
+                id={elem.id}
+                className="test-card"
+                ref={setElementRef(elem.id, elem.attrs)}
+                style={{ borderLeft: '4px solid #ff4d4f' }}
+              >
+                <h3>
+                  <span className={`badge badge-${elem.badge}`}>
+                    {elem.badgeText}
+                  </span>
+                  {elem.title}
+                  <span className="type-tag" style={{ background: '#fff1f0', color: '#ff4d4f' }}>Recording</span>
+                </h3>
+                <p>{elem.description}</p>
+                <p style={{ color: '#ff4d4f', fontSize: '13px', marginTop: '8px' }}>
+                  <strong>使用步骤：</strong><br/>
+                  1. 点击下方"开始测试"按钮<br/>
+                  2. 按 Alt+R 进入录制模式（高亮框变红）<br/>
+                  3. Alt+点击此卡片，以录制模式打开抽屉<br/>
+                  4. 观察左侧版本列表的变化<br/>
+                  5. 5秒后停止录制，可进行版本对比
+                </p>
+                <div style={{ marginTop: '12px' }}>
+                  <button className="btn btn-primary" onClick={startRecordingTest} style={{ background: '#ff4d4f' }}>
+                    ▶️ 开始测试
+                  </button>
+                  <button className="btn" onClick={stopRecordingTest} style={{ background: '#666', color: 'white' }}>
+                    ⏹️ 停止测试
+                  </button>
+                </div>
+                {Object.keys(elem.attrs).length > 0 && (
+                  <div className="attr-info">
+                    data-id: "{elem.attrs['data-id']}"
+                  </div>
+                )}
+                {elem.schemaKey && schemaData[elem.schemaKey] !== undefined && (
+                  <div className="schema-display">
+                    <div className="schema-title">💾 当前Schema数据（实时更新）：</div>
+                    <pre className="schema-content" style={{ whiteSpace: 'pre-wrap' }}>
+                      {typeof schemaData[elem.schemaKey] === 'string' 
+                        ? schemaData[elem.schemaKey] 
+                        : JSON.stringify(schemaData[elem.schemaKey], null, 2)}
                     </pre>
                   </div>
                 )}
