@@ -326,9 +326,14 @@
           }
         };
 
-        // 实现预览函数（新名称）
-        window.__getContentPreview = (data) => {
-          addLog('info', '🎨 调用 __getContentPreview', { data });
+        // 预览 root 实例（闭包中保存，用于复用）
+        let previewRootInstance = null;
+        
+        // 实现预览函数（方案一：使用 container 自己渲染，无需暴露 ReactDOM）
+        // 参数：data - 预览数据, container - DOM容器
+        window.__getContentPreview = (data, container) => {
+          console.log('🎨 __getContentPreview 被调用', { data, container, hasContainer: !!container });
+          addLog('info', '🎨 调用 __getContentPreview', { data, hasContainer: !!container });
           
           try {
             // 创建预览组件
@@ -447,10 +452,50 @@
               );
             };
 
-            addLog('success', '✅ 预览组件已创建');
+            // 方案一：使用 container 自己渲染
+            if (container) {
+              // 自己判断：root 不存在就是首次渲染，需要创建
+              if (!previewRootInstance) {
+                console.log('✅ 首次渲染，创建 React root', container);
+                previewRootInstance = ReactDOM.createRoot(container);
+                addLog('success', '✅ 首次渲染，创建 React root');
+              } else {
+                console.log('🔄 更新渲染，复用 React root');
+                addLog('info', '🔄 更新渲染，复用 React root');
+              }
+              
+              // 渲染组件，React 会自动 diff
+              previewRootInstance.render(React.createElement(PreviewCard));
+              
+              // 返回清理函数（只在关闭预览时被调用）
+              return () => {
+                console.log('🧹 清理预览');
+                if (previewRootInstance) {
+                  previewRootInstance.unmount();
+                  previewRootInstance = null;
+                }
+                addLog('info', '🧹 预览已清理');
+              };
+            } else {
+              console.log('⚠️ container 为空，使用兼容模式');
+            }
+
+            // 向后兼容：如果没有 container，返回 ReactNode
+            addLog('success', '✅ 预览组件已创建（兼容模式）');
             return React.createElement(PreviewCard);
           } catch (error) {
             addLog('error', '❌ 预览组件创建失败', { error: error.message });
+            
+            // 如果有 container，渲染错误信息
+            if (container) {
+              container.innerHTML = `
+                <div style="background: #fff1f0; border: 1px solid #ffccc7; border-radius: 4px; padding: 16px; color: #ff4d4f;">
+                  <div style="font-weight: bold; margin-bottom: 8px;">预览渲染错误</div>
+                  <div style="font-size: 12px;">${error.message || '未知错误'}</div>
+                </div>
+              `;
+              return null;
+            }
             
             // 返回错误提示组件
             return React.createElement('div', {

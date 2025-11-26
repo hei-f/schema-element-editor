@@ -22,6 +22,10 @@ export enum MessageType {
   RENDER_PREVIEW = 'RENDER_PREVIEW',
   /** 清除预览 */
   CLEAR_PREVIEW = 'CLEAR_PREVIEW',
+  /** 隐藏预览（拖拽时） */
+  HIDE_PREVIEW = 'HIDE_PREVIEW',
+  /** 显示预览（拖拽结束） */
+  SHOW_PREVIEW = 'SHOW_PREVIEW',
   /** 检查预览函数是否存在 */
   CHECK_PREVIEW_FUNCTION = 'CHECK_PREVIEW_FUNCTION',
   /** 预览函数检查结果 */

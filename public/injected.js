@@ -24,6 +24,8 @@
   /** 预览容器和 React root */
   let previewContainer = null
   let previewRoot = null
+  /** 用户返回的清理函数 */
+  let userCleanupFn = null
 
   window.addEventListener('message', (event) => {
     if (event.source !== window) return
@@ -49,6 +51,12 @@
         break
       case 'CLEAR_PREVIEW':
         handleClearPreview()
+        break
+      case 'HIDE_PREVIEW':
+        handleHidePreview()
+        break
+      case 'SHOW_PREVIEW':
+        handleShowPreview()
         break
       default:
         console.warn('未知的消息类型:', type)
@@ -211,22 +219,31 @@
         console.error('预览函数不存在')
         return
       }
-      const reactNode = fn(data)
       
-      // 如果页面使用 React 18+，需要使用 ReactDOM.createRoot
-      // 如果页面使用 React 17-，需要使用 ReactDOM.render
-      // 这里假设页面会自己处理渲染，我们只是提供容器
+      // 调用预览函数，传入 container 让用户可以自己管理渲染
+      const result = fn(data, previewContainer)
+      
+      // 如果返回函数，说明用户自己处理了渲染，保存清理函数（仅首次保存或更新）
+      if (typeof result === 'function') {
+        userCleanupFn = result
+        return
+      }
+      
+      // 如果返回 null/undefined，说明用户自己处理了渲染但没有清理函数
+      if (result === null || result === undefined) {
+        return
+      }
+      
+      // 向后兼容：如果返回的是 ReactNode，使用 ReactDOM 渲染
+      const reactNode = result
       
       // 检查是否有 ReactDOM
       if (window.ReactDOM) {
-        // 清理旧的 root
-        if (previewRoot && previewRoot.unmount) {
-          previewRoot.unmount()
-        }
-        
-        // React 18+ API
+        // React 18+ API：复用 root，只在首次创建
         if (window.ReactDOM.createRoot) {
-          previewRoot = window.ReactDOM.createRoot(previewContainer)
+          if (!previewRoot) {
+            previewRoot = window.ReactDOM.createRoot(previewContainer)
+          }
           previewRoot.render(reactNode)
         } 
         // React 17- API
@@ -254,10 +271,38 @@
   }
 
   /**
+   * 隐藏预览容器（拖拽时使用）
+   */
+  function handleHidePreview() {
+    if (previewContainer) {
+      previewContainer.style.display = 'none'
+    }
+  }
+
+  /**
+   * 显示预览容器（拖拽结束后使用）
+   */
+  function handleShowPreview() {
+    if (previewContainer) {
+      previewContainer.style.display = 'block'
+    }
+  }
+
+  /**
    * 清除预览
    */
   function handleClearPreview() {
     try {
+      // 调用用户返回的清理函数
+      if (userCleanupFn && typeof userCleanupFn === 'function') {
+        try {
+          userCleanupFn()
+        } catch (e) {
+          console.warn('执行用户清理函数失败:', e)
+        }
+        userCleanupFn = null
+      }
+      
       // 清理 React root
       if (previewRoot) {
         if (previewRoot.unmount) {
