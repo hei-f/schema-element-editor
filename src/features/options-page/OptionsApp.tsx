@@ -289,7 +289,7 @@ export const OptionsApp: React.FC = () => {
           </PageDescription>
         </HeaderContent>
         <HeaderActions align="center" gap={12}>
-          <VersionTag>v1.10.0</VersionTag>
+          <VersionTag>v1.11.0</VersionTag>
           <Button onClick={openReleasePage}>
             检查更新
           </Button>
