@@ -279,252 +279,258 @@
       const recordingTestTimerRef = useRef(null);
       const recordingTestCountRef = useRef(0);
 
+      // 预览 root 实例（闭包中保存，用于复用）
+      const previewRootRef = useRef(null);
+
       useEffect(() => {
         // 初始化显示所有Schema数据
         setSchemaData({ ...schemaStore.current });
         
-        // 实现页面全局方法
-        window.__getContentById = (params) => {
-          addLog('info', '🔍 调用 __getContentById', { params });
-          
-          const schema = schemaStore.current[params];
-          
-          if (schema !== undefined) {
-            addLog('success', '✅ 返回 Schema 数据', schema);
-            return schema;
-          } else {
-            const defaultSchema = {
-              error: 'Schema not found',
-              params: params,
-              message: '未找到对应的Schema数据'
-            };
-            addLog('warn', '⚠️ 未找到Schema，返回默认值', defaultSchema);
-            return defaultSchema;
+        // 创建预览组件的函数
+        const createPreviewCard = (data) => {
+          const cardStyle = {
+            background: 'white',
+            borderRadius: '8px',
+            padding: '20px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            marginBottom: '16px'
+          };
+
+          const titleStyle = {
+            fontSize: '18px',
+            fontWeight: 'bold',
+            color: '#333',
+            marginBottom: '12px',
+            borderBottom: '2px solid #1890ff',
+            paddingBottom: '8px'
+          };
+
+          const contentStyle = {
+            fontSize: '14px',
+            color: '#666',
+            lineHeight: '1.6'
+          };
+
+          const codeStyle = {
+            background: '#f5f5f5',
+            padding: '12px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontFamily: 'Consolas, Monaco, monospace',
+            overflow: 'auto',
+            marginTop: '12px'
+          };
+
+          // 判断数据类型并渲染
+          if (typeof data === 'string') {
+            return React.createElement('div', { style: cardStyle },
+              React.createElement('div', { style: titleStyle }, '字符串预览'),
+              React.createElement('div', { style: contentStyle }, data)
+            );
           }
-        };
 
-        window.__updateContentById = (schema, params) => {
-          addLog('info', '💾 调用 __updateContentById', { 
-            schema, 
-            params 
-          });
-
-          try {
-            // 验证schema不为空
-            if (schema === null || schema === undefined) {
-              throw new Error('Schema 数据不能为空');
-            }
-
-            // 更新 schema store
-            schemaStore.current[params] = schema;
-            
-            // 刷新显示
-            setSchemaData({ ...schemaStore.current });
-
-            // 更新成功
-            addLog('success', '✅ Schema 更新成功', { 
-              params,
-              newValue: schema
-            });
-            return true;
-          } catch (error) {
-            addLog('error', '❌ Schema 更新失败', { error: error.message });
-            return false;
+          if (typeof data === 'number') {
+            return React.createElement('div', { style: cardStyle },
+              React.createElement('div', { style: titleStyle }, '数字预览'),
+              React.createElement('div', { style: contentStyle }, `值: ${data}`)
+            );
           }
-        };
 
-        // 预览 root 实例（闭包中保存，用于复用）
-        let previewRootInstance = null;
-        
-        // 实现预览函数（方案一：使用 container 自己渲染，无需暴露 ReactDOM）
-        // 参数：data - 预览数据, container - DOM容器
-        window.__getContentPreview = (data, container) => {
-          console.log('🎨 __getContentPreview 被调用', { data, container, hasContainer: !!container });
-          addLog('info', '🎨 调用 __getContentPreview', { data, hasContainer: !!container });
-          
-          try {
-            // 创建预览组件
-            const PreviewCard = () => {
-              const cardStyle = {
-                background: 'white',
-                borderRadius: '8px',
-                padding: '20px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                marginBottom: '16px'
-              };
-
-              const titleStyle = {
-                fontSize: '18px',
-                fontWeight: 'bold',
-                color: '#333',
-                marginBottom: '12px',
-                borderBottom: '2px solid #1890ff',
-                paddingBottom: '8px'
-              };
-
-              const contentStyle = {
-                fontSize: '14px',
-                color: '#666',
-                lineHeight: '1.6'
-              };
-
-              const codeStyle = {
-                background: '#f5f5f5',
-                padding: '12px',
-                borderRadius: '4px',
-                fontSize: '12px',
-                fontFamily: 'Consolas, Monaco, monospace',
-                overflow: 'auto',
-                marginTop: '12px'
-              };
-
-              // 判断数据类型并渲染
-              if (typeof data === 'string') {
-                return React.createElement('div', { style: cardStyle },
-                  React.createElement('div', { style: titleStyle }, '字符串预览'),
-                  React.createElement('div', { style: contentStyle }, data)
-                );
-              }
-
-              if (typeof data === 'number') {
-                return React.createElement('div', { style: cardStyle },
-                  React.createElement('div', { style: titleStyle }, '数字预览'),
-                  React.createElement('div', { style: contentStyle }, `值: ${data}`)
-                );
-              }
-
-              if (Array.isArray(data)) {
-                return React.createElement('div', { style: cardStyle },
-                  React.createElement('div', { style: titleStyle }, '数组预览'),
-                  React.createElement('div', { style: contentStyle },
-                    `包含 ${data.length} 个元素`,
-                    React.createElement('pre', { style: codeStyle },
-                      JSON.stringify(data, null, 2)
-                    )
-                  )
-                );
-              }
-
-              if (typeof data === 'object' && data !== null) {
-                // 检查是否是 Elements 结构
-                if (data.type && data.content) {
-                  return React.createElement('div', { style: cardStyle },
-                    React.createElement('div', { style: titleStyle }, 
-                      `${data.type} 元素预览`
-                    ),
-                    React.createElement('div', { style: contentStyle },
-                      data.title && React.createElement('h4', { 
-                        style: { margin: '0 0 8px 0', color: '#1890ff' } 
-                      }, data.title),
-                      React.createElement('p', { style: { margin: '8px 0' } }, 
-                        data.content || data.text || '(无内容)'
-                      ),
-                      data.image && React.createElement('img', {
-                        src: data.image,
-                        alt: data.title || 'preview',
-                        style: { 
-                          maxWidth: '100%', 
-                          borderRadius: '4px',
-                          marginTop: '12px'
-                        }
-                      }),
-                      React.createElement('pre', { style: codeStyle },
-                        JSON.stringify(data, null, 2)
-                      )
-                    )
-                  );
-                }
-
-                // 通用对象预览
-                return React.createElement('div', { style: cardStyle },
-                  React.createElement('div', { style: titleStyle }, '对象预览'),
-                  React.createElement('div', { style: contentStyle },
-                    `包含 ${Object.keys(data).length} 个属性`,
-                    React.createElement('pre', { style: codeStyle },
-                      JSON.stringify(data, null, 2)
-                    )
-                  )
-                );
-              }
-
-              // 其他类型
-              return React.createElement('div', { style: cardStyle },
-                React.createElement('div', { style: titleStyle }, '预览'),
-                React.createElement('div', { style: contentStyle }, 
-                  `类型: ${typeof data}`,
-                  React.createElement('pre', { style: codeStyle },
-                    String(data)
-                  )
+          if (Array.isArray(data)) {
+            return React.createElement('div', { style: cardStyle },
+              React.createElement('div', { style: titleStyle }, '数组预览'),
+              React.createElement('div', { style: contentStyle },
+                `包含 ${data.length} 个元素`,
+                React.createElement('pre', { style: codeStyle },
+                  JSON.stringify(data, null, 2)
                 )
-              );
-            };
-
-            // 方案一：使用 container 自己渲染
-            if (container) {
-              // 自己判断：root 不存在就是首次渲染，需要创建
-              if (!previewRootInstance) {
-                console.log('✅ 首次渲染，创建 React root', container);
-                previewRootInstance = ReactDOM.createRoot(container);
-                addLog('success', '✅ 首次渲染，创建 React root');
-              } else {
-                console.log('🔄 更新渲染，复用 React root');
-                addLog('info', '🔄 更新渲染，复用 React root');
-              }
-              
-              // 渲染组件，React 会自动 diff
-              previewRootInstance.render(React.createElement(PreviewCard));
-              
-              // 返回清理函数（只在关闭预览时被调用）
-              return () => {
-                console.log('🧹 清理预览');
-                if (previewRootInstance) {
-                  previewRootInstance.unmount();
-                  previewRootInstance = null;
-                }
-                addLog('info', '🧹 预览已清理');
-              };
-            } else {
-              console.log('⚠️ container 为空，使用兼容模式');
-            }
-
-            // 向后兼容：如果没有 container，返回 ReactNode
-            addLog('success', '✅ 预览组件已创建（兼容模式）');
-            return React.createElement(PreviewCard);
-          } catch (error) {
-            addLog('error', '❌ 预览组件创建失败', { error: error.message });
-            
-            // 如果有 container，渲染错误信息
-            if (container) {
-              container.innerHTML = `
-                <div style="background: #fff1f0; border: 1px solid #ffccc7; border-radius: 4px; padding: 16px; color: #ff4d4f;">
-                  <div style="font-weight: bold; margin-bottom: 8px;">预览渲染错误</div>
-                  <div style="font-size: 12px;">${error.message || '未知错误'}</div>
-                </div>
-              `;
-              return null;
-            }
-            
-            // 返回错误提示组件
-            return React.createElement('div', {
-              style: {
-                background: '#fff1f0',
-                border: '1px solid #ffccc7',
-                borderRadius: '4px',
-                padding: '16px',
-                color: '#ff4d4f'
-              }
-            },
-              React.createElement('div', { 
-                style: { fontWeight: 'bold', marginBottom: '8px' } 
-              }, '预览渲染错误'),
-              React.createElement('div', { style: { fontSize: '12px' } }, 
-                error.message || '未知错误'
               )
             );
           }
+
+          if (typeof data === 'object' && data !== null) {
+            // 检查是否是 Elements 结构
+            if (data.type && data.content) {
+              return React.createElement('div', { style: cardStyle },
+                React.createElement('div', { style: titleStyle }, 
+                  `${data.type} 元素预览`
+                ),
+                React.createElement('div', { style: contentStyle },
+                  data.title && React.createElement('h4', { 
+                    style: { margin: '0 0 8px 0', color: '#1890ff' } 
+                  }, data.title),
+                  React.createElement('p', { style: { margin: '8px 0' } }, 
+                    data.content || data.text || '(无内容)'
+                  ),
+                  data.image && React.createElement('img', {
+                    src: data.image,
+                    alt: data.title || 'preview',
+                    style: { 
+                      maxWidth: '100%', 
+                      borderRadius: '4px',
+                      marginTop: '12px'
+                    }
+                  }),
+                  React.createElement('pre', { style: codeStyle },
+                    JSON.stringify(data, null, 2)
+                  )
+                )
+              );
+            }
+
+            // 通用对象预览
+            return React.createElement('div', { style: cardStyle },
+              React.createElement('div', { style: titleStyle }, '对象预览'),
+              React.createElement('div', { style: contentStyle },
+                `包含 ${Object.keys(data).length} 个属性`,
+                React.createElement('pre', { style: codeStyle },
+                  JSON.stringify(data, null, 2)
+                )
+              )
+            );
+          }
+
+          // 其他类型
+          return React.createElement('div', { style: cardStyle },
+            React.createElement('div', { style: titleStyle }, '预览'),
+            React.createElement('div', { style: contentStyle }, 
+              `类型: ${typeof data}`,
+              React.createElement('pre', { style: codeStyle },
+                String(data)
+              )
+            )
+          );
         };
 
-        addLog('info', '🚀 测试页面已加载', { message: '全局方法已注册' });
+        // 发送响应的辅助函数
+        const sendResponse = (requestId, result) => {
+          window.dispatchEvent(new CustomEvent('schema-editor:response', {
+            detail: { requestId, ...result }
+          }));
+        };
+
+        // 监听扩展请求（CustomEvent 模式）
+        const handleSchemaEditorRequest = (event) => {
+          const { type, payload, requestId } = event.detail;
+          let result;
+
+          switch (type) {
+            case 'GET_SCHEMA': {
+              const params = payload.params;
+              addLog('info', '🔍 收到 GET_SCHEMA 请求', { params });
+              
+              const schema = schemaStore.current[params];
+              
+              if (schema !== undefined) {
+                addLog('success', '✅ 返回 Schema 数据', schema);
+                result = { success: true, data: schema };
+              } else {
+                const defaultSchema = {
+                  error: 'Schema not found',
+                  params: params,
+                  message: '未找到对应的Schema数据'
+                };
+                addLog('warn', '⚠️ 未找到Schema，返回默认值', defaultSchema);
+                result = { success: true, data: defaultSchema };
+              }
+              break;
+            }
+
+            case 'UPDATE_SCHEMA': {
+              const { schema, params } = payload;
+              addLog('info', '💾 收到 UPDATE_SCHEMA 请求', { schema, params });
+
+              try {
+                if (schema === null || schema === undefined) {
+                  throw new Error('Schema 数据不能为空');
+                }
+
+                schemaStore.current[params] = schema;
+                setSchemaData({ ...schemaStore.current });
+
+                addLog('success', '✅ Schema 更新成功', { params, newValue: schema });
+                result = { success: true };
+              } catch (error) {
+                addLog('error', '❌ Schema 更新失败', { error: error.message });
+                result = { success: false, error: error.message };
+              }
+              break;
+            }
+
+            case 'CHECK_PREVIEW': {
+              addLog('info', '🔍 收到 CHECK_PREVIEW 请求');
+              result = { exists: true };
+              addLog('success', '✅ 预览功能可用');
+              break;
+            }
+
+            case 'RENDER_PREVIEW': {
+              const { data, containerId } = payload;
+              addLog('info', '🎨 收到 RENDER_PREVIEW 请求', { data, containerId });
+
+              try {
+                const container = document.getElementById(containerId);
+                if (!container) {
+                  throw new Error(`容器 ${containerId} 不存在`);
+                }
+
+                // 创建或复用 React root
+                if (!previewRootRef.current) {
+                  console.log('✅ 首次渲染，创建 React root', container);
+                  previewRootRef.current = ReactDOM.createRoot(container);
+                  addLog('success', '✅ 首次渲染，创建 React root');
+                } else {
+                  console.log('🔄 更新渲染，复用 React root');
+                  addLog('info', '🔄 更新渲染，复用 React root');
+                }
+
+                // 渲染预览组件
+                previewRootRef.current.render(createPreviewCard(data));
+                
+                result = { success: true, hasCleanup: true };
+                addLog('success', '✅ 预览渲染完成');
+              } catch (error) {
+                addLog('error', '❌ 预览渲染失败', { error: error.message });
+                result = { success: false, error: error.message };
+              }
+              break;
+            }
+
+            case 'CLEANUP_PREVIEW': {
+              addLog('info', '🧹 收到 CLEANUP_PREVIEW 请求');
+              
+              try {
+                if (previewRootRef.current) {
+                  previewRootRef.current.unmount();
+                  previewRootRef.current = null;
+                  addLog('success', '✅ 预览已清理');
+                }
+                result = { success: true };
+              } catch (error) {
+                addLog('error', '❌ 清理预览失败', { error: error.message });
+                result = { success: false, error: error.message };
+              }
+              break;
+            }
+
+            default:
+              addLog('warn', '⚠️ 未知的请求类型', { type });
+              result = { success: false, error: `未知的请求类型: ${type}` };
+          }
+
+          // 发送响应
+          sendResponse(requestId, result);
+        };
+
+        // 注册事件监听器
+        window.addEventListener('schema-editor:request', handleSchemaEditorRequest);
+
+        addLog('info', '🚀 测试页面已加载', { message: 'CustomEvent 事件监听器已注册' });
+
+        // 清理函数
+        return () => {
+          window.removeEventListener('schema-editor:request', handleSchemaEditorRequest);
+        };
       }, []);
 
       // 启动录制模式测试 - schema持续变化10秒
@@ -827,7 +833,13 @@
       return (
         <div className="container">
           <div className="header">
-            <h1>🔧 Schema Editor 测试页面（通用版）</h1>
+            <h1>🔧 Schema Editor 测试页面（CustomEvent 模式）</h1>
+            <p style={{ background: '#e6f7ff', padding: '8px 12px', borderRadius: '4px', marginBottom: '12px' }}>
+              📡 <strong>通信模式：CustomEvent 事件通信</strong>
+              <span style={{ marginLeft: '8px', fontSize: '12px', color: '#1890ff' }}>
+                监听 schema-editor:request / 响应 schema-editor:response
+              </span>
+            </p>
             <p>📌 <strong>使用说明：</strong></p>
             <p>1. 点击浏览器工具栏的 Schema Editor 图标激活插件</p>
             <p>2. <strong>按住 Alt/Option 键</strong>并将鼠标悬停在下方的测试元素上，观察高亮效果和提示</p>
