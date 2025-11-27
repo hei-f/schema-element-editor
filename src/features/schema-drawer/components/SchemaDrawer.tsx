@@ -84,7 +84,10 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     serialize: true,
     format: true,
     preview: true,
-    importExport: true
+    importExport: true,
+    draft: true,
+    favorites: true,
+    history: true
   })
   const [autoSaveDraft, setAutoSaveDraft] = useState(false)
   
@@ -236,6 +239,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     paramsKey,
     editorValue,
     maxHistoryCount,
+    enabled: toolbarButtons.history,
     onLoadVersion: handleLoadHistoryVersion
   })
 
@@ -266,6 +270,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     isModified,
     autoSaveDraft,
     isFirstLoad: isFirstLoadRef.current,
+    enabled: toolbarButtons.draft,
     onLoadDraft: handleLoadDraftContent,
     onSuccess: (msg) => message.success(msg, 1.5),
     onWarning: (msg) => message.warning(msg),
@@ -868,12 +873,12 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
           <DrawerTitleContainer>
             <DrawerTitleLeft>
               <span>Schema Editor</span>
-              {draftAutoSaveStatus === 'success' && (
+              {toolbarButtons.draft && draftAutoSaveStatus === 'success' && (
                 <DraftAutoSaveSuccess>
                   ✓ 草稿已自动保存
                 </DraftAutoSaveSuccess>
               )}
-              {showDraftNotification && (
+              {toolbarButtons.draft && showDraftNotification && (
                 <DraftNotification>
                   💾 检测到草稿
                 </DraftNotification>
@@ -907,13 +912,15 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
                 )}
                 
                 {/* 历史按钮 */}
-                <HistoryDropdown
-                  history={history}
-                  currentIndex={currentIndex}
-                  onLoadVersion={loadHistoryVersion}
-                  onClearHistory={clearHistory}
-                  disabled={!hasHistory}
-                />
+                {toolbarButtons.history && (
+                  <HistoryDropdown
+                    history={history}
+                    currentIndex={currentIndex}
+                    onLoadVersion={loadHistoryVersion}
+                    onClearHistory={clearHistory}
+                    disabled={!hasHistory}
+                  />
+                )}
                 
                 {toolbarButtons.preview && (
                   <Tooltip title={
@@ -931,7 +938,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
                   </Tooltip>
                 )}
                 
-                {hasDraft && (
+                {toolbarButtons.draft && hasDraft && (
                   <>
                     <Tooltip title="加载草稿">
                       <Button size="small" type="text" icon={<FileTextOutlined />} onClick={handleLoadDraft} />
@@ -941,12 +948,16 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
                     </Tooltip>
                   </>
                 )}
-                <Tooltip title="添加收藏">
-                  <Button size="small" type="text" icon={<StarOutlined />} onClick={handleOpenAddFavorite} />
-                </Tooltip>
-                <Tooltip title="浏览收藏">
-                  <Button size="small" type="text" icon={<FolderOpenOutlined />} onClick={handleOpenFavorites} />
-                </Tooltip>
+                {toolbarButtons.favorites && (
+                  <>
+                    <Tooltip title="添加收藏">
+                      <Button size="small" type="text" icon={<StarOutlined />} onClick={handleOpenAddFavorite} />
+                    </Tooltip>
+                    <Tooltip title="浏览收藏">
+                      <Button size="small" type="text" icon={<FolderOpenOutlined />} onClick={handleOpenFavorites} />
+                    </Tooltip>
+                  </>
+                )}
                 <Dropdown
                   menu={{
                     items: EDITOR_THEME_OPTIONS.map(t => ({
@@ -987,9 +998,11 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         footer={
           <DrawerFooter>
             <Space>
-              <Button onClick={handleSaveDraft} size="small">
-                保存草稿
-              </Button>
+              {toolbarButtons.draft && (
+                <Button onClick={handleSaveDraft} size="small">
+                  保存草稿
+                </Button>
+              )}
               <Button onClick={onClose} size="small">关闭</Button>
               <Button 
                 type="primary" 
