@@ -15,7 +15,7 @@
     "test:app": "vite --config test/test-app/vite.config.ts"
   },
   "dependencies": {
-    "@ant-design/agentic-ui": "^2.18.0",
+    "@ant-design/agentic-ui": "^2.20.2",
     "@codemirror/autocomplete": "^6.20.0",
     "@codemirror/commands": "^6.10.0",
     "@codemirror/lang-json": "^6.0.2",
