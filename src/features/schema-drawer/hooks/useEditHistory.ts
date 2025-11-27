@@ -6,6 +6,8 @@ interface UseEditHistoryProps {
   paramsKey: string
   editorValue: string
   maxHistoryCount: number
+  /** 是否启用历史记录功能（false 时不记录历史） */
+  enabled?: boolean
   onLoadVersion: (content: string, entry: HistoryEntry) => void
   onClearHistory?: () => void
 }
@@ -39,6 +41,7 @@ export const useEditHistory = ({
   paramsKey,
   editorValue,
   maxHistoryCount,
+  enabled = true,
   onLoadVersion,
   onClearHistory
 }: UseEditHistoryProps): UseEditHistoryReturn => {
@@ -122,8 +125,15 @@ export const useEditHistory = ({
    * 初始化：加载历史
    */
   useEffect(() => {
+    // 功能禁用时不加载历史，保持空状态
+    if (!enabled) {
+      setEntries([])
+      setSpecialEntries([])
+      setCurrentIndex(-1)
+      return
+    }
     loadFromStorage()
-  }, [loadFromStorage])
+  }, [loadFromStorage, enabled])
   
   /**
    * 添加历史条目
@@ -170,6 +180,11 @@ export const useEditHistory = ({
    * 防抖记录变更（2秒）
    */
   const recordChange = useCallback((value: string) => {
+    // 功能禁用时跳过
+    if (!enabled) {
+      return
+    }
+    
     // 如果内容与上次记录的内容相同，直接返回
     if (value === lastRecordedContentRef.current) {
       return
@@ -194,7 +209,7 @@ export const useEditHistory = ({
       }
       addHistoryEntry(entry)
     }, 2000)
-  }, [addHistoryEntry])
+  }, [addHistoryEntry, enabled])
   
   /**
    * 记录特殊版本（立即）
@@ -204,6 +219,11 @@ export const useEditHistory = ({
     description?: string,
     content?: string
   ) => {
+    // 功能禁用时跳过
+    if (!enabled) {
+      return
+    }
+    
     const entry: HistoryEntry = {
       id: Date.now().toString(),
       content: content || editorValue,
@@ -212,7 +232,7 @@ export const useEditHistory = ({
       description
     }
     addHistoryEntry(entry)
-  }, [editorValue, addHistoryEntry])
+  }, [editorValue, addHistoryEntry, enabled])
   
   /**
    * 加载历史版本
