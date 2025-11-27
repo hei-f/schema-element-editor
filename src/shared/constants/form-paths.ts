@@ -66,7 +66,13 @@ export const FORM_PATHS = {
     /** 预览按钮 */
     preview: ['toolbarButtons', 'preview'],
     /** 导入导出按钮 */
-    importExport: ['toolbarButtons', 'importExport']
+    importExport: ['toolbarButtons', 'importExport'],
+    /** 草稿功能 */
+    draft: ['toolbarButtons', 'draft'],
+    /** 收藏功能 */
+    favorites: ['toolbarButtons', 'favorites'],
+    /** 历史记录功能 */
+    history: ['toolbarButtons', 'history']
   },
   
   /** 最大收藏数量 */

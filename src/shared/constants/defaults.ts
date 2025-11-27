@@ -24,7 +24,10 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     serialize: false,
     format: true,
     preview: true,
-    importExport: true
+    importExport: true,
+    draft: true,
+    favorites: true,
+    history: true
   },
   highlightColor: '#39C5BB',
   maxFavoritesCount: 50,

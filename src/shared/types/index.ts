@@ -80,6 +80,12 @@ export interface ToolbarButtonsConfig {
   preview: boolean
   /** 导入导出按钮 */
   importExport: boolean
+  /** 草稿功能 */
+  draft: boolean
+  /** 收藏功能 */
+  favorites: boolean
+  /** 历史记录功能 */
+  history: boolean
 }
 
 /**
