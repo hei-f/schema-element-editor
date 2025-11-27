@@ -59,7 +59,10 @@ describe('OptionsApp组件测试', () => {
       serialize: false,
       format: true,
       preview: true,
-      importExport: true
+      importExport: true,
+      draft: true,
+      favorites: true,
+      history: true
     },
     drawerWidth: '800px',
     highlightColor: '#39C5BB',
