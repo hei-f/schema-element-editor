@@ -5,7 +5,8 @@
   "description": "DOM元素Schema查看和编辑工具",
   "permissions": [
     "storage",
-    "activeTab"
+    "activeTab",
+    "scripting"
   ],
   "host_permissions": [
     "<all_urls>"

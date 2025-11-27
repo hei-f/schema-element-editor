@@ -9,20 +9,72 @@ import { injectPageScript } from './injector'
 import { ElementMonitor } from './monitor'
 import { createShadowRoot } from './shadow-dom'
 
+/** 扩展全局类型声明 */
+declare global {
+  interface Window {
+    __SCHEMA_EDITOR_INSTANCE__?: SchemaEditorContent
+    __SCHEMA_EDITOR_VERSION__?: string
+  }
+}
+
+/** 当前扩展版本号 */
+const EXTENSION_VERSION = chrome.runtime.getManifest().version
+
 /**
  * Schema Editor Content Script 主应用类
  * 负责管理整个插件的生命周期
  */
 export class SchemaEditorContent {
-  private monitor: ElementMonitor
+  private monitor!: ElementMonitor
   private reactRoot: ReactDOM.Root | null = null
   private container: HTMLDivElement | null = null
   private isActive: boolean = false
   private isInitialized: boolean = false
+  private isDestroyed: boolean = false
 
   constructor() {
+    // 如果已有旧实例且版本不同，先清理旧实例
+    if (window.__SCHEMA_EDITOR_INSTANCE__ && window.__SCHEMA_EDITOR_VERSION__ !== EXTENSION_VERSION) {
+      logger.log(`检测到旧版本实例 (${window.__SCHEMA_EDITOR_VERSION__})，正在清理...`)
+      window.__SCHEMA_EDITOR_INSTANCE__.destroy()
+    }
+    
+    // 如果已有相同版本的实例，不重复创建
+    if (window.__SCHEMA_EDITOR_INSTANCE__ && window.__SCHEMA_EDITOR_VERSION__ === EXTENSION_VERSION) {
+      logger.log('已存在相同版本的实例，跳过创建')
+      this.isDestroyed = true // 标记为无效实例
+      return
+    }
+    
+    // 注册当前实例
+    window.__SCHEMA_EDITOR_INSTANCE__ = this
+    window.__SCHEMA_EDITOR_VERSION__ = EXTENSION_VERSION
+    
     this.monitor = new ElementMonitor()
     this.init()
+  }
+  
+  /**
+   * 销毁实例
+   */
+  public destroy(): void {
+    if (this.isDestroyed) return
+    this.isDestroyed = true
+    
+    logger.log('销毁 Schema Editor 实例')
+    this.stop()
+    
+    // 清理 React
+    if (this.reactRoot) {
+      this.reactRoot.unmount()
+      this.reactRoot = null
+    }
+    
+    // 清理容器
+    if (this.container && this.container.parentNode) {
+      this.container.parentNode.removeChild(this.container)
+      this.container = null
+    }
   }
 
   /**
@@ -36,8 +88,8 @@ export class SchemaEditorContent {
     }
 
     // 监听来自background的消息
-    listenChromeMessages((message: Message) => {
-      this.handleMessage(message)
+    listenChromeMessages((message: Message, _sender, sendResponse) => {
+      return this.handleMessage(message, sendResponse)
     })
 
     // 设置元素点击回调
@@ -55,12 +107,21 @@ export class SchemaEditorContent {
 
   /**
    * 处理消息
+   * @returns 返回 true 表示已同步响应
    */
-  private handleMessage(message: Message): void {
+  private handleMessage(message: Message, sendResponse?: (response: any) => void): boolean | void {
+    // 已销毁的实例忽略消息
+    if (this.isDestroyed) return
+
     switch (message.type) {
       case MessageType.ACTIVE_STATE_CHANGED:
         this.handleActiveStateChanged(message.payload?.isActive)
         break
+
+      case MessageType.PING:
+        // 响应 PING，返回当前版本号
+        sendResponse?.({ status: 'ready', version: EXTENSION_VERSION })
+        return true
 
       default:
         break

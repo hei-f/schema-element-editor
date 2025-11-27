@@ -30,6 +30,8 @@ export enum MessageType {
   CHECK_PREVIEW_FUNCTION = 'CHECK_PREVIEW_FUNCTION',
   /** 预览函数检查结果 */
   PREVIEW_FUNCTION_RESULT = 'PREVIEW_FUNCTION_RESULT',
+  /** Ping 检测 Content Script 是否存活 */
+  PING = 'PING',
 }
 
 /**

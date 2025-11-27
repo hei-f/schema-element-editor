@@ -32,17 +32,27 @@ export async function sendMessageToContent<T = any>(
 
 /**
  * 监听来自Background或Content Script的消息
+ * handler 可以返回响应值（同步）或 Promise（异步）
  */
 export function listenChromeMessages(
-  handler: (message: Message, sender: chrome.runtime.MessageSender) => void | Promise<void>
+  handler: (
+    message: Message, 
+    sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: any) => void
+  ) => void | boolean | Promise<void>
 ): void {
   chrome.runtime.onMessage.addListener((message: Message, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
-    const result = handler(message, sender)
+    const result = handler(message, sender, sendResponse)
     
     // 如果handler返回Promise，等待其完成
     if (result instanceof Promise) {
       result.then(() => sendResponse({ success: true }))
       return true // 保持消息通道开启
+    }
+    
+    // 如果handler返回true，表示需要异步响应
+    if (result === true) {
+      return true
     }
     
     return false
