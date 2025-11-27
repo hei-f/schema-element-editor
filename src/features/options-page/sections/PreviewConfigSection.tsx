@@ -48,11 +48,11 @@ export const PreviewConfigSection: React.FC<PreviewConfigSectionProps> = (props)
       <Form.Item
         label="预览区域宽度"
         name={FORM_PATHS.previewConfig.previewWidth}
-        extra="预览区域占抽屉的百分比（10-60%）"
+        extra="预览区域占抽屉的百分比（20-80%）"
       >
         <FixedWidthInputNumber 
-          min={10} 
-          max={60}
+          min={20} 
+          max={80}
           $width={120}
           suffix="%"
         />
