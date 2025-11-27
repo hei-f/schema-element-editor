@@ -2,7 +2,7 @@
 
 Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 
-![Version](https://img.shields.io/badge/version-1.9.1-blue)
+![Version](https://img.shields.io/badge/version-1.10.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 ## 功能
@@ -83,60 +83,122 @@ npm run test:page
 
 ## 页面集成
 
-页面需提供以下全局方法和DOM标记：
+页面需提供 API 接口和 DOM 标记，插件支持两种通信模式。
 
-### 全局方法
+### 核心 API 类型定义
+
+无论使用哪种通信模式，获取和更新 Schema 的类型定义一致：
 
 ```typescript
-// 类型定义
-type GetFunc<T> = (params: string) => NonNullable<T>
-type UpdateFunc<T> = (schema: NonNullable<T>, params: string) => any
-type PreviewFunc<T> = (schema: NonNullable<T>, container: HTMLElement) => (() => void) | null
+/** 获取 Schema 函数 */
+type GetSchemaFunc<T> = (params: string) => NonNullable<T>
 
-// 获取Schema
+/** 更新 Schema 函数 */
+type UpdateSchemaFunc<T> = (schema: NonNullable<T>, params: string) => boolean
+```
+
+- `params`: 参数字符串，格式为 `'param1'` 或 `'param1,param2'`
+- `schema`: Schema 数据对象，不能为 `null` 或 `undefined`
+
+### 预览 API 类型定义
+
+预览函数的类型因通信模式而异：
+
+**CustomEvent 模式**：通过 `containerId` 获取容器
+
+```typescript
+/** 预览函数（CustomEvent 模式） */
+type PreviewFunc<T> = (data: NonNullable<T>, containerId: string) => void
+```
+
+**Window 函数模式（已废弃）**：直接传入容器 DOM 元素
+
+```typescript
+/** @deprecated 预览函数（Window 函数模式） */
+type PreviewFunc<T> = (data: NonNullable<T>, container: HTMLElement) => (() => void) | null
+```
+
+- `data`: 预览数据，与 Schema 数据一致
+- `containerId`: 预览容器的 DOM ID，通过 `document.getElementById()` 获取
+- `container`: 预览容器 DOM 元素（已废弃模式）
+- 返回清理函数：插件关闭预览时会自动调用（仅 Window 函数模式需要返回）
+
+### CustomEvent 事件模式（推荐）
+
+使用 CustomEvent 实现双向通信，无需污染 window 对象：
+
+```typescript
+// 监听扩展请求
+window.addEventListener('schema-editor:request', (event: CustomEvent) => {
+  const { type, payload, requestId } = event.detail
+  let result
+
+  switch (type) {
+    case 'GET_SCHEMA':
+      // payload.params: 'param1' 或 'param1,param2'
+      result = { success: true, data: getSchema(payload.params) }
+      break
+    case 'UPDATE_SCHEMA':
+      result = { success: updateSchema(payload.schema, payload.params) }
+      break
+    case 'CHECK_PREVIEW':
+      result = { exists: true }  // 是否支持预览
+      break
+    case 'RENDER_PREVIEW':
+      // payload.containerId: 预览容器 ID
+      const container = document.getElementById(payload.containerId)
+      renderPreview(payload.data, container)
+      result = { success: true, hasCleanup: true }
+      break
+    case 'CLEANUP_PREVIEW':
+      cleanupPreview()
+      result = { success: true }
+      break
+  }
+
+  // 发送响应
+  window.dispatchEvent(new CustomEvent('schema-editor:response', {
+    detail: { requestId, ...result }
+  }))
+})
+```
+
+事件名可在配置页面自定义，默认为 `schema-editor:request` 和 `schema-editor:response`。
+
+### 通信模式对比
+
+| 特性 | CustomEvent 模式 | Window 函数模式 |
+|------|------------------|-----------------|
+| **性能** | 异步事件驱动，有微小开销（~50-200μs） | 同步直接调用，理论更快（~1-5μs） |
+| **命名空间** | 事件隔离，不污染 window | 需要在 window 上挂载函数 |
+| **健壮性** | 内置超时机制和错误处理 | 依赖页面实现 |
+| **可调试性** | requestId 便于追踪 | 无内置追踪机制 |
+| **安全性** | 减少全局暴露 | 全局函数可被外部访问 |
+
+> **性能说明**：Window 函数模式理论上有微小的性能优势（同步调用 vs 事件驱动），但实际差异在微秒级别，Schema 编辑操作为低频用户交互，业务逻辑处理耗时（毫秒级）远大于通信开销，因此性能差异可忽略不计。CustomEvent 模式带来的架构收益（隔离性、健壮性、可维护性）远超这点性能损失。
+
+### Window 函数模式（已废弃）
+
+> ⚠️ **此模式已废弃，将在未来版本中移除，建议迁移到 CustomEvent 模式。**
+
+```typescript
+// @deprecated 获取Schema
 window.__getContentById = (params: string) => {
-  // params: 'param1' 或 'param1,param2'
   return { /* Schema对象 */ }
 }
 
-// 更新Schema
-window.__updateContentById = (schema: NonNullable<T>, params: string) => {
-  // 更新逻辑
+// @deprecated 更新Schema
+window.__updateContentById = (schema, params: string) => {
   return true
 }
-```
 
-函数名可在配置页面自定义。
-
-### 扩展 API (v1.7.1+)
-
-除了核心 API（`__getContentById` 和 `__updateContentById`），插件还支持以下可选的扩展 API：
-
-```typescript
-/**
- * 预览函数（可选）
- * @param schema - 当前编辑的数据（与 __updateContentById 的 schema 类型一致）
- * @param container - 预览容器 DOM 元素
- * @returns 清理函数 | null
- */
-let previewRoot = null
-window.__getContentPreview = (schema: NonNullable<T>, container: HTMLElement) => {
-  // 自己判断：root 不存在就创建，存在就复用（利用 React diff 机制）
-  if (!previewRoot) {
-    previewRoot = ReactDOM.createRoot(container)
-  }
-  previewRoot.render(<YourPreviewComponent schema={schema} />)
-  // 返回清理函数，插件关闭预览时会自动调用
-  return () => {
-    previewRoot?.unmount()
-    previewRoot = null
-  }
+// @deprecated 预览函数（可选）
+window.__getContentPreview = (data, container: HTMLElement) => {
+  const root = ReactDOM.createRoot(container)
+  root.render(<Preview data={data} />)
+  return () => root.unmount()
 }
 ```
-
-| API 名称 | 类型 | 用途 | 默认行为 |
-|---------|------|------|---------|
-| `__getContentPreview` | 同步 | 自定义预览渲染 | 不提供则禁用预览 |
 
 函数名可在配置页面自定义。
 
