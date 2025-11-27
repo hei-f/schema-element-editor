@@ -10,6 +10,8 @@ interface UseDraftManagementProps {
   isModified: boolean
   autoSaveDraft: boolean
   isFirstLoad: boolean
+  /** 是否启用草稿功能（false 时所有草稿逻辑跳过） */
+  enabled?: boolean
   onLoadDraft: (content: string) => void
   /** 成功提示回调 */
   onSuccess?: (message: string) => void
@@ -39,6 +41,7 @@ export const useDraftManagement = ({
   isModified,
   autoSaveDraft,
   isFirstLoad,
+  enabled = true,
   onLoadDraft,
   onSuccess,
   onWarning,
@@ -56,6 +59,13 @@ export const useDraftManagement = ({
    * 检查是否有草稿
    */
   const checkDraft = useCallback(async () => {
+    // 功能禁用时跳过检查
+    if (!enabled) {
+      setHasDraft(false)
+      setShowDraftNotification(false)
+      return
+    }
+    
     try {
       const draft = await storage.getDraft(paramsKey)
       if (draft) {
@@ -68,12 +78,17 @@ export const useDraftManagement = ({
     } catch (error) {
       logger.error('检查草稿失败:', error)
     }
-  }, [paramsKey])
+  }, [paramsKey, enabled])
 
   /**
    * 手动保存草稿
    */
   const handleSaveDraft = useCallback(async () => {
+    // 功能禁用时跳过
+    if (!enabled) {
+      return
+    }
+    
     try {
       await storage.saveDraft(paramsKey, editorValue)
       setHasDraft(true)
@@ -82,7 +97,7 @@ export const useDraftManagement = ({
     } catch (error) {
       onError?.('保存草稿失败')
     }
-  }, [paramsKey, editorValue, onSuccess, onError])
+  }, [paramsKey, editorValue, enabled, onSuccess, onError])
 
   /**
    * 加载草稿内容
@@ -151,6 +166,11 @@ export const useDraftManagement = ({
    * 只有在启用自动保存且不是首次加载时才执行
    */
   const debouncedAutoSaveDraft = useCallback((value: string) => {
+    // 功能禁用时跳过
+    if (!enabled) {
+      return
+    }
+    
     // 如果未启用自动保存或是首次加载，则不执行
     if (!autoSaveDraft || isFirstLoad) {
       return
@@ -176,7 +196,7 @@ export const useDraftManagement = ({
         setDraftAutoSaveStatus('idle')
       }
     }, autoSaveDebounce)
-  }, [paramsKey, autoSaveDraft, isFirstLoad])
+  }, [paramsKey, autoSaveDraft, isFirstLoad, enabled])
 
   /**
    * 监听showDraftNotification变化，显示3秒后自动消失

@@ -397,5 +397,94 @@ describe('useDraftManagement Hook 测试', () => {
       expect(jest.getTimerCount()).toBe(0)
     })
   })
+
+  describe('enabled 功能开关', () => {
+    it('enabled=false 时 checkDraft 应该跳过检查', async () => {
+      mockStorage.getDraft.mockResolvedValue({
+        content: 'draft content',
+        timestamp: Date.now()
+      })
+
+      const { result } = renderHook(() => useDraftManagement({
+        ...defaultProps,
+        enabled: false
+      }))
+
+      await act(async () => {
+        await result.current.checkDraft()
+      })
+
+      expect(mockStorage.getDraft).not.toHaveBeenCalled()
+      expect(result.current.hasDraft).toBe(false)
+      expect(result.current.showDraftNotification).toBe(false)
+    })
+
+    it('enabled=false 时 handleSaveDraft 应该跳过保存', async () => {
+      const { result } = renderHook(() => useDraftManagement({
+        ...defaultProps,
+        enabled: false
+      }))
+
+      await act(async () => {
+        await result.current.handleSaveDraft()
+      })
+
+      expect(mockStorage.saveDraft).not.toHaveBeenCalled()
+      expect(mockOnSuccess).not.toHaveBeenCalled()
+    })
+
+    it('enabled=false 时 debouncedAutoSaveDraft 应该跳过自动保存', async () => {
+      const { result } = renderHook(() => useDraftManagement({
+        ...defaultProps,
+        autoSaveDraft: true,
+        enabled: false
+      }))
+
+      act(() => {
+        result.current.debouncedAutoSaveDraft('content')
+      })
+
+      await act(async () => {
+        jest.advanceTimersByTime(3000)
+      })
+
+      expect(mockStorage.saveDraft).not.toHaveBeenCalled()
+    })
+
+    it('enabled=true 时功能应该正常工作（默认行为）', async () => {
+      mockStorage.getDraft.mockResolvedValue({
+        content: 'draft content',
+        timestamp: Date.now()
+      })
+
+      const { result } = renderHook(() => useDraftManagement({
+        ...defaultProps,
+        enabled: true
+      }))
+
+      await act(async () => {
+        await result.current.checkDraft()
+      })
+
+      expect(mockStorage.getDraft).toHaveBeenCalled()
+      expect(result.current.hasDraft).toBe(true)
+    })
+
+    it('不传 enabled 参数时应该默认启用', async () => {
+      mockStorage.getDraft.mockResolvedValue({
+        content: 'draft content',
+        timestamp: Date.now()
+      })
+
+      const { result } = renderHook(() => useDraftManagement(defaultProps))
+
+      await act(async () => {
+        await result.current.checkDraft()
+      })
+
+      expect(mockStorage.getDraft).toHaveBeenCalled()
+      expect(result.current.hasDraft).toBe(true)
+    })
+  })
 })
 
