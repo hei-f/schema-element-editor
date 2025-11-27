@@ -12,8 +12,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:e2e": "playwright test",
-    "test:page": "cd test && python3 -m http.server 8080 & wait-on http://localhost:8080 && open http://localhost:8080",
-    "test:dev": "concurrently \"npm run dev\" \"npm run test:page\""
+    "test:app": "vite --config test/test-app/vite.config.ts"
   },
   "dependencies": {
     "@ant-design/agentic-ui": "^2.18.0",
