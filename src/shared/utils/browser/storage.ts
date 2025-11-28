@@ -22,12 +22,14 @@ class StorageManager {
       const result = await chrome.storage.local.get(config.key)
       let value = result[config.key] ?? config.defaultValue
       
-      if (config.validator && !config.validator(value)) {
-        return config.defaultValue as T
-      }
-      
+      // 先执行 transformer 进行数据迁移
       if (config.transformer) {
         value = config.transformer(value)
+      }
+      
+      // 再执行 validator 验证迁移后的数据
+      if (config.validator && !config.validator(value)) {
+        return config.defaultValue as T
       }
       
       return value as T

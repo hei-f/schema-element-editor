@@ -150,10 +150,8 @@ describe('Storage工具测试', () => {
         editorTheme: 'schemaEditorDark',
         previewFunctionName: '__getContentPreview',
         apiConfig: {
-          communicationMode: 'customEvent',
-          requestTimeout: 5,
-          requestEventName: 'schema-editor:request',
-          responseEventName: 'schema-editor:response'
+          communicationMode: 'postMessage',
+          requestTimeout: 5
         }
       })
     })
@@ -228,10 +226,8 @@ describe('Storage工具测试', () => {
         editorTheme: 'schemaEditorDark',
         previewFunctionName: '__getContentPreview',
         apiConfig: {
-          communicationMode: 'customEvent',
-          requestTimeout: 5,
-          requestEventName: 'schema-editor:request',
-          responseEventName: 'schema-editor:response'
+          communicationMode: 'postMessage',
+          requestTimeout: 5
         }
       })
     })
@@ -296,10 +292,8 @@ describe('Storage工具测试', () => {
         editorTheme: 'schemaEditorDark',
         previewFunctionName: '__getContentPreview',
         apiConfig: {
-          communicationMode: 'customEvent',
-          requestTimeout: 5,
-          requestEventName: 'schema-editor:request',
-          responseEventName: 'schema-editor:response'
+          communicationMode: 'postMessage',
+          requestTimeout: 5
         }
       })
     })
@@ -544,10 +538,8 @@ describe('Storage工具测试', () => {
         editorTheme: 'schemaEditorDark',
         previewFunctionName: '__getContentPreview',
         apiConfig: {
-          communicationMode: 'customEvent',
-          requestTimeout: 5,
-          requestEventName: 'schema-editor:request',
-          responseEventName: 'schema-editor:response'
+          communicationMode: 'postMessage',
+          requestTimeout: 5
         }
       })
     })
@@ -1314,10 +1306,8 @@ describe('Storage工具测试', () => {
       const result = await storage.getApiConfig()
       
       expect(result).toEqual({
-        communicationMode: 'customEvent',
-        requestTimeout: 5,
-        requestEventName: 'schema-editor:request',
-        responseEventName: 'schema-editor:response'
+        communicationMode: 'postMessage',
+        requestTimeout: 5
       })
     })
 
@@ -1325,18 +1315,14 @@ describe('Storage工具测试', () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
         'apiConfig': {
           communicationMode: 'windowFunction',
-          requestTimeout: 10,
-          requestEventName: 'custom:request',
-          responseEventName: 'custom:response'
+          requestTimeout: 10
         }
       })
 
       const result = await storage.getApiConfig()
       expect(result).toEqual({
         communicationMode: 'windowFunction',
-        requestTimeout: 10,
-        requestEventName: 'custom:request',
-        responseEventName: 'custom:response'
+        requestTimeout: 10
       })
     })
 
@@ -1345,29 +1331,23 @@ describe('Storage工具测试', () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
         'apiConfig': {
           communicationMode: 'invalidMode',
-          requestTimeout: 5,
-          requestEventName: 'schema-editor:request',
-          responseEventName: 'schema-editor:response'
+          requestTimeout: 5
         }
       })
 
       const result = await storage.getApiConfig()
       // 应该返回默认值
       expect(result).toEqual({
-        communicationMode: 'customEvent',
-        requestTimeout: 5,
-        requestEventName: 'schema-editor:request',
-        responseEventName: 'schema-editor:response'
+        communicationMode: 'postMessage',
+        requestTimeout: 5
       })
     })
 
     it('getApiConfig应该验证requestTimeout范围（小于1）', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
         'apiConfig': {
-          communicationMode: 'customEvent',
-          requestTimeout: 0, // 无效：小于1
-          requestEventName: 'schema-editor:request',
-          responseEventName: 'schema-editor:response'
+          communicationMode: 'postMessage',
+          requestTimeout: 0 // 无效：小于1
         }
       })
 
@@ -1379,10 +1359,8 @@ describe('Storage工具测试', () => {
     it('getApiConfig应该验证requestTimeout范围（大于30）', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
         'apiConfig': {
-          communicationMode: 'customEvent',
-          requestTimeout: 60, // 无效：大于30
-          requestEventName: 'schema-editor:request',
-          responseEventName: 'schema-editor:response'
+          communicationMode: 'postMessage',
+          requestTimeout: 60 // 无效：大于30
         }
       })
 
@@ -1391,62 +1369,26 @@ describe('Storage工具测试', () => {
       expect(result.requestTimeout).toBe(5)
     })
 
-    it('getApiConfig应该验证requestEventName非空', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'apiConfig': {
-          communicationMode: 'customEvent',
-          requestTimeout: 5,
-          requestEventName: '', // 无效：空字符串
-          responseEventName: 'schema-editor:response'
-        }
-      })
-
-      const result = await storage.getApiConfig()
-      // 应该返回默认值
-      expect(result.requestEventName).toBe('schema-editor:request')
-    })
-
-    it('getApiConfig应该验证responseEventName非空', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'apiConfig': {
-          communicationMode: 'customEvent',
-          requestTimeout: 5,
-          requestEventName: 'schema-editor:request',
-          responseEventName: '' // 无效：空字符串
-        }
-      })
-
-      const result = await storage.getApiConfig()
-      // 应该返回默认值
-      expect(result.responseEventName).toBe('schema-editor:response')
-    })
-
     it('getApiConfig应该接受有效的边界值', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
         'apiConfig': {
-          communicationMode: 'customEvent',
-          requestTimeout: 1, // 最小值
-          requestEventName: 'a',
-          responseEventName: 'b'
+          communicationMode: 'postMessage',
+          requestTimeout: 1 // 最小值
         }
       })
 
       const result = await storage.getApiConfig()
       expect(result).toEqual({
-        communicationMode: 'customEvent',
-        requestTimeout: 1,
-        requestEventName: 'a',
-        responseEventName: 'b'
+        communicationMode: 'postMessage',
+        requestTimeout: 1
       })
     })
 
     it('getApiConfig应该接受最大超时值', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
         'apiConfig': {
-          communicationMode: 'customEvent',
-          requestTimeout: 30, // 最大值
-          requestEventName: 'schema-editor:request',
-          responseEventName: 'schema-editor:response'
+          communicationMode: 'postMessage',
+          requestTimeout: 30 // 最大值
         }
       })
 
@@ -1458,9 +1400,7 @@ describe('Storage工具测试', () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
         'apiConfig': {
           communicationMode: 'windowFunction',
-          requestTimeout: 5,
-          requestEventName: 'schema-editor:request',
-          responseEventName: 'schema-editor:response'
+          requestTimeout: 5
         }
       })
 
@@ -1468,12 +1408,25 @@ describe('Storage工具测试', () => {
       expect(result.communicationMode).toBe('windowFunction')
     })
 
+    it('getApiConfig应该将旧的customEvent模式迁移为postMessage', async () => {
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'apiConfig': {
+          communicationMode: 'customEvent',
+          requestTimeout: 10
+        }
+      })
+
+      const result = await storage.getApiConfig()
+      expect(result).toEqual({
+        communicationMode: 'postMessage',
+        requestTimeout: 10
+      })
+    })
+
     it('setApiConfig应该设置配置', async () => {
       const config = {
         communicationMode: 'windowFunction' as const,
-        requestTimeout: 10,
-        requestEventName: 'my-app:request',
-        responseEventName: 'my-app:response'
+        requestTimeout: 10
       }
       
       await storage.setApiConfig(config)
@@ -1483,12 +1436,10 @@ describe('Storage工具测试', () => {
       })
     })
 
-    it('setApiConfig应该保存customEvent模式配置', async () => {
+    it('setApiConfig应该保存postMessage模式配置', async () => {
       const config = {
-        communicationMode: 'customEvent' as const,
-        requestTimeout: 15,
-        requestEventName: 'custom-editor:req',
-        responseEventName: 'custom-editor:res'
+        communicationMode: 'postMessage' as const,
+        requestTimeout: 15
       }
       
       await storage.setApiConfig(config)
@@ -1503,10 +1454,8 @@ describe('Storage工具测试', () => {
       
       const result = await storage.getApiConfig()
       expect(result).toEqual({
-        communicationMode: 'customEvent',
-        requestTimeout: 5,
-        requestEventName: 'schema-editor:request',
-        responseEventName: 'schema-editor:response'
+        communicationMode: 'postMessage',
+        requestTimeout: 5
       })
     })
 
@@ -1514,10 +1463,8 @@ describe('Storage工具测试', () => {
       ;(chrome.storage.local.set as jest.Mock).mockRejectedValue(new Error('Storage error'))
       
       const config = {
-        communicationMode: 'customEvent' as const,
-        requestTimeout: 5,
-        requestEventName: 'schema-editor:request',
-        responseEventName: 'schema-editor:response'
+        communicationMode: 'postMessage' as const,
+        requestTimeout: 5
       }
       
       await expect(storage.setApiConfig(config)).resolves.not.toThrow()
