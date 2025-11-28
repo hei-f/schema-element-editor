@@ -28,7 +28,7 @@ export const useContentDetection = (): UseContentDetectionReturn => {
    * 统一检测编辑器内容类型和是否可解析
    */
   const detectContentType = useCallback((value: string): DetectionResult => {
-    if (!value || value.trim() === '') {
+    if (!value?.trim()) {
       return { type: ContentType.Other, canParse: false }
     }
 

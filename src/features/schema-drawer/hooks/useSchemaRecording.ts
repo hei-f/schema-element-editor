@@ -121,10 +121,12 @@ export function useSchemaRecording(props: UseSchemaRecordingOptions): UseSchemaR
   const requestSchemaPostMessage = useCallback(async () => {
     const params = attributes.params.join(',')
     try {
+      const messageType = apiConfig?.messageTypes?.getSchema ?? 'GET_SCHEMA'
       const response = await sendRequestToHost<{ success: boolean; data?: any; error?: string }>(
-        'GET_SCHEMA',
+        messageType,
         { params },
-        apiConfig?.requestTimeout ?? 5
+        apiConfig?.requestTimeout ?? 5,
+        apiConfig?.sourceConfig
       )
       handleSchemaResponse({
         success: response.success !== false,
