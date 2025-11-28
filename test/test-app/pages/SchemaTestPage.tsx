@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { Card, Button, Space, Tag, Typography, Badge, Collapse, Row, Col, message, Tooltip } from 'antd'
+import { Card, Button, Space, Tag, Typography, Badge, Collapse, Row, Col, message, Radio, Alert } from 'antd'
 import { 
   PlayCircleOutlined, 
   PauseCircleOutlined, 
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  SafetyCertificateOutlined
+  SafetyCertificateOutlined,
+  SwapOutlined
 } from '@ant-design/icons'
 import styled from 'styled-components'
 
 const { Title, Text, Paragraph } = Typography
+
+/** 通信模式类型 */
+type CommunicationMode = 'postMessage' | 'windowFunction'
 
 const PageContainer = styled.div`
   max-width: 1400px;
@@ -163,6 +165,7 @@ export const SchemaTestPage: React.FC = () => {
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [schemaData, setSchemaData] = useState<Record<string, any>>({})
   const [isRecording, setIsRecording] = useState(false)
+  const [communicationMode, setCommunicationMode] = useState<CommunicationMode>('postMessage')
   const schemaStoreRef = useRef({ ...initialSchemaStore })
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null)
   const recordingCountRef = useRef(0)
@@ -178,97 +181,195 @@ export const SchemaTestPage: React.FC = () => {
     setLogs(prev => [...prev.slice(-30), log])
   }, [])
 
+  /**
+   * 处理 Schema 请求的核心逻辑（两种模式共用）
+   */
+  const handleRequest = useCallback((type: string, payload: any): any => {
+    let result: any
+
+    switch (type) {
+      case 'GET_SCHEMA': {
+        const params = payload.params
+        addLog('info', '🔍 收到 GET_SCHEMA 请求', { params })
+        
+        const schema = schemaStoreRef.current[params]
+        
+        if (schema !== undefined) {
+          addLog('success', '✅ 返回 Schema 数据', schema)
+          result = { success: true, data: schema }
+        } else {
+          const defaultSchema = {
+            error: 'Schema not found',
+            params: params,
+            message: '未找到对应的Schema数据'
+          }
+          addLog('warn', '⚠️ 未找到Schema，返回默认值', defaultSchema)
+          result = { success: true, data: defaultSchema }
+        }
+        break
+      }
+
+      case 'UPDATE_SCHEMA': {
+        const { schema, params } = payload
+        addLog('info', '💾 收到 UPDATE_SCHEMA 请求', { schema, params })
+
+        try {
+          if (schema === null || schema === undefined) {
+            throw new Error('Schema 数据不能为空')
+          }
+
+          schemaStoreRef.current[params] = schema
+          setSchemaData({ ...schemaStoreRef.current })
+
+          addLog('success', '✅ Schema 更新成功', { params, newValue: schema })
+          result = { success: true }
+        } catch (error: any) {
+          addLog('error', '❌ Schema 更新失败', { error: error.message })
+          result = { success: false, error: error.message }
+        }
+        break
+      }
+
+      case 'CHECK_PREVIEW': {
+        addLog('info', '🔍 收到 CHECK_PREVIEW 请求')
+        result = { exists: true }
+        addLog('success', '✅ 预览功能可用')
+        break
+      }
+
+      case 'RENDER_PREVIEW': {
+        addLog('info', '🎨 收到 RENDER_PREVIEW 请求', payload)
+        result = { success: true }
+        addLog('success', '✅ 预览渲染完成')
+        break
+      }
+
+      case 'CLEANUP_PREVIEW': {
+        addLog('info', '🧹 收到 CLEANUP_PREVIEW 请求')
+        result = { success: true }
+        break
+      }
+
+      default:
+        addLog('warn', '⚠️ 未知的请求类型', { type })
+        result = { success: false, error: `未知的请求类型: ${type}` }
+    }
+
+    return result
+  }, [addLog])
+
+  /**
+   * 注册 postMessage 模式监听器
+   */
   useEffect(() => {
     setSchemaData({ ...schemaStoreRef.current })
 
-    const sendResponse = (requestId: string, result: any) => {
-      window.dispatchEvent(new CustomEvent('schema-editor:response', {
-        detail: { requestId, ...result }
-      }))
+    if (communicationMode !== 'postMessage') return
+
+    const handlePostMessage = (event: MessageEvent) => {
+      // 只处理来自当前窗口的消息
+      if (event.source !== window) return
+      // 只处理来自插件的消息
+      if (!event.data || event.data.source !== 'schema-editor-content') return
+
+      const { type, payload, requestId } = event.data
+      const result = handleRequest(type, payload)
+
+      // 发送响应（必须携带 requestId）
+      window.postMessage({
+        source: 'schema-editor-host',
+        requestId,
+        ...result
+      }, '*')
     }
 
-    const handleSchemaEditorRequest = (event: CustomEvent) => {
-      const { type, payload, requestId } = event.detail
-      let result: any
-
-      switch (type) {
-        case 'GET_SCHEMA': {
-          const params = payload.params
-          addLog('info', '🔍 收到 GET_SCHEMA 请求', { params })
-          
-          const schema = schemaStoreRef.current[params]
-          
-          if (schema !== undefined) {
-            addLog('success', '✅ 返回 Schema 数据', schema)
-            result = { success: true, data: schema }
-          } else {
-            const defaultSchema = {
-              error: 'Schema not found',
-              params: params,
-              message: '未找到对应的Schema数据'
-            }
-            addLog('warn', '⚠️ 未找到Schema，返回默认值', defaultSchema)
-            result = { success: true, data: defaultSchema }
-          }
-          break
-        }
-
-        case 'UPDATE_SCHEMA': {
-          const { schema, params } = payload
-          addLog('info', '💾 收到 UPDATE_SCHEMA 请求', { schema, params })
-
-          try {
-            if (schema === null || schema === undefined) {
-              throw new Error('Schema 数据不能为空')
-            }
-
-            schemaStoreRef.current[params] = schema
-            setSchemaData({ ...schemaStoreRef.current })
-
-            addLog('success', '✅ Schema 更新成功', { params, newValue: schema })
-            result = { success: true }
-          } catch (error: any) {
-            addLog('error', '❌ Schema 更新失败', { error: error.message })
-            result = { success: false, error: error.message }
-          }
-          break
-        }
-
-        case 'CHECK_PREVIEW': {
-          addLog('info', '🔍 收到 CHECK_PREVIEW 请求')
-          result = { exists: true }
-          addLog('success', '✅ 预览功能可用')
-          break
-        }
-
-        case 'RENDER_PREVIEW': {
-          addLog('info', '🎨 收到 RENDER_PREVIEW 请求', payload)
-          result = { success: true, hasCleanup: true }
-          addLog('success', '✅ 预览渲染完成')
-          break
-        }
-
-        case 'CLEANUP_PREVIEW': {
-          addLog('info', '🧹 收到 CLEANUP_PREVIEW 请求')
-          result = { success: true }
-          break
-        }
-
-        default:
-          addLog('warn', '⚠️ 未知的请求类型', { type })
-          result = { success: false, error: `未知的请求类型: ${type}` }
-      }
-
-      sendResponse(requestId, result)
-    }
-
-    window.addEventListener('schema-editor:request', handleSchemaEditorRequest as EventListener)
-    addLog('info', '🚀 测试页面已加载', { message: 'CustomEvent 事件监听器已注册' })
+    window.addEventListener('message', handlePostMessage)
+    addLog('info', '🚀 postMessage 模式已启用', { 
+      receive: 'source: schema-editor-content',
+      respond: 'source: schema-editor-host'
+    })
 
     return () => {
-      window.removeEventListener('schema-editor:request', handleSchemaEditorRequest as EventListener)
+      window.removeEventListener('message', handlePostMessage)
     }
-  }, [addLog])
+  }, [communicationMode, handleRequest, addLog])
+
+  /**
+   * 注册 windowFunction 模式的全局函数
+   */
+  useEffect(() => {
+    if (communicationMode !== 'windowFunction') {
+      // 清理全局函数
+      delete (window as any).__getContentById
+      delete (window as any).__updateContentById
+      delete (window as any).__getContentPreview
+      return
+    }
+
+    // 注册全局函数
+    ;(window as any).__getContentById = (params: string) => {
+      addLog('info', '🔍 调用 __getContentById', { params })
+      const schema = schemaStoreRef.current[params]
+      if (schema !== undefined) {
+        addLog('success', '✅ 返回 Schema 数据', schema)
+        return schema
+      }
+      const defaultSchema = { error: 'Schema not found', params }
+      addLog('warn', '⚠️ 未找到Schema，返回默认值', defaultSchema)
+      return defaultSchema
+    }
+
+    ;(window as any).__updateContentById = (schema: any, params: string) => {
+      addLog('info', '💾 调用 __updateContentById', { schema, params })
+      try {
+        if (schema === null || schema === undefined) {
+          throw new Error('Schema 数据不能为空')
+        }
+        schemaStoreRef.current[params] = schema
+        setSchemaData({ ...schemaStoreRef.current })
+        addLog('success', '✅ Schema 更新成功', { params, newValue: schema })
+        return true
+      } catch (error: any) {
+        addLog('error', '❌ Schema 更新失败', { error: error.message })
+        return false
+      }
+    }
+
+    ;(window as any).__getContentPreview = (data: any, containerId: string) => {
+      addLog('info', '🎨 调用 __getContentPreview', { data, containerId })
+      const container = document.getElementById(containerId)
+      if (container) {
+        container.innerHTML = `<pre style="padding: 16px; margin: 0; font-size: 12px;">${JSON.stringify(data, null, 2)}</pre>`
+      }
+      addLog('success', '✅ 预览渲染完成')
+      return () => {
+        addLog('info', '🧹 预览清理函数被调用')
+        const el = document.getElementById(containerId)
+        if (el) {
+          el.innerHTML = ''
+        }
+      }
+    }
+
+    addLog('info', '🚀 windowFunction 模式已启用', { 
+      functions: ['__getContentById', '__updateContentById', '__getContentPreview']
+    })
+
+    return () => {
+      delete (window as any).__getContentById
+      delete (window as any).__updateContentById
+      delete (window as any).__getContentPreview
+    }
+  }, [communicationMode, addLog])
+
+  /**
+   * 切换通信模式
+   */
+  const handleModeChange = (mode: CommunicationMode) => {
+    setCommunicationMode(mode)
+    setLogs([]) // 清空日志
+    message.success(`已切换到 ${mode === 'postMessage' ? 'postMessage 直连' : 'Window 函数'} 模式`)
+  }
 
   const startRecordingTest = () => {
     if (recordingTimerRef.current) {
@@ -381,13 +482,50 @@ export const SchemaTestPage: React.FC = () => {
   return (
     <PageContainer>
       <HeaderCard>
-        <Title level={3} style={{ color: '#0958d9', margin: 0 }}>
-          🔧 Schema Editor 功能测试
-        </Title>
-        <Paragraph style={{ color: '#1677ff', margin: '8px 0 16px 0' }}>
-          📡 通信模式：CustomEvent 事件通信 | 监听 schema-editor:request / 响应 schema-editor:response
-        </Paragraph>
-        <Space>
+        <Row justify="space-between" align="middle">
+          <Col>
+            <Title level={3} style={{ color: '#0958d9', margin: 0 }}>
+              🔧 Schema Editor 功能测试
+            </Title>
+          </Col>
+          <Col>
+            <Space>
+              <SwapOutlined style={{ color: '#1677ff' }} />
+              <Text strong style={{ color: '#1677ff' }}>通信模式：</Text>
+              <Radio.Group 
+                value={communicationMode} 
+                onChange={(e) => handleModeChange(e.target.value)}
+                optionType="button"
+                buttonStyle="solid"
+              >
+                <Radio.Button value="postMessage">
+                  postMessage 直连
+                </Radio.Button>
+                <Radio.Button value="windowFunction">
+                  Window 函数
+                </Radio.Button>
+              </Radio.Group>
+            </Space>
+          </Col>
+        </Row>
+        
+        <Alert
+          style={{ marginTop: 16 }}
+          type={communicationMode === 'postMessage' ? 'info' : 'warning'}
+          showIcon
+          message={
+            communicationMode === 'postMessage' 
+              ? '📡 postMessage 直连模式（推荐）'
+              : '⚠️ Window 函数模式（已废弃）'
+          }
+          description={
+            communicationMode === 'postMessage'
+              ? '监听 source: schema-editor-content → 响应 source: schema-editor-host'
+              : '暴露 __getContentById / __updateContentById / __getContentPreview'
+          }
+        />
+        
+        <Space style={{ marginTop: 16 }}>
           <Button icon={<SafetyCertificateOutlined />} onClick={verifyAttributes}>
             验证元素属性
           </Button>
