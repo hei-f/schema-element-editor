@@ -2,7 +2,7 @@
 
 Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 
-![Version](https://img.shields.io/badge/version-1.11.0-blue)
+![Version](https://img.shields.io/badge/version-1.12.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 ## 功能
@@ -46,25 +46,12 @@ npm run package
 
 ## 测试
 
-**方式一：一键启动（推荐）**
-
 ```bash
-npm run test:dev
+# 启动测试应用
+npm run test:app
 ```
 
-访问 http://localhost:8080/index.html
-
-**方式二：分开启动**
-
-```bash
-# 终端1：启动开发服务器
-npm run dev
-
-# 终端2：启动测试页面
-npm run test:page
-```
-
-访问 http://localhost:8080/index.html
+访问 http://localhost:3001
 
 ## 使用
 
@@ -102,35 +89,34 @@ type UpdateSchemaFunc<T> = (schema: NonNullable<T>, params: string) => boolean
 
 ### 预览 API 类型定义
 
-预览函数的类型因通信模式而异：
-
-**CustomEvent 模式**：通过 `containerId` 获取容器
+预览容器统一由插件创建，宿主通过 `containerId` 获取容器并渲染内容：
 
 ```typescript
-/** 预览函数（CustomEvent 模式） */
-type RenderPreviewFunc<T> = (schema: NonNullable<T>, containerId: string) => void
+/**
+ * 预览函数类型（两种模式统一）
+ * @param schema - 当前编辑的 Schema 数据
+ * @param containerId - 预览容器 ID，通过 document.getElementById() 获取
+ * @returns 可选的清理函数，插件关闭预览时自动调用
+ */
+type PreviewFunc<T> = (
+  schema: NonNullable<T>,
+  containerId: string
+) => (() => void) | void
 ```
 
-**Window 函数模式（已废弃）**：直接传入容器 DOM 元素
+### postMessage 直连模式（推荐）
 
-```typescript
-/** @deprecated 预览函数（Window 函数模式） */
-type PreviewFunc<T> = (schema: NonNullable<T>, container: HTMLElement) => (() => void) | null
-```
-
-- `schema`: 当前编辑的 Schema 数据
-- `containerId`: 预览容器的 DOM ID，通过 `document.getElementById()` 获取
-- `container`: 预览容器 DOM 元素（已废弃模式）
-- 返回清理函数：插件关闭预览时会自动调用（仅 Window 函数模式需要返回）
-
-### CustomEvent 事件模式（推荐）
-
-使用 CustomEvent 实现双向通信，无需污染 window 对象：
+使用 postMessage 实现双向通信，无需注入脚本，无需污染 window 对象：
 
 ```typescript
 // 监听扩展请求
-window.addEventListener('schema-editor:request', (event: CustomEvent) => {
-  const { type, payload, requestId } = event.detail
+window.addEventListener('message', (event) => {
+  // 只处理来自当前窗口的消息
+  if (event.source !== window) return
+  // 只处理来自插件的消息
+  if (event.data?.source !== 'schema-editor-content') return
+
+  const { type, payload, requestId } = event.data
   let result
 
   switch (type) {
@@ -149,7 +135,7 @@ window.addEventListener('schema-editor:request', (event: CustomEvent) => {
       // payload.containerId: 预览容器 ID
       const container = document.getElementById(payload.containerId)
       renderPreview(payload.schema, container)
-      result = { success: true, hasCleanup: true }
+      result = { success: true }
       break
     case 'CLEANUP_PREVIEW':
       cleanupPreview()
@@ -157,30 +143,30 @@ window.addEventListener('schema-editor:request', (event: CustomEvent) => {
       break
   }
 
-  // 发送响应
-  window.dispatchEvent(new CustomEvent('schema-editor:response', {
-    detail: { requestId, ...result }
-  }))
+  // 发送响应（必须携带 requestId）
+  window.postMessage({
+    source: 'schema-editor-host',
+    requestId,
+    ...result
+  }, '*')
 })
 ```
 
-事件名可在配置页面自定义，默认为 `schema-editor:request` 和 `schema-editor:response`。
-
 ### 通信模式对比
 
-| 特性 | CustomEvent 模式 | Window 函数模式 |
+| 特性 | postMessage 模式 | Window 函数模式 |
 |------|------------------|-----------------|
-| **性能** | 异步事件驱动，有微小开销（~50-200μs） | 同步直接调用，理论更快（~1-5μs） |
-| **命名空间** | 事件隔离，不污染 window | 需要在 window 上挂载函数 |
+| **架构** | 无需注入脚本，Content Script 直连 | 需要注入页面脚本 |
+| **命名空间** | postMessage 隔离，不污染 window | 需要在 window 上挂载函数 |
 | **健壮性** | 内置超时机制和错误处理 | 依赖页面实现 |
 | **可调试性** | requestId 便于追踪 | 无内置追踪机制 |
 | **安全性** | 减少全局暴露 | 全局函数可被外部访问 |
 
-> **性能说明**：Window 函数模式理论上有微小的性能优势（同步调用 vs 事件驱动），但实际差异在微秒级别，Schema 编辑操作为低频用户交互，业务逻辑处理耗时（毫秒级）远大于通信开销，因此性能差异可忽略不计。CustomEvent 模式带来的架构收益（隔离性、健壮性、可维护性）远超这点性能损失。
+> **架构说明**：postMessage 模式无需注入脚本到页面上下文，Content Script 直接通过 postMessage 与宿主应用通信，架构更简洁，安全性更高。
 
 ### Window 函数模式（已废弃）
 
-> ⚠️ **此模式已废弃，将在未来版本中移除，建议迁移到 CustomEvent 模式。**
+> ⚠️ **此模式已废弃，将在未来版本中移除，建议迁移到 postMessage 模式。**
 
 ```typescript
 // @deprecated 获取Schema
@@ -194,7 +180,8 @@ window.__updateContentById = (schema, params: string) => {
 }
 
 // @deprecated 预览函数（可选）
-window.__getContentPreview = (data, container: HTMLElement) => {
+window.__getContentPreview = (data, containerId: string) => {
+  const container = document.getElementById(containerId)
   const root = ReactDOM.createRoot(container)
   root.render(<Preview data={data} />)
   return () => root.unmount()
