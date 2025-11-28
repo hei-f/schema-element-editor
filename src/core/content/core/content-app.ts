@@ -145,13 +145,13 @@ export class SchemaEditorContent {
   /**
    * 启动监听
    */
-  private start(): void {
+  private async start(): Promise<void> {
     logger.log('启动Schema Editor')
     
     // 首次激活时执行初始化
     if (!this.isInitialized) {
-      // 注入页面脚本
-      injectPageScript()
+      // 注入页面脚本（仅 windowFunction 模式需要）
+      await injectPageScript()
       this.isInitialized = true
     }
     

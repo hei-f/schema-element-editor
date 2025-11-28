@@ -1,6 +1,26 @@
 import type { Message } from '@/shared/types'
 import { logger } from '@/shared/utils/logger'
 
+/** 消息来源标识 */
+export const MESSAGE_SOURCE = {
+  /** Content Script 发送的消息 */
+  FROM_CONTENT: 'schema-editor-content',
+  /** 宿主应用响应的消息（postMessage 模式） */
+  FROM_HOST: 'schema-editor-host',
+  /** Injected Script 响应的消息（windowFunction 模式） */
+  FROM_INJECTED: 'schema-editor-injected'
+} as const
+
+/** requestId 计数器 */
+let requestCounter = 0
+
+/** 待处理请求 Map */
+const pendingRequests = new Map<string, {
+  resolve: (value: any) => void
+  reject: (reason: any) => void
+  timeoutId: ReturnType<typeof setTimeout>
+}>()
+
 /**
  * 发送消息到Background Service Worker
  */
@@ -60,11 +80,11 @@ export function listenChromeMessages(
 }
 
 /**
- * 发送消息到页面上下文（通过postMessage）
+ * 发送消息到页面上下文（通过postMessage，用于 windowFunction 模式与 injected.js 通信）
  */
 export function postMessageToPage(message: Message): void {
   const fullMessage = {
-    source: 'schema-editor-content',
+    source: MESSAGE_SOURCE.FROM_CONTENT,
     type: message.type,
     payload: message.payload
   }
@@ -73,7 +93,7 @@ export function postMessageToPage(message: Message): void {
 }
 
 /**
- * 监听来自页面上下文的消息（通过postMessage）
+ * 监听来自 injected script 的消息（windowFunction 模式）
  */
 export function listenPageMessages(
   handler: (message: Message) => void
@@ -83,7 +103,7 @@ export function listenPageMessages(
     if (event.source !== window) return
     
     // 只处理来自injected script的消息
-    if (!event.data || event.data.source !== 'schema-editor-injected') return
+    if (!event.data || event.data.source !== MESSAGE_SOURCE.FROM_INJECTED) return
     
     handler(event.data)
   }
@@ -93,6 +113,73 @@ export function listenPageMessages(
   // 返回清理函数
   return () => {
     window.removeEventListener('message', listener)
+  }
+}
+
+/**
+ * 发送请求到宿主应用并等待响应（postMessage 直连模式）
+ * @param type 消息类型
+ * @param payload 消息载荷
+ * @param timeoutSeconds 超时时间（秒）
+ * @returns Promise，resolve 时返回宿主响应
+ */
+export function sendRequestToHost<T = any>(
+  type: string,
+  payload: any,
+  timeoutSeconds: number = 5
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const requestId = `req-${++requestCounter}-${Date.now()}`
+    const timeoutMs = timeoutSeconds * 1000
+    
+    const timeoutId = setTimeout(() => {
+      pendingRequests.delete(requestId)
+      reject(new Error(`请求超时（${timeoutSeconds}秒），请检查宿主应用是否正确监听了 postMessage`))
+    }, timeoutMs)
+    
+    // 存储待处理请求
+    pendingRequests.set(requestId, { resolve, reject, timeoutId })
+    
+    // 发送请求到宿主
+    window.postMessage({
+      source: MESSAGE_SOURCE.FROM_CONTENT,
+      type,
+      payload,
+      requestId
+    }, '*')
+  })
+}
+
+/**
+ * 初始化宿主消息监听器（postMessage 直连模式）
+ * 需要在 Content Script 启动时调用一次
+ */
+export function initHostMessageListener(): () => void {
+  const listener = (event: MessageEvent) => {
+    // 只处理来自当前窗口的消息
+    if (event.source !== window) return
+    
+    // 只处理来自宿主的响应
+    if (!event.data || event.data.source !== MESSAGE_SOURCE.FROM_HOST) return
+    
+    const { requestId } = event.data
+    const pending = pendingRequests.get(requestId)
+    
+    if (pending) {
+      clearTimeout(pending.timeoutId)
+      pendingRequests.delete(requestId)
+      pending.resolve(event.data)
+    }
+  }
+  
+  window.addEventListener('message', listener)
+  
+  // 返回清理函数
+  return () => {
+    window.removeEventListener('message', listener)
+    // 清理所有待处理请求
+    pendingRequests.forEach(({ timeoutId }) => clearTimeout(timeoutId))
+    pendingRequests.clear()
   }
 }
 
