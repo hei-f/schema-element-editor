@@ -10,12 +10,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, '../../src'),
       '@shared': path.resolve(__dirname, '../../src/shared'),
       '@features': path.resolve(__dirname, '../../src/features'),
-      '@core': path.resolve(__dirname, '../../src/core')
-    }
+      '@core': path.resolve(__dirname, '../../src/core'),
+    },
   },
   server: {
     port: 3001,
-    open: true
-  }
+    open: true,
+  },
 })
-

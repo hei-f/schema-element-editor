@@ -1,10 +1,23 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { Card, Button, Space, Tag, Typography, Badge, Collapse, Row, Col, message, Radio, Alert } from 'antd'
-import { 
-  PlayCircleOutlined, 
-  PauseCircleOutlined, 
+import {
+  Card,
+  Button,
+  Space,
+  Tag,
+  Typography,
+  Badge,
+  Collapse,
+  Row,
+  Col,
+  message,
+  Radio,
+  Alert,
+} from 'antd'
+import {
+  PlayCircleOutlined,
+  PauseCircleOutlined,
   SafetyCertificateOutlined,
-  SwapOutlined
+  SwapOutlined,
 } from '@ant-design/icons'
 import styled from 'styled-components'
 
@@ -27,8 +40,8 @@ const HeaderCard = styled(Card)`
 const TestCard = styled(Card)<{ $isValid?: boolean }>`
   cursor: pointer;
   transition: all 0.3s;
-  border-left: 4px solid ${props => props.$isValid ? '#52c41a' : '#ff4d4f'};
-  
+  border-left: 4px solid ${(props) => (props.$isValid ? '#52c41a' : '#ff4d4f')};
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -45,7 +58,7 @@ const ConsolePanel = styled(Card)`
   border-radius: 8px 0 0 0;
   z-index: 1000;
   box-shadow: -2px -2px 8px rgba(0, 0, 0, 0.1);
-  
+
   .ant-card-body {
     max-height: 240px;
     overflow-y: auto;
@@ -59,20 +72,28 @@ const LogItem = styled.div<{ $type: string }>`
   padding: 4px 8px;
   margin: 2px 0;
   border-radius: 4px;
-  background: ${props => {
+  background: ${(props) => {
     switch (props.$type) {
-      case 'success': return '#f6ffed';
-      case 'error': return '#fff2f0';
-      case 'warn': return '#fffbe6';
-      default: return '#e6f4ff';
+      case 'success':
+        return '#f6ffed'
+      case 'error':
+        return '#fff2f0'
+      case 'warn':
+        return '#fffbe6'
+      default:
+        return '#e6f4ff'
     }
   }};
-  color: ${props => {
+  color: ${(props) => {
     switch (props.$type) {
-      case 'success': return '#389e0d';
-      case 'error': return '#cf1322';
-      case 'warn': return '#d48806';
-      default: return '#0958d9';
+      case 'success':
+        return '#389e0d'
+      case 'error':
+        return '#cf1322'
+      case 'warn':
+        return '#d48806'
+      default:
+        return '#0958d9'
     }
   }};
 `
@@ -129,36 +150,165 @@ const initialSchemaStore: Record<string, any> = {
   'object-simple': { name: 'Test Object', value: 123 },
   'object-nested': {
     user: { id: 1, name: 'Alice', profile: { age: 25, city: 'Beijing' } },
-    settings: { theme: 'dark', notifications: true }
+    settings: { theme: 'dark', notifications: true },
   },
   'array-numbers': [1, 2, 3, 4, 5],
   'array-strings': ['apple', 'banana', 'cherry'],
-  'array-objects': [{ id: 1, name: 'Item 1' }, { id: 2, name: 'Item 2' }],
+  'array-objects': [
+    { id: 1, name: 'Item 1' },
+    { id: 2, name: 'Item 2' },
+  ],
   'user-001,profile-001': {
     userId: 'user-001',
     profileId: 'profile-001',
-    data: { username: 'alice', email: 'alice@example.com', age: 28 }
+    data: { username: 'alice', email: 'alice@example.com', age: 28 },
   },
   'boolean-true': true,
   'boolean-false': false,
-  'recording-test': '"初始内容"'
+  'recording-test': '"初始内容"',
 }
 
 const testElements: TestElement[] = [
-  { id: 'string-simple', title: 'String - 简单字符串', description: '单参数测试，schema为简单字符串', attrs: { 'data-id': 'string-simple' }, schemaKey: 'string-simple', badge: 'success', badgeText: '有效', typeTag: 'String' },
-  { id: 'string-complex', title: 'String - 复杂字符串', description: '包含特殊字符的字符串', attrs: { 'data-id': 'string-complex' }, schemaKey: 'string-complex', badge: 'success', badgeText: '有效', typeTag: 'String' },
-  { id: 'number-int', title: 'Number - 整数', description: '单参数测试，schema为整数', attrs: { 'data-id': 'number-int' }, schemaKey: 'number-int', badge: 'success', badgeText: '有效', typeTag: 'Number' },
-  { id: 'number-float', title: 'Number - 浮点数', description: '单参数测试，schema为浮点数', attrs: { 'data-id': 'number-float' }, schemaKey: 'number-float', badge: 'success', badgeText: '有效', typeTag: 'Number' },
-  { id: 'object-simple', title: 'Object - 简单对象', description: '单参数测试，schema为简单对象', attrs: { 'data-id': 'object-simple' }, schemaKey: 'object-simple', badge: 'success', badgeText: '有效', typeTag: 'Object' },
-  { id: 'object-nested', title: 'Object - 嵌套对象', description: '单参数测试，schema为复杂嵌套对象', attrs: { 'data-id': 'object-nested' }, schemaKey: 'object-nested', badge: 'success', badgeText: '有效', typeTag: 'Object' },
-  { id: 'array-numbers', title: 'Array - 数字数组', description: '单参数测试，schema为数字数组', attrs: { 'data-id': 'array-numbers' }, schemaKey: 'array-numbers', badge: 'success', badgeText: '有效', typeTag: 'Array' },
-  { id: 'array-strings', title: 'Array - 字符串数组', description: '单参数测试，schema为字符串数组', attrs: { 'data-id': 'array-strings' }, schemaKey: 'array-strings', badge: 'success', badgeText: '有效', typeTag: 'Array' },
-  { id: 'array-objects', title: 'Array - 对象数组', description: '单参数测试，schema为对象数组', attrs: { 'data-id': 'array-objects' }, schemaKey: 'array-objects', badge: 'success', badgeText: '有效', typeTag: 'Array' },
-  { id: 'multi-params', title: '多参数测试', description: '包含user-001和profile-001两个参数', attrs: { 'data-id': 'user-001,profile-001' }, schemaKey: 'user-001,profile-001', badge: 'success', badgeText: '有效', typeTag: 'Object' },
-  { id: 'boolean-true', title: 'Boolean - true', description: '单参数测试，schema为true', attrs: { 'data-id': 'boolean-true' }, schemaKey: 'boolean-true', badge: 'success', badgeText: '有效', typeTag: 'Boolean' },
-  { id: 'boolean-false', title: 'Boolean - false', description: '单参数测试，schema为false', attrs: { 'data-id': 'boolean-false' }, schemaKey: 'boolean-false', badge: 'success', badgeText: '有效', typeTag: 'Boolean' },
-  { id: 'recording-test', title: '🎬 录制模式测试', description: '点击开始后schema会持续变化，用于测试录制功能', attrs: { 'data-id': 'recording-test' }, schemaKey: 'recording-test', badge: 'success', badgeText: '有效', typeTag: 'Recording' },
-  { id: 'invalid-null', title: '无效元素测试', description: '不包含任何data-id属性，应显示"非法目标"', attrs: {}, schemaKey: null, badge: 'error', badgeText: '非法', typeTag: null },
+  {
+    id: 'string-simple',
+    title: 'String - 简单字符串',
+    description: '单参数测试，schema为简单字符串',
+    attrs: { 'data-id': 'string-simple' },
+    schemaKey: 'string-simple',
+    badge: 'success',
+    badgeText: '有效',
+    typeTag: 'String',
+  },
+  {
+    id: 'string-complex',
+    title: 'String - 复杂字符串',
+    description: '包含特殊字符的字符串',
+    attrs: { 'data-id': 'string-complex' },
+    schemaKey: 'string-complex',
+    badge: 'success',
+    badgeText: '有效',
+    typeTag: 'String',
+  },
+  {
+    id: 'number-int',
+    title: 'Number - 整数',
+    description: '单参数测试，schema为整数',
+    attrs: { 'data-id': 'number-int' },
+    schemaKey: 'number-int',
+    badge: 'success',
+    badgeText: '有效',
+    typeTag: 'Number',
+  },
+  {
+    id: 'number-float',
+    title: 'Number - 浮点数',
+    description: '单参数测试，schema为浮点数',
+    attrs: { 'data-id': 'number-float' },
+    schemaKey: 'number-float',
+    badge: 'success',
+    badgeText: '有效',
+    typeTag: 'Number',
+  },
+  {
+    id: 'object-simple',
+    title: 'Object - 简单对象',
+    description: '单参数测试，schema为简单对象',
+    attrs: { 'data-id': 'object-simple' },
+    schemaKey: 'object-simple',
+    badge: 'success',
+    badgeText: '有效',
+    typeTag: 'Object',
+  },
+  {
+    id: 'object-nested',
+    title: 'Object - 嵌套对象',
+    description: '单参数测试，schema为复杂嵌套对象',
+    attrs: { 'data-id': 'object-nested' },
+    schemaKey: 'object-nested',
+    badge: 'success',
+    badgeText: '有效',
+    typeTag: 'Object',
+  },
+  {
+    id: 'array-numbers',
+    title: 'Array - 数字数组',
+    description: '单参数测试，schema为数字数组',
+    attrs: { 'data-id': 'array-numbers' },
+    schemaKey: 'array-numbers',
+    badge: 'success',
+    badgeText: '有效',
+    typeTag: 'Array',
+  },
+  {
+    id: 'array-strings',
+    title: 'Array - 字符串数组',
+    description: '单参数测试，schema为字符串数组',
+    attrs: { 'data-id': 'array-strings' },
+    schemaKey: 'array-strings',
+    badge: 'success',
+    badgeText: '有效',
+    typeTag: 'Array',
+  },
+  {
+    id: 'array-objects',
+    title: 'Array - 对象数组',
+    description: '单参数测试，schema为对象数组',
+    attrs: { 'data-id': 'array-objects' },
+    schemaKey: 'array-objects',
+    badge: 'success',
+    badgeText: '有效',
+    typeTag: 'Array',
+  },
+  {
+    id: 'multi-params',
+    title: '多参数测试',
+    description: '包含user-001和profile-001两个参数',
+    attrs: { 'data-id': 'user-001,profile-001' },
+    schemaKey: 'user-001,profile-001',
+    badge: 'success',
+    badgeText: '有效',
+    typeTag: 'Object',
+  },
+  {
+    id: 'boolean-true',
+    title: 'Boolean - true',
+    description: '单参数测试，schema为true',
+    attrs: { 'data-id': 'boolean-true' },
+    schemaKey: 'boolean-true',
+    badge: 'success',
+    badgeText: '有效',
+    typeTag: 'Boolean',
+  },
+  {
+    id: 'boolean-false',
+    title: 'Boolean - false',
+    description: '单参数测试，schema为false',
+    attrs: { 'data-id': 'boolean-false' },
+    schemaKey: 'boolean-false',
+    badge: 'success',
+    badgeText: '有效',
+    typeTag: 'Boolean',
+  },
+  {
+    id: 'recording-test',
+    title: '🎬 录制模式测试',
+    description: '点击开始后schema会持续变化，用于测试录制功能',
+    attrs: { 'data-id': 'recording-test' },
+    schemaKey: 'recording-test',
+    badge: 'success',
+    badgeText: '有效',
+    typeTag: 'Recording',
+  },
+  {
+    id: 'invalid-null',
+    title: '无效元素测试',
+    description: '不包含任何data-id属性，应显示"非法目标"',
+    attrs: {},
+    schemaKey: null,
+    badge: 'error',
+    badgeText: '非法',
+    typeTag: null,
+  },
 ]
 
 export const SchemaTestPage: React.FC = () => {
@@ -169,103 +319,105 @@ export const SchemaTestPage: React.FC = () => {
   const schemaStoreRef = useRef({ ...initialSchemaStore })
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null)
   const recordingCountRef = useRef(0)
-  const previewRootRef = useRef<any>(null)
 
   const addLog = useCallback((type: LogEntry['type'], logMessage: string, data?: any) => {
     const log: LogEntry = {
       type,
       message: logMessage,
       data,
-      time: new Date().toLocaleTimeString()
+      time: new Date().toLocaleTimeString(),
     }
-    setLogs(prev => [...prev.slice(-30), log])
+    setLogs((prev) => [...prev.slice(-30), log])
   }, [])
 
   /**
    * 处理 Schema 请求的核心逻辑（两种模式共用）
    */
-  const handleRequest = useCallback((type: string, payload: any): any => {
-    let result: any
+  const handleRequest = useCallback(
+    (type: string, payload: any): any => {
+      let result: any
 
-    switch (type) {
-      case 'GET_SCHEMA': {
-        const params = payload.params
-        addLog('info', '🔍 收到 GET_SCHEMA 请求', { params })
-        
-        const schema = schemaStoreRef.current[params]
-        
-        if (schema !== undefined) {
-          addLog('success', '✅ 返回 Schema 数据', schema)
-          result = { success: true, data: schema }
-        } else {
-          const defaultSchema = {
-            error: 'Schema not found',
-            params: params,
-            message: '未找到对应的Schema数据'
+      switch (type) {
+        case 'GET_SCHEMA': {
+          const params = payload.params
+          addLog('info', '🔍 收到 GET_SCHEMA 请求', { params })
+
+          const schema = schemaStoreRef.current[params]
+
+          if (schema !== undefined) {
+            addLog('success', '✅ 返回 Schema 数据', schema)
+            result = { success: true, data: schema }
+          } else {
+            const defaultSchema = {
+              error: 'Schema not found',
+              params: params,
+              message: '未找到对应的Schema数据',
+            }
+            addLog('warn', '⚠️ 未找到Schema，返回默认值', defaultSchema)
+            result = { success: true, data: defaultSchema }
           }
-          addLog('warn', '⚠️ 未找到Schema，返回默认值', defaultSchema)
-          result = { success: true, data: defaultSchema }
+          break
         }
-        break
-      }
 
-      case 'UPDATE_SCHEMA': {
-        const { schema, params } = payload
-        addLog('info', '💾 收到 UPDATE_SCHEMA 请求', { schema, params })
+        case 'UPDATE_SCHEMA': {
+          const { schema, params } = payload
+          addLog('info', '💾 收到 UPDATE_SCHEMA 请求', { schema, params })
 
-        try {
-          if (schema === null || schema === undefined) {
-            throw new Error('Schema 数据不能为空')
+          try {
+            if (schema === null || schema === undefined) {
+              throw new Error('Schema 数据不能为空')
+            }
+
+            schemaStoreRef.current[params] = schema
+            setSchemaData({ ...schemaStoreRef.current })
+
+            addLog('success', '✅ Schema 更新成功', { params, newValue: schema })
+            result = { success: true }
+          } catch (error: any) {
+            addLog('error', '❌ Schema 更新失败', { error: error.message })
+            result = { success: false, error: error.message }
           }
-
-          schemaStoreRef.current[params] = schema
-          setSchemaData({ ...schemaStoreRef.current })
-
-          addLog('success', '✅ Schema 更新成功', { params, newValue: schema })
-          result = { success: true }
-        } catch (error: any) {
-          addLog('error', '❌ Schema 更新失败', { error: error.message })
-          result = { success: false, error: error.message }
+          break
         }
-        break
-      }
 
-      case 'CHECK_PREVIEW': {
-        addLog('info', '🔍 收到 CHECK_PREVIEW 请求')
-        result = { exists: true }
-        addLog('success', '✅ 预览功能可用')
-        break
-      }
-
-      case 'RENDER_PREVIEW': {
-        const { schema, containerId } = payload
-        addLog('info', '🎨 收到 RENDER_PREVIEW 请求', { schema, containerId })
-        
-        const container = document.getElementById(containerId)
-        if (container) {
-          container.innerHTML = `<pre style="padding: 16px; margin: 0; font-size: 12px; background: #f5f5f5; border-radius: 4px; overflow: auto; height: 100%;">${JSON.stringify(schema, null, 2)}</pre>`
-          addLog('success', '✅ 预览渲染完成')
-          result = { success: true }
-        } else {
-          addLog('error', '❌ 预览容器不存在', { containerId })
-          result = { success: false, error: '预览容器不存在' }
+        case 'CHECK_PREVIEW': {
+          addLog('info', '🔍 收到 CHECK_PREVIEW 请求')
+          result = { exists: true }
+          addLog('success', '✅ 预览功能可用')
+          break
         }
-        break
+
+        case 'RENDER_PREVIEW': {
+          const { schema, containerId } = payload
+          addLog('info', '🎨 收到 RENDER_PREVIEW 请求', { schema, containerId })
+
+          const container = document.getElementById(containerId)
+          if (container) {
+            container.innerHTML = `<pre style="padding: 16px; margin: 0; font-size: 12px; background: #f5f5f5; border-radius: 4px; overflow: auto; height: 100%;">${JSON.stringify(schema, null, 2)}</pre>`
+            addLog('success', '✅ 预览渲染完成')
+            result = { success: true }
+          } else {
+            addLog('error', '❌ 预览容器不存在', { containerId })
+            result = { success: false, error: '预览容器不存在' }
+          }
+          break
+        }
+
+        case 'CLEANUP_PREVIEW': {
+          addLog('info', '🧹 收到 CLEANUP_PREVIEW 请求')
+          result = { success: true }
+          break
+        }
+
+        default:
+          addLog('warn', '⚠️ 未知的请求类型', { type })
+          result = { success: false, error: `未知的请求类型: ${type}` }
       }
 
-      case 'CLEANUP_PREVIEW': {
-        addLog('info', '🧹 收到 CLEANUP_PREVIEW 请求')
-        result = { success: true }
-        break
-      }
-
-      default:
-        addLog('warn', '⚠️ 未知的请求类型', { type })
-        result = { success: false, error: `未知的请求类型: ${type}` }
-    }
-
-    return result
-  }, [addLog])
+      return result
+    },
+    [addLog]
+  )
 
   /**
    * 注册 postMessage 模式监听器
@@ -285,17 +437,20 @@ export const SchemaTestPage: React.FC = () => {
       const result = handleRequest(type, payload)
 
       // 发送响应（必须携带 requestId）
-      window.postMessage({
-        source: 'schema-editor-host',
-        requestId,
-        ...result
-      }, '*')
+      window.postMessage(
+        {
+          source: 'schema-editor-host',
+          requestId,
+          ...result,
+        },
+        '*'
+      )
     }
 
     window.addEventListener('message', handlePostMessage)
-    addLog('info', '🚀 postMessage 模式已启用', { 
+    addLog('info', '🚀 postMessage 模式已启用', {
       receive: 'source: schema-editor-content',
-      respond: 'source: schema-editor-host'
+      respond: 'source: schema-editor-host',
     })
 
     return () => {
@@ -327,7 +482,6 @@ export const SchemaTestPage: React.FC = () => {
       addLog('warn', '⚠️ 未找到Schema，返回默认值', defaultSchema)
       return defaultSchema
     }
-
     ;(window as any).__updateContentById = (schema: any, params: string) => {
       addLog('info', '💾 调用 __updateContentById', { schema, params })
       try {
@@ -343,7 +497,6 @@ export const SchemaTestPage: React.FC = () => {
         return false
       }
     }
-
     ;(window as any).__getContentPreview = (data: any, containerId: string) => {
       addLog('info', '🎨 调用 __getContentPreview', { data, containerId })
       const container = document.getElementById(containerId)
@@ -360,8 +513,8 @@ export const SchemaTestPage: React.FC = () => {
       }
     }
 
-    addLog('info', '🚀 windowFunction 模式已启用', { 
-      functions: ['__getContentById', '__updateContentById', '__getContentPreview']
+    addLog('info', '🚀 windowFunction 模式已启用', {
+      functions: ['__getContentById', '__updateContentById', '__getContentPreview'],
     })
 
     return () => {
@@ -384,46 +537,46 @@ export const SchemaTestPage: React.FC = () => {
     if (recordingTimerRef.current) {
       clearInterval(recordingTimerRef.current)
     }
-    
+
     recordingCountRef.current = 0
     const startTime = Date.now()
-    
+
     schemaStoreRef.current['recording-test'] = JSON.stringify('开始录制测试 - 时间: 0ms')
     setSchemaData({ ...schemaStoreRef.current })
     setIsRecording(true)
-    
+
     addLog('info', '🎬 开始录制模式测试', { duration: '10秒', interval: '100ms' })
-    
+
     recordingTimerRef.current = setInterval(() => {
       const elapsed = Date.now() - startTime
       recordingCountRef.current++
-      
+
       const lines = [
         `录制模式测试 - 已运行 ${elapsed}ms`,
         `更新次数: ${recordingCountRef.current}`,
-        '---'
+        '---',
       ]
-      
+
       for (let i = 1; i <= Math.min(recordingCountRef.current, 10); i++) {
         lines.push(`数据行 ${i}: 内容_${i * 100}ms`)
       }
-      
+
       const newContent = lines.join('\n')
       schemaStoreRef.current['recording-test'] = JSON.stringify(newContent)
       setSchemaData({ ...schemaStoreRef.current })
-      
+
       if (elapsed >= 10000) {
         clearInterval(recordingTimerRef.current!)
         recordingTimerRef.current = null
         setIsRecording(false)
-        
+
         const finalLines = [...lines, '---', '✅ 录制测试完成！']
         schemaStoreRef.current['recording-test'] = JSON.stringify(finalLines.join('\n'))
         setSchemaData({ ...schemaStoreRef.current })
-        
-        addLog('success', '✅ 录制模式测试完成', { 
+
+        addLog('success', '✅ 录制模式测试完成', {
           totalUpdates: recordingCountRef.current,
-          duration: `${elapsed}ms`
+          duration: `${elapsed}ms`,
         })
       }
     }, 100)
@@ -442,17 +595,15 @@ export const SchemaTestPage: React.FC = () => {
     let successCount = 0
     let failCount = 0
 
-    testElements.forEach(elem => {
+    testElements.forEach((elem) => {
       const domElem = document.getElementById(elem.id)
       if (domElem) {
         const hasExpectedAttrs = Object.keys(elem.attrs).length > 0
         const actualValue = domElem.getAttribute('data-id')
-        
-        const isCorrect = (
-          (!elem.attrs['data-id'] && !actualValue) ||
-          (actualValue === elem.attrs['data-id'])
-        )
-        
+
+        const isCorrect =
+          (!elem.attrs['data-id'] && !actualValue) || actualValue === elem.attrs['data-id']
+
         if (hasExpectedAttrs && isCorrect) {
           successCount++
         } else if (hasExpectedAttrs && !isCorrect) {
@@ -470,22 +621,29 @@ export const SchemaTestPage: React.FC = () => {
 
   const getTypeColor = (typeTag: string | null) => {
     switch (typeTag) {
-      case 'String': return 'orange'
-      case 'Number': return 'blue'
-      case 'Object': return 'green'
-      case 'Array': return 'purple'
-      case 'Boolean': return 'cyan'
-      case 'Recording': return 'red'
-      default: return 'default'
+      case 'String':
+        return 'orange'
+      case 'Number':
+        return 'blue'
+      case 'Object':
+        return 'green'
+      case 'Array':
+        return 'purple'
+      case 'Boolean':
+        return 'cyan'
+      case 'Recording':
+        return 'red'
+      default:
+        return 'default'
     }
   }
 
   const groupedElements = {
-    'String / Number': testElements.filter(e => ['String', 'Number'].includes(e.typeTag || '')),
-    'Object / Array': testElements.filter(e => ['Object', 'Array'].includes(e.typeTag || '')),
-    'Boolean': testElements.filter(e => e.typeTag === 'Boolean'),
-    'Recording': testElements.filter(e => e.typeTag === 'Recording'),
-    '无效元素': testElements.filter(e => !e.typeTag),
+    'String / Number': testElements.filter((e) => ['String', 'Number'].includes(e.typeTag || '')),
+    'Object / Array': testElements.filter((e) => ['Object', 'Array'].includes(e.typeTag || '')),
+    Boolean: testElements.filter((e) => e.typeTag === 'Boolean'),
+    Recording: testElements.filter((e) => e.typeTag === 'Recording'),
+    无效元素: testElements.filter((e) => !e.typeTag),
   }
 
   return (
@@ -500,30 +658,28 @@ export const SchemaTestPage: React.FC = () => {
           <Col>
             <Space>
               <SwapOutlined style={{ color: '#1677ff' }} />
-              <Text strong style={{ color: '#1677ff' }}>通信模式：</Text>
-              <Radio.Group 
-                value={communicationMode} 
+              <Text strong style={{ color: '#1677ff' }}>
+                通信模式：
+              </Text>
+              <Radio.Group
+                value={communicationMode}
                 onChange={(e) => handleModeChange(e.target.value)}
                 optionType="button"
                 buttonStyle="solid"
               >
-                <Radio.Button value="postMessage">
-                  postMessage 直连
-                </Radio.Button>
-                <Radio.Button value="windowFunction">
-                  Window 函数
-                </Radio.Button>
+                <Radio.Button value="postMessage">postMessage 直连</Radio.Button>
+                <Radio.Button value="windowFunction">Window 函数</Radio.Button>
               </Radio.Group>
             </Space>
           </Col>
         </Row>
-        
+
         <Alert
           style={{ marginTop: 16 }}
           type={communicationMode === 'postMessage' ? 'info' : 'warning'}
           showIcon
           message={
-            communicationMode === 'postMessage' 
+            communicationMode === 'postMessage'
               ? '📡 postMessage 直连模式（推荐）'
               : '⚠️ Window 函数模式（已废弃）'
           }
@@ -533,14 +689,16 @@ export const SchemaTestPage: React.FC = () => {
               : '暴露 __getContentById / __updateContentById / __getContentPreview'
           }
         />
-        
+
         <Space style={{ marginTop: 16 }}>
           <Button icon={<SafetyCertificateOutlined />} onClick={verifyAttributes}>
             验证元素属性
           </Button>
         </Space>
         <Paragraph style={{ color: '#595959', margin: '16px 0 0 0', fontSize: 13 }}>
-          💡 使用说明：按住 <Text keyboard>Alt/Option</Text> 并将鼠标悬停在测试元素上，观察高亮效果；按住 <Text keyboard>Alt/Option</Text> 并点击有效元素打开抽屉
+          💡 使用说明：按住 <Text keyboard>Alt/Option</Text>{' '}
+          并将鼠标悬停在测试元素上，观察高亮效果；按住 <Text keyboard>Alt/Option</Text>{' '}
+          并点击有效元素打开抽屉
         </Paragraph>
       </HeaderCard>
 
@@ -551,7 +709,7 @@ export const SchemaTestPage: React.FC = () => {
           label: <Text strong>{group} 类型测试</Text>,
           children: (
             <Row gutter={[16, 16]}>
-              {elements.map(elem => (
+              {elements.map((elem) => (
                 <Col span={elem.typeTag === 'Recording' ? 24 : 12} key={elem.id}>
                   <TestCard
                     id={elem.id}
@@ -560,18 +718,21 @@ export const SchemaTestPage: React.FC = () => {
                     {...(elem.attrs['data-id'] ? { 'data-id': elem.attrs['data-id'] } : {})}
                   >
                     <Space style={{ marginBottom: 8 }}>
-                      <Badge status={elem.badge === 'success' ? 'success' : 'error'} text={elem.badgeText} />
+                      <Badge
+                        status={elem.badge === 'success' ? 'success' : 'error'}
+                        text={elem.badgeText}
+                      />
                       <Text strong>{elem.title}</Text>
                       {elem.typeTag && <Tag color={getTypeColor(elem.typeTag)}>{elem.typeTag}</Tag>}
                     </Space>
                     <Paragraph type="secondary" style={{ margin: '4px 0 0 0', fontSize: 13 }}>
                       {elem.description}
                     </Paragraph>
-                    
+
                     {elem.typeTag === 'Recording' && (
                       <Space style={{ marginTop: 12 }}>
-                        <Button 
-                          type="primary" 
+                        <Button
+                          type="primary"
                           danger
                           icon={<PlayCircleOutlined />}
                           onClick={startRecordingTest}
@@ -579,7 +740,7 @@ export const SchemaTestPage: React.FC = () => {
                         >
                           开始测试
                         </Button>
-                        <Button 
+                        <Button
                           icon={<PauseCircleOutlined />}
                           onClick={stopRecordingTest}
                           disabled={!isRecording}
@@ -589,15 +750,15 @@ export const SchemaTestPage: React.FC = () => {
                         {isRecording && <Tag color="processing">录制中...</Tag>}
                       </Space>
                     )}
-                    
+
                     {Object.keys(elem.attrs).length > 0 && (
                       <AttrInfo>data-id: "{elem.attrs['data-id']}"</AttrInfo>
                     )}
-                    
+
                     {elem.schemaKey && schemaData[elem.schemaKey] !== undefined && (
                       <SchemaDisplay>
-                        {typeof schemaData[elem.schemaKey] === 'string' 
-                          ? schemaData[elem.schemaKey] 
+                        {typeof schemaData[elem.schemaKey] === 'string'
+                          ? schemaData[elem.schemaKey]
                           : JSON.stringify(schemaData[elem.schemaKey], null, 2)}
                       </SchemaDisplay>
                     )}
@@ -605,7 +766,7 @@ export const SchemaTestPage: React.FC = () => {
                 </Col>
               ))}
             </Row>
-          )
+          ),
         }))}
       />
 
@@ -628,4 +789,3 @@ export const SchemaTestPage: React.FC = () => {
     </PageContainer>
   )
 }
-

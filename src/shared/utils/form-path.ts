@@ -22,27 +22,27 @@ export function pathEqual(a: string[], b: string[]): boolean {
 
 /**
  * 从嵌套的 changedValues 对象中提取变更字段的完整路径
- * @example 
- * getChangedFieldPath({ searchConfig: { searchDepthDown: 5 } }) 
+ * @example
+ * getChangedFieldPath({ searchConfig: { searchDepthDown: 5 } })
  * => ['searchConfig', 'searchDepthDown']
  */
 export function getChangedFieldPath(changedValues: any, prefix: string[] = []): string[] {
   const keys = Object.keys(changedValues)
   if (keys.length === 0) return prefix
-  
+
   const key = keys[0]
   const value = changedValues[key]
-  
+
   // 如果值是普通对象（非数组、非null），继续递归
   if (
-    value !== null && 
-    typeof value === 'object' && 
+    value !== null &&
+    typeof value === 'object' &&
     !Array.isArray(value) &&
     Object.keys(value).length > 0
   ) {
     return getChangedFieldPath(value, [...prefix, key])
   }
-  
+
   // 否则返回当前路径
   return [...prefix, key]
 }
@@ -53,13 +53,13 @@ export function getChangedFieldPath(changedValues: any, prefix: string[] = []): 
  */
 export function getValueByPath(obj: any, path: string[]): any {
   if (!obj || path.length === 0) return undefined
-  
+
   let current = obj
   for (const key of path) {
     if (current === null || current === undefined) return undefined
     current = current[key]
   }
-  
+
   return current
 }
 
@@ -69,7 +69,7 @@ export function getValueByPath(obj: any, path: string[]): any {
  */
 export function setValueByPath(obj: any, path: string[], value: any): void {
   if (!obj || path.length === 0) return
-  
+
   let current = obj
   for (let i = 0; i < path.length - 1; i++) {
     const key = path[i]
@@ -78,7 +78,6 @@ export function setValueByPath(obj: any, path: string[], value: any): void {
     }
     current = current[key]
   }
-  
+
   current[path[path.length - 1]] = value
 }
-

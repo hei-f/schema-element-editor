@@ -30,14 +30,14 @@ interface IntegrationConfigSectionProps {
  * 整合通信模式、属性配置和 API 配置
  */
 export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> = (props) => {
-  const { 
-    communicationMode, 
+  const {
+    communicationMode,
     attributeName,
     getFunctionName,
     updateFunctionName,
     previewFunctionName,
     apiConfig,
-    onResetDefault 
+    onResetDefault,
   } = props
 
   return (
@@ -57,11 +57,15 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
           <Space direction="vertical">
             <Radio value="postMessage">
               <Text strong>postMessage 模式</Text>
-              <Text type="secondary" style={{ marginLeft: 8 }}>不污染 window，方法不会暴露</Text>
+              <Text type="secondary" style={{ marginLeft: 8 }}>
+                不污染 window，方法不会暴露
+              </Text>
             </Radio>
             <Radio value="windowFunction">
               <Text strong>Window 函数模式</Text>
-              <Text type="secondary" style={{ marginLeft: 8 }}>接入简单，宿主只需暴露方法</Text>
+              <Text type="secondary" style={{ marginLeft: 8 }}>
+                接入简单，宿主只需暴露方法
+              </Text>
             </Radio>
           </Space>
         </Radio.Group>
@@ -69,13 +73,16 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
 
       {/* 通用配置：属性名 */}
       <FormSectionLabel>元素标记配置</FormSectionLabel>
-      
+
       <Form.Item
         label="属性名称"
         name={FORM_PATHS.attributeName}
         rules={[
           { required: true, message: '请输入属性名称' },
-          { pattern: /^[a-z][a-z0-9-]*$/, message: '属性名只能包含小写字母、数字和连字符，且必须以小写字母开头' }
+          {
+            pattern: /^[a-z][a-z0-9-]*$/,
+            message: '属性名只能包含小写字母、数字和连字符，且必须以小写字母开头',
+          },
         ]}
         extra={`此属性名将用于从页面元素中提取参数，默认值为 ${DEFAULT_VALUES.attributeName}`}
       >
@@ -86,13 +93,13 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
       {communicationMode === 'postMessage' && (
         <>
           <FormSectionLabel>postMessage 配置</FormSectionLabel>
-          
+
           <Form.Item
             label="请求超时时间"
             name={FORM_PATHS.apiConfig.requestTimeout}
             rules={[
               { required: true, message: '请输入超时时间' },
-              { type: 'number', min: 1, max: 30, message: '超时时间必须在 1-30 秒之间' }
+              { type: 'number', min: 1, max: 30, message: '超时时间必须在 1-30 秒之间' },
             ]}
             extra="发送请求后等待响应的最长时间"
           >
@@ -100,17 +107,23 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
           </Form.Item>
 
           <FormSectionLabel>消息标识配置</FormSectionLabel>
-          
+
           <Form.Item
             label="插件端 source"
             name={FORM_PATHS.apiConfig.sourceConfig.contentSource}
             rules={[
               { required: true, message: '请输入插件端 source 标识' },
-              { pattern: /^[a-zA-Z][a-zA-Z0-9-_]*$/, message: '只能包含字母、数字、连字符和下划线，且必须以字母开头' }
+              {
+                pattern: /^[a-zA-Z][a-zA-Z0-9-_]*$/,
+                message: '只能包含字母、数字、连字符和下划线，且必须以字母开头',
+              },
             ]}
             extra="插件发送消息时使用的 source 标识"
           >
-            <Input placeholder={DEFAULT_VALUES.apiConfig.sourceConfig.contentSource} style={{ maxWidth: 300 }} />
+            <Input
+              placeholder={DEFAULT_VALUES.apiConfig.sourceConfig.contentSource}
+              style={{ maxWidth: 300 }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -118,11 +131,17 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
             name={FORM_PATHS.apiConfig.sourceConfig.hostSource}
             rules={[
               { required: true, message: '请输入宿主端 source 标识' },
-              { pattern: /^[a-zA-Z][a-zA-Z0-9-_]*$/, message: '只能包含字母、数字、连字符和下划线，且必须以字母开头' }
+              {
+                pattern: /^[a-zA-Z][a-zA-Z0-9-_]*$/,
+                message: '只能包含字母、数字、连字符和下划线，且必须以字母开头',
+              },
             ]}
             extra="宿主响应消息时使用的 source 标识"
           >
-            <Input placeholder={DEFAULT_VALUES.apiConfig.sourceConfig.hostSource} style={{ maxWidth: 300 }} />
+            <Input
+              placeholder={DEFAULT_VALUES.apiConfig.sourceConfig.hostSource}
+              style={{ maxWidth: 300 }}
+            />
           </Form.Item>
 
           <FormSectionLabel>消息类型配置</FormSectionLabel>
@@ -132,11 +151,14 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
             name={FORM_PATHS.apiConfig.messageTypes.getSchema}
             rules={[
               { required: true, message: '请输入消息类型' },
-              { pattern: /^[A-Z][A-Z0-9_]*$/, message: '建议使用大写字母和下划线' }
+              { pattern: /^[A-Z][A-Z0-9_]*$/, message: '建议使用大写字母和下划线' },
             ]}
             extra="获取 Schema 数据的消息类型"
           >
-            <Input placeholder={DEFAULT_VALUES.apiConfig.messageTypes.getSchema} style={{ maxWidth: 300 }} />
+            <Input
+              placeholder={DEFAULT_VALUES.apiConfig.messageTypes.getSchema}
+              style={{ maxWidth: 300 }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -144,11 +166,14 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
             name={FORM_PATHS.apiConfig.messageTypes.updateSchema}
             rules={[
               { required: true, message: '请输入消息类型' },
-              { pattern: /^[A-Z][A-Z0-9_]*$/, message: '建议使用大写字母和下划线' }
+              { pattern: /^[A-Z][A-Z0-9_]*$/, message: '建议使用大写字母和下划线' },
             ]}
             extra="更新 Schema 数据的消息类型"
           >
-            <Input placeholder={DEFAULT_VALUES.apiConfig.messageTypes.updateSchema} style={{ maxWidth: 300 }} />
+            <Input
+              placeholder={DEFAULT_VALUES.apiConfig.messageTypes.updateSchema}
+              style={{ maxWidth: 300 }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -156,11 +181,14 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
             name={FORM_PATHS.apiConfig.messageTypes.checkPreview}
             rules={[
               { required: true, message: '请输入消息类型' },
-              { pattern: /^[A-Z][A-Z0-9_]*$/, message: '建议使用大写字母和下划线' }
+              { pattern: /^[A-Z][A-Z0-9_]*$/, message: '建议使用大写字母和下划线' },
             ]}
             extra="检查预览函数是否存在的消息类型"
           >
-            <Input placeholder={DEFAULT_VALUES.apiConfig.messageTypes.checkPreview} style={{ maxWidth: 300 }} />
+            <Input
+              placeholder={DEFAULT_VALUES.apiConfig.messageTypes.checkPreview}
+              style={{ maxWidth: 300 }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -168,11 +196,14 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
             name={FORM_PATHS.apiConfig.messageTypes.renderPreview}
             rules={[
               { required: true, message: '请输入消息类型' },
-              { pattern: /^[A-Z][A-Z0-9_]*$/, message: '建议使用大写字母和下划线' }
+              { pattern: /^[A-Z][A-Z0-9_]*$/, message: '建议使用大写字母和下划线' },
             ]}
             extra="渲染预览内容的消息类型"
           >
-            <Input placeholder={DEFAULT_VALUES.apiConfig.messageTypes.renderPreview} style={{ maxWidth: 300 }} />
+            <Input
+              placeholder={DEFAULT_VALUES.apiConfig.messageTypes.renderPreview}
+              style={{ maxWidth: 300 }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -180,45 +211,130 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
             name={FORM_PATHS.apiConfig.messageTypes.cleanupPreview}
             rules={[
               { required: true, message: '请输入消息类型' },
-              { pattern: /^[A-Z][A-Z0-9_]*$/, message: '建议使用大写字母和下划线' }
+              { pattern: /^[A-Z][A-Z0-9_]*$/, message: '建议使用大写字母和下划线' },
             ]}
             extra="清理预览内容的消息类型"
           >
-            <Input placeholder={DEFAULT_VALUES.apiConfig.messageTypes.cleanupPreview} style={{ maxWidth: 300 }} />
+            <Input
+              placeholder={DEFAULT_VALUES.apiConfig.messageTypes.cleanupPreview}
+              style={{ maxWidth: 300 }}
+            />
           </Form.Item>
 
           <ExampleSection>
             <ExampleLabel strong>postMessage 模式 - 宿主页面示例：</ExampleLabel>
             <CodeBlock>
-              <span className="comment">// 监听扩展请求</span>{'\n'}
-              <span className="keyword">window</span>.<span className="function">addEventListener</span>(<span className="string">'message'</span>, (event) =&gt; {'{'}{'\n'}
-              {'  '}<span className="keyword">if</span> (event.source !== <span className="keyword">window</span>) <span className="keyword">return</span>;{'\n'}
-              {'  '}<span className="keyword">if</span> (event.data?.source !== <span className="string">'{apiConfig?.sourceConfig?.contentSource ?? DEFAULT_VALUES.apiConfig.sourceConfig.contentSource}'</span>) <span className="keyword">return</span>;{'\n\n'}
-              {'  '}<span className="keyword">const</span> {'{ type, payload, requestId }'} = event.data;{'\n'}
-              {'  '}<span className="keyword">let</span> result;{'\n\n'}
-              {'  '}<span className="keyword">switch</span> (type) {'{'}{'\n'}
-              {'    '}<span className="keyword">case</span> <span className="string">'{apiConfig?.messageTypes?.getSchema ?? DEFAULT_VALUES.apiConfig.messageTypes.getSchema}'</span>:{'\n'}
+              <span className="comment">{'// 监听扩展请求'}</span>
+              {'\n'}
+              <span className="keyword">window</span>.
+              <span className="function">addEventListener</span>(
+              <span className="string">'message'</span>, (event) =&gt; {'{'}
+              {'\n'}
+              {'  '}
+              <span className="keyword">if</span> (event.source !=={' '}
+              <span className="keyword">window</span>) <span className="keyword">return</span>;
+              {'\n'}
+              {'  '}
+              <span className="keyword">if</span> (event.data?.source !=={' '}
+              <span className="string">
+                '
+                {apiConfig?.sourceConfig?.contentSource ??
+                  DEFAULT_VALUES.apiConfig.sourceConfig.contentSource}
+                '
+              </span>
+              ) <span className="keyword">return</span>;{'\n\n'}
+              {'  '}
+              <span className="keyword">const</span> {'{ type, payload, requestId }'} = event.data;
+              {'\n'}
+              {'  '}
+              <span className="keyword">let</span> result;{'\n\n'}
+              {'  '}
+              <span className="keyword">switch</span> (type) {'{'}
+              {'\n'}
+              {'    '}
+              <span className="keyword">case</span>{' '}
+              <span className="string">
+                '
+                {apiConfig?.messageTypes?.getSchema ??
+                  DEFAULT_VALUES.apiConfig.messageTypes.getSchema}
+                '
+              </span>
+              :{'\n'}
               {'      '}result = {'{ success: true, data: getSchema(payload.params) }'};{'\n'}
-              {'      '}<span className="keyword">break</span>;{'\n'}
-              {'    '}<span className="keyword">case</span> <span className="string">'{apiConfig?.messageTypes?.updateSchema ?? DEFAULT_VALUES.apiConfig.messageTypes.updateSchema}'</span>:{'\n'}
-              {'      '}result = {'{ success: updateSchema(payload.schema, payload.params) }'};{'\n'}
-              {'      '}<span className="keyword">break</span>;{'\n'}
-              {'    '}<span className="keyword">case</span> <span className="string">'{apiConfig?.messageTypes?.checkPreview ?? DEFAULT_VALUES.apiConfig.messageTypes.checkPreview}'</span>:{'\n'}
+              {'      '}
+              <span className="keyword">break</span>;{'\n'}
+              {'    '}
+              <span className="keyword">case</span>{' '}
+              <span className="string">
+                '
+                {apiConfig?.messageTypes?.updateSchema ??
+                  DEFAULT_VALUES.apiConfig.messageTypes.updateSchema}
+                '
+              </span>
+              :{'\n'}
+              {'      '}result = {'{ success: updateSchema(payload.schema, payload.params) }'};
+              {'\n'}
+              {'      '}
+              <span className="keyword">break</span>;{'\n'}
+              {'    '}
+              <span className="keyword">case</span>{' '}
+              <span className="string">
+                '
+                {apiConfig?.messageTypes?.checkPreview ??
+                  DEFAULT_VALUES.apiConfig.messageTypes.checkPreview}
+                '
+              </span>
+              :{'\n'}
               {'      '}result = {'{ exists: true }'};{'\n'}
-              {'      '}<span className="keyword">break</span>;{'\n'}
-              {'    '}<span className="keyword">case</span> <span className="string">'{apiConfig?.messageTypes?.renderPreview ?? DEFAULT_VALUES.apiConfig.messageTypes.renderPreview}'</span>:{'\n'}
-              {'      '}<span className="keyword">const</span> container = <span className="keyword">document</span>.<span className="function">getElementById</span>(payload.containerId);{'\n'}
+              {'      '}
+              <span className="keyword">break</span>;{'\n'}
+              {'    '}
+              <span className="keyword">case</span>{' '}
+              <span className="string">
+                '
+                {apiConfig?.messageTypes?.renderPreview ??
+                  DEFAULT_VALUES.apiConfig.messageTypes.renderPreview}
+                '
+              </span>
+              :{'\n'}
+              {'      '}
+              <span className="keyword">const</span> container ={' '}
+              <span className="keyword">document</span>.
+              <span className="function">getElementById</span>(payload.containerId);{'\n'}
               {'      '}renderPreview(payload.schema, container);{'\n'}
               {'      '}result = {'{ success: true }'};{'\n'}
-              {'      '}<span className="keyword">break</span>;{'\n'}
-              {'    '}<span className="keyword">case</span> <span className="string">'{apiConfig?.messageTypes?.cleanupPreview ?? DEFAULT_VALUES.apiConfig.messageTypes.cleanupPreview}'</span>:{'\n'}
+              {'      '}
+              <span className="keyword">break</span>;{'\n'}
+              {'    '}
+              <span className="keyword">case</span>{' '}
+              <span className="string">
+                '
+                {apiConfig?.messageTypes?.cleanupPreview ??
+                  DEFAULT_VALUES.apiConfig.messageTypes.cleanupPreview}
+                '
+              </span>
+              :{'\n'}
               {'      '}cleanupPreview();{'\n'}
               {'      '}result = {'{ success: true }'};{'\n'}
-              {'      '}<span className="keyword">break</span>;{'\n'}
-              {'  }'}{'\n\n'}
-              {'  '}<span className="comment">// 发送响应（必须携带 requestId）</span>{'\n'}
-              {'  '}<span className="keyword">window</span>.<span className="function">postMessage</span>({'{'}{'\n'}
-              {'    '}source: <span className="string">'{apiConfig?.sourceConfig?.hostSource ?? DEFAULT_VALUES.apiConfig.sourceConfig.hostSource}'</span>,{'\n'}
+              {'      '}
+              <span className="keyword">break</span>;{'\n'}
+              {'  }'}
+              {'\n\n'}
+              {'  '}
+              <span className="comment">{'// 发送响应（必须携带 requestId）'}</span>
+              {'\n'}
+              {'  '}
+              <span className="keyword">window</span>.<span className="function">postMessage</span>(
+              {'{'}
+              {'\n'}
+              {'    '}source:{' '}
+              <span className="string">
+                '
+                {apiConfig?.sourceConfig?.hostSource ??
+                  DEFAULT_VALUES.apiConfig.sourceConfig.hostSource}
+                '
+              </span>
+              ,{'\n'}
               {'    '}requestId,{'\n'}
               {'    '}...result{'\n'}
               {'  }'},<span className="string"> '*'</span>);{'\n'}
@@ -246,11 +362,14 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
             name={FORM_PATHS.getFunctionName}
             rules={[
               { required: true, message: '请输入函数名' },
-              { pattern: /^[a-zA-Z_$][a-zA-Z0-9_$]*$/, message: '必须是有效的JavaScript函数名' }
+              { pattern: /^[a-zA-Z_$][a-zA-Z0-9_$]*$/, message: '必须是有效的JavaScript函数名' },
             ]}
             extra="页面需要提供的获取Schema数据的全局函数名"
           >
-            <Input placeholder={`例如: ${DEFAULT_VALUES.getFunctionName}`} style={{ maxWidth: 300 }} />
+            <Input
+              placeholder={`例如: ${DEFAULT_VALUES.getFunctionName}`}
+              style={{ maxWidth: 300 }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -258,11 +377,14 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
             name={FORM_PATHS.updateFunctionName}
             rules={[
               { required: true, message: '请输入函数名' },
-              { pattern: /^[a-zA-Z_$][a-zA-Z0-9_$]*$/, message: '必须是有效的JavaScript函数名' }
+              { pattern: /^[a-zA-Z_$][a-zA-Z0-9_$]*$/, message: '必须是有效的JavaScript函数名' },
             ]}
             extra="页面需要提供的更新Schema数据的全局函数名"
           >
-            <Input placeholder={`例如: ${DEFAULT_VALUES.updateFunctionName}`} style={{ maxWidth: 300 }} />
+            <Input
+              placeholder={`例如: ${DEFAULT_VALUES.updateFunctionName}`}
+              style={{ maxWidth: 300 }}
+            />
           </Form.Item>
 
           <FormSectionLabel>扩展 API（可选）</FormSectionLabel>
@@ -272,37 +394,68 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
             name={FORM_PATHS.previewFunctionName}
             rules={[
               { required: true, message: '请输入函数名' },
-              { pattern: /^[a-zA-Z_$][a-zA-Z0-9_$]*$/, message: '必须是有效的JavaScript函数名' }
+              { pattern: /^[a-zA-Z_$][a-zA-Z0-9_$]*$/, message: '必须是有效的JavaScript函数名' },
             ]}
             extra="返回 React 组件用于实时预览，若页面未提供则预览功能不可用"
           >
-            <Input placeholder={`例如: ${DEFAULT_VALUES.previewFunctionName}`} style={{ maxWidth: 300 }} />
+            <Input
+              placeholder={`例如: ${DEFAULT_VALUES.previewFunctionName}`}
+              style={{ maxWidth: 300 }}
+            />
           </Form.Item>
 
           <ExampleSection>
             <ExampleLabel strong>Window 函数模式 - 宿主页面示例（已废弃）：</ExampleLabel>
             <CodeBlock>
-              <span className="comment">&lt;!-- HTML元素属性 --&gt;</span>{'\n'}
-              <span className="tag">&lt;div</span> <span className="attr-name">data-{attributeName}</span>=<span className="attr-value">"param1,param2"</span><span className="tag">&gt;</span>{'\n'}
+              <span className="comment">&lt;!-- HTML元素属性 --&gt;</span>
+              {'\n'}
+              <span className="tag">&lt;div</span>{' '}
+              <span className="attr-name">data-{attributeName}</span>=
+              <span className="attr-value">"param1,param2"</span>
+              <span className="tag">&gt;</span>
+              {'\n'}
               {'  '}点击此元素{'\n'}
-              <span className="tag">&lt;/div&gt;</span>{'\n\n'}
-              <span className="comment">// 核心 API（必需）</span>{'\n'}
-              <span className="keyword">window</span>.<span className="function">{getFunctionName}</span> = (params) =&gt; {'{'}{'\n'}
-              {'  '}<span className="comment">// params: 'param1' 或 'param1,param2'</span>{'\n'}
-              {'  '}<span className="keyword">return</span> getSchema(params);{'\n'}
+              <span className="tag">&lt;/div&gt;</span>
+              {'\n\n'}
+              <span className="comment">{'// 核心 API（必需）'}</span>
+              {'\n'}
+              <span className="keyword">window</span>.
+              <span className="function">{getFunctionName}</span> = (params) =&gt; {'{'}
+              {'\n'}
+              {'  '}
+              <span className="comment">{"// params: 'param1' 或 'param1,param2'"}</span>
+              {'\n'}
+              {'  '}
+              <span className="keyword">return</span> getSchema(params);{'\n'}
               {'}'};{'\n\n'}
-              <span className="keyword">window</span>.<span className="function">{updateFunctionName}</span> = (schema, params) =&gt; {'{'}{'\n'}
+              <span className="keyword">window</span>.
+              <span className="function">{updateFunctionName}</span> = (schema, params) =&gt; {'{'}
+              {'\n'}
               {'  '}saveSchema(schema, params);{'\n'}
-              {'  '}<span className="keyword">return</span> <span className="attr-value">true</span>;{'\n'}
+              {'  '}
+              <span className="keyword">return</span> <span className="attr-value">true</span>;
+              {'\n'}
               {'}'};{'\n\n'}
-              <span className="comment">// 预览 API（可选）</span>{'\n'}
-              <span className="keyword">let</span> previewRoot = <span className="attr-value">null</span>;{'\n'}
-              <span className="keyword">window</span>.<span className="function">{previewFunctionName}</span> = (data, container) =&gt; {'{'}{'\n'}
-              {'  '}<span className="keyword">if</span> (!previewRoot) {'{'}{'\n'}
-              {'    '}previewRoot = ReactDOM.<span className="function">createRoot</span>(container);{'\n'}
-              {'  }'}{'\n'}
-              {'  '}previewRoot.<span className="function">render</span>({'<Preview data={data} />'});{'\n'}
-              {'  '}<span className="keyword">return</span> () =&gt; {'{'}{'\n'}
+              <span className="comment">{'// 预览 API（可选）'}</span>
+              {'\n'}
+              <span className="keyword">let</span> previewRoot ={' '}
+              <span className="attr-value">null</span>;{'\n'}
+              <span className="keyword">window</span>.
+              <span className="function">{previewFunctionName}</span> = (data, container) =&gt;{' '}
+              {'{'}
+              {'\n'}
+              {'  '}
+              <span className="keyword">if</span> (!previewRoot) {'{'}
+              {'\n'}
+              {'    '}previewRoot = ReactDOM.<span className="function">createRoot</span>
+              (container);{'\n'}
+              {'  }'}
+              {'\n'}
+              {'  '}previewRoot.<span className="function">render</span>({'<Preview data={data} />'}
+              );{'\n'}
+              {'  '}
+              <span className="keyword">return</span> () =&gt; {'{'}
+              {'\n'}
               {'    '}previewRoot?.<span className="function">unmount</span>();{'\n'}
               {'    '}previewRoot = <span className="attr-value">null</span>;{'\n'}
               {'  }'};{'\n'}
@@ -314,4 +467,3 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
     </SectionCard>
   )
 }
-

@@ -1,10 +1,10 @@
-import { storage } from '../browser/storage';
+import { storage } from '../browser/storage'
 
 describe('Storage工具测试', () => {
   beforeEach(() => {
     // 清除所有mock调用记录
     jest.clearAllMocks()
-    
+
     // 重置chrome.storage.local.get的mock返回值
     ;(chrome.storage.local.get as jest.Mock).mockImplementation(() => Promise.resolve({}))
   })
@@ -17,7 +17,7 @@ describe('Storage工具测试', () => {
 
     it('应该返回存储的值', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ isActive: true })
-      
+
       const result = await storage.getActiveState()
       expect(result).toBe(true)
     })
@@ -26,13 +26,13 @@ describe('Storage工具测试', () => {
   describe('setActiveState', () => {
     it('应该保存激活状态', async () => {
       await storage.setActiveState(true)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({ isActive: true })
     })
 
     it('应该保存非激活状态', async () => {
       await storage.setActiveState(false)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({ isActive: false })
     })
   })
@@ -45,7 +45,7 @@ describe('Storage工具测试', () => {
 
     it('应该返回存储的宽度', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ drawerWidth: 1200 })
-      
+
       const result = await storage.getDrawerWidth()
       expect(result).toBe('1200px')
     })
@@ -54,13 +54,13 @@ describe('Storage工具测试', () => {
   describe('setDrawerWidth', () => {
     it('应该保存抽屉宽度', async () => {
       await storage.setDrawerWidth(1000)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({ drawerWidth: 1000 })
     })
 
     it('应该处理最小宽度', async () => {
       await storage.setDrawerWidth(400)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({ drawerWidth: 400 })
     })
   })
@@ -73,7 +73,7 @@ describe('Storage工具测试', () => {
 
     it('应该返回存储的属性名', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ attributeName: 'custom-attr' })
-      
+
       const result = await storage.getAttributeName()
       expect(result).toBe('custom-attr')
     })
@@ -82,13 +82,13 @@ describe('Storage工具测试', () => {
   describe('setAttributeName', () => {
     it('应该保存属性名', async () => {
       await storage.setAttributeName('my-schema')
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({ attributeName: 'my-schema' })
     })
 
     it('应该保存kebab-case格式的属性名', async () => {
       await storage.setAttributeName('data-params')
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({ attributeName: 'data-params' })
     })
   })
@@ -96,7 +96,7 @@ describe('Storage工具测试', () => {
   describe('getAllData', () => {
     it('应该返回所有默认值', async () => {
       const result = await storage.getAllData()
-      
+
       expect(result).toEqual({
         isActive: false,
         drawerWidth: '800px',
@@ -104,7 +104,7 @@ describe('Storage工具测试', () => {
         searchConfig: {
           limitUpwardSearch: false,
           searchDepthUp: 5,
-          throttleInterval: 16
+          throttleInterval: 16,
         },
         getFunctionName: '__getContentById',
         updateFunctionName: '__updateContentById',
@@ -120,10 +120,10 @@ describe('Storage工具测试', () => {
           importExport: true,
           draft: true,
           favorites: true,
-          history: true
+          history: true,
         },
         exportConfig: {
-          customFileName: false
+          customFileName: false,
         },
         highlightColor: '#39C5BB',
         maxFavoritesCount: 50,
@@ -133,19 +133,19 @@ describe('Storage工具测试', () => {
         previewConfig: {
           previewWidth: 40,
           updateDelay: 500,
-          autoUpdate: false
+          autoUpdate: false,
         },
         maxHistoryCount: 50,
         highlightAllConfig: {
           enabled: true,
           keyBinding: 'a',
-          maxHighlightCount: 500
+          maxHighlightCount: 500,
         },
         recordingModeConfig: {
           enabled: true,
           keyBinding: 'r',
           highlightColor: '#FF4D4F',
-          pollingInterval: 100
+          pollingInterval: 100,
         },
         editorTheme: 'schemaEditorDark',
         previewFunctionName: '__getContentPreview',
@@ -154,16 +154,16 @@ describe('Storage工具测试', () => {
           requestTimeout: 5,
           sourceConfig: {
             contentSource: 'schema-editor-content',
-            hostSource: 'schema-editor-host'
+            hostSource: 'schema-editor-host',
           },
           messageTypes: {
             getSchema: 'GET_SCHEMA',
             updateSchema: 'UPDATE_SCHEMA',
             checkPreview: 'CHECK_PREVIEW',
             renderPreview: 'RENDER_PREVIEW',
-            cleanupPreview: 'CLEANUP_PREVIEW'
-          }
-        }
+            cleanupPreview: 'CLEANUP_PREVIEW',
+          },
+        },
       })
     })
 
@@ -175,15 +175,15 @@ describe('Storage工具测试', () => {
         searchConfig: {
           limitUpwardSearch: true,
           searchDepthUp: 5,
-          throttleInterval: 8
+          throttleInterval: 8,
         },
         getFunctionName: 'myGetFn',
         updateFunctionName: 'myUpdateFn',
-        autoParseString: true
+        autoParseString: true,
       })
-      
+
       const result = await storage.getAllData()
-      
+
       expect(result).toEqual({
         isActive: true,
         drawerWidth: '1000px',
@@ -191,7 +191,7 @@ describe('Storage工具测试', () => {
         searchConfig: {
           limitUpwardSearch: true,
           searchDepthUp: 5,
-          throttleInterval: 8
+          throttleInterval: 8,
         },
         getFunctionName: 'myGetFn',
         updateFunctionName: 'myUpdateFn',
@@ -207,10 +207,10 @@ describe('Storage工具测试', () => {
           importExport: true,
           draft: true,
           favorites: true,
-          history: true
+          history: true,
         },
         exportConfig: {
-          customFileName: false
+          customFileName: false,
         },
         highlightColor: '#39C5BB',
         maxFavoritesCount: 50,
@@ -220,19 +220,19 @@ describe('Storage工具测试', () => {
         previewConfig: {
           previewWidth: 40,
           updateDelay: 500,
-          autoUpdate: false
+          autoUpdate: false,
         },
         maxHistoryCount: 50,
         highlightAllConfig: {
           enabled: true,
           keyBinding: 'a',
-          maxHighlightCount: 500
+          maxHighlightCount: 500,
         },
         recordingModeConfig: {
           enabled: true,
           keyBinding: 'r',
           highlightColor: '#FF4D4F',
-          pollingInterval: 100
+          pollingInterval: 100,
         },
         editorTheme: 'schemaEditorDark',
         previewFunctionName: '__getContentPreview',
@@ -241,26 +241,26 @@ describe('Storage工具测试', () => {
           requestTimeout: 5,
           sourceConfig: {
             contentSource: 'schema-editor-content',
-            hostSource: 'schema-editor-host'
+            hostSource: 'schema-editor-host',
           },
           messageTypes: {
             getSchema: 'GET_SCHEMA',
             updateSchema: 'UPDATE_SCHEMA',
             checkPreview: 'CHECK_PREVIEW',
             renderPreview: 'RENDER_PREVIEW',
-            cleanupPreview: 'CLEANUP_PREVIEW'
-          }
-        }
+            cleanupPreview: 'CLEANUP_PREVIEW',
+          },
+        },
       })
     })
 
     it('应该合并默认值和存储值', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        isActive: true
+        isActive: true,
       })
-      
+
       const result = await storage.getAllData()
-      
+
       expect(result).toEqual({
         isActive: true,
         drawerWidth: '800px',
@@ -268,7 +268,7 @@ describe('Storage工具测试', () => {
         searchConfig: {
           limitUpwardSearch: false,
           searchDepthUp: 5,
-          throttleInterval: 16
+          throttleInterval: 16,
         },
         getFunctionName: '__getContentById',
         updateFunctionName: '__updateContentById',
@@ -284,10 +284,10 @@ describe('Storage工具测试', () => {
           importExport: true,
           draft: true,
           favorites: true,
-          history: true
+          history: true,
         },
         exportConfig: {
-          customFileName: false
+          customFileName: false,
         },
         highlightColor: '#39C5BB',
         maxFavoritesCount: 50,
@@ -297,19 +297,19 @@ describe('Storage工具测试', () => {
         previewConfig: {
           previewWidth: 40,
           updateDelay: 500,
-          autoUpdate: false
+          autoUpdate: false,
         },
         maxHistoryCount: 50,
         highlightAllConfig: {
           enabled: true,
           keyBinding: 'a',
-          maxHighlightCount: 500
+          maxHighlightCount: 500,
         },
         recordingModeConfig: {
           enabled: true,
           keyBinding: 'r',
           highlightColor: '#FF4D4F',
-          pollingInterval: 100
+          pollingInterval: 100,
         },
         editorTheme: 'schemaEditorDark',
         previewFunctionName: '__getContentPreview',
@@ -318,16 +318,16 @@ describe('Storage工具测试', () => {
           requestTimeout: 5,
           sourceConfig: {
             contentSource: 'schema-editor-content',
-            hostSource: 'schema-editor-host'
+            hostSource: 'schema-editor-host',
           },
           messageTypes: {
             getSchema: 'GET_SCHEMA',
             updateSchema: 'UPDATE_SCHEMA',
             checkPreview: 'CHECK_PREVIEW',
             renderPreview: 'RENDER_PREVIEW',
-            cleanupPreview: 'CLEANUP_PREVIEW'
-          }
-        }
+            cleanupPreview: 'CLEANUP_PREVIEW',
+          },
+        },
       })
     })
   })
@@ -335,11 +335,11 @@ describe('Storage工具测试', () => {
   describe('getSearchConfig', () => {
     it('应该返回默认搜索配置', async () => {
       const result = await storage.getSearchConfig()
-      
+
       expect(result).toEqual({
         limitUpwardSearch: false,
         searchDepthUp: 5,
-        throttleInterval: 16
+        throttleInterval: 16,
       })
     })
 
@@ -348,28 +348,28 @@ describe('Storage工具测试', () => {
         searchConfig: {
           limitUpwardSearch: true,
           searchDepthUp: 10,
-          throttleInterval: 32
-        }
+          throttleInterval: 32,
+        },
       })
-      
+
       const result = await storage.getSearchConfig()
-      
+
       expect(result).toEqual({
         limitUpwardSearch: true,
         searchDepthUp: 10,
-        throttleInterval: 32
+        throttleInterval: 32,
       })
     })
 
     it('应该处理部分存储的配置', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
         searchConfig: {
-          searchDepthUp: 8
-        }
+          searchDepthUp: 8,
+        },
       })
-      
+
       const result = await storage.getSearchConfig()
-      
+
       // 应该返回存储的值，因为我们存储的是整个对象
       expect(result.searchDepthUp).toBe(8)
     })
@@ -381,22 +381,22 @@ describe('Storage工具测试', () => {
         searchConfig: {
           limitUpwardSearch: false,
           searchDepthUp: 0,
-          throttleInterval: 100
-        }
+          throttleInterval: 100,
+        },
       })
 
       await storage.setSearchConfig({
         limitUpwardSearch: true,
         searchDepthUp: 5,
-        throttleInterval: 32
+        throttleInterval: 32,
       })
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         searchConfig: {
           limitUpwardSearch: true,
           searchDepthUp: 5,
-          throttleInterval: 32
-        }
+          throttleInterval: 32,
+        },
       })
     })
 
@@ -405,20 +405,20 @@ describe('Storage工具测试', () => {
         searchConfig: {
           limitUpwardSearch: false,
           searchDepthUp: 0,
-          throttleInterval: 100
-        }
+          throttleInterval: 100,
+        },
       })
 
       await storage.setSearchConfig({
-        searchDepthUp: 8
+        searchDepthUp: 8,
       })
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         searchConfig: {
           limitUpwardSearch: false,
           searchDepthUp: 8,
-          throttleInterval: 100
-        }
+          throttleInterval: 100,
+        },
       })
     })
 
@@ -427,20 +427,20 @@ describe('Storage工具测试', () => {
         searchConfig: {
           searchDepthDown: 5,
           searchDepthUp: 0,
-          throttleInterval: 100
-        }
+          throttleInterval: 100,
+        },
       })
 
       await storage.setSearchConfig({
-        throttleInterval: 50
+        throttleInterval: 50,
       })
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         searchConfig: {
           searchDepthDown: 5,
           searchDepthUp: 0,
-          throttleInterval: 50
-        }
+          throttleInterval: 50,
+        },
       })
     })
   })
@@ -452,10 +452,10 @@ describe('Storage工具测试', () => {
     })
 
     it('应该返回存储的函数名', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ 
-        getFunctionName: 'customGetFunction' 
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        getFunctionName: 'customGetFunction',
       })
-      
+
       const result = await storage.getGetFunctionName()
       expect(result).toBe('customGetFunction')
     })
@@ -468,10 +468,10 @@ describe('Storage工具测试', () => {
     })
 
     it('应该返回存储的函数名', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ 
-        updateFunctionName: 'customUpdateFunction' 
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        updateFunctionName: 'customUpdateFunction',
       })
-      
+
       const result = await storage.getUpdateFunctionName()
       expect(result).toBe('customUpdateFunction')
     })
@@ -480,11 +480,11 @@ describe('Storage工具测试', () => {
   describe('setFunctionNames', () => {
     it('应该保存三个函数名', async () => {
       await storage.setFunctionNames('myGetFn', 'myUpdateFn', 'myPreviewFn')
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         getFunctionName: 'myGetFn',
         updateFunctionName: 'myUpdateFn',
-        previewFunctionName: 'myPreviewFn'
+        previewFunctionName: 'myPreviewFn',
       })
     })
   })
@@ -499,12 +499,12 @@ describe('Storage工具测试', () => {
           searchConfig: {
             limitUpwardSearch: false,
             searchDepthUp: 2,
-            throttleInterval: 20
+            throttleInterval: 20,
           },
           getFunctionName: 'getMySchema',
-          updateFunctionName: 'updateMySchema'
+          updateFunctionName: 'updateMySchema',
         }
-        
+
         if (Array.isArray(keys)) {
           return Promise.resolve(
             keys.reduce((acc, key) => {
@@ -517,7 +517,7 @@ describe('Storage工具测试', () => {
       })
 
       const result = await storage.getAllData()
-      
+
       expect(result).toEqual({
         isActive: true,
         drawerWidth: '1000px',
@@ -525,7 +525,7 @@ describe('Storage工具测试', () => {
         searchConfig: {
           limitUpwardSearch: false,
           searchDepthUp: 2,
-          throttleInterval: 20
+          throttleInterval: 20,
         },
         getFunctionName: 'getMySchema',
         updateFunctionName: 'updateMySchema',
@@ -541,10 +541,10 @@ describe('Storage工具测试', () => {
           importExport: true,
           draft: true,
           favorites: true,
-          history: true
+          history: true,
         },
         exportConfig: {
-          customFileName: false
+          customFileName: false,
         },
         highlightColor: '#39C5BB',
         maxFavoritesCount: 50,
@@ -554,19 +554,19 @@ describe('Storage工具测试', () => {
         previewConfig: {
           previewWidth: 40,
           updateDelay: 500,
-          autoUpdate: false
+          autoUpdate: false,
         },
         maxHistoryCount: 50,
         highlightAllConfig: {
           enabled: true,
           keyBinding: 'a',
-          maxHighlightCount: 500
+          maxHighlightCount: 500,
         },
         recordingModeConfig: {
           enabled: true,
           keyBinding: 'r',
           highlightColor: '#FF4D4F',
-          pollingInterval: 100
+          pollingInterval: 100,
         },
         editorTheme: 'schemaEditorDark',
         previewFunctionName: '__getContentPreview',
@@ -575,16 +575,16 @@ describe('Storage工具测试', () => {
           requestTimeout: 5,
           sourceConfig: {
             contentSource: 'schema-editor-content',
-            hostSource: 'schema-editor-host'
+            hostSource: 'schema-editor-host',
           },
           messageTypes: {
             getSchema: 'GET_SCHEMA',
             updateSchema: 'UPDATE_SCHEMA',
             checkPreview: 'CHECK_PREVIEW',
             renderPreview: 'RENDER_PREVIEW',
-            cleanupPreview: 'CLEANUP_PREVIEW'
-          }
-        }
+            cleanupPreview: 'CLEANUP_PREVIEW',
+          },
+        },
       })
     })
   })
@@ -596,10 +596,10 @@ describe('Storage工具测试', () => {
     })
 
     it('应该返回存储的值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ 
-        autoParseString: false 
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        autoParseString: false,
       })
-      
+
       const result = await storage.getAutoParseString()
       expect(result).toBe(false)
     })
@@ -608,13 +608,13 @@ describe('Storage工具测试', () => {
   describe('setAutoParseString', () => {
     it('应该保存字符串自动解析配置', async () => {
       await storage.setAutoParseString(false)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({ autoParseString: false })
     })
 
     it('应该能够开启字符串自动解析', async () => {
       await storage.setAutoParseString(true)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({ autoParseString: true })
     })
   })
@@ -622,7 +622,7 @@ describe('Storage工具测试', () => {
   describe('工具栏按钮配置', () => {
     it('应该返回默认的工具栏按钮配置', async () => {
       const result = await storage.getToolbarButtons()
-      
+
       expect(result).toEqual({
         astRawStringToggle: true,
         deserialize: false,
@@ -632,7 +632,7 @@ describe('Storage工具测试', () => {
         importExport: true,
         draft: true,
         favorites: true,
-        history: true
+        history: true,
       })
     })
 
@@ -642,12 +642,12 @@ describe('Storage工具测试', () => {
           astRawStringToggle: false,
           deserialize: true,
           serialize: true,
-          format: true
-        }
+          format: true,
+        },
       })
-      
+
       const result = await storage.getToolbarButtons()
-      
+
       expect(result.astRawStringToggle).toBe(false)
     })
 
@@ -657,21 +657,21 @@ describe('Storage工具测试', () => {
           astRawStringToggle: true,
           deserialize: true,
           serialize: true,
-          format: true
-        }
+          format: true,
+        },
       })
 
       await storage.setToolbarButtons({
-        astRawStringToggle: false
+        astRawStringToggle: false,
       })
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         toolbarButtons: {
           astRawStringToggle: false,
           deserialize: true,
           serialize: true,
-          format: true
-        }
+          format: true,
+        },
       })
     })
   })
@@ -684,18 +684,18 @@ describe('Storage工具测试', () => {
 
     it('应该返回存储的颜色', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        highlightColor: '#FF0000'
+        highlightColor: '#FF0000',
       })
-      
+
       const result = await storage.getHighlightColor()
       expect(result).toBe('#FF0000')
     })
 
     it('应该保存高亮框颜色', async () => {
       await storage.setHighlightColor('#00FF00')
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        highlightColor: '#00FF00'
+        highlightColor: '#00FF00',
       })
     })
   })
@@ -708,18 +708,18 @@ describe('Storage工具测试', () => {
 
     it('应该返回存储的最大收藏数量', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        maxFavoritesCount: 100
+        maxFavoritesCount: 100,
       })
-      
+
       const result = await storage.getMaxFavoritesCount()
       expect(result).toBe(100)
     })
 
     it('应该保存最大收藏数量', async () => {
       await storage.setMaxFavoritesCount(80)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        maxFavoritesCount: 80
+        maxFavoritesCount: 80,
       })
     })
   })
@@ -732,18 +732,18 @@ describe('Storage工具测试', () => {
 
     it('应该返回存储的草稿保留天数', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        draftRetentionDays: 14
+        draftRetentionDays: 14,
       })
-      
+
       const result = await storage.getDraftRetentionDays()
       expect(result).toBe(14)
     })
 
     it('应该保存草稿保留天数', async () => {
       await storage.setDraftRetentionDays(30)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        draftRetentionDays: 30
+        draftRetentionDays: 30,
       })
     })
 
@@ -754,18 +754,18 @@ describe('Storage工具测试', () => {
 
     it('应该返回存储的自动保存草稿配置', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        autoSaveDraft: false
+        autoSaveDraft: false,
       })
-      
+
       const result = await storage.getAutoSaveDraft()
       expect(result).toBe(false)
     })
 
     it('应该保存自动保存草稿配置', async () => {
       await storage.setAutoSaveDraft(false)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        autoSaveDraft: false
+        autoSaveDraft: false,
       })
     })
 
@@ -776,18 +776,18 @@ describe('Storage工具测试', () => {
 
     it('应该返回存储的草稿自动保存防抖时间', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        draftAutoSaveDebounce: 5000
+        draftAutoSaveDebounce: 5000,
       })
-      
+
       const result = await storage.getDraftAutoSaveDebounce()
       expect(result).toBe(5000)
     })
 
     it('应该保存草稿自动保存防抖时间', async () => {
       await storage.setDraftAutoSaveDebounce(2000)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        draftAutoSaveDebounce: 2000
+        draftAutoSaveDebounce: 2000,
       })
     })
   })
@@ -796,32 +796,32 @@ describe('Storage工具测试', () => {
     it('应该获取草稿', async () => {
       const mockDraft = {
         content: 'test content',
-        timestamp: Date.now()
-      };
-      (chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'draft:test-key': mockDraft
+        timestamp: Date.now(),
+      }
+      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        'draft:test-key': mockDraft,
       })
-      
+
       const result = await storage.getDraft('test-key')
-      
+
       expect(result).toEqual(mockDraft)
     })
 
     it('草稿不存在时应该返回null', async () => {
       const result = await storage.getDraft('non-existent')
-      
+
       expect(result).toBeNull()
     })
 
     it('应该保存草稿', async () => {
       await storage.saveDraft('test-key', 'test content')
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalled()
     })
 
     it('应该删除草稿', async () => {
       await storage.deleteDraft('test-key')
-      
+
       expect(chrome.storage.local.remove).toHaveBeenCalledWith('draft:test-key')
     })
   })
@@ -834,21 +834,21 @@ describe('Storage工具测试', () => {
           name: 'Test',
           content: 'content',
           timestamp: Date.now(),
-          lastUsedTime: Date.now()
-        }
+          lastUsedTime: Date.now(),
+        },
       ]
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        favorites: mockFavorites
+        favorites: mockFavorites,
       })
-      
+
       const result = await storage.getFavorites()
-      
+
       expect(result).toEqual(mockFavorites)
     })
 
     it('收藏列表不存在时应该返回空数组', async () => {
       const result = await storage.getFavorites()
-      
+
       expect(result).toEqual([])
     })
   })
@@ -856,34 +856,34 @@ describe('Storage工具测试', () => {
   describe('错误处理', () => {
     it('get操作失败时应该返回默认值', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
-      
+
       const result = await storage.getActiveState()
       expect(result).toBe(false)
     })
 
     it('getFunctionName失败时应该返回默认值', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
-      
+
       const result = await storage.getGetFunctionName()
       expect(result).toBe('__getContentById')
     })
 
     it('set操作失败时不应该抛出错误', async () => {
       ;(chrome.storage.local.set as jest.Mock).mockRejectedValue(new Error('Storage error'))
-      
+
       // setActiveState内部捕获了错误，不会抛出
       await expect(storage.setActiveState(true)).resolves.not.toThrow()
     })
 
     it('setFunctionNames失败时不应该抛出错误', async () => {
       ;(chrome.storage.local.set as jest.Mock).mockRejectedValue(new Error('Storage error'))
-      
+
       await expect(storage.setFunctionNames('fn1', 'fn2', 'fn3')).resolves.not.toThrow()
     })
 
     it('getToolbarButtons失败时应该返回默认值', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
-      
+
       const result = await storage.getToolbarButtons()
       expect(result).toEqual({
         astRawStringToggle: true,
@@ -894,20 +894,20 @@ describe('Storage工具测试', () => {
         importExport: true,
         draft: true,
         favorites: true,
-        history: true
+        history: true,
       })
     })
 
     it('getFavorites失败时应该返回空数组', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
-      
+
       const result = await storage.getFavorites()
       expect(result).toEqual([])
     })
 
     it('getDraft失败时应该返回null', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
-      
+
       const result = await storage.getDraft('test-key')
       expect(result).toBeNull()
     })
@@ -922,49 +922,49 @@ describe('Storage工具测试', () => {
     it('toggleActiveState应该切换激活状态', async () => {
       // 初始状态为false
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValueOnce({
-        'isActive': false
+        isActive: false,
       })
 
       const newState = await storage.toggleActiveState()
-      
+
       expect(newState).toBe(true)
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'isActive': true
+        isActive: true,
       })
     })
 
     it('toggleActiveState应该从true切换到false', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValueOnce({
-        'isActive': true
+        isActive: true,
       })
 
       const newState = await storage.toggleActiveState()
-      
+
       expect(newState).toBe(false)
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'isActive': false
+        isActive: false,
       })
     })
 
     it('setDrawerWidth应该设置抽屉宽度', async () => {
       await storage.setDrawerWidth('500px')
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'drawerWidth': '500px'
+        drawerWidth: '500px',
       })
     })
 
     it('setDrawerWidth应该支持数字类型', async () => {
       await storage.setDrawerWidth(600)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'drawerWidth': 600
+        drawerWidth: 600,
       })
     })
 
     it('getDrawerWidth应该支持transformer转换数字为带px的字符串', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'drawerWidth': 500
+        drawerWidth: 500,
       })
 
       const width = await storage.getDrawerWidth()
@@ -975,20 +975,20 @@ describe('Storage工具测试', () => {
       const existingConfig = {
         limitUpwardSearch: false,
         searchDepthUp: 3,
-        throttleInterval: 200
+        throttleInterval: 200,
       }
-      
+
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValueOnce({
-        'searchConfig': existingConfig
+        searchConfig: existingConfig,
       })
 
       await storage.setSearchConfig({ searchDepthUp: 10 })
 
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'searchConfig': {
+        searchConfig: {
           ...existingConfig,
-          searchDepthUp: 10
-        }
+          searchDepthUp: 10,
+        },
       })
     })
 
@@ -1001,25 +1001,25 @@ describe('Storage工具测试', () => {
 
     it('setAttributeName应该设置属性名', async () => {
       await storage.setAttributeName('custom-attr')
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'attributeName': 'custom-attr'
+        attributeName: 'custom-attr',
       })
     })
 
     it('setFunctionNames应该同时设置三个函数名', async () => {
       await storage.setFunctionNames('getFunc', 'updateFunc', 'previewFunc')
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'getFunctionName': 'getFunc',
-        'updateFunctionName': 'updateFunc',
-        'previewFunctionName': 'previewFunc'
+        getFunctionName: 'getFunc',
+        updateFunctionName: 'updateFunc',
+        previewFunctionName: 'previewFunc',
       })
     })
 
     it('getAutoParseString应该返回配置值', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'autoParseString': true
+        autoParseString: true,
       })
 
       const result = await storage.getAutoParseString()
@@ -1028,15 +1028,15 @@ describe('Storage工具测试', () => {
 
     it('setAutoParseString应该设置配置', async () => {
       await storage.setAutoParseString(false)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'autoParseString': false
+        autoParseString: false,
       })
     })
 
     it('getEnableDebugLog应该返回配置值', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'enableDebugLog': true
+        enableDebugLog: true,
       })
 
       const result = await storage.getEnableDebugLog()
@@ -1045,15 +1045,15 @@ describe('Storage工具测试', () => {
 
     it('setEnableDebugLog应该设置配置', async () => {
       await storage.setEnableDebugLog(true)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'enableDebugLog': true
+        enableDebugLog: true,
       })
     })
 
     it('getHighlightColor应该返回颜色值', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'highlightColor': '#FF5733'
+        highlightColor: '#FF5733',
       })
 
       const result = await storage.getHighlightColor()
@@ -1063,7 +1063,7 @@ describe('Storage工具测试', () => {
     it('getHighlightColor应该使用validator验证颜色值', async () => {
       // 返回无效的空字符串
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'highlightColor': ''
+        highlightColor: '',
       })
 
       const result = await storage.getHighlightColor()
@@ -1073,15 +1073,15 @@ describe('Storage工具测试', () => {
 
     it('setHighlightColor应该设置颜色', async () => {
       await storage.setHighlightColor('#00FF00')
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'highlightColor': '#00FF00'
+        highlightColor: '#00FF00',
       })
     })
 
     it('getMaxFavoritesCount应该返回数量', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'maxFavoritesCount': 100
+        maxFavoritesCount: 100,
       })
 
       const result = await storage.getMaxFavoritesCount()
@@ -1090,15 +1090,15 @@ describe('Storage工具测试', () => {
 
     it('setMaxFavoritesCount应该设置数量', async () => {
       await storage.setMaxFavoritesCount(200)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'maxFavoritesCount': 200
+        maxFavoritesCount: 200,
       })
     })
 
     it('getDraftRetentionDays应该返回天数', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'draftRetentionDays': 14
+        draftRetentionDays: 14,
       })
 
       const result = await storage.getDraftRetentionDays()
@@ -1107,15 +1107,15 @@ describe('Storage工具测试', () => {
 
     it('setDraftRetentionDays应该设置天数', async () => {
       await storage.setDraftRetentionDays(30)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'draftRetentionDays': 30
+        draftRetentionDays: 30,
       })
     })
 
     it('getAutoSaveDraft应该返回配置', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'autoSaveDraft': true
+        autoSaveDraft: true,
       })
 
       const result = await storage.getAutoSaveDraft()
@@ -1124,15 +1124,15 @@ describe('Storage工具测试', () => {
 
     it('setAutoSaveDraft应该设置配置', async () => {
       await storage.setAutoSaveDraft(false)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'autoSaveDraft': false
+        autoSaveDraft: false,
       })
     })
 
     it('getMaxHistoryCount应该返回数量', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'maxHistoryCount': 100
+        maxHistoryCount: 100,
       })
 
       const result = await storage.getMaxHistoryCount()
@@ -1141,15 +1141,15 @@ describe('Storage工具测试', () => {
 
     it('setMaxHistoryCount应该设置数量', async () => {
       await storage.setMaxHistoryCount(150)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'maxHistoryCount': 150
+        maxHistoryCount: 150,
       })
     })
 
     it('deleteDraft应该删除指定草稿', async () => {
       await storage.deleteDraft('test-params')
-      
+
       expect(chrome.storage.local.remove).toHaveBeenCalledWith('draft:test-params')
     })
 
@@ -1163,39 +1163,39 @@ describe('Storage工具测试', () => {
   describe('高亮所有元素配置', () => {
     it('getHighlightAllConfig应该返回默认配置', async () => {
       const result = await storage.getHighlightAllConfig()
-      
+
       expect(result).toEqual({
         enabled: true,
         keyBinding: 'a',
-        maxHighlightCount: 500
+        maxHighlightCount: 500,
       })
     })
 
     it('getHighlightAllConfig应该返回存储的配置', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'highlightAllConfig': {
+        highlightAllConfig: {
           enabled: false,
           keyBinding: 'h',
-          maxHighlightCount: 300
-        }
+          maxHighlightCount: 300,
+        },
       })
 
       const result = await storage.getHighlightAllConfig()
       expect(result).toEqual({
         enabled: false,
         keyBinding: 'h',
-        maxHighlightCount: 300
+        maxHighlightCount: 300,
       })
     })
 
     it('getHighlightAllConfig应该验证配置格式', async () => {
       // 返回无效配置（keyBinding不是单个字母）
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'highlightAllConfig': {
+        highlightAllConfig: {
           enabled: true,
           keyBinding: 'ab', // 无效：多个字符
-          maxHighlightCount: 500
-        }
+          maxHighlightCount: 500,
+        },
       })
 
       const result = await storage.getHighlightAllConfig()
@@ -1203,18 +1203,18 @@ describe('Storage工具测试', () => {
       expect(result).toEqual({
         enabled: true,
         keyBinding: 'a',
-        maxHighlightCount: 500
+        maxHighlightCount: 500,
       })
     })
 
     it('getHighlightAllConfig应该验证keyBinding必须是字母或数字', async () => {
       // 返回无效配置（keyBinding是特殊字符）
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'highlightAllConfig': {
+        highlightAllConfig: {
           enabled: true,
           keyBinding: '@', // 无效：特殊字符
-          maxHighlightCount: 500
-        }
+          maxHighlightCount: 500,
+        },
       })
 
       const result = await storage.getHighlightAllConfig()
@@ -1222,18 +1222,18 @@ describe('Storage工具测试', () => {
       expect(result).toEqual({
         enabled: true,
         keyBinding: 'a',
-        maxHighlightCount: 500
+        maxHighlightCount: 500,
       })
     })
 
     it('getHighlightAllConfig应该接受大写字母', async () => {
       // 大写字母是有效的
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'highlightAllConfig': {
+        highlightAllConfig: {
           enabled: true,
           keyBinding: 'H',
-          maxHighlightCount: 300
-        }
+          maxHighlightCount: 300,
+        },
       })
 
       const result = await storage.getHighlightAllConfig()
@@ -1241,18 +1241,18 @@ describe('Storage工具测试', () => {
       expect(result).toEqual({
         enabled: true,
         keyBinding: 'H',
-        maxHighlightCount: 300
+        maxHighlightCount: 300,
       })
     })
 
     it('getHighlightAllConfig应该接受数字', async () => {
       // 数字是有效的
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'highlightAllConfig': {
+        highlightAllConfig: {
           enabled: true,
           keyBinding: '1',
-          maxHighlightCount: 400
-        }
+          maxHighlightCount: 400,
+        },
       })
 
       const result = await storage.getHighlightAllConfig()
@@ -1260,18 +1260,18 @@ describe('Storage工具测试', () => {
       expect(result).toEqual({
         enabled: true,
         keyBinding: '1',
-        maxHighlightCount: 400
+        maxHighlightCount: 400,
       })
     })
 
     it('getHighlightAllConfig应该验证maxHighlightCount范围', async () => {
       // 返回无效配置（maxHighlightCount超出范围）
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'highlightAllConfig': {
+        highlightAllConfig: {
           enabled: true,
           keyBinding: 'a',
-          maxHighlightCount: 50 // 无效：小于100
-        }
+          maxHighlightCount: 50, // 无效：小于100
+        },
       })
 
       const result = await storage.getHighlightAllConfig()
@@ -1279,18 +1279,18 @@ describe('Storage工具测试', () => {
       expect(result).toEqual({
         enabled: true,
         keyBinding: 'a',
-        maxHighlightCount: 500
+        maxHighlightCount: 500,
       })
     })
 
     it('getHighlightAllConfig应该验证maxHighlightCount上限', async () => {
       // 返回无效配置（maxHighlightCount超出上限）
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'highlightAllConfig': {
+        highlightAllConfig: {
           enabled: true,
           keyBinding: 'a',
-          maxHighlightCount: 1500 // 无效：大于1000
-        }
+          maxHighlightCount: 1500, // 无效：大于1000
+        },
       })
 
       const result = await storage.getHighlightAllConfig()
@@ -1298,7 +1298,7 @@ describe('Storage工具测试', () => {
       expect(result).toEqual({
         enabled: true,
         keyBinding: 'a',
-        maxHighlightCount: 500
+        maxHighlightCount: 500,
       })
     })
 
@@ -1306,13 +1306,13 @@ describe('Storage工具测试', () => {
       const config = {
         enabled: false,
         keyBinding: 'h',
-        maxHighlightCount: 300
+        maxHighlightCount: 300,
       }
-      
+
       await storage.setHighlightAllConfig(config)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'highlightAllConfig': config
+        highlightAllConfig: config,
       })
     })
 
@@ -1320,13 +1320,13 @@ describe('Storage工具测试', () => {
       const config = {
         enabled: true,
         keyBinding: 'z',
-        maxHighlightCount: 100 // 最小值
+        maxHighlightCount: 100, // 最小值
       }
-      
+
       await storage.setHighlightAllConfig(config)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'highlightAllConfig': config
+        highlightAllConfig: config,
       })
     })
 
@@ -1334,13 +1334,13 @@ describe('Storage工具测试', () => {
       const config = {
         enabled: true,
         keyBinding: 'a',
-        maxHighlightCount: 1000 // 最大值
+        maxHighlightCount: 1000, // 最大值
       }
-      
+
       await storage.setHighlightAllConfig(config)
-      
+
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'highlightAllConfig': config
+        highlightAllConfig: config,
       })
     })
   })
@@ -1348,30 +1348,30 @@ describe('Storage工具测试', () => {
   describe('API 配置', () => {
     it('getApiConfig应该返回默认配置', async () => {
       const result = await storage.getApiConfig()
-      
+
       expect(result).toEqual({
         communicationMode: 'postMessage',
         requestTimeout: 5,
         sourceConfig: {
           contentSource: 'schema-editor-content',
-          hostSource: 'schema-editor-host'
+          hostSource: 'schema-editor-host',
         },
         messageTypes: {
           getSchema: 'GET_SCHEMA',
           updateSchema: 'UPDATE_SCHEMA',
           checkPreview: 'CHECK_PREVIEW',
           renderPreview: 'RENDER_PREVIEW',
-          cleanupPreview: 'CLEANUP_PREVIEW'
-        }
+          cleanupPreview: 'CLEANUP_PREVIEW',
+        },
       })
     })
 
     it('getApiConfig应该返回存储的配置', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'apiConfig': {
+        apiConfig: {
           communicationMode: 'windowFunction',
-          requestTimeout: 10
-        }
+          requestTimeout: 10,
+        },
       })
 
       const result = await storage.getApiConfig()
@@ -1380,25 +1380,25 @@ describe('Storage工具测试', () => {
         requestTimeout: 10,
         sourceConfig: {
           contentSource: 'schema-editor-content',
-          hostSource: 'schema-editor-host'
+          hostSource: 'schema-editor-host',
         },
         messageTypes: {
           getSchema: 'GET_SCHEMA',
           updateSchema: 'UPDATE_SCHEMA',
           checkPreview: 'CHECK_PREVIEW',
           renderPreview: 'RENDER_PREVIEW',
-          cleanupPreview: 'CLEANUP_PREVIEW'
-        }
+          cleanupPreview: 'CLEANUP_PREVIEW',
+        },
       })
     })
 
     it('getApiConfig应该验证communicationMode有效值', async () => {
       // 返回无效的 communicationMode
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'apiConfig': {
+        apiConfig: {
           communicationMode: 'invalidMode',
-          requestTimeout: 5
-        }
+          requestTimeout: 5,
+        },
       })
 
       const result = await storage.getApiConfig()
@@ -1408,24 +1408,24 @@ describe('Storage工具测试', () => {
         requestTimeout: 5,
         sourceConfig: {
           contentSource: 'schema-editor-content',
-          hostSource: 'schema-editor-host'
+          hostSource: 'schema-editor-host',
         },
         messageTypes: {
           getSchema: 'GET_SCHEMA',
           updateSchema: 'UPDATE_SCHEMA',
           checkPreview: 'CHECK_PREVIEW',
           renderPreview: 'RENDER_PREVIEW',
-          cleanupPreview: 'CLEANUP_PREVIEW'
-        }
+          cleanupPreview: 'CLEANUP_PREVIEW',
+        },
       })
     })
 
     it('getApiConfig应该验证requestTimeout范围（小于1）', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'apiConfig': {
+        apiConfig: {
           communicationMode: 'postMessage',
-          requestTimeout: 0 // 无效：小于1
-        }
+          requestTimeout: 0, // 无效：小于1
+        },
       })
 
       const result = await storage.getApiConfig()
@@ -1435,10 +1435,10 @@ describe('Storage工具测试', () => {
 
     it('getApiConfig应该验证requestTimeout范围（大于30）', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'apiConfig': {
+        apiConfig: {
           communicationMode: 'postMessage',
-          requestTimeout: 60 // 无效：大于30
-        }
+          requestTimeout: 60, // 无效：大于30
+        },
       })
 
       const result = await storage.getApiConfig()
@@ -1448,10 +1448,10 @@ describe('Storage工具测试', () => {
 
     it('getApiConfig应该接受有效的边界值', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'apiConfig': {
+        apiConfig: {
           communicationMode: 'postMessage',
-          requestTimeout: 1 // 最小值
-        }
+          requestTimeout: 1, // 最小值
+        },
       })
 
       const result = await storage.getApiConfig()
@@ -1460,24 +1460,24 @@ describe('Storage工具测试', () => {
         requestTimeout: 1,
         sourceConfig: {
           contentSource: 'schema-editor-content',
-          hostSource: 'schema-editor-host'
+          hostSource: 'schema-editor-host',
         },
         messageTypes: {
           getSchema: 'GET_SCHEMA',
           updateSchema: 'UPDATE_SCHEMA',
           checkPreview: 'CHECK_PREVIEW',
           renderPreview: 'RENDER_PREVIEW',
-          cleanupPreview: 'CLEANUP_PREVIEW'
-        }
+          cleanupPreview: 'CLEANUP_PREVIEW',
+        },
       })
     })
 
     it('getApiConfig应该接受最大超时值', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'apiConfig': {
+        apiConfig: {
           communicationMode: 'postMessage',
-          requestTimeout: 30 // 最大值
-        }
+          requestTimeout: 30, // 最大值
+        },
       })
 
       const result = await storage.getApiConfig()
@@ -1486,10 +1486,10 @@ describe('Storage工具测试', () => {
 
     it('getApiConfig应该接受windowFunction模式', async () => {
       ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
-        'apiConfig': {
+        apiConfig: {
           communicationMode: 'windowFunction',
-          requestTimeout: 5
-        }
+          requestTimeout: 5,
+        },
       })
 
       const result = await storage.getApiConfig()
@@ -1499,60 +1499,92 @@ describe('Storage工具测试', () => {
     it('setApiConfig应该设置配置', async () => {
       const config = {
         communicationMode: 'windowFunction' as const,
-        requestTimeout: 10
-      }
-      
-      await storage.setApiConfig(config)
-      
-      expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'apiConfig': config
-      })
-    })
-
-    it('setApiConfig应该保存postMessage模式配置', async () => {
-      const config = {
-        communicationMode: 'postMessage' as const,
-        requestTimeout: 15
-      }
-      
-      await storage.setApiConfig(config)
-      
-      expect(chrome.storage.local.set).toHaveBeenCalledWith({
-        'apiConfig': config
-      })
-    })
-
-    it('getApiConfig失败时应该返回默认值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
-      
-      const result = await storage.getApiConfig()
-      expect(result).toEqual({
-        communicationMode: 'postMessage',
-        requestTimeout: 5,
+        requestTimeout: 10,
         sourceConfig: {
           contentSource: 'schema-editor-content',
-          hostSource: 'schema-editor-host'
+          hostSource: 'schema-editor-host',
         },
         messageTypes: {
           getSchema: 'GET_SCHEMA',
           updateSchema: 'UPDATE_SCHEMA',
           checkPreview: 'CHECK_PREVIEW',
           renderPreview: 'RENDER_PREVIEW',
-          cleanupPreview: 'CLEANUP_PREVIEW'
-        }
+          cleanupPreview: 'CLEANUP_PREVIEW',
+        },
+      }
+
+      await storage.setApiConfig(config)
+
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        apiConfig: config,
+      })
+    })
+
+    it('setApiConfig应该保存postMessage模式配置', async () => {
+      const config = {
+        communicationMode: 'postMessage' as const,
+        requestTimeout: 15,
+        sourceConfig: {
+          contentSource: 'schema-editor-content',
+          hostSource: 'schema-editor-host',
+        },
+        messageTypes: {
+          getSchema: 'GET_SCHEMA',
+          updateSchema: 'UPDATE_SCHEMA',
+          checkPreview: 'CHECK_PREVIEW',
+          renderPreview: 'RENDER_PREVIEW',
+          cleanupPreview: 'CLEANUP_PREVIEW',
+        },
+      }
+
+      await storage.setApiConfig(config)
+
+      expect(chrome.storage.local.set).toHaveBeenCalledWith({
+        apiConfig: config,
+      })
+    })
+
+    it('getApiConfig失败时应该返回默认值', async () => {
+      ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
+
+      const result = await storage.getApiConfig()
+      expect(result).toEqual({
+        communicationMode: 'postMessage',
+        requestTimeout: 5,
+        sourceConfig: {
+          contentSource: 'schema-editor-content',
+          hostSource: 'schema-editor-host',
+        },
+        messageTypes: {
+          getSchema: 'GET_SCHEMA',
+          updateSchema: 'UPDATE_SCHEMA',
+          checkPreview: 'CHECK_PREVIEW',
+          renderPreview: 'RENDER_PREVIEW',
+          cleanupPreview: 'CLEANUP_PREVIEW',
+        },
       })
     })
 
     it('setApiConfig失败时不应该抛出错误', async () => {
       ;(chrome.storage.local.set as jest.Mock).mockRejectedValue(new Error('Storage error'))
-      
+
       const config = {
         communicationMode: 'postMessage' as const,
-        requestTimeout: 5
+        requestTimeout: 5,
+        sourceConfig: {
+          contentSource: 'schema-editor-content',
+          hostSource: 'schema-editor-host',
+        },
+        messageTypes: {
+          getSchema: 'GET_SCHEMA',
+          updateSchema: 'UPDATE_SCHEMA',
+          checkPreview: 'CHECK_PREVIEW',
+          renderPreview: 'RENDER_PREVIEW',
+          cleanupPreview: 'CLEANUP_PREVIEW',
+        },
       }
-      
+
       await expect(storage.setApiConfig(config)).resolves.not.toThrow()
     })
   })
 })
-

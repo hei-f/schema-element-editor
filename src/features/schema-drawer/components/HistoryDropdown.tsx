@@ -14,7 +14,7 @@ import {
   HistoryDropdownItem,
   HistoryDropdownList,
   HistoryDropdownMenuItemContent,
-  HistoryDropdownTime
+  HistoryDropdownTime,
 } from '../styles/history-dropdown.styles'
 
 interface HistoryDropdownProps {
@@ -35,7 +35,7 @@ const HISTORY_ICONS: Record<HistoryEntryType, string> = {
   save: '💾',
   draft: '📝',
   favorite: '⭐',
-  manual: '🔄'
+  manual: '🔄',
 }
 
 /**
@@ -59,20 +59,20 @@ export const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
   onLoadVersion,
   onClearHistory,
   disabled,
-  showText = false
+  showText = false,
 }) => {
   const [open, setOpen] = React.useState(false)
-  
+
   const handleItemClick = (index: number) => {
     onLoadVersion(index)
     setOpen(false)
   }
-  
+
   const handleClear = () => {
     onClearHistory()
     setOpen(false)
   }
-  
+
   const dropdownContent = (
     <HistoryDropdownContainer>
       <HistoryDropdownList>
@@ -83,8 +83,8 @@ export const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
           </HistoryDropdownEmptyState>
         ) : (
           history.map((entry, index) => (
-            <HistoryDropdownItem 
-              key={index} 
+            <HistoryDropdownItem
+              key={index}
               $isActive={index === currentIndex}
               onClick={() => handleItemClick(index)}
             >
@@ -120,7 +120,7 @@ export const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
       )}
     </HistoryDropdownContainer>
   )
-  
+
   return (
     <Dropdown
       popupRender={() => dropdownContent}
@@ -130,12 +130,7 @@ export const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
       placement="bottomRight"
       getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
     >
-      <Button
-        size="small"
-        type="text"
-        icon={<HistoryOutlined />}
-        disabled={disabled}
-      >
+      <Button size="small" type="text" icon={<HistoryOutlined />} disabled={disabled}>
         {showText && `历史${history.length > 0 ? ` (${history.length})` : ''}`}
       </Button>
     </Dropdown>

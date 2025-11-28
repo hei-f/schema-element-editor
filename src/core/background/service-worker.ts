@@ -11,17 +11,17 @@ const EXTENSION_VERSION = chrome.runtime.getManifest().version
 function updateIconState(isActive: boolean) {
   // 更新图标标题
   chrome.action.setTitle({
-    title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`
+    title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
   })
-  
+
   // 切换图标颜色
   const iconSuffix = isActive ? 'active' : 'inactive'
   chrome.action.setIcon({
     path: {
       16: `icons/icon-${iconSuffix}-16.png`,
       48: `icons/icon-${iconSuffix}-48.png`,
-      128: `icons/icon-${iconSuffix}-128.png`
-    }
+      128: `icons/icon-${iconSuffix}-128.png`,
+    },
   })
 }
 
@@ -30,25 +30,25 @@ function updateIconState(isActive: boolean) {
  */
 chrome.action.onClicked.addListener(async (_tab: chrome.tabs.Tab) => {
   logger.log('扩展图标被点击')
-  
+
   // 切换激活状态
   const newState = await storage.toggleActiveState()
   logger.log('激活状态已切换:', newState)
-  
+
   // 更新图标状态
   updateIconState(newState)
-  
+
   // 通知所有标签页的content script
   try {
     const tabs = await chrome.tabs.query({})
     logger.log(`通知 ${tabs.length} 个标签页激活状态变更`)
-    
+
     for (const tab of tabs) {
       if (tab.id) {
         try {
           await chrome.tabs.sendMessage(tab.id, {
             type: MessageType.ACTIVE_STATE_CHANGED,
-            payload: { isActive: newState }
+            payload: { isActive: newState },
           } as Message)
         } catch (error) {
           // 某些特殊页面（如 chrome://, edge:// 等）无法接收消息，忽略这些错误
@@ -64,23 +64,29 @@ chrome.action.onClicked.addListener(async (_tab: chrome.tabs.Tab) => {
 /**
  * 监听来自content script的消息
  */
-chrome.runtime.onMessage.addListener((message: Message, _sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
-  logger.log('Background收到消息:', message)
-  
-  // 这里可以添加更多的消息处理逻辑
-  switch (message.type) {
-    case MessageType.TOGGLE_ACTIVE:
-      storage.toggleActiveState().then((newState) => {
-        sendResponse({ success: true, isActive: newState })
-      })
-      return true // 保持消息通道开启
-      
-    default:
-      sendResponse({ success: false, error: '未知的消息类型' })
+chrome.runtime.onMessage.addListener(
+  (
+    message: Message,
+    _sender: chrome.runtime.MessageSender,
+    sendResponse: (response?: any) => void
+  ) => {
+    logger.log('Background收到消息:', message)
+
+    // 这里可以添加更多的消息处理逻辑
+    switch (message.type) {
+      case MessageType.TOGGLE_ACTIVE:
+        storage.toggleActiveState().then((newState) => {
+          sendResponse({ success: true, isActive: newState })
+        })
+        return true // 保持消息通道开启
+
+      default:
+        sendResponse({ success: false, error: '未知的消息类型' })
+    }
+
+    return false
   }
-  
-  return false
-})
+)
 
 logger.log('Background Service Worker已启动')
 
@@ -88,7 +94,9 @@ logger.log('Background Service Worker已启动')
  * Ping Content Script 检测是否存活及版本号
  * @returns 响应对象或 null（无响应）
  */
-async function pingContentScript(tabId: number): Promise<{ status: string; version: string } | null> {
+async function pingContentScript(
+  tabId: number
+): Promise<{ status: string; version: string } | null> {
   try {
     const response = await chrome.tabs.sendMessage(tabId, { type: MessageType.PING })
     return response
@@ -105,7 +113,7 @@ async function injectContentScript(tabId: number): Promise<boolean> {
   try {
     await chrome.scripting.executeScript({
       target: { tabId },
-      files: ['src/core/content/index.tsx']
+      files: ['src/core/content/index.tsx'],
     })
     logger.log(`已向 tab ${tabId} 动态注入 Content Script`)
     return true
@@ -123,13 +131,13 @@ async function injectContentScript(tabId: number): Promise<boolean> {
  */
 async function checkAndInjectIfNeeded(tabId: number): Promise<void> {
   const response = await pingContentScript(tabId)
-  
+
   if (!response) {
     // 无响应，不注入（可能是特殊页面如 chrome://）
     logger.log(`Tab ${tabId} 无响应，跳过注入`)
     return
   }
-  
+
   if (response.version !== EXTENSION_VERSION) {
     // 版本不匹配，需要重新注入
     logger.log(`Tab ${tabId} 版本不匹配 (${response.version} vs ${EXTENSION_VERSION})，重新注入`)
@@ -155,7 +163,7 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
   const isActive = await storage.getActiveState()
   updateIconState(isActive)
   logger.log('图标状态已恢复:', isActive)
-  
+
   // Service Worker 启动时检查当前活跃 tab
   try {
     const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true })
@@ -167,4 +175,3 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
     logger.warn('检查当前 tab 失败:', error)
   }
 })()
-

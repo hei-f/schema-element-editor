@@ -22,14 +22,14 @@ export const useLightNotifications = (): UseLightNotificationsReturn => {
    */
   const showLightNotification = useCallback((text: string) => {
     const id = `notification_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
-    
-    setLightNotifications(prev => [...prev, { id, text }])
-    
+
+    setLightNotifications((prev) => [...prev, { id, text }])
+
     const timer = setTimeout(() => {
-      setLightNotifications(prev => prev.filter(n => n.id !== id))
+      setLightNotifications((prev) => prev.filter((n) => n.id !== id))
       lightNotificationTimersRef.current.delete(id)
     }, 1500)
-    
+
     lightNotificationTimersRef.current.set(id, timer)
   }, [])
 
@@ -38,14 +38,13 @@ export const useLightNotifications = (): UseLightNotificationsReturn => {
    */
   useEffect(() => {
     return () => {
-      lightNotificationTimersRef.current.forEach(timer => clearTimeout(timer))
+      lightNotificationTimersRef.current.forEach((timer) => clearTimeout(timer))
       lightNotificationTimersRef.current.clear()
     }
   }, [])
 
   return {
     lightNotifications,
-    showLightNotification
+    showLightNotification,
   }
 }
-

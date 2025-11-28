@@ -8,12 +8,11 @@ export const formatTooltipContent = (attributes: ElementAttributes, isValid: boo
   if (!isValid) {
     return '非法目标'
   }
-  
+
   const lines: string[] = []
   attributes.params.forEach((param: string, index: number) => {
     lines.push(`params${index + 1}: ${param}`)
   })
-  
+
   return lines.join('\n')
 }
-

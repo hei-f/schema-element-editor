@@ -1,4 +1,9 @@
-import type { ElementAttributes, HighlightAllConfig, RecordingModeConfig, SearchConfig } from '@/shared/types'
+import type {
+  ElementAttributes,
+  HighlightAllConfig,
+  RecordingModeConfig,
+  SearchConfig,
+} from '@/shared/types'
 import { storage } from '@/shared/utils/browser/storage'
 import { logger } from '@/shared/utils/logger'
 import {
@@ -6,7 +11,7 @@ import {
   getElementAttributes,
   getMousePosition,
   hasValidAttributes,
-  isVisibleElement
+  isVisibleElement,
 } from '@/shared/utils/ui/dom'
 
 /** 扩展UI元素的选择器 */
@@ -20,19 +25,21 @@ export class ElementMonitor {
   private isActive: boolean = false
   private currentElement: HTMLElement | null = null
   private tooltipElement: HTMLDivElement | null = null
-  private onElementClickCallback: ((element: HTMLElement, attrs: ElementAttributes) => void) | null = null
+  private onElementClickCallback:
+    | ((element: HTMLElement, attrs: ElementAttributes) => void)
+    | null = null
   private isControlPressed: boolean = false
   private rafId: number | null = null
   private lastSearchTime: number = 0
   private searchConfig: SearchConfig | null = null
   private lastMouseX: number = 0
   private lastMouseY: number = 0
-  
+
   // 单元素高亮相关属性
   private highlightBox: HTMLElement | null = null
   private currentHighlightedElement: HTMLElement | null = null
   private highlightInitialRect: { left: number; top: number } | null = null
-  
+
   // 高亮所有元素相关属性
   private highlightAllConfig: HighlightAllConfig | null = null
   private isHighlightingAll: boolean = false
@@ -42,12 +49,14 @@ export class ElementMonitor {
     boxElement: HTMLElement
     initialRect: { left: number; top: number }
   }> = []
-  
+
   // 录制模式相关属性
   private recordingModeConfig: RecordingModeConfig | null = null
   private isRecordingMode: boolean = false
-  private onRecordingModeClickCallback: ((element: HTMLElement, attrs: ElementAttributes) => void) | null = null
-  
+  private onRecordingModeClickCallback:
+    | ((element: HTMLElement, attrs: ElementAttributes) => void)
+    | null = null
+
   // 滚动处理相关
   private scrollStopTimer: number | null = null
   private scrollUpdateRafId: number | null = null
@@ -58,19 +67,19 @@ export class ElementMonitor {
    */
   async start(): Promise<void> {
     if (this.isActive) return
-    
+
     this.isActive = true
     logger.log('元素监听器已启动 (按住 Alt/Option 键启用检测)')
-    
+
     // 加载搜索配置
     this.searchConfig = await storage.getSearchConfig()
-    
+
     // 加载高亮所有元素配置
     this.highlightAllConfig = await storage.getHighlightAllConfig()
-    
+
     // 加载录制模式配置
     this.recordingModeConfig = await storage.getRecordingModeConfig()
-    
+
     // 添加事件监听
     document.addEventListener('mousemove', this.handleMouseMove, true)
     document.addEventListener('click', this.handleClick, true)
@@ -78,7 +87,7 @@ export class ElementMonitor {
     document.addEventListener('keyup', this.handleKeyUp, true)
     document.addEventListener('scroll', this.handleScroll, true)
     window.addEventListener('schema-editor:clear-highlight', this.handleClearHighlight)
-    
+
     // 创建tooltip元素
     this.createTooltip()
   }
@@ -88,22 +97,22 @@ export class ElementMonitor {
    */
   stop(): void {
     if (!this.isActive) return
-    
+
     this.isActive = false
     this.isControlPressed = false
     logger.log('元素监听器已停止')
-    
+
     // 移除事件监听
     document.removeEventListener('mousemove', this.handleMouseMove, true)
     document.removeEventListener('click', this.handleClick, true)
     document.removeEventListener('keydown', this.handleKeyDown, true)
     document.removeEventListener('keyup', this.handleKeyUp, true)
-    document.removeEventListener('scroll', this.handleScroll, true)  // 移除滚动监听
+    document.removeEventListener('scroll', this.handleScroll, true) // 移除滚动监听
     window.removeEventListener('schema-editor:clear-highlight', this.handleClearHighlight)
-    
+
     // 清理当前高亮
     this.clearHighlight()
-    
+
     // 移除tooltip
     this.removeTooltip()
   }
@@ -125,7 +134,9 @@ export class ElementMonitor {
   /**
    * 设置录制模式点击回调
    */
-  setOnRecordingModeClick(callback: (element: HTMLElement, attrs: ElementAttributes) => void): void {
+  setOnRecordingModeClick(
+    callback: (element: HTMLElement, attrs: ElementAttributes) => void
+  ): void {
     this.onRecordingModeClickCallback = callback
   }
 
@@ -141,7 +152,7 @@ export class ElementMonitor {
    */
   private createTooltip(): void {
     if (this.tooltipElement) return
-    
+
     this.tooltipElement = document.createElement('div')
     this.tooltipElement.style.cssText = `
       position: fixed;
@@ -176,57 +187,61 @@ export class ElementMonitor {
    */
   private handleKeyDown = (event: KeyboardEvent): void => {
     if (!this.isActive) return
-    
+
     // 检测 Alt 键（Mac 上是 Option 键）
     if (event.altKey) {
       // 使用 event.code 而不是 event.key，因为 Mac 上 Alt+A 会产生特殊字符 'å'
       const keyCode = event.code.toLowerCase()
-      
+
       // 检测高亮所有元素快捷键
       const highlightKeyBinding = this.highlightAllConfig?.keyBinding.toLowerCase()
       const isHighlightDigit = /^[0-9]$/.test(highlightKeyBinding || '')
-      const expectedHighlightCode = isHighlightDigit ? `digit${highlightKeyBinding}` : `key${highlightKeyBinding}`
-      
+      const expectedHighlightCode = isHighlightDigit
+        ? `digit${highlightKeyBinding}`
+        : `key${highlightKeyBinding}`
+
       if (
         this.highlightAllConfig?.enabled &&
         keyCode === expectedHighlightCode &&
-        !this.isHighlightingAll  // 防止重复触发
+        !this.isHighlightingAll // 防止重复触发
       ) {
         event.preventDefault()
         this.highlightAll()
         return
       }
-      
+
       // 检测录制模式快捷键 - 按住 Alt+R 进入录制模式
       const recordingKeyBinding = this.recordingModeConfig?.keyBinding.toLowerCase()
       const isRecordingDigit = /^[0-9]$/.test(recordingKeyBinding || '')
-      const expectedRecordingCode = isRecordingDigit ? `digit${recordingKeyBinding}` : `key${recordingKeyBinding}`
-      
+      const expectedRecordingCode = isRecordingDigit
+        ? `digit${recordingKeyBinding}`
+        : `key${recordingKeyBinding}`
+
       if (
         this.recordingModeConfig?.enabled &&
         keyCode === expectedRecordingCode &&
-        !this.isRecordingMode  // 防止重复触发
+        !this.isRecordingMode // 防止重复触发
       ) {
         event.preventDefault()
         this.enterRecordingMode()
         return
       }
-      
+
       if (!this.isControlPressed) {
         this.isControlPressed = true
-        
+
         // 如果正在高亮所有元素，不执行单元素高亮
         if (this.isHighlightingAll) {
           return
         }
-        
+
         // 如果有有效的鼠标位置，立即触发一次检测
         if (this.lastMouseX !== 0 || this.lastMouseY !== 0) {
           const mockMouseEvent = new MouseEvent('mousemove', {
             clientX: this.lastMouseX,
             clientY: this.lastMouseY,
             bubbles: true,
-            cancelable: true
+            cancelable: true,
           })
           this.performSearch(mockMouseEvent)
         }
@@ -239,26 +254,28 @@ export class ElementMonitor {
    */
   private enterRecordingMode(): void {
     if (this.isRecordingMode) return
-    
+
     this.isRecordingMode = true
     this.isControlPressed = true
     logger.log('录制模式: 开启')
-    
+
     // 清除当前高亮框，重新用录制模式颜色创建
     this.clearHighlight()
-    
+
     // 触发录制模式变化事件
-    window.dispatchEvent(new CustomEvent('schema-editor:recording-mode-change', {
-      detail: { isRecordingMode: true }
-    }))
-    
+    window.dispatchEvent(
+      new CustomEvent('schema-editor:recording-mode-change', {
+        detail: { isRecordingMode: true },
+      })
+    )
+
     // 如果有有效的鼠标位置，立即触发一次检测（使用录制模式颜色）
     if (this.lastMouseX !== 0 || this.lastMouseY !== 0) {
       const mockMouseEvent = new MouseEvent('mousemove', {
         clientX: this.lastMouseX,
         clientY: this.lastMouseY,
         bubbles: true,
-        cancelable: true
+        cancelable: true,
       })
       this.performSearch(mockMouseEvent)
     }
@@ -269,14 +286,16 @@ export class ElementMonitor {
    */
   private exitRecordingMode(): void {
     if (!this.isRecordingMode) return
-    
+
     this.isRecordingMode = false
     logger.log('录制模式: 关闭')
-    
+
     // 触发录制模式变化事件
-    window.dispatchEvent(new CustomEvent('schema-editor:recording-mode-change', {
-      detail: { isRecordingMode: false }
-    }))
+    window.dispatchEvent(
+      new CustomEvent('schema-editor:recording-mode-change', {
+        detail: { isRecordingMode: false },
+      })
+    )
   }
 
   /**
@@ -284,7 +303,7 @@ export class ElementMonitor {
    */
   private handleKeyUp = (event: KeyboardEvent): void => {
     if (!this.isActive) return
-    
+
     // Alt 键释放
     if (!event.altKey) {
       if (this.isControlPressed) {
@@ -292,12 +311,12 @@ export class ElementMonitor {
         // 清理当前高亮
         this.clearHighlight()
       }
-      
+
       // 清除高亮所有元素
       if (this.isHighlightingAll) {
         this.clearAllHighlights()
       }
-      
+
       // 退出录制模式（松开 Alt 键时退出）
       if (this.isRecordingMode) {
         this.exitRecordingMode()
@@ -313,20 +332,20 @@ export class ElementMonitor {
     if (this.scrollUpdateRafId) {
       cancelAnimationFrame(this.scrollUpdateRafId)
     }
-    
+
     this.scrollUpdateRafId = requestAnimationFrame(() => {
       // 更新单元素高亮框位置
       this.updateHighlightBoxPosition()
-      
+
       // 更新所有高亮框位置
       this.updateAllHighlightBoxPositions()
     })
-    
+
     // 清除之前的滚动停止定时器
     if (this.scrollStopTimer) {
       clearTimeout(this.scrollStopTimer)
     }
-    
+
     // 设置新的滚动停止定时器（debounce）
     this.scrollStopTimer = window.setTimeout(() => {
       // 滚动停止，重新检测鼠标位置的元素
@@ -336,7 +355,7 @@ export class ElementMonitor {
           clientX: this.lastMouseX,
           clientY: this.lastMouseY,
           bubbles: true,
-          cancelable: true
+          cancelable: true,
         })
         // 重新执行搜索（会走条件判断逻辑）
         this.performSearch(mockMouseEvent)
@@ -349,11 +368,11 @@ export class ElementMonitor {
    */
   private handleMouseMove = (event: MouseEvent): void => {
     if (!this.isActive) return
-    
+
     // 记录鼠标位置，供按键时使用
     this.lastMouseX = event.clientX
     this.lastMouseY = event.clientY
-    
+
     // 只有在按住 Alt/Option 键时才进行检测
     if (!this.isControlPressed) {
       // 如果之前有高亮，清除它
@@ -362,26 +381,29 @@ export class ElementMonitor {
       }
       return
     }
-    
+
     const target = event.target as HTMLElement
-    
+
     // 忽略我们自己创建的元素
-    if (target === this.tooltipElement || (target.closest && target.closest('[data-schema-editor-ui]'))) {
+    if (
+      target === this.tooltipElement ||
+      (target.closest && target.closest('[data-schema-editor-ui]'))
+    ) {
       return
     }
-    
+
     // 取消之前的 RAF
     if (this.rafId) {
       cancelAnimationFrame(this.rafId)
     }
-    
+
     // 节流检查
     const now = Date.now()
     const throttleInterval = this.searchConfig?.throttleInterval ?? 16
     if (now - this.lastSearchTime < throttleInterval) {
       return
     }
-    
+
     // 在下一帧执行搜索
     this.rafId = requestAnimationFrame(() => {
       this.performSearch(event)
@@ -397,39 +419,37 @@ export class ElementMonitor {
     if (this.isHighlightingAll) {
       return
     }
-    
+
     // 使用新的智能搜索函数
-    const { target } = await findElementWithSchemaParams(
-      event.clientX,
-      event.clientY
-    )
-    
+    const { target } = await findElementWithSchemaParams(event.clientX, event.clientY)
+
     if (!target) {
       // 没找到任何元素，清理高亮并显示"非法目标"
       this.clearHighlight()
       this.showTooltip({ params: [] }, false, event)
       return
     }
-    
+
     // 获取目标元素属性
     const attrs = await getElementAttributes(target)
     const isValid = hasValidAttributes(attrs)
-    
+
     // 条件卸载：检查是否是同一个元素
     if (target === this.currentHighlightedElement) {
       // 同一个元素，只更新 tooltip 位置，不重建高亮框
       this.showTooltip(attrs, isValid, event)
       return
     }
-    
+
     // 不同元素，需要重建高亮框
     // 设置当前元素
     this.currentElement = target
-    
+
     // 创建高亮框 - 录制模式下使用不同颜色
-    const color = this.isRecordingMode && this.recordingModeConfig?.highlightColor
-      ? this.recordingModeConfig.highlightColor
-      : await storage.getHighlightColor()
+    const color =
+      this.isRecordingMode && this.recordingModeConfig?.highlightColor
+        ? this.recordingModeConfig.highlightColor
+        : await storage.getHighlightColor()
     this.createHighlightBox(target, color)
     this.showTooltip(attrs, isValid, event)
   }
@@ -439,35 +459,39 @@ export class ElementMonitor {
    */
   private handleClick = async (event: MouseEvent): Promise<void> => {
     if (!this.isActive) return
-    
+
     // 只有在按住 Alt/Option 键时才响应点击
     if (!this.isControlPressed) return
-    
+
     // 忽略我们自己创建的元素
-    if ((event.target as HTMLElement) === this.tooltipElement || 
-        (event.target as HTMLElement).closest('[data-schema-editor-ui]')) {
+    if (
+      (event.target as HTMLElement) === this.tooltipElement ||
+      (event.target as HTMLElement).closest('[data-schema-editor-ui]')
+    ) {
       return
     }
-    
+
     // 使用当前已检测到的元素
     if (!this.currentElement) return
-    
+
     // 获取元素属性
     const attrs = await getElementAttributes(this.currentElement)
-    
+
     // 只有有效的元素才触发回调
     if (hasValidAttributes(attrs)) {
       event.preventDefault()
       event.stopPropagation()
-      
+
       // 根据是否处于录制模式调用不同的回调
       if (this.isRecordingMode && this.onRecordingModeClickCallback) {
         this.onRecordingModeClickCallback(this.currentElement, attrs)
         // 点击后退出录制模式
         this.isRecordingMode = false
-        window.dispatchEvent(new CustomEvent('schema-editor:recording-mode-change', {
-          detail: { isRecordingMode: false }
-        }))
+        window.dispatchEvent(
+          new CustomEvent('schema-editor:recording-mode-change', {
+            detail: { isRecordingMode: false },
+          })
+        )
       } else if (this.onElementClickCallback) {
         this.onElementClickCallback(this.currentElement, attrs)
       }
@@ -479,18 +503,20 @@ export class ElementMonitor {
    */
   private showTooltip(attrs: ElementAttributes, isValid: boolean, event: MouseEvent): void {
     if (!this.tooltipElement) return
-    
+
     const mousePos = getMousePosition(event)
-    
+
     if (isValid) {
       // 显示参数列表
       const lines: string[] = []
-      
+
       // 录制模式下添加醒目提示
       if (this.isRecordingMode) {
-        lines.push('<div style="background: #ff4d4f; color: white; padding: 4px 8px; margin: -8px -12px 8px -12px; border-radius: 6px 6px 0 0; font-weight: 600; font-size: 13px; text-align: center;">🔴 录制模式</div>')
+        lines.push(
+          '<div style="background: #ff4d4f; color: white; padding: 4px 8px; margin: -8px -12px 8px -12px; border-radius: 6px 6px 0 0; font-weight: 600; font-size: 13px; text-align: center;">🔴 录制模式</div>'
+        )
       }
-      
+
       attrs.params.forEach((param, index) => {
         lines.push(`params${index + 1}: ${param}`)
       })
@@ -503,7 +529,7 @@ export class ElementMonitor {
       this.tooltipElement.style.background = 'rgba(255, 77, 79, 0.9)'
       this.tooltipElement.style.color = 'white'
     }
-    
+
     // 定位tooltip
     this.positionTooltip(mousePos.x, mousePos.y)
     this.tooltipElement.style.display = 'block'
@@ -514,24 +540,24 @@ export class ElementMonitor {
    */
   private positionTooltip(x: number, y: number): void {
     if (!this.tooltipElement) return
-    
+
     const offset = 15
     let left = x + offset
     let top = y + offset
-    
+
     // 确保tooltip不超出视口
     const tooltipRect = this.tooltipElement.getBoundingClientRect()
     const viewportWidth = window.innerWidth
     const viewportHeight = window.innerHeight
-    
+
     if (left + tooltipRect.width > viewportWidth) {
       left = x - tooltipRect.width - offset
     }
-    
+
     if (top + tooltipRect.height > viewportHeight) {
       top = y - tooltipRect.height - offset
     }
-    
+
     this.tooltipElement.style.left = `${left}px`
     this.tooltipElement.style.top = `${top}px`
   }
@@ -542,10 +568,10 @@ export class ElementMonitor {
   private clearHighlight(): void {
     // 移除高亮框
     this.removeHighlightBox()
-    
+
     // 清除当前元素引用
     this.currentElement = null
-    
+
     // 隐藏 tooltip
     if (this.tooltipElement) {
       this.tooltipElement.style.display = 'none'
@@ -557,46 +583,49 @@ export class ElementMonitor {
    */
   private async highlightAll(): Promise<void> {
     if (!this.highlightAllConfig) return
-    
+
     // 清除单元素高亮（如果存在）
     this.clearHighlight()
-    
+
     this.isHighlightingAll = true
-    
+
     const attributeName = await storage.getAttributeName()
     const dataAttrName = `data-${attributeName}`
     const highlightColor = await storage.getHighlightColor()
-    
+
     // 查找所有合法元素
     const allElements = document.querySelectorAll(`[${dataAttrName}]`)
-    
+
     logger.log(`找到 ${allElements.length} 个合法元素`)
-    
+
     // 应用数量限制
     const maxCount = this.highlightAllConfig.maxHighlightCount
     const elementsToHighlight = Array.from(allElements).slice(0, maxCount)
-    
+
     if (allElements.length > maxCount) {
       logger.log(`仅高亮前 ${maxCount} 个元素`)
     }
-    
+
     elementsToHighlight.forEach((el) => {
       const element = el as HTMLElement
-      
+
       // 跳过不可见元素
       if (!isVisibleElement(element)) return
-      
+
       // 跳过插件自己的元素
       if (element.closest(UI_ELEMENT_SELECTOR)) return
-      
+
       // 获取属性值
       const attrValue = element.getAttribute(dataAttrName) || ''
       if (!attrValue) return
-      
+
       // 解析参数
-      const params = attrValue.split(',').map(s => s.trim()).filter(Boolean)
+      const params = attrValue
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
       if (params.length === 0) return
-      
+
       // 添加高亮框和标签
       this.addHighlightBox(element, params, highlightColor)
       this.highlightAllElements.push(element)
@@ -609,13 +638,13 @@ export class ElementMonitor {
   private addHighlightBox(element: HTMLElement, params: string[], color: string): void {
     const rect = element.getBoundingClientRect()
     const offset = 4 // outlineOffset + border
-    
+
     // 创建高亮框容器
     const container = document.createElement('div')
     container.className = 'schema-editor-highlight-all'
     container.setAttribute('data-schema-editor-ui', 'true')
     container.style.cssText = this.createHighlightBoxStyle(rect, color, true)
-    
+
     // 创建标签
     const label = document.createElement('div')
     label.className = 'schema-editor-highlight-label'
@@ -635,19 +664,19 @@ export class ElementMonitor {
       text-overflow: ellipsis;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     `
-    
+
     // 格式化标签内容（单行显示）
     const labelText = params.map((param, index) => `params${index + 1}: ${param}`).join(', ')
     label.textContent = labelText
-    
+
     container.appendChild(label)
     document.body.appendChild(container)
-    
+
     // 存储到数组中（包含目标元素、高亮框元素和初始位置）
     this.highlightAllBoxes.push({
       targetElement: element,
       boxElement: container,
-      initialRect: { left: rect.left - offset, top: rect.top - offset }
+      initialRect: { left: rect.left - offset, top: rect.top - offset },
     })
   }
 
@@ -656,16 +685,16 @@ export class ElementMonitor {
    */
   private clearAllHighlights(): void {
     // 移除所有高亮框
-    this.highlightAllBoxes.forEach(item => {
+    this.highlightAllBoxes.forEach((item) => {
       if (item.boxElement.parentNode) {
         item.boxElement.parentNode.removeChild(item.boxElement)
       }
     })
-    
+
     this.highlightAllBoxes = []
     this.highlightAllElements = []
     this.isHighlightingAll = false
-    
+
     logger.log('已清除所有高亮')
   }
 
@@ -683,7 +712,7 @@ export class ElementMonitor {
     const top = rect.top - offset
     const width = rect.width + offset * 2
     const height = rect.height + offset * 2
-    
+
     const baseStyle = `
       position: fixed;
       width: ${width}px;
@@ -694,18 +723,24 @@ export class ElementMonitor {
       z-index: 999998;
       box-sizing: border-box;
     `
-    
+
     if (useTransform) {
-      return baseStyle + `
+      return (
+        baseStyle +
+        `
         left: 0;
         top: 0;
         transform: translate(${left}px, ${top}px);
       `
+      )
     } else {
-      return baseStyle + `
+      return (
+        baseStyle +
+        `
         left: ${left}px;
         top: ${top}px;
       `
+      )
     }
   }
 
@@ -715,17 +750,17 @@ export class ElementMonitor {
   private createHighlightBox(element: HTMLElement, color: string): void {
     // 如果已存在高亮框，先移除
     this.removeHighlightBox()
-    
+
     const rect = element.getBoundingClientRect()
-    
+
     // 创建高亮框元素
     const box = document.createElement('div')
     box.className = 'schema-editor-highlight-hover'
     box.setAttribute('data-schema-editor-ui', 'true')
     box.style.cssText = this.createHighlightBoxStyle(rect, color, true)
-    
+
     document.body.appendChild(box)
-    
+
     // 记录状态
     this.highlightBox = box
     this.currentHighlightedElement = element
@@ -751,12 +786,12 @@ export class ElementMonitor {
     if (!this.highlightBox || !this.currentHighlightedElement || !this.highlightInitialRect) {
       return
     }
-    
+
     const currentRect = this.currentHighlightedElement.getBoundingClientRect()
     const offset = 4 // outlineOffset + border
     const deltaX = currentRect.left - offset - this.highlightInitialRect.left
     const deltaY = currentRect.top - offset - this.highlightInitialRect.top
-    
+
     this.highlightBox.style.transform = `translate(${this.highlightInitialRect.left + deltaX}px, ${this.highlightInitialRect.top + deltaY}px)`
   }
 
@@ -769,7 +804,7 @@ export class ElementMonitor {
       const offset = 4
       const deltaX = currentRect.left - offset - item.initialRect.left
       const deltaY = currentRect.top - offset - item.initialRect.top
-      
+
       item.boxElement.style.transform = `translate(${item.initialRect.left + deltaX}px, ${item.initialRect.top + deltaY}px)`
     }
   }
@@ -784,4 +819,3 @@ export class ElementMonitor {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`
   }
 }
-

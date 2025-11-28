@@ -17,7 +17,7 @@ interface ColorPickerFieldProps {
 
 /**
  * ColorPicker 包装组件，确保值始终为字符串
- * 
+ *
  * Ant Design 5.20.0+ 使用 @ant-design/fast-color，
  * 只接受字符串格式的颜色值，此组件确保类型安全
  */
@@ -26,13 +26,13 @@ export const ColorPickerField: React.FC<ColorPickerFieldProps> = ({
   onChange,
   showText = true,
   format = 'hex',
-  presets
+  presets,
 }) => {
   const handleChange = (color: Color | string) => {
     if (!onChange) return
-    
+
     const defaultColor = DEFAULT_VALUES.highlightColor
-    
+
     if (!color) {
       onChange(defaultColor)
     } else if (typeof color === 'string') {
@@ -56,4 +56,3 @@ export const ColorPickerField: React.FC<ColorPickerFieldProps> = ({
     />
   )
 }
-

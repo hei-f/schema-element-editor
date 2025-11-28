@@ -19,7 +19,7 @@ import {
   VersionItem,
   VersionListContainer,
   VersionNumber,
-  VersionTimestamp
+  VersionTimestamp,
 } from '../styles/recording.styles'
 
 interface RecordingPanelProps {
@@ -62,7 +62,7 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = (props) => {
     onStopRecording,
     onSelectSnapshot,
     onEnterDiffMode,
-    children
+    children,
   } = props
 
   const canDiff = !isRecording && snapshots.length >= 2
@@ -75,11 +75,9 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = (props) => {
           <RecordingIndicator $isRecording={isRecording}>
             {isRecording ? '录制中' : '已停止'}
           </RecordingIndicator>
-          <VersionCount>
-            已记录 {snapshots.length} 个版本
-          </VersionCount>
+          <VersionCount>已记录 {snapshots.length} 个版本</VersionCount>
         </RecordingStatusLeft>
-        
+
         <div style={{ display: 'flex', gap: 8 }}>
           {isRecording ? (
             <StopRecordingButton onClick={onStopRecording}>
@@ -88,10 +86,7 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = (props) => {
             </StopRecordingButton>
           ) : (
             <Tooltip title={snapshots.length < 2 ? '需要至少2个版本才能进行对比' : '对比不同版本'}>
-              <DiffButton 
-                $disabled={!canDiff}
-                onClick={canDiff ? onEnterDiffMode : undefined}
-              >
+              <DiffButton $disabled={!canDiff} onClick={canDiff ? onEnterDiffMode : undefined}>
                 <DiffOutlined />
                 版本对比
               </DiffButton>
@@ -104,15 +99,11 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = (props) => {
       <RecordingContentArea>
         {/* 左侧录制面板 */}
         <RecordingPanelContainer>
-          <PanelHeader>
-            版本历史
-          </PanelHeader>
-          
+          <PanelHeader>版本历史</PanelHeader>
+
           <VersionListContainer>
             {snapshots.length === 0 ? (
-              <EmptyState>
-                {isRecording ? '等待数据变化...' : '暂无录制数据'}
-              </EmptyState>
+              <EmptyState>{isRecording ? '等待数据变化...' : '暂无录制数据'}</EmptyState>
             ) : (
               snapshots.map((snapshot, index) => (
                 <VersionItem
@@ -131,11 +122,8 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = (props) => {
         </RecordingPanelContainer>
 
         {/* 右侧编辑器区域 */}
-        <RecordingEditorArea>
-          {children}
-        </RecordingEditorArea>
+        <RecordingEditorArea>{children}</RecordingEditorArea>
       </RecordingContentArea>
     </RecordingModeContainer>
   )
 }
-

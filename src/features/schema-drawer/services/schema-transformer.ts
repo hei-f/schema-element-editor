@@ -5,7 +5,7 @@ import {
   formatJsonString,
   isElementsArray,
   isStringData,
-  parserSchemaNodeToMarkdown
+  parserSchemaNodeToMarkdown,
 } from '@/shared/utils/schema/transformers'
 
 /**
@@ -75,12 +75,12 @@ export class SchemaTransformer {
       const markdownString = parserSchemaNodeToMarkdown(elements)
       return {
         success: true,
-        data: markdownString
+        data: markdownString,
       }
     } catch (error: any) {
       return {
         success: false,
-        error: `转换为Markdown失败: ${error.message}`
+        error: `转换为Markdown失败: ${error.message}`,
       }
     }
   }
@@ -102,26 +102,26 @@ export class SchemaTransformer {
           // 直接返回字符串数据
           return {
             success: true,
-            data: parsed
+            data: parsed,
           }
         } else {
           // 转换为JSON字符串
           return {
             success: true,
-            data: JSON.stringify(parsed)
+            data: JSON.stringify(parsed),
           }
         }
       } else {
         // 原始数据不是字符串类型，直接返回解析后的对象
         return {
           success: true,
-          data: parsed
+          data: parsed,
         }
       }
     } catch (error: any) {
       return {
         success: false,
-        error: `数据解析失败: ${error.message}`
+        error: `数据解析失败: ${error.message}`,
       }
     }
   }
@@ -145,4 +145,3 @@ export class SchemaTransformer {
  * 导出单例实例
  */
 export const schemaTransformer = new SchemaTransformer()
-

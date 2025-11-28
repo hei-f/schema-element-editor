@@ -13,7 +13,7 @@ describe('FavoritesManager 测试', () => {
     name: `Favorite ${id}`,
     content: `Content ${id}`,
     timestamp: Date.now(),
-    lastUsedTime: lastUsedTime || Date.now()
+    lastUsedTime: lastUsedTime || Date.now(),
   })
 
   describe('单例', () => {
@@ -66,7 +66,7 @@ describe('FavoritesManager 测试', () => {
 
       const savedFavorites = mockSaver.mock.calls[0][0] as Favorite[]
       const favorite = savedFavorites[0]
-      
+
       expect(favorite.id).toMatch(/^fav_\d+_[a-z0-9]+$/)
       expect(favorite.timestamp).toBeGreaterThanOrEqual(beforeAdd)
       expect(favorite.lastUsedTime).toBeGreaterThanOrEqual(beforeAdd)
@@ -77,7 +77,7 @@ describe('FavoritesManager 测试', () => {
       const existingFavorites = [
         { ...createMockFavorite('old1'), name: 'old1', lastUsedTime: now - 3000 },
         { ...createMockFavorite('old2'), name: 'old2', lastUsedTime: now - 2000 },
-        { ...createMockFavorite('recent'), name: 'recent', lastUsedTime: now - 1000 }
+        { ...createMockFavorite('recent'), name: 'recent', lastUsedTime: now - 1000 },
       ]
       const mockGetter = jest.fn().mockResolvedValue(existingFavorites)
       const mockSaver = jest.fn().mockResolvedValue(undefined)
@@ -87,9 +87,9 @@ describe('FavoritesManager 测试', () => {
       const savedFavorites = mockSaver.mock.calls[0][0] as Favorite[]
       expect(savedFavorites).toHaveLength(3)
       // 应该保留新添加的和最近使用的
-      expect(savedFavorites.map(f => f.name)).toContain('New')
-      expect(savedFavorites.map(f => f.name)).toContain('recent')
-      expect(savedFavorites.map(f => f.id)).not.toContain('old1')
+      expect(savedFavorites.map((f) => f.name)).toContain('New')
+      expect(savedFavorites.map((f) => f.name)).toContain('recent')
+      expect(savedFavorites.map((f) => f.id)).not.toContain('old1')
     })
 
     it('未超过最大数量时不应该删除', async () => {
@@ -106,11 +106,7 @@ describe('FavoritesManager 测试', () => {
 
   describe('deleteFavorite 删除收藏', () => {
     it('应该删除指定ID的收藏', async () => {
-      const favorites = [
-        createMockFavorite('1'),
-        createMockFavorite('2'),
-        createMockFavorite('3')
-      ]
+      const favorites = [createMockFavorite('1'), createMockFavorite('2'), createMockFavorite('3')]
       const mockGetter = jest.fn().mockResolvedValue(favorites)
       const mockSaver = jest.fn().mockResolvedValue(undefined)
 
@@ -118,9 +114,9 @@ describe('FavoritesManager 测试', () => {
 
       const savedFavorites = mockSaver.mock.calls[0][0] as Favorite[]
       expect(savedFavorites).toHaveLength(2)
-      expect(savedFavorites.map(f => f.id)).not.toContain('2')
-      expect(savedFavorites.map(f => f.id)).toContain('1')
-      expect(savedFavorites.map(f => f.id)).toContain('3')
+      expect(savedFavorites.map((f) => f.id)).not.toContain('2')
+      expect(savedFavorites.map((f) => f.id)).toContain('1')
+      expect(savedFavorites.map((f) => f.id)).toContain('3')
     })
 
     it('ID不存在时应该不改变列表', async () => {
@@ -140,7 +136,7 @@ describe('FavoritesManager 测试', () => {
       const beforeUpdate = Date.now()
       const favorites = [
         createMockFavorite('target', beforeUpdate - 10000),
-        createMockFavorite('other', beforeUpdate)
+        createMockFavorite('other', beforeUpdate),
       ]
       const mockGetter = jest.fn().mockResolvedValue(favorites)
       const mockSaver = jest.fn().mockResolvedValue(undefined)
@@ -148,9 +144,9 @@ describe('FavoritesManager 测试', () => {
       await manager.updateFavoriteUsedTime('target', mockGetter, mockSaver)
 
       const savedFavorites = mockSaver.mock.calls[0][0] as Favorite[]
-      const updated = savedFavorites.find(f => f.id === 'target')
-      const other = savedFavorites.find(f => f.id === 'other')
-      
+      const updated = savedFavorites.find((f) => f.id === 'target')
+      const other = savedFavorites.find((f) => f.id === 'other')
+
       expect(updated!.lastUsedTime).toBeGreaterThanOrEqual(beforeUpdate)
       expect(updated!.lastUsedTime).not.toBe(beforeUpdate - 10000)
       expect(other!.lastUsedTime).toBe(beforeUpdate) // 其他收藏不变
@@ -174,7 +170,7 @@ describe('FavoritesManager 测试', () => {
         createMockFavorite('oldest', now - 5000),
         createMockFavorite('old', now - 4000),
         createMockFavorite('recent', now - 1000),
-        createMockFavorite('newest', now)
+        createMockFavorite('newest', now),
       ]
       const mockGetter = jest.fn().mockResolvedValue(favorites)
       const mockSaver = jest.fn().mockResolvedValue(undefined)
@@ -184,8 +180,8 @@ describe('FavoritesManager 测试', () => {
       expect(deletedCount).toBe(2)
       const savedFavorites = mockSaver.mock.calls[0][0] as Favorite[]
       expect(savedFavorites).toHaveLength(2)
-      expect(savedFavorites.map(f => f.id)).toContain('newest')
-      expect(savedFavorites.map(f => f.id)).toContain('recent')
+      expect(savedFavorites.map((f) => f.id)).toContain('newest')
+      expect(savedFavorites.map((f) => f.id)).toContain('recent')
     })
 
     it('未超过最大数量时应该返回0', async () => {
@@ -217,7 +213,7 @@ describe('FavoritesManager 测试', () => {
       const favorites = [
         createMockFavorite('1', now - 5000),
         createMockFavorite('2', now - 1000),
-        createMockFavorite('3', now - 3000)
+        createMockFavorite('3', now - 3000),
       ]
       const mockGetter = jest.fn().mockResolvedValue(favorites)
       const mockSaver = jest.fn().mockResolvedValue(undefined)
@@ -233,7 +229,7 @@ describe('FavoritesManager 测试', () => {
       const now = Date.now()
       const favorites = [
         { ...createMockFavorite('old'), timestamp: now - 5000, lastUsedTime: undefined } as any,
-        { ...createMockFavorite('new'), timestamp: now - 1000, lastUsedTime: undefined } as any
+        { ...createMockFavorite('new'), timestamp: now - 1000, lastUsedTime: undefined } as any,
       ]
       const mockGetter = jest.fn().mockResolvedValue(favorites)
       const mockSaver = jest.fn().mockResolvedValue(undefined)
@@ -278,7 +274,7 @@ describe('FavoritesManager 测试', () => {
     it('应该处理大量收藏的LRU清理', async () => {
       const now = Date.now()
       const favorites: Favorite[] = []
-      
+
       // 创建100个收藏
       for (let i = 0; i < 100; i++) {
         favorites.push(createMockFavorite(`fav${i}`, now - i * 1000))
@@ -297,4 +293,3 @@ describe('FavoritesManager 测试', () => {
     })
   })
 })
-

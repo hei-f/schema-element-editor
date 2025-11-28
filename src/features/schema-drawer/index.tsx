@@ -28,4 +28,3 @@ export * from './styles/editor.styles'
 export * from './styles/notifications.styles'
 export * from './styles/toolbar.styles'
 export * from './styles/recording.styles'
-

@@ -1,6 +1,15 @@
-import type { ApiConfig, CommunicationMode, ElementAttributes, SchemaSnapshot } from '@/shared/types'
+import type {
+  ApiConfig,
+  CommunicationMode,
+  ElementAttributes,
+  SchemaSnapshot,
+} from '@/shared/types'
 import { MessageType } from '@/shared/types'
-import { listenPageMessages, postMessageToPage, sendRequestToHost } from '@/shared/utils/browser/message'
+import {
+  listenPageMessages,
+  postMessageToPage,
+  sendRequestToHost,
+} from '@/shared/utils/browser/message'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface UseSchemaRecordingOptions {
@@ -37,11 +46,11 @@ interface UseSchemaRecordingReturn {
  */
 export function useSchemaRecording(props: UseSchemaRecordingOptions): UseSchemaRecordingReturn {
   const { attributes, pollingInterval, onSchemaChange, apiConfig } = props
-  
+
   const [isRecording, setIsRecording] = useState(false)
   const [snapshots, setSnapshots] = useState<SchemaSnapshot[]>([])
   const [selectedSnapshotId, setSelectedSnapshotId] = useState<number | null>(null)
-  
+
   /** 录制开始时间 */
   const recordingStartTimeRef = useRef<number>(0)
   /** 上一次的schema内容（用于去重） */
@@ -65,55 +74,58 @@ export function useSchemaRecording(props: UseSchemaRecordingOptions): UseSchemaR
   /**
    * 处理schema响应
    */
-  const handleSchemaResponse = useCallback((payload: { success: boolean; data?: any; error?: string }) => {
-    // 只在录制中时处理响应
-    if (!isRecordingRef.current) {
-      return
-    }
-    
-    if (!payload.success || payload.data === undefined) {
-      return
-    }
-    
-    // 将数据转换为可显示的字符串
-    // 字符串保留原始格式（保留换行以便逐行diff）
-    // 对象/数组使用 stringify 格式化
-    let content: string
-    if (typeof payload.data === 'string') {
-      // 字符串：直接使用，保留换行符
-      content = payload.data
-    } else {
-      // 对象/数组/其他：stringify 格式化
-      try {
-        content = JSON.stringify(payload.data, null, 2)
-      } catch {
-        content = String(payload.data)
+  const handleSchemaResponse = useCallback(
+    (payload: { success: boolean; data?: any; error?: string }) => {
+      // 只在录制中时处理响应
+      if (!isRecordingRef.current) {
+        return
       }
-    }
-    
-    // 去重：与上一次内容相同则跳过
-    if (content === lastContentRef.current) {
-      return
-    }
-    
-    lastContentRef.current = content
-    
-    // 计算相对时间
-    const timestamp = Date.now() - recordingStartTimeRef.current
-    
-    // 创建新快照
-    const newSnapshot: SchemaSnapshot = {
-      id: snapshotIdRef.current++,
-      content,
-      timestamp
-    }
-    
-    setSnapshots(prev => [...prev, newSnapshot])
-    setSelectedSnapshotId(newSnapshot.id)
-    
-    // 通知外部schema变化
-    onSchemaChange?.(content)
-  }, [onSchemaChange])
+
+      if (!payload.success || payload.data === undefined) {
+        return
+      }
+
+      // 将数据转换为可显示的字符串
+      // 字符串保留原始格式（保留换行以便逐行diff）
+      // 对象/数组使用 stringify 格式化
+      let content: string
+      if (typeof payload.data === 'string') {
+        // 字符串：直接使用，保留换行符
+        content = payload.data
+      } else {
+        // 对象/数组/其他：stringify 格式化
+        try {
+          content = JSON.stringify(payload.data, null, 2)
+        } catch {
+          content = String(payload.data)
+        }
+      }
+
+      // 去重：与上一次内容相同则跳过
+      if (content === lastContentRef.current) {
+        return
+      }
+
+      lastContentRef.current = content
+
+      // 计算相对时间
+      const timestamp = Date.now() - recordingStartTimeRef.current
+
+      // 创建新快照
+      const newSnapshot: SchemaSnapshot = {
+        id: snapshotIdRef.current++,
+        content,
+        timestamp,
+      }
+
+      setSnapshots((prev) => [...prev, newSnapshot])
+      setSelectedSnapshotId(newSnapshot.id)
+
+      // 通知外部schema变化
+      onSchemaChange?.(content)
+    },
+    [onSchemaChange]
+  )
 
   /**
    * 发送获取schema请求（postMessage 直连模式）
@@ -131,7 +143,7 @@ export function useSchemaRecording(props: UseSchemaRecordingOptions): UseSchemaR
       handleSchemaResponse({
         success: response.success !== false,
         data: response.data,
-        error: response.error
+        error: response.error,
       })
     } catch {
       // 忽略单次请求失败
@@ -145,7 +157,7 @@ export function useSchemaRecording(props: UseSchemaRecordingOptions): UseSchemaR
     const params = attributes.params.join(',')
     postMessageToPage({
       type: MessageType.GET_SCHEMA,
-      payload: { params }
+      payload: { params },
     })
   }, [attributes.params])
 
@@ -155,20 +167,20 @@ export function useSchemaRecording(props: UseSchemaRecordingOptions): UseSchemaR
   const startRecording = useCallback(() => {
     // 使用ref判断避免闭包问题
     if (isRecordingRef.current) return
-    
+
     // 重置状态
     setSnapshots([])
     setSelectedSnapshotId(null)
     lastContentRef.current = ''
     snapshotIdRef.current = 0
     recordingStartTimeRef.current = Date.now()
-    
+
     const mode = getCommunicationMode()
-    
+
     if (mode === 'postMessage') {
       // postMessage 直连模式：直接轮询
       requestSchemaPostMessage()
-      
+
       pollingTimerRef.current = window.setInterval(() => {
         requestSchemaPostMessage()
       }, pollingInterval)
@@ -179,17 +191,23 @@ export function useSchemaRecording(props: UseSchemaRecordingOptions): UseSchemaR
           handleSchemaResponse(msg.payload)
         }
       })
-      
+
       requestSchemaWindowFunction()
-      
+
       pollingTimerRef.current = window.setInterval(() => {
         requestSchemaWindowFunction()
       }, pollingInterval)
     }
-    
+
     isRecordingRef.current = true
     setIsRecording(true)
-  }, [pollingInterval, getCommunicationMode, requestSchemaPostMessage, requestSchemaWindowFunction, handleSchemaResponse])
+  }, [
+    pollingInterval,
+    getCommunicationMode,
+    requestSchemaPostMessage,
+    requestSchemaWindowFunction,
+    handleSchemaResponse,
+  ])
 
   /**
    * 停止录制
@@ -200,13 +218,13 @@ export function useSchemaRecording(props: UseSchemaRecordingOptions): UseSchemaR
       clearInterval(pollingTimerRef.current)
       pollingTimerRef.current = null
     }
-    
+
     // 清理消息监听
     if (messageCleanupRef.current) {
       messageCleanupRef.current()
       messageCleanupRef.current = null
     }
-    
+
     isRecordingRef.current = false
     setIsRecording(false)
   }, [])
@@ -214,13 +232,16 @@ export function useSchemaRecording(props: UseSchemaRecordingOptions): UseSchemaR
   /**
    * 选择快照
    */
-  const selectSnapshot = useCallback((id: number) => {
-    const snapshot = snapshots.find(s => s.id === id)
-    if (snapshot) {
-      setSelectedSnapshotId(id)
-      onSchemaChange?.(snapshot.content)
-    }
-  }, [snapshots, onSchemaChange])
+  const selectSnapshot = useCallback(
+    (id: number) => {
+      const snapshot = snapshots.find((s) => s.id === id)
+      if (snapshot) {
+        setSelectedSnapshotId(id)
+        onSchemaChange?.(snapshot.content)
+      }
+    },
+    [snapshots, onSchemaChange]
+  )
 
   /**
    * 清空快照
@@ -254,7 +275,6 @@ export function useSchemaRecording(props: UseSchemaRecordingOptions): UseSchemaR
     startRecording,
     stopRecording,
     selectSnapshot,
-    clearSnapshots
+    clearSnapshots,
   }
 }
-

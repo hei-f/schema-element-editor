@@ -4,8 +4,8 @@ import { useResizer, PREVIEW_WIDTH_LIMITS } from '../useResizer'
 // Mock previewContainerManager
 jest.mock('@/core/content/core/preview-container', () => ({
   previewContainerManager: {
-    hide: jest.fn()
-  }
+    hide: jest.fn(),
+  },
 }))
 
 describe('useResizer Hook 测试', () => {
@@ -36,11 +36,13 @@ describe('useResizer Hook 测试', () => {
     })
 
     it('使用自定义 minWidth 和 maxWidth 初始化', () => {
-      const { result } = renderHook(() => useResizer({
-        initialWidth: 30,
-        minWidth: 10,
-        maxWidth: 90
-      }))
+      const { result } = renderHook(() =>
+        useResizer({
+          initialWidth: 30,
+          minWidth: 10,
+          maxWidth: 90,
+        })
+      )
 
       expect(result.current.width).toBe(30)
     })
@@ -85,7 +87,7 @@ describe('useResizer Hook 测试', () => {
       const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
 
       const mockEvent = {
-        preventDefault: jest.fn()
+        preventDefault: jest.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -101,7 +103,7 @@ describe('useResizer Hook 测试', () => {
       const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
 
       const mockEvent = {
-        preventDefault: jest.fn()
+        preventDefault: jest.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -115,11 +117,11 @@ describe('useResizer Hook 测试', () => {
   describe('鼠标事件处理', () => {
     it('拖拽状态时绑定全局鼠标事件', () => {
       const addEventListenerSpy = jest.spyOn(document, 'addEventListener')
-      
+
       const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
 
       const mockEvent = {
-        preventDefault: jest.fn()
+        preventDefault: jest.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -136,7 +138,7 @@ describe('useResizer Hook 测试', () => {
       const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
 
       const mockEvent = {
-        preventDefault: jest.fn()
+        preventDefault: jest.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -155,13 +157,15 @@ describe('useResizer Hook 测试', () => {
 
     it('mouseup 后触发 onResizeEnd 回调', async () => {
       const onResizeEnd = jest.fn()
-      const { result } = renderHook(() => useResizer({
-        initialWidth: 40,
-        onResizeEnd
-      }))
+      const { result } = renderHook(() =>
+        useResizer({
+          initialWidth: 40,
+          onResizeEnd,
+        })
+      )
 
       const mockEvent = {
-        preventDefault: jest.fn()
+        preventDefault: jest.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -186,11 +190,11 @@ describe('useResizer Hook 测试', () => {
   describe('卸载清理', () => {
     it('卸载时移除事件监听器', () => {
       const removeEventListenerSpy = jest.spyOn(document, 'removeEventListener')
-      
+
       const { result, unmount } = renderHook(() => useResizer({ initialWidth: 40 }))
 
       const mockEvent = {
-        preventDefault: jest.fn()
+        preventDefault: jest.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -223,7 +227,7 @@ describe('useResizer Hook 测试', () => {
       const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
 
       const mockEvent = {
-        preventDefault: jest.fn()
+        preventDefault: jest.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -252,7 +256,7 @@ describe('useResizer Hook 测试', () => {
       )
 
       const mockEvent = {
-        preventDefault: jest.fn()
+        preventDefault: jest.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -277,4 +281,3 @@ describe('useResizer Hook 测试', () => {
     })
   })
 })
-

@@ -4,7 +4,7 @@ import { listenChromeMessages } from '@/shared/utils/browser/message'
 import { storage } from '@/shared/utils/browser/storage'
 import { logger } from '@/shared/utils/logger'
 import React from 'react'
-import ReactDOM from 'react-dom/client'
+import type ReactDOM from 'react-dom/client'
 import { injectPageScript } from './injector'
 import { ElementMonitor } from './monitor'
 import { createShadowRoot } from './shadow-dom'
@@ -34,42 +34,48 @@ export class SchemaEditorContent {
 
   constructor() {
     // 如果已有旧实例且版本不同，先清理旧实例
-    if (window.__SCHEMA_EDITOR_INSTANCE__ && window.__SCHEMA_EDITOR_VERSION__ !== EXTENSION_VERSION) {
+    if (
+      window.__SCHEMA_EDITOR_INSTANCE__ &&
+      window.__SCHEMA_EDITOR_VERSION__ !== EXTENSION_VERSION
+    ) {
       logger.log(`检测到旧版本实例 (${window.__SCHEMA_EDITOR_VERSION__})，正在清理...`)
       window.__SCHEMA_EDITOR_INSTANCE__.destroy()
     }
-    
+
     // 如果已有相同版本的实例，不重复创建
-    if (window.__SCHEMA_EDITOR_INSTANCE__ && window.__SCHEMA_EDITOR_VERSION__ === EXTENSION_VERSION) {
+    if (
+      window.__SCHEMA_EDITOR_INSTANCE__ &&
+      window.__SCHEMA_EDITOR_VERSION__ === EXTENSION_VERSION
+    ) {
       logger.log('已存在相同版本的实例，跳过创建')
       this.isDestroyed = true // 标记为无效实例
       return
     }
-    
+
     // 注册当前实例
     window.__SCHEMA_EDITOR_INSTANCE__ = this
     window.__SCHEMA_EDITOR_VERSION__ = EXTENSION_VERSION
-    
+
     this.monitor = new ElementMonitor()
     this.init()
   }
-  
+
   /**
    * 销毁实例
    */
   public destroy(): void {
     if (this.isDestroyed) return
     this.isDestroyed = true
-    
+
     logger.log('销毁 Schema Editor 实例')
     this.stop()
-    
+
     // 清理 React
     if (this.reactRoot) {
       this.reactRoot.unmount()
       this.reactRoot = null
     }
-    
+
     // 清理容器
     if (this.container && this.container.parentNode) {
       this.container.parentNode.removeChild(this.container)
@@ -147,14 +153,14 @@ export class SchemaEditorContent {
    */
   private async start(): Promise<void> {
     logger.log('启动Schema Editor')
-    
+
     // 首次激活时执行初始化
     if (!this.isInitialized) {
       // 注入页面脚本（仅 windowFunction 模式需要）
       await injectPageScript()
       this.isInitialized = true
     }
-    
+
     // 启动元素监听器
     this.monitor.start()
 
@@ -170,7 +176,7 @@ export class SchemaEditorContent {
   private stop(): void {
     logger.log('停止Schema Editor')
     this.monitor.stop()
-    
+
     // 移除UI容器（完全清除DOM元素）
     if (this.container && this.container.parentNode) {
       this.container.parentNode.removeChild(this.container)
@@ -189,9 +195,7 @@ export class SchemaEditorContent {
 
     // 渲染React应用，传递shadowRoot引用
     this.reactRoot.render(
-      React.createElement(React.StrictMode, null,
-        React.createElement(App, { shadowRoot })
-      )
+      React.createElement(React.StrictMode, null, React.createElement(App, { shadowRoot }))
     )
   }
 
@@ -201,7 +205,7 @@ export class SchemaEditorContent {
   private handleElementClick(element: HTMLElement, attrs: ElementAttributes): void {
     // 触发自定义事件，通知React应用
     const event = new CustomEvent('schema-editor:element-click', {
-      detail: { element, attributes: attrs, isRecordingMode: false }
+      detail: { element, attributes: attrs, isRecordingMode: false },
     })
     window.dispatchEvent(event)
   }
@@ -212,9 +216,8 @@ export class SchemaEditorContent {
   private handleRecordingModeClick(element: HTMLElement, attrs: ElementAttributes): void {
     // 触发自定义事件，通知React应用以录制模式打开
     const event = new CustomEvent('schema-editor:element-click', {
-      detail: { element, attributes: attrs, isRecordingMode: true }
+      detail: { element, attributes: attrs, isRecordingMode: true },
     })
     window.dispatchEvent(event)
   }
 }
-

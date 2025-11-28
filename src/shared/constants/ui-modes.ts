@@ -8,7 +8,7 @@ export const FULL_SCREEN_MODE = {
   PREVIEW: 'preview',
 } as const
 
-export type FullScreenMode = typeof FULL_SCREEN_MODE[keyof typeof FULL_SCREEN_MODE]
+export type FullScreenMode = (typeof FULL_SCREEN_MODE)[keyof typeof FULL_SCREEN_MODE]
 
 /**
  * 通信模式常量
@@ -19,4 +19,3 @@ export const COMMUNICATION_MODE = {
   POST_MESSAGE: 'postMessage',
   WINDOW_FUNCTION: 'windowFunction',
 } as const
-

@@ -74,7 +74,9 @@ export const LightSuccessNotification = styled.div`
   opacity: 0.9;
   animation: ${fadeInOut} 1.5s ease-in-out;
   pointer-events: none;
-  transition: top 0.3s ease-out, transform 0.3s ease-out;
+  transition:
+    top 0.3s ease-out,
+    transform 0.3s ease-out;
 `
 
 /**
@@ -94,8 +96,7 @@ export const ShadowRootContainer = styled.div`
 export const TooltipContainer = styled.div<{ $isValid: boolean }>`
   position: fixed;
   z-index: 2147483647;
-  background: ${(props) =>
-    props.$isValid ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 77, 79, 0.9)'};
+  background: ${(props) => (props.$isValid ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 77, 79, 0.9)')};
   color: white;
   padding: 8px 12px;
   border-radius: 6px;
@@ -267,13 +268,12 @@ export const RetryButton = styled.button`
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  
+
   &:hover {
     background: #40a9ff;
   }
-  
+
   &:active {
     background: #096dd9;
   }
 `
-

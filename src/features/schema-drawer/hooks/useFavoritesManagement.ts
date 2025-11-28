@@ -47,7 +47,7 @@ export const useFavoritesManagement = ({
   onApplyFavorite,
   onShowLightNotification,
   onWarning,
-  onError
+  onError,
 }: UseFavoritesManagementProps): UseFavoritesManagementReturn => {
   const [favoritesModalVisible, setFavoritesModalVisible] = useState(false)
   const [favoritesList, setFavoritesList] = useState<Favorite[]>([])
@@ -86,6 +86,7 @@ export const useFavoritesManagement = ({
       setAddFavoriteModalVisible(false)
       setFavoriteNameInput('')
     } catch (error) {
+      console.error('添加收藏失败:', error)
       onError?.('添加收藏失败')
     }
   }, [favoriteNameInput, editorValue, onShowLightNotification, onWarning, onError])
@@ -99,6 +100,7 @@ export const useFavoritesManagement = ({
       setFavoritesList(favorites)
       setFavoritesModalVisible(true)
     } catch (error) {
+      console.error('加载收藏列表失败:', error)
       onError?.('加载收藏列表失败')
     }
   }, [onError])
@@ -106,48 +108,58 @@ export const useFavoritesManagement = ({
   /**
    * 应用收藏内容
    */
-  const applyFavoriteContent = useCallback(async (favorite: Favorite) => {
-    onApplyFavorite(favorite.content)
-    setFavoritesModalVisible(false)
-    
-    await storage.updateFavoriteUsedTime(favorite.id)
-    
-    onShowLightNotification('已应用收藏内容')
-  }, [onApplyFavorite, onShowLightNotification])
+  const applyFavoriteContent = useCallback(
+    async (favorite: Favorite) => {
+      onApplyFavorite(favorite.content)
+      setFavoritesModalVisible(false)
+
+      await storage.updateFavoriteUsedTime(favorite.id)
+
+      onShowLightNotification('已应用收藏内容')
+    },
+    [onApplyFavorite, onShowLightNotification]
+  )
 
   /**
    * 应用收藏
    */
-  const handleApplyFavorite = useCallback((favorite: Favorite) => {
-    if (isModified) {
-      Modal.confirm({
-        title: '确认应用收藏',
-        content: '当前内容未保存，应用收藏将替换当前内容，确认吗？',
-        okText: '应用',
-        cancelText: '取消',
-        getContainer: shadowRootManager.getContainer,
-        onOk: () => {
-          applyFavoriteContent(favorite)
-        }
-      })
-    } else {
-      applyFavoriteContent(favorite)
-    }
-  }, [isModified, applyFavoriteContent])
+  const handleApplyFavorite = useCallback(
+    (favorite: Favorite) => {
+      if (isModified) {
+        Modal.confirm({
+          title: '确认应用收藏',
+          content: '当前内容未保存，应用收藏将替换当前内容，确认吗？',
+          okText: '应用',
+          cancelText: '取消',
+          getContainer: shadowRootManager.getContainer,
+          onOk: () => {
+            applyFavoriteContent(favorite)
+          },
+        })
+      } else {
+        applyFavoriteContent(favorite)
+      }
+    },
+    [isModified, applyFavoriteContent]
+  )
 
   /**
    * 删除收藏
    */
-  const handleDeleteFavorite = useCallback(async (id: string) => {
-    try {
-      await storage.deleteFavorite(id)
-      const favorites = await storage.getFavorites()
-      setFavoritesList(favorites)
-      onShowLightNotification('收藏已删除')
-    } catch (error) {
-      onError?.('删除收藏失败')
-    }
-  }, [onShowLightNotification, onError])
+  const handleDeleteFavorite = useCallback(
+    async (id: string) => {
+      try {
+        await storage.deleteFavorite(id)
+        const favorites = await storage.getFavorites()
+        setFavoritesList(favorites)
+        onShowLightNotification('收藏已删除')
+      } catch (error) {
+        console.error('删除收藏失败:', error)
+        onError?.('删除收藏失败')
+      }
+    },
+    [onShowLightNotification, onError]
+  )
 
   /**
    * 编辑收藏
@@ -168,21 +180,24 @@ export const useFavoritesManagement = ({
   /**
    * 保存编辑
    */
-  const handleSaveEdit = useCallback(async (id: string, name: string, content: string) => {
-    try {
-      await storage.updateFavorite(id, name, content)
-      
-      // 刷新列表
-      const favorites = await storage.getFavorites()
-      setFavoritesList(favorites)
-      
-      onShowLightNotification('收藏已更新')
-      setEditModalVisible(false)
-    } catch (error) {
-      onError?.('更新收藏失败')
-      throw error
-    }
-  }, [onShowLightNotification, onError])
+  const handleSaveEdit = useCallback(
+    async (id: string, name: string, content: string) => {
+      try {
+        await storage.updateFavorite(id, name, content)
+
+        // 刷新列表
+        const favorites = await storage.getFavorites()
+        setFavoritesList(favorites)
+
+        onShowLightNotification('收藏已更新')
+        setEditModalVisible(false)
+      } catch (error) {
+        onError?.('更新收藏失败')
+        throw error
+      }
+    },
+    [onShowLightNotification, onError]
+  )
 
   const closeFavoritesModal = useCallback(() => setFavoritesModalVisible(false), [])
   const closeAddFavoriteModal = useCallback(() => setAddFavoriteModalVisible(false), [])
@@ -207,7 +222,6 @@ export const useFavoritesManagement = ({
     handleSaveEdit,
     closeFavoritesModal,
     closeAddFavoriteModal,
-    closeEditModal
+    closeEditModal,
   }
 }
-

@@ -5,7 +5,7 @@ import {
   isElementsArray,
   isStringData,
   parseMarkdownString,
-  parserSchemaNodeToMarkdown
+  parserSchemaNodeToMarkdown,
 } from '../schema/transformers'
 
 describe('Markdown解析工具测试', () => {
@@ -13,7 +13,7 @@ describe('Markdown解析工具测试', () => {
     it('应该解析简单的Markdown字符串', () => {
       const markdown = '# 标题\n\n这是一段文本'
       const result = parseMarkdownString(markdown)
-      
+
       expect(Array.isArray(result)).toBe(true)
       expect(result.length).toBeGreaterThan(0)
     })
@@ -21,7 +21,7 @@ describe('Markdown解析工具测试', () => {
     it('应该解析包含列表的Markdown', () => {
       const markdown = '- 项目1\n- 项目2\n- 项目3'
       const result = parseMarkdownString(markdown)
-      
+
       expect(Array.isArray(result)).toBe(true)
       expect(result.length).toBeGreaterThan(0)
     })
@@ -29,14 +29,14 @@ describe('Markdown解析工具测试', () => {
     it('应该解析包含代码块的Markdown', () => {
       const markdown = '```javascript\nconst a = 1;\n```'
       const result = parseMarkdownString(markdown)
-      
+
       expect(Array.isArray(result)).toBe(true)
       expect(result.length).toBeGreaterThan(0)
     })
 
     it('解析失败时应该返回空数组', () => {
       const result = parseMarkdownString('')
-      
+
       expect(Array.isArray(result)).toBe(true)
     })
 
@@ -53,9 +53,9 @@ describe('Markdown解析工具测试', () => {
 \`\`\`javascript
 console.log('Hello');
 \`\`\``
-      
+
       const result = parseMarkdownString(markdown)
-      
+
       expect(Array.isArray(result)).toBe(true)
       expect(result.length).toBeGreaterThan(0)
     })
@@ -66,14 +66,14 @@ console.log('Hello');
       const markdown = '# 标题\n\n这是文本'
       const elements = parseMarkdownString(markdown)
       const result = parserSchemaNodeToMarkdown(elements)
-      
+
       expect(typeof result).toBe('string')
       expect(result.length).toBeGreaterThan(0)
     })
 
     it('应该处理空数组', () => {
       const result = parserSchemaNodeToMarkdown([])
-      
+
       expect(typeof result).toBe('string')
     })
 
@@ -82,7 +82,7 @@ console.log('Hello');
       const elements = parseMarkdownString(originalMarkdown)
       const convertedMarkdown = parserSchemaNodeToMarkdown(elements)
       const reElements = parseMarkdownString(convertedMarkdown)
-      
+
       expect(Array.isArray(reElements)).toBe(true)
       expect(reElements.length).toBeGreaterThan(0)
     })
@@ -114,7 +114,7 @@ console.log('Hello');
     it('应该识别从Markdown解析的Elements', () => {
       const markdown = '# 标题'
       const elements = parseMarkdownString(markdown)
-      
+
       if (elements.length > 0) {
         expect(isElementsArray(elements)).toBe(true)
       }
@@ -156,33 +156,31 @@ console.log('Hello');
 
     it('应该检查数组中的所有元素', () => {
       // 部分有效，部分无效 - 应该拒绝
-      expect(isElementsArray([
-        { type: 'paragraph', children: [] },
-        { type: 'text' } // 缺少children
-      ])).toBe(false)
+      expect(
+        isElementsArray([
+          { type: 'paragraph', children: [] },
+          { type: 'text' }, // 缺少children
+        ])
+      ).toBe(false)
 
       // 全部有效 - 应该接受
-      expect(isElementsArray([
-        { type: 'paragraph', children: [] },
-        { type: 'heading', children: [{ text: 'title' }] }
-      ])).toBe(true)
+      expect(
+        isElementsArray([
+          { type: 'paragraph', children: [] },
+          { type: 'heading', children: [{ text: 'title' }] },
+        ])
+      ).toBe(true)
     })
   })
 
   describe('双向转换一致性', () => {
     it('Markdown -> Elements -> Markdown 应该保持基本结构', () => {
-      const testCases = [
-        '# 标题',
-        '## 二级标题',
-        '这是一段文本',
-        '- 列表项',
-        '**粗体文本**'
-      ]
+      const testCases = ['# 标题', '## 二级标题', '这是一段文本', '- 列表项', '**粗体文本**']
 
-      testCases.forEach(markdown => {
+      testCases.forEach((markdown) => {
         const elements = parseMarkdownString(markdown)
         expect(elements.length).toBeGreaterThan(0)
-        
+
         const convertedMarkdown = parserSchemaNodeToMarkdown(elements)
         expect(typeof convertedMarkdown).toBe('string')
         expect(convertedMarkdown.length).toBeGreaterThan(0)
@@ -194,7 +192,7 @@ console.log('Hello');
     it('应该格式化有效的JSON字符串', () => {
       const input = '{"name":"test","value":123}'
       const result = formatJsonString(input)
-      
+
       expect(result.success).toBe(true)
       expect(result.data).toContain('"name"')
       expect(result.data).toContain('"test"')
@@ -204,7 +202,7 @@ console.log('Hello');
     it('应该处理数组格式', () => {
       const input = '[1,2,3]'
       const result = formatJsonString(input)
-      
+
       expect(result.success).toBe(true)
       expect(result.data).toBeTruthy()
     })
@@ -212,7 +210,7 @@ console.log('Hello');
     it('应该拒绝无效的JSON', () => {
       const input = '{invalid json}'
       const result = formatJsonString(input)
-      
+
       expect(result.success).toBe(false)
       expect(result.error).toBeTruthy()
     })
@@ -223,7 +221,7 @@ console.log('Hello');
       const markdown = '# 标题\n\n这是内容'
       const input = JSON.stringify(markdown)
       const result = convertToASTString(input)
-      
+
       expect(result.success).toBe(true)
       expect(result.data).toBeTruthy()
     })
@@ -231,7 +229,7 @@ console.log('Hello');
     it('应该拒绝非字符串类型的数据', () => {
       const input = JSON.stringify({ key: 'value' })
       const result = convertToASTString(input)
-      
+
       expect(result.success).toBe(false)
       expect(result.error).toContain('不是字符串类型')
     })
@@ -239,7 +237,7 @@ console.log('Hello');
     it('应该处理空字符串', () => {
       const input = JSON.stringify('')
       const result = convertToASTString(input)
-      
+
       // 空字符串解析为空数组，应该失败
       expect(result.success).toBe(false)
     })
@@ -247,7 +245,7 @@ console.log('Hello');
     it('应该处理无效的JSON格式', () => {
       const input = 'not a json'
       const result = convertToASTString(input)
-      
+
       expect(result.success).toBe(false)
       expect(result.error).toBeTruthy()
     })
@@ -259,7 +257,7 @@ console.log('Hello');
       const elements = parseMarkdownString(markdown)
       const input = JSON.stringify(elements)
       const result = convertToMarkdownString(input)
-      
+
       expect(result.success).toBe(true)
       expect(result.data).toBeTruthy()
     })
@@ -267,7 +265,7 @@ console.log('Hello');
     it('应该拒绝非Elements数组', () => {
       const input = JSON.stringify({ key: 'value' })
       const result = convertToMarkdownString(input)
-      
+
       expect(result.success).toBe(false)
       expect(result.error).toContain('不是Elements[]类型')
     })
@@ -275,17 +273,16 @@ console.log('Hello');
     it('应该拒绝空数组', () => {
       const input = JSON.stringify([])
       const result = convertToMarkdownString(input)
-      
+
       expect(result.success).toBe(false)
     })
 
     it('应该处理无效的JSON', () => {
       const input = 'invalid json'
       const result = convertToMarkdownString(input)
-      
+
       expect(result.success).toBe(false)
       expect(result.error).toBeTruthy()
     })
   })
 })
-

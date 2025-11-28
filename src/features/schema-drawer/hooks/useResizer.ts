@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { previewContainerManager } from '@/core/content/core/preview-container'
+import { useLatest } from '@/shared/hooks/useLatest'
 
 /** 预览区域宽度限制（百分比） */
 export const PREVIEW_WIDTH_LIMITS = {
   MIN: 20,
-  MAX: 80
+  MAX: 80,
 } as const
 
 interface UseResizerOptions {
@@ -40,20 +41,16 @@ export const useResizer = (options: UseResizerOptions): UseResizerReturn => {
     minWidth = PREVIEW_WIDTH_LIMITS.MIN,
     maxWidth = PREVIEW_WIDTH_LIMITS.MAX,
     initialWidth,
-    onResizeEnd
+    onResizeEnd,
   } = options
 
   const [width, setWidth] = useState(initialWidth)
   const [isDragging, setIsDragging] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  
-  // 使用 ref 存储最新的值，避免闭包问题
-  const widthRef = useRef(width)
-  widthRef.current = width
-  
-  // 使用 ref 存储最新的回调，避免闭包问题
-  const onResizeEndRef = useRef(onResizeEnd)
-  onResizeEndRef.current = onResizeEnd
+
+  // 使用 useLatest 存储最新的值，避免闭包问题
+  const widthRef = useLatest(width)
+  const onResizeEndRef = useLatest(onResizeEnd)
 
   /**
    * 开始拖拽
@@ -90,10 +87,10 @@ export const useResizer = (options: UseResizerOptions): UseResizerReturn => {
 
     const handleMouseUp = () => {
       setIsDragging(false)
-      
+
       // 使用 ref 获取最新的 width 值
       const finalWidth = widthRef.current
-      
+
       // 拖拽结束后触发回调（使用 ref 获取最新回调）
       if (onResizeEndRef.current) {
         // 使用 setTimeout 等待 React 完成渲染后再回调
@@ -117,7 +114,6 @@ export const useResizer = (options: UseResizerOptions): UseResizerReturn => {
     setWidth,
     isDragging,
     containerRef,
-    handleResizeStart
+    handleResizeStart,
   }
 }
-

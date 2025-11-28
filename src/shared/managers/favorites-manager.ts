@@ -24,22 +24,22 @@ export class FavoritesManager {
     saveFavorites: (favorites: Favorite[]) => Promise<void>
   ): Promise<void> {
     const favorites = await getFavorites()
-    
+
     const now = Date.now()
     const newFavorite: Favorite = {
       id: `fav_${now}_${Math.random().toString(36).slice(2, 9)}`,
       name,
       content,
       timestamp: now,
-      lastUsedTime: now
+      lastUsedTime: now,
     }
-    
+
     // 添加到列表开头
     favorites.unshift(newFavorite)
-    
+
     // 应用LRU清理策略
     const cleanedFavorites = this.applyLRUCleanup(favorites, maxCount)
-    
+
     await saveFavorites(cleanedFavorites)
   }
 
@@ -54,8 +54,8 @@ export class FavoritesManager {
     saveFavorites: (favorites: Favorite[]) => Promise<void>
   ): Promise<void> {
     const favorites = await getFavorites()
-    const favorite = favorites.find(fav => fav.id === id)
-    
+    const favorite = favorites.find((fav) => fav.id === id)
+
     if (favorite) {
       favorite.name = name
       favorite.content = content
@@ -75,7 +75,7 @@ export class FavoritesManager {
     saveFavorites: (favorites: Favorite[]) => Promise<void>
   ): Promise<void> {
     const favorites = await getFavorites()
-    const filtered = favorites.filter(fav => fav.id !== id)
+    const filtered = favorites.filter((fav) => fav.id !== id)
     await saveFavorites(filtered)
   }
 
@@ -88,8 +88,8 @@ export class FavoritesManager {
     saveFavorites: (favorites: Favorite[]) => Promise<void>
   ): Promise<void> {
     const favorites = await getFavorites()
-    const favorite = favorites.find(fav => fav.id === id)
-    
+    const favorite = favorites.find((fav) => fav.id === id)
+
     if (favorite) {
       favorite.lastUsedTime = Date.now()
       await saveFavorites(favorites)
@@ -104,12 +104,12 @@ export class FavoritesManager {
     if (favorites.length <= maxCount) {
       return favorites
     }
-    
+
     // 按最后使用时间排序（降序）
-    const sorted = [...favorites].sort((a, b) => 
-      (b.lastUsedTime || b.timestamp) - (a.lastUsedTime || a.timestamp)
+    const sorted = [...favorites].sort(
+      (a, b) => (b.lastUsedTime || b.timestamp) - (a.lastUsedTime || a.timestamp)
     )
-    
+
     // 只保留最近使用的maxCount个
     return sorted.slice(0, maxCount)
   }
@@ -123,14 +123,14 @@ export class FavoritesManager {
     saveFavorites: (favorites: Favorite[]) => Promise<void>
   ): Promise<number> {
     const favorites = await getFavorites()
-    
+
     if (favorites.length <= maxCount) {
       return 0
     }
-    
+
     const cleanedFavorites = this.applyLRUCleanup(favorites, maxCount)
     await saveFavorites(cleanedFavorites)
-    
+
     return favorites.length - cleanedFavorites.length
   }
 }
@@ -139,4 +139,3 @@ export class FavoritesManager {
  * 导出单例实例
  */
 export const favoritesManager = new FavoritesManager()
-

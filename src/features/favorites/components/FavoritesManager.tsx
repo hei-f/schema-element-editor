@@ -44,7 +44,7 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = ({
   onApplyFavorite,
   onDeleteFavorite,
   onSaveEdit,
-  onCloseEditModal
+  onCloseEditModal,
 }) => {
   return (
     <>
@@ -76,4 +76,3 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = ({
     </>
   )
 }
-

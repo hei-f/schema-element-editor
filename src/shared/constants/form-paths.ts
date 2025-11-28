@@ -7,24 +7,24 @@
 /**
  * 表单字段路径常量对象
  * 使用 as const 确保类型推导为字面量类型，提供完整的类型安全
- * 
+ *
  * @example
  * // ✅ 类型安全的使用方式
  * <Form.Item name={FORM_PATHS.searchConfig.searchDepthDown}>
- * 
+ *
  * // ✅ IDE 自动补全
  * FORM_PATHS.searchConfig. // 按下 . 后会列出所有子字段
- * 
+ *
  * // ❌ TypeScript 会报错
  * FORM_PATHS.searchConfig.wrongField // 属性不存在
  */
 export const FORM_PATHS = {
   /** 属性名称 */
   attributeName: ['attributeName'],
-  
+
   /** 抽屉宽度 */
   drawerWidth: ['drawerWidth'],
-  
+
   /** 搜索配置 */
   searchConfig: {
     /** 是否限制向上搜索层级 */
@@ -32,27 +32,27 @@ export const FORM_PATHS = {
     /** 向上搜索深度 */
     searchDepthUp: ['searchConfig', 'searchDepthUp'],
     /** 节流间隔 */
-    throttleInterval: ['searchConfig', 'throttleInterval']
+    throttleInterval: ['searchConfig', 'throttleInterval'],
   },
-  
+
   /** 获取函数名 */
   getFunctionName: ['getFunctionName'],
-  
+
   /** 更新函数名 */
   updateFunctionName: ['updateFunctionName'],
-  
+
   /** 预览函数名 */
   previewFunctionName: ['previewFunctionName'],
-  
+
   /** 自动解析字符串 */
   autoParseString: ['autoParseString'],
-  
+
   /** 启用调试日志 */
   enableDebugLog: ['enableDebugLog'],
-  
+
   /** 高亮颜色 */
   highlightColor: ['highlightColor'],
-  
+
   /** 工具栏按钮配置 */
   toolbarButtons: {
     /** AST/RawString切换按钮 */
@@ -72,15 +72,15 @@ export const FORM_PATHS = {
     /** 收藏功能 */
     favorites: ['toolbarButtons', 'favorites'],
     /** 历史记录功能 */
-    history: ['toolbarButtons', 'history']
+    history: ['toolbarButtons', 'history'],
   },
-  
+
   /** 最大收藏数量 */
   maxFavoritesCount: ['maxFavoritesCount'],
-  
+
   /** 自动保存草稿 */
   autoSaveDraft: ['autoSaveDraft'],
-  
+
   /** 预览配置 */
   previewConfig: {
     /** 预览区域宽度 */
@@ -88,12 +88,12 @@ export const FORM_PATHS = {
     /** 更新延迟 */
     updateDelay: ['previewConfig', 'updateDelay'],
     /** 自动更新预览 */
-    autoUpdate: ['previewConfig', 'autoUpdate']
+    autoUpdate: ['previewConfig', 'autoUpdate'],
   },
-  
+
   /** 最大历史记录数量 */
   maxHistoryCount: ['maxHistoryCount'],
-  
+
   /** 高亮所有元素配置 */
   highlightAllConfig: {
     /** 是否启用 */
@@ -101,9 +101,9 @@ export const FORM_PATHS = {
     /** 快捷键 */
     keyBinding: ['highlightAllConfig', 'keyBinding'],
     /** 最大高亮数量 */
-    maxHighlightCount: ['highlightAllConfig', 'maxHighlightCount']
+    maxHighlightCount: ['highlightAllConfig', 'maxHighlightCount'],
   },
-  
+
   /** 录制模式配置 */
   recordingModeConfig: {
     /** 是否启用 */
@@ -113,18 +113,18 @@ export const FORM_PATHS = {
     /** 录制模式高亮颜色 */
     highlightColor: ['recordingModeConfig', 'highlightColor'],
     /** 轮询间隔 */
-    pollingInterval: ['recordingModeConfig', 'pollingInterval']
+    pollingInterval: ['recordingModeConfig', 'pollingInterval'],
   },
-  
+
   /** 启用 AST 类型提示 */
   enableAstTypeHints: ['enableAstTypeHints'],
-  
+
   /** 导出配置 */
   exportConfig: {
     /** 导出时自定义文件名 */
-    customFileName: ['exportConfig', 'customFileName']
+    customFileName: ['exportConfig', 'customFileName'],
   },
-  
+
   /** API 配置 */
   apiConfig: {
     /** 通信模式 */
@@ -136,7 +136,7 @@ export const FORM_PATHS = {
       /** 插件端 source */
       contentSource: ['apiConfig', 'sourceConfig', 'contentSource'],
       /** 宿主端 source */
-      hostSource: ['apiConfig', 'sourceConfig', 'hostSource']
+      hostSource: ['apiConfig', 'sourceConfig', 'hostSource'],
     },
     /** 消息类型名称配置 */
     messageTypes: {
@@ -149,14 +149,13 @@ export const FORM_PATHS = {
       /** 渲染预览 */
       renderPreview: ['apiConfig', 'messageTypes', 'renderPreview'],
       /** 清理预览 */
-      cleanupPreview: ['apiConfig', 'messageTypes', 'cleanupPreview']
-    }
-  }
+      cleanupPreview: ['apiConfig', 'messageTypes', 'cleanupPreview'],
+    },
+  },
 }
 
 /**
  * 表单路径类型
  * 从 FORM_PATHS 中提取所有路径的联合类型
  */
-export type FormPath = typeof FORM_PATHS[keyof typeof FORM_PATHS]
-
+export type FormPath = (typeof FORM_PATHS)[keyof typeof FORM_PATHS]

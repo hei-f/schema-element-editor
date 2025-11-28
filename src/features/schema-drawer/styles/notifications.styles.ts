@@ -40,6 +40,7 @@ export const LightSuccessNotification = styled.div`
   opacity: 0.9;
   animation: ${fadeInOut} 1.5s ease-in-out;
   pointer-events: none;
-  transition: top 0.3s ease-out, transform 0.3s ease-out;
+  transition:
+    top 0.3s ease-out,
+    transform 0.3s ease-out;
 `
-

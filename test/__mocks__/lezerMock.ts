@@ -5,7 +5,7 @@
 const mockExtension = () => ({})
 
 export const HighlightStyle = {
-  define: (_specs: any) => mockExtension()
+  define: (_specs: any) => mockExtension(),
 }
 
 // 添加 styleTags 函数
@@ -25,6 +25,5 @@ export const tags = {
   className: 'className',
   typeName: 'typeName',
   function: 'function',
-  variableName: 'variableName'
+  variableName: 'variableName',
 }
-

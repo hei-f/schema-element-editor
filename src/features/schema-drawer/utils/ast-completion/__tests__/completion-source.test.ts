@@ -1,7 +1,7 @@
 /**
  * completion-source 单元测试
  * 测试补全源功能
- * 
+ *
  * 注意：由于 CodeMirror 的 AST 功能在 Jest 环境中被 mock，
  * 这些测试主要验证逻辑流程和数据结构，而非完整的 AST 分析。
  * 完整的集成测试需要在浏览器环境中运行。
@@ -18,7 +18,7 @@ import { createAstCompletionSource } from '../completion-source'
 function createState(content: string): EditorState {
   return EditorState.create({
     doc: content,
-    extensions: []
+    extensions: [],
   })
 }
 
@@ -44,7 +44,7 @@ function createContext(
           from: pos - match[0].length,
           to: pos,
           text: match[0],
-          type: { name: types[0] || 'Word' }
+          type: { name: types[0] || 'Word' },
         }
       }
       return null
@@ -56,11 +56,11 @@ function createContext(
         return {
           from: pos - match[0].length,
           to: pos,
-          text: match[0]
+          text: match[0],
         }
       }
       return null
-    }
+    },
   } as CompletionContext
 }
 
@@ -72,7 +72,7 @@ describe('completion-source', () => {
       // 默认开启 AST 提示，并模拟内容为 AST
       completionSource = createAstCompletionSource(
         () => true, // enableAstHints
-        () => true  // isAstContent
+        () => true // isAstContent
       )
     })
 

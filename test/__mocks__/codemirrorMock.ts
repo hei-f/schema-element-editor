@@ -13,7 +13,7 @@ export class MockEditorView {
     this.state = config.state || new MockEditorState()
     this.dom = document.createElement('div')
     this.dom.className = 'cm-editor'
-    
+
     // 保存更新处理器
     if (config.dispatch) {
       this.changeHandlers.push(config.dispatch)
@@ -23,9 +23,9 @@ export class MockEditorView {
   dispatch(transaction: any) {
     // 模拟状态更新
     this.state = transaction.state || this.state
-    
+
     // 触发更新处理器
-    this.changeHandlers.forEach(handler => {
+    this.changeHandlers.forEach((handler) => {
       handler({ state: this.state, transactions: [transaction] })
     })
   }
@@ -60,7 +60,7 @@ export class MockEditorState {
   toJSON() {
     return {
       doc: this.doc.toString(),
-      selection: this.selection
+      selection: this.selection,
     }
   }
 
@@ -72,16 +72,16 @@ export class MockEditorState {
 // Mock EditorSelection
 export const MockEditorSelection = {
   single: (from: number, to: number) => ({
-    main: { from, to, empty: from === to }
+    main: { from, to, empty: from === to },
   }),
   cursor: (pos: number) => ({
-    main: { from: pos, to: pos, empty: true }
+    main: { from: pos, to: pos, empty: true },
   }),
   range: (from: number, to: number) => ({
     from,
     to,
-    empty: from === to
-  })
+    empty: from === to,
+  }),
 }
 
 // Mock Text (文档模型)
@@ -110,7 +110,7 @@ export class MockText {
           number: i + 1,
           from: currentPos,
           to: currentPos + lines[i].length,
-          text: lines[i]
+          text: lines[i],
         }
       }
       currentPos += lineLength
@@ -119,7 +119,7 @@ export class MockText {
       number: lines.length,
       from: currentPos,
       to: this.content.length,
-      text: lines[lines.length - 1] || ''
+      text: lines[lines.length - 1] || '',
     }
   }
 
@@ -137,7 +137,7 @@ export const codemirrorMocks = {
   EditorState: MockEditorState,
   EditorSelection: MockEditorSelection,
   Text: MockText,
-  
+
   // @codemirror/view
   EditorView: MockEditorView,
   keymap: mockExtension,
@@ -145,43 +145,43 @@ export const codemirrorMocks = {
   highlightActiveLine: mockExtension,
   highlightActiveLineGutter: mockExtension,
   placeholder: (_text: string) => mockExtension(),
-  
+
   // @codemirror/commands
   defaultKeymap: [],
   historyKeymap: [],
   history: mockExtension,
   indentWithTab: {},
   cursorMatchingBracket: mockExtension,
-  
+
   // @codemirror/autocomplete
   closeBrackets: mockExtension,
   closeBracketsKeymap: [],
-  
+
   // @codemirror/language
   syntaxHighlighting: mockExtension,
   bracketMatching: mockExtension,
   foldGutter: mockExtension,
   foldKeymap: [],
   indentOnInput: mockExtension,
-  
+
   // @codemirror/lang-json
   json: mockExtension,
   jsonParseLinter: mockExtension,
-  
+
   // @codemirror/lint
   linter: mockExtension,
   lintGutter: mockExtension,
-  
+
   // @codemirror/search
   highlightSelectionMatches: mockExtension,
   searchKeymap: [],
-  
+
   // @codemirror/theme-one-dark
   oneDark: mockExtension,
-  
+
   // @lezer/highlight
   HighlightStyle: {
-    define: (_specs: any) => mockExtension()
+    define: (_specs: any) => mockExtension(),
   },
   tags: {
     propertyName: 'propertyName',
@@ -192,7 +192,6 @@ export const codemirrorMocks = {
     keyword: 'keyword',
     operator: 'operator',
     comment: 'comment',
-    bracket: 'bracket'
-  }
+    bracket: 'bracket',
+  },
 }
-

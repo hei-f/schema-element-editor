@@ -54,33 +54,36 @@ export const RecordingIndicator = styled.div<{ $isRecording: boolean }>`
   border-radius: 16px;
   font-size: 13px;
   font-weight: 500;
-  
-  ${props => props.$isRecording ? css`
-    background: rgba(255, 77, 79, 0.15);
-    color: #ff4d4f;
-    
-    &::before {
-      content: '';
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #ff4d4f;
-      animation: ${pulseAnimation} 1s ease-in-out infinite;
-    }
-  ` : css`
-    background: rgba(82, 196, 26, 0.15);
-    color: #52c41a;
-    
-    &::before {
-      content: '';
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #52c41a;
-    }
-  `}
+
+  ${(props) =>
+    props.$isRecording
+      ? css`
+          background: rgba(255, 77, 79, 0.15);
+          color: #ff4d4f;
+
+          &::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff4d4f;
+            animation: ${pulseAnimation} 1s ease-in-out infinite;
+          }
+        `
+      : css`
+          background: rgba(82, 196, 26, 0.15);
+          color: #52c41a;
+
+          &::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #52c41a;
+          }
+        `}
 `
 
 /**
@@ -133,19 +136,19 @@ export const VersionListContainer = styled.div`
   flex: 1;
   overflow-y: auto;
   padding: 8px;
-  
+
   &::-webkit-scrollbar {
     width: 6px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: #4a5568;
     border-radius: 3px;
-    
+
     &:hover {
       background: #5a6878;
     }
@@ -164,19 +167,22 @@ export const VersionItem = styled.div<{ $isActive?: boolean }>`
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
-  
-  ${props => props.$isActive ? css`
-    background: rgba(24, 144, 255, 0.2);
-    border: 1px solid rgba(24, 144, 255, 0.4);
-  ` : css`
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid transparent;
-    
-    &:hover {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.1);
-    }
-  `}
+
+  ${(props) =>
+    props.$isActive
+      ? css`
+          background: rgba(24, 144, 255, 0.2);
+          border: 1px solid rgba(24, 144, 255, 0.4);
+        `
+      : css`
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid transparent;
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.1);
+          }
+        `}
 `
 
 /**
@@ -262,20 +268,20 @@ export const DiffContentArea = styled.div`
   min-height: 0;
   overflow: auto;
   overscroll-behavior: contain;
-  
+
   &::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: #4a5568;
     border-radius: 4px;
-    
+
     &:hover {
       background: #5a6878;
     }
@@ -319,10 +325,12 @@ export const DiffTableHeaderCell = styled.div<{ $isLeft?: boolean }>`
   border-bottom: 1px solid #b0b0b0;
   font-size: 12px;
   color: #abb2bf;
-  
-  ${props => props.$isLeft && css`
-    border-right: 1px solid #b0b0b0;
-  `}
+
+  ${(props) =>
+    props.$isLeft &&
+    css`
+      border-right: 1px solid #b0b0b0;
+    `}
 `
 
 /**
@@ -347,12 +355,14 @@ export const DiffCell = styled.div<{ $type: DiffLineType; $isLeft?: boolean }>`
   width: 50%;
   vertical-align: top;
   border-bottom: 1px solid #b0b0b0;
-  
-  ${props => props.$isLeft && css`
-    border-right: 1px solid #b0b0b0;
-  `}
-  
-  ${props => {
+
+  ${(props) =>
+    props.$isLeft &&
+    css`
+      border-right: 1px solid #b0b0b0;
+    `}
+
+  ${(props) => {
     switch (props.$type) {
       case 'added':
         return css`
@@ -364,11 +374,11 @@ export const DiffCell = styled.div<{ $type: DiffLineType; $isLeft?: boolean }>`
         `
       case 'empty':
         return css`
-          background: #F5F5F5;
+          background: #f5f5f5;
         `
       default:
         return css`
-          background: #F5F5F5;
+          background: #f5f5f5;
         `
     }
   }}
@@ -385,8 +395,8 @@ export const DiffCellLineNumber = styled.span<{ $type: DiffLineType }>`
   text-align: right;
   user-select: none;
   border-right: 1px solid #b0b0b0;
-  
-  ${props => {
+
+  ${(props) => {
     switch (props.$type) {
       case 'added':
         return css`
@@ -400,12 +410,12 @@ export const DiffCellLineNumber = styled.span<{ $type: DiffLineType }>`
         `
       case 'empty':
         return css`
-          background: #E8E8E8;
+          background: #e8e8e8;
           color: transparent;
         `
       default:
         return css`
-          background: #E8E8E8;
+          background: #e8e8e8;
           color: #666666;
         `
     }
@@ -420,8 +430,8 @@ export const DiffCellContent = styled.span<{ $type: DiffLineType }>`
   padding: 2px 12px;
   white-space: pre-wrap;
   word-break: break-all;
-  
-  ${props => {
+
+  ${(props) => {
     switch (props.$type) {
       case 'added':
         return css`
@@ -520,7 +530,7 @@ export const SyntaxPunctuation = styled.span`
  * 参考 schemaEditorDark: tags.squareBracket
  */
 export const SyntaxSquareBracket = styled.span`
-  color: #E8BA36;
+  color: #e8ba36;
   font-weight: bold;
 `
 
@@ -529,7 +539,7 @@ export const SyntaxSquareBracket = styled.span`
  * 参考 schemaEditorDark: tags.brace
  */
 export const SyntaxBrace = styled.span`
-  color: #54A857;
+  color: #54a857;
   font-weight: bold;
 `
 
@@ -577,7 +587,7 @@ export const DiffEditorHeader = styled.div<{ $isLeft?: boolean }>`
   font-size: 12px;
   color: #abb2bf;
   font-weight: 500;
-  ${props => props.$isLeft && `border-right: 1px solid #b0b0b0;`}
+  ${(props) => props.$isLeft && `border-right: 1px solid #b0b0b0;`}
 `
 
 /**
@@ -587,21 +597,21 @@ export const SharedScrollContainer = styled.div`
   flex: 1;
   min-height: 0;
   overflow: auto;
-  
+
   &::-webkit-scrollbar {
     width: 12px;
     height: 12px;
   }
-  
+
   &::-webkit-scrollbar-track {
     background: #1a1a2e;
   }
-  
+
   &::-webkit-scrollbar-thumb {
     background: #4a5568;
     border-radius: 6px;
     border: 3px solid #1a1a2e;
-    
+
     &:hover {
       background: #5a6878;
     }
@@ -622,7 +632,7 @@ export const DiffEditorsRow = styled.div`
 export const DiffEditorPanel = styled.div<{ $isLeft?: boolean }>`
   flex: 1;
   min-width: 0;
-  ${props => props.$isLeft && `border-right: 1px solid #b0b0b0;`}
+  ${(props) => props.$isLeft && `border-right: 1px solid #b0b0b0;`}
 `
 
 /**
@@ -630,21 +640,21 @@ export const DiffEditorPanel = styled.div<{ $isLeft?: boolean }>`
  */
 export const DiffEditorWrapper = styled.div`
   position: relative;
-  
+
   /* CodeMirror 编辑器：禁用垂直滚动，让外部容器统一滚动 */
   .cm-editor {
     height: auto !important;
   }
-  
+
   .cm-scroller {
     overflow-y: visible !important;
-    overflow-x: auto !important;  /* 允许水平滚动 */
+    overflow-x: auto !important; /* 允许水平滚动 */
   }
-  
+
   .cm-content {
     min-height: auto !important;
   }
-  
+
   /* 隐藏水平滚动条，使用共享滚动 */
   .cm-scroller::-webkit-scrollbar {
     height: 0;
@@ -657,13 +667,7 @@ export const DiffEditorWrapper = styled.div`
  */
 export const PlaceholderLineStyle = styled.div`
   height: 19.2px; /* 与编辑器行高一致 (12px * 1.6) */
-  background: repeating-linear-gradient(
-    -45deg,
-    #e8e8e8,
-    #e8e8e8 4px,
-    #f5f5f5 4px,
-    #f5f5f5 8px
-  );
+  background: repeating-linear-gradient(-45deg, #e8e8e8, #e8e8e8 4px, #f5f5f5 4px, #f5f5f5 8px);
   border-bottom: 1px solid #e0e0e0;
   box-sizing: border-box;
 `
@@ -673,13 +677,7 @@ export const PlaceholderLineStyle = styled.div`
  */
 export const PlaceholderLineStyleDark = styled.div`
   height: 19.2px;
-  background: repeating-linear-gradient(
-    -45deg,
-    #2d3748,
-    #2d3748 4px,
-    #1a202c 4px,
-    #1a202c 8px
-  );
+  background: repeating-linear-gradient(-45deg, #2d3748, #2d3748 4px, #1a202c 4px, #1a202c 8px);
   border-bottom: 1px solid #4a5568;
   box-sizing: border-box;
 `
@@ -722,13 +720,13 @@ export const StopRecordingButton = styled.button`
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
-  
+
   &:hover {
     background: linear-gradient(135deg, #ff7875 0%, #ff4d4f 100%);
     box-shadow: 0 4px 12px rgba(255, 77, 79, 0.4);
     transform: translateY(-1px);
   }
-  
+
   &:active {
     transform: translateY(0);
   }
@@ -742,20 +740,21 @@ export const DiffButton = styled.button<{ $disabled?: boolean }>`
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: ${props => props.$disabled ? 'rgba(255, 255, 255, 0.05)' : 'rgba(24, 144, 255, 0.15)'};
-  border: 1px solid ${props => props.$disabled ? 'transparent' : 'rgba(24, 144, 255, 0.3)'};
+  background: ${(props) =>
+    props.$disabled ? 'rgba(255, 255, 255, 0.05)' : 'rgba(24, 144, 255, 0.15)'};
+  border: 1px solid ${(props) => (props.$disabled ? 'transparent' : 'rgba(24, 144, 255, 0.3)')};
   border-radius: 6px;
-  color: ${props => props.$disabled ? '#6b7280' : '#1890ff'};
+  color: ${(props) => (props.$disabled ? '#6b7280' : '#1890ff')};
   font-size: 12px;
-  cursor: ${props => props.$disabled ? 'not-allowed' : 'pointer'};
+  cursor: ${(props) => (props.$disabled ? 'not-allowed' : 'pointer')};
   transition: all 0.2s ease;
-  
-  ${props => !props.$disabled && css`
-    &:hover {
-      background: rgba(24, 144, 255, 0.25);
-      border-color: rgba(24, 144, 255, 0.5);
-    }
-  `}
+
+  ${(props) =>
+    !props.$disabled &&
+    css`
+      &:hover {
+        background: rgba(24, 144, 255, 0.25);
+        border-color: rgba(24, 144, 255, 0.5);
+      }
+    `}
 `
-
-

@@ -32,8 +32,8 @@ export const HistoryDropdownInfo = styled.div`
  */
 export const HistoryDropdownDesc = styled.div<{ $isActive: boolean }>`
   font-size: 14px;
-  font-weight: ${props => props.$isActive ? 600 : 500};
-  color: ${props => props.$isActive ? '#1890ff' : '#262626'};
+  font-weight: ${(props) => (props.$isActive ? 600 : 500)};
+  color: ${(props) => (props.$isActive ? '#1890ff' : '#262626')};
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -44,7 +44,7 @@ export const HistoryDropdownDesc = styled.div<{ $isActive: boolean }>`
  */
 export const HistoryDropdownTime = styled.div<{ $isActive: boolean }>`
   font-size: 12px;
-  color: ${props => props.$isActive ? '#40a9ff' : '#8c8c8c'};
+  color: ${(props) => (props.$isActive ? '#40a9ff' : '#8c8c8c')};
   margin-top: 2px;
 `
 
@@ -65,7 +65,10 @@ export const HistoryDropdownContainer = styled.div`
   width: 260px;
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 6px 16px 0 rgba(0, 0, 0, 0.08),
+    0 3px 6px -4px rgba(0, 0, 0, 0.12),
+    0 9px 28px 8px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 `
 
@@ -84,10 +87,10 @@ export const HistoryDropdownList = styled.div`
 export const HistoryDropdownItem = styled.div<{ $isActive: boolean }>`
   padding: 8px 12px;
   cursor: pointer;
-  background: ${props => props.$isActive ? '#e6f4ff' : 'transparent'};
-  
+  background: ${(props) => (props.$isActive ? '#e6f4ff' : 'transparent')};
+
   &:hover {
-    background: ${props => props.$isActive ? '#e6f4ff' : '#f5f5f5'};
+    background: ${(props) => (props.$isActive ? '#e6f4ff' : '#f5f5f5')};
   }
 `
 
@@ -118,4 +121,3 @@ export const HistoryDropdownEmptyIcon = styled.div`
   margin-bottom: 8px;
   opacity: 0.5;
 `
-

@@ -46,7 +46,7 @@ export const ErrorAlert = styled(Alert)`
  */
 export const FullWidthVerticalSpace = styled(Space).attrs({
   direction: 'vertical',
-  size: 'middle'
+  size: 'middle',
 })`
   width: 100%;
 `
@@ -55,7 +55,7 @@ export const FullWidthVerticalSpace = styled(Space).attrs({
  * 列表搜索区域容器
  */
 export const ListSearchContainer = styled(Space).attrs({
-  direction: 'vertical'
+  direction: 'vertical',
 })`
   width: 100%;
   margin-bottom: 16px;
@@ -67,4 +67,3 @@ export const ListSearchContainer = styled(Space).attrs({
 export const FullWidthSearchInput = styled(Input.Search)`
   width: 100%;
 `
-

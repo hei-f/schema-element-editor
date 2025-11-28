@@ -30,13 +30,12 @@ export const RetryButton = styled.button`
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  
+
   &:hover {
     background: #40a9ff;
   }
-  
+
   &:active {
     background: #096dd9;
   }
 `
-

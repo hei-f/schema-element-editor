@@ -28,7 +28,7 @@ export const EditorConfigSection: React.FC<EditorConfigSectionProps> = (props) =
         name={FORM_PATHS.drawerWidth}
         rules={[
           { required: true, message: '请输入抽屉宽度' },
-          { pattern: /^\d+(%|px)$/, message: '宽度格式必须为数字+px或%' }
+          { pattern: /^\d+(%|px)$/, message: '宽度格式必须为数字+px或%' },
         ]}
         extra="设置编辑器抽屉的宽度"
       >

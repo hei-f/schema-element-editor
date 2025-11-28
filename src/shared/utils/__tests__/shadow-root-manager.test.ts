@@ -6,7 +6,7 @@ describe('shadowRootManager', () => {
   beforeEach(() => {
     // 重置单例状态
     shadowRootManager.reset()
-    
+
     // 创建 mock shadowRoot
     mockShadowRoot = document.createElement('div') as unknown as ShadowRoot
   })
@@ -28,9 +28,7 @@ describe('shadowRootManager', () => {
       shadowRootManager.init(mockShadowRoot)
       shadowRootManager.init(mockShadowRoot)
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'ShadowRoot already initialized, overwriting...'
-      )
+      expect(consoleWarnSpy).toHaveBeenCalledWith('ShadowRoot already initialized, overwriting...')
 
       consoleWarnSpy.mockRestore()
     })
@@ -49,9 +47,9 @@ describe('shadowRootManager', () => {
   describe('get', () => {
     it('应该返回已初始化的 shadowRoot', () => {
       shadowRootManager.init(mockShadowRoot)
-      
+
       const result = shadowRootManager.get()
-      
+
       expect(result).toBe(mockShadowRoot)
     })
 
@@ -63,10 +61,10 @@ describe('shadowRootManager', () => {
 
     it('应该在多次调用时返回相同的实例', () => {
       shadowRootManager.init(mockShadowRoot)
-      
+
       const first = shadowRootManager.get()
       const second = shadowRootManager.get()
-      
+
       expect(first).toBe(second)
     })
   })
@@ -74,9 +72,9 @@ describe('shadowRootManager', () => {
   describe('getContainer', () => {
     it('应该返回类型转换后的 shadowRoot', () => {
       shadowRootManager.init(mockShadowRoot)
-      
+
       const container = shadowRootManager.getContainer()
-      
+
       // 应该返回 HTMLElement 类型
       expect(container).toBe(mockShadowRoot)
     })
@@ -89,13 +87,13 @@ describe('shadowRootManager', () => {
 
     it('应该可以作为 Ant Design getContainer 使用', () => {
       shadowRootManager.init(mockShadowRoot)
-      
+
       // 模拟 Ant Design Modal 的 getContainer 属性
       const modalConfig = {
         title: 'Test',
-        getContainer: shadowRootManager.getContainer
+        getContainer: shadowRootManager.getContainer,
       }
-      
+
       expect(typeof modalConfig.getContainer).toBe('function')
       expect(modalConfig.getContainer()).toBe(mockShadowRoot)
     })
@@ -105,7 +103,7 @@ describe('shadowRootManager', () => {
     it('应该清除已初始化的 shadowRoot', () => {
       shadowRootManager.init(mockShadowRoot)
       shadowRootManager.reset()
-      
+
       expect(() => {
         shadowRootManager.get()
       }).toThrow('ShadowRoot not initialized')
@@ -153,7 +151,7 @@ describe('shadowRootManager', () => {
       }
 
       // 所有结果应该指向同一个实例
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result).toBe(mockShadowRoot)
       })
     })
@@ -162,9 +160,9 @@ describe('shadowRootManager', () => {
   describe('类型安全测试', () => {
     it('get 应该返回 ShadowRoot 类型', () => {
       shadowRootManager.init(mockShadowRoot)
-      
+
       const result = shadowRootManager.get()
-      
+
       // TypeScript 类型检查会在编译时验证
       // 这里我们验证运行时返回的是正确的对象
       expect(result).toBe(mockShadowRoot)
@@ -172,9 +170,9 @@ describe('shadowRootManager', () => {
 
     it('getContainer 应该返回可以作为 HTMLElement 使用的对象', () => {
       shadowRootManager.init(mockShadowRoot)
-      
+
       const container = shadowRootManager.getContainer()
-      
+
       // 验证返回的对象可以被使用
       expect(container).toBeTruthy()
       expect(typeof container).toBe('object')
@@ -187,7 +185,7 @@ describe('shadowRootManager', () => {
       expect(() => {
         shadowRootManager.init(null as any)
       }).not.toThrow()
-      
+
       expect(() => {
         shadowRootManager.get()
       }).toThrow('ShadowRoot not initialized')
@@ -201,12 +199,11 @@ describe('shadowRootManager', () => {
         return Promise.resolve(shadowRootManager.get())
       })
 
-      return Promise.all(promises).then(results => {
-        results.forEach(result => {
+      return Promise.all(promises).then((results) => {
+        results.forEach((result) => {
           expect(result).toBe(mockShadowRoot)
         })
       })
     })
   })
 })
-

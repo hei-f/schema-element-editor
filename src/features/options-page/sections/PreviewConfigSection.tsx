@@ -31,33 +31,22 @@ export const PreviewConfigSection: React.FC<PreviewConfigSectionProps> = (props)
       >
         <Switch />
       </Form.Item>
-      
+
       <Form.Item
         label="更新防抖（毫秒）"
         name={FORM_PATHS.previewConfig.updateDelay}
         extra="编辑后多久更新预览，避免频繁渲染"
       >
-        <FixedWidthInputNumber 
-          min={100} 
-          max={2000} 
-          step={100}
-          $width={120}
-        />
+        <FixedWidthInputNumber min={100} max={2000} step={100} $width={120} />
       </Form.Item>
-      
+
       <Form.Item
         label="预览区域宽度"
         name={FORM_PATHS.previewConfig.previewWidth}
         extra="预览区域占抽屉的百分比（20-80%）"
       >
-        <FixedWidthInputNumber 
-          min={20} 
-          max={80}
-          $width={120}
-          suffix="%"
-        />
+        <FixedWidthInputNumber min={20} max={80} $width={120} suffix="%" />
       </Form.Item>
     </SectionCard>
   )
 }
-

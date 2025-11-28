@@ -28,39 +28,39 @@ export const CodeBlock = styled.pre`
   line-height: 1.6;
   color: #24292f;
   margin: 0;
-  
+
   /* 注释样式 */
   .comment {
     color: #6a737d;
     font-style: italic;
   }
-  
+
   /* HTML标签 */
   .tag {
     color: #22863a;
   }
-  
+
   /* 属性名 */
   .attr-name {
     color: #6f42c1;
   }
-  
+
   /* 属性值 */
   .attr-value {
     color: #032f62;
   }
-  
+
   /* 关键字 */
   .keyword {
     color: #d73a49;
     font-weight: 500;
   }
-  
+
   /* 函数名 */
   .function {
     color: #6f42c1;
   }
-  
+
   /* 字符串 */
   .string {
     color: #032f62;
@@ -122,8 +122,10 @@ export const PanelActionButton = styled.button<{ $variant?: 'default' | 'primary
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
-  
-  ${props => props.$variant === 'primary' ? `
+
+  ${(props) =>
+    props.$variant === 'primary'
+      ? `
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #fff;
     border: none;
@@ -138,7 +140,8 @@ export const PanelActionButton = styled.button<{ $variant?: 'default' | 'primary
       transform: translateY(0);
       box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
     }
-  ` : `
+  `
+      : `
     background: #fff;
     color: #666;
     border: 1px solid #d9d9d9;
@@ -163,12 +166,12 @@ export const AutoSaveHint = styled(Flex)`
   margin-bottom: 16px;
   font-size: 13px;
   color: #1e40af;
-  
+
   .anticon {
     font-size: 16px;
     color: #3b82f6;
   }
-  
+
   .ant-btn-link {
     margin-left: auto;
     padding: 0;
@@ -190,7 +193,7 @@ export const PageDescription = styled(Paragraph)`
 
 export const SectionTitle = styled(Title)<{ $noMarginTop?: boolean }>`
   &.ant-typography {
-    margin-top: ${props => props.$noMarginTop ? '0' : '24px'};
+    margin-top: ${(props) => (props.$noMarginTop ? '0' : '24px')};
     margin-bottom: 16px;
   }
 `
@@ -205,7 +208,7 @@ export const SectionSubTitle = styled(Title)`
 export const StyledCollapse = styled(Collapse)`
   margin-top: 24px;
   margin-bottom: 24px;
-  
+
   /* 折叠面板头部样式 */
   .ant-collapse-header {
     /* 防止标题被选中 */
@@ -213,11 +216,11 @@ export const StyledCollapse = styled(Collapse)`
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    
+
     /* 确保箭头图标和标题垂直居中对齐 */
     align-items: center !important;
   }
-  
+
   /* 确保箭头图标垂直居中 */
   .ant-collapse-expand-icon {
     display: flex;
@@ -225,7 +228,7 @@ export const StyledCollapse = styled(Collapse)`
     height: auto !important;
     padding-inline-end: 12px !important;
   }
-  
+
   /* 确保 header 内容区域占满剩余空间 */
   .ant-collapse-header-text {
     flex: 1;
@@ -291,7 +294,7 @@ export const FormSectionLabel = styled.div<{ $noMarginTop?: boolean }>`
   font-size: 13px;
   font-weight: 600;
   color: rgba(0, 0, 0, 0.88);
-  margin: ${props => props.$noMarginTop ? '0' : '24px'} 0 16px;
+  margin: ${(props) => (props.$noMarginTop ? '0' : '24px')} 0 16px;
 `
 
 /**
@@ -338,7 +341,7 @@ export const ZeroMarginFormItem = styled(Form.Item)`
 export const HelpTooltipIcon = styled(QuestionCircleOutlined)`
   color: #999;
   cursor: pointer;
-  
+
   &:hover {
     color: #666;
   }
@@ -349,7 +352,7 @@ export const HelpTooltipIcon = styled(QuestionCircleOutlined)`
  * 支持通过 $width 属性自定义宽度
  */
 export const FixedWidthInput = styled(Input)<{ $width?: number }>`
-  width: ${props => props.$width || 100}px;
+  width: ${(props) => props.$width || 100}px;
 `
 
 /**
@@ -357,7 +360,7 @@ export const FixedWidthInput = styled(Input)<{ $width?: number }>`
  * 支持通过 $width 属性自定义宽度
  */
 export const FixedWidthInputNumber = styled(InputNumber)<{ $width?: number }>`
-  width: ${props => props.$width || 100}px;
+  width: ${(props) => props.$width || 100}px;
 `
 
 /**
@@ -365,7 +368,6 @@ export const FixedWidthInputNumber = styled(InputNumber)<{ $width?: number }>`
  * 支持通过 $marginTop 和 $marginBottom 属性自定义上下间距
  */
 export const SpacedAlert = styled(Alert)<{ $marginTop?: number; $marginBottom?: number }>`
-  ${props => props.$marginTop ? `margin-top: ${props.$marginTop}px;` : ''}
-  ${props => props.$marginBottom ? `margin-bottom: ${props.$marginBottom}px;` : ''}
+  ${(props) => (props.$marginTop ? `margin-top: ${props.$marginTop}px;` : '')}
+  ${(props) => (props.$marginBottom ? `margin-bottom: ${props.$marginBottom}px;` : '')}
 `
-

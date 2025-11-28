@@ -18,11 +18,7 @@ export function isVisibleElement(element: HTMLElement): boolean {
 
   // 检查是否隐藏
   const style = window.getComputedStyle(element)
-  if (
-    style.display === 'none' ||
-    style.visibility === 'hidden' ||
-    style.opacity === '0'
-  ) {
+  if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
     return false
   }
 
@@ -81,7 +77,7 @@ export async function findElementWithSchemaParams(
   // 遍历每个元素
   for (let i = 0; i < elementsAtPoint.length; i++) {
     const element = elementsAtPoint[i] as HTMLElement
-    
+
     // 忽略扩展自己的UI元素（提前终止，避免后续检查）
     if (element.closest(UI_ELEMENT_SELECTOR)) {
       continue
@@ -98,16 +94,10 @@ export async function findElementWithSchemaParams(
     }
 
     // 向上搜索（根据配置决定是否限制层数）
-    const maxDepth = searchConfig.limitUpwardSearch 
-      ? searchConfig.searchDepthUp 
-      : 999 // 不限制时搜索到根元素
-    
+    const maxDepth = searchConfig.limitUpwardSearch ? searchConfig.searchDepthUp : 999 // 不限制时搜索到根元素
+
     if (maxDepth > 0) {
-      const ancestors = searchAncestors(
-        element,
-        maxDepth,
-        dataAttrName
-      )
+      const ancestors = searchAncestors(element, maxDepth, dataAttrName)
       allCandidates.push(...ancestors)
     }
   }
@@ -129,16 +119,16 @@ export async function getElementAttributes(element: HTMLElement): Promise<Elemen
   const attributeName = await storage.getAttributeName()
   const dataAttrName = `data-${attributeName}`
   const attrValue = element.getAttribute(dataAttrName)
-  
+
   if (!attrValue) {
     return { params: [] }
   }
-  
+
   const params = attrValue
     .split(',')
-    .map(s => s.trim())
+    .map((s) => s.trim())
     .filter(Boolean)
-  
+
   return { params }
 }
 
@@ -159,7 +149,7 @@ export function getElementPosition(element: HTMLElement): ElementPosition {
     x: rect.left + window.scrollX,
     y: rect.top + window.scrollY,
     width: rect.width,
-    height: rect.height
+    height: rect.height,
   }
 }
 
@@ -169,17 +159,14 @@ export function getElementPosition(element: HTMLElement): ElementPosition {
 export function getMousePosition(event: MouseEvent): { x: number; y: number } {
   return {
     x: event.clientX,
-    y: event.clientY
+    y: event.clientY,
   }
 }
 
 /**
  * 检查点击是否在元素内
  */
-export function isClickInside(
-  event: MouseEvent,
-  element: HTMLElement
-): boolean {
+export function isClickInside(event: MouseEvent, element: HTMLElement): boolean {
   const rect = element.getBoundingClientRect()
   return (
     event.clientX >= rect.left &&
@@ -188,5 +175,3 @@ export function isClickInside(
     event.clientY <= rect.bottom
   )
 }
-
-

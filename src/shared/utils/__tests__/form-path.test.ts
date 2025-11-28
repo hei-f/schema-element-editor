@@ -3,7 +3,7 @@ import {
   getValueByPath,
   pathEqual,
   pathToString,
-  setValueByPath
+  setValueByPath,
 } from '../form-path'
 
 describe('form-path 工具函数测试', () => {
@@ -25,7 +25,9 @@ describe('form-path 工具函数测试', () => {
     })
 
     it('应该保留特殊字符', () => {
-      expect(pathToString(['key-with-dash', 'key_with_underscore'])).toBe('key-with-dash.key_with_underscore')
+      expect(pathToString(['key-with-dash', 'key_with_underscore'])).toBe(
+        'key-with-dash.key_with_underscore'
+      )
     })
   })
 
@@ -59,8 +61,8 @@ describe('form-path 工具函数测试', () => {
     it('应该从嵌套对象中提取完整路径', () => {
       const changedValues = {
         searchConfig: {
-          searchDepthDown: 5
-        }
+          searchDepthDown: 5,
+        },
       }
       expect(getChangedFieldPath(changedValues)).toEqual(['searchConfig', 'searchDepthDown'])
     })
@@ -75,10 +77,10 @@ describe('form-path 工具函数测试', () => {
         level1: {
           level2: {
             level3: {
-              level4: 'value'
-            }
-          }
-        }
+              level4: 'value',
+            },
+          },
+        },
       }
       expect(getChangedFieldPath(changedValues)).toEqual(['level1', 'level2', 'level3', 'level4'])
     })
@@ -90,8 +92,8 @@ describe('form-path 工具函数测试', () => {
     it('应该处理数组值（作为终点）', () => {
       const changedValues = {
         config: {
-          items: [1, 2, 3]
-        }
+          items: [1, 2, 3],
+        },
       }
       expect(getChangedFieldPath(changedValues)).toEqual(['config', 'items'])
     })
@@ -99,8 +101,8 @@ describe('form-path 工具函数测试', () => {
     it('应该处理null值', () => {
       const changedValues = {
         config: {
-          value: null
-        }
+          value: null,
+        },
       }
       expect(getChangedFieldPath(changedValues)).toEqual(['config', 'value'])
     })
@@ -108,8 +110,8 @@ describe('form-path 工具函数测试', () => {
     it('应该处理布尔值', () => {
       const changedValues = {
         settings: {
-          enabled: true
-        }
+          enabled: true,
+        },
       }
       expect(getChangedFieldPath(changedValues)).toEqual(['settings', 'enabled'])
     })
@@ -117,8 +119,8 @@ describe('form-path 工具函数测试', () => {
     it('应该处理数字值', () => {
       const changedValues = {
         config: {
-          count: 0
-        }
+          count: 0,
+        },
       }
       expect(getChangedFieldPath(changedValues)).toEqual(['config', 'count'])
     })
@@ -126,8 +128,8 @@ describe('form-path 工具函数测试', () => {
     it('应该处理字符串值', () => {
       const changedValues = {
         user: {
-          name: 'test'
-        }
+          name: 'test',
+        },
       }
       expect(getChangedFieldPath(changedValues)).toEqual(['user', 'name'])
     })
@@ -135,8 +137,8 @@ describe('form-path 工具函数测试', () => {
     it('应该处理空对象值（作为终点）', () => {
       const changedValues = {
         config: {
-          data: {}
-        }
+          data: {},
+        },
       }
       expect(getChangedFieldPath(changedValues)).toEqual(['config', 'data'])
     })
@@ -295,10 +297,10 @@ describe('form-path 工具函数测试', () => {
     it('应该处理表单变更检测', () => {
       const changedValues = {
         searchConfig: {
-          searchDepthDown: 10
-        }
+          searchDepthDown: 10,
+        },
       }
-      
+
       const path = getChangedFieldPath(changedValues)
       expect(path).toEqual(['searchConfig', 'searchDepthDown'])
       expect(pathToString(path)).toBe('searchConfig.searchDepthDown')
@@ -309,10 +311,10 @@ describe('form-path 工具函数测试', () => {
         user: {
           profile: {
             settings: {
-              theme: 'dark'
-            }
-          }
-        }
+              theme: 'dark',
+            },
+          },
+        },
       }
 
       // 获取深层值
@@ -328,4 +330,3 @@ describe('form-path 工具函数测试', () => {
     })
   })
 })
-

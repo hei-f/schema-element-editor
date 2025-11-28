@@ -4,15 +4,8 @@ import { json } from '@codemirror/lang-json'
 import { bracketMatching, foldGutter, foldKeymap, indentOnInput } from '@codemirror/language'
 import { highlightSelectionMatches, searchKeymap } from '@codemirror/search'
 import { EditorState, StateEffect, StateField } from '@codemirror/state'
-import { 
-  Decoration, 
-  DecorationSet, 
-  EditorView, 
-  keymap, 
-  lineNumbers, 
-  WidgetType,
-  ViewUpdate
-} from '@codemirror/view'
+import type { DecorationSet, ViewUpdate } from '@codemirror/view'
+import { Decoration, EditorView, keymap, lineNumbers, WidgetType } from '@codemirror/view'
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react'
 import { schemaEditorDark, schemaEditorDarkHighlighting } from '../styles/schema-editor-dark-theme'
 import { DiffEditorWrapper } from '../styles/recording.styles'
@@ -80,22 +73,22 @@ const setDiffDecorations = StateEffect.define<{
 /** 行背景装饰样式 */
 const lineBackgroundTheme = EditorView.baseTheme({
   '&': {
-    height: '100%'
+    height: '100%',
   },
   '.cm-scroller': {
-    overflow: 'auto'
+    overflow: 'auto',
   },
   '.cm-line-added': {
-    backgroundColor: 'rgba(152, 195, 121, 0.15) !important'
+    backgroundColor: 'rgba(152, 195, 121, 0.15) !important',
   },
   '.cm-line-removed': {
-    backgroundColor: 'rgba(224, 108, 117, 0.15) !important'
+    backgroundColor: 'rgba(224, 108, 117, 0.15) !important',
   },
   '.cm-line-modified': {
-    backgroundColor: 'rgba(229, 192, 123, 0.15) !important'
+    backgroundColor: 'rgba(229, 192, 123, 0.15) !important',
   },
   '.cm-diff-placeholder': {
-    display: 'block'
+    display: 'block',
   },
   /* 行内差异高亮 - 更显眼的颜色 */
   '.cm-inline-added': {
@@ -103,7 +96,7 @@ const lineBackgroundTheme = EditorView.baseTheme({
     borderRadius: '3px',
     padding: '1px 2px',
     border: '1px solid rgba(80, 200, 100, 0.6)',
-    margin: '0 1px'
+    margin: '0 1px',
   },
   '.cm-inline-removed': {
     backgroundColor: 'rgba(240, 80, 80, 0.5)',
@@ -111,8 +104,8 @@ const lineBackgroundTheme = EditorView.baseTheme({
     padding: '1px 2px',
     border: '1px solid rgba(240, 80, 80, 0.6)',
     margin: '0 1px',
-    textDecoration: 'line-through'
-  }
+    textDecoration: 'line-through',
+  },
 })
 
 /** Diff 装饰 StateField */
@@ -126,22 +119,22 @@ const diffDecorationsField = StateField.define<DecorationSet>({
       if (effect.is(setDiffDecorations)) {
         const { lines, isDark } = effect.value
         const builder: any[] = []
-        
+
         for (const line of lines) {
           if (line.editorLine < 0 || line.editorLine >= tr.state.doc.lines) {
             continue
           }
-          
+
           const docLine = tr.state.doc.line(line.editorLine + 1)
           const lineStart = docLine.from
-          
+
           if (line.isPlaceholder) {
             // 插入占位行 widget
             builder.push(
               Decoration.widget({
                 widget: new PlaceholderWidget(isDark),
                 block: true,
-                side: -1 // 在行之前
+                side: -1, // 在行之前
               }).range(lineStart)
             )
           } else {
@@ -149,10 +142,10 @@ const diffDecorationsField = StateField.define<DecorationSet>({
             const className = `cm-line-${line.type}`
             builder.push(
               Decoration.line({
-                class: className
+                class: className,
               }).range(lineStart)
             )
-            
+
             // 添加行内差异高亮
             if (line.inlineDiffs && line.inlineDiffs.length > 0) {
               for (const diff of line.inlineDiffs) {
@@ -162,7 +155,7 @@ const diffDecorationsField = StateField.define<DecorationSet>({
                 if (from >= lineStart && to <= docLine.to) {
                   builder.push(
                     Decoration.mark({
-                      class: `cm-inline-${diff.type}`
+                      class: `cm-inline-${diff.type}`,
                     }).range(from, to)
                   )
                 }
@@ -170,22 +163,22 @@ const diffDecorationsField = StateField.define<DecorationSet>({
             }
           }
         }
-        
+
         // 按位置排序
         builder.sort((a, b) => a.from - b.from)
-        
+
         return Decoration.set(builder)
       }
     }
-    
+
     // 文档变化时，映射装饰位置
     if (tr.docChanged) {
       return decorations.map(tr.changes)
     }
-    
+
     return decorations
   },
-  provide: f => EditorView.decorations.from(f)
+  provide: (f) => EditorView.decorations.from(f),
 })
 
 interface DiffEditorProps {
@@ -225,7 +218,7 @@ export const DiffEditor = forwardRef<DiffEditorHandle, DiffEditorProps>((props, 
     onHorizontalScroll,
     isDark = true,
     readOnly = false,
-    diffLines = []
+    diffLines = [],
   } = props
 
   const containerRef = useRef<HTMLDivElement>(null)
@@ -244,34 +237,38 @@ export const DiffEditor = forwardRef<DiffEditorHandle, DiffEditorProps>((props, 
   }, [onHorizontalScroll])
 
   // 暴露 API
-  useImperativeHandle(ref, () => ({
-    getValue: () => viewRef.current?.state.doc.toString() || '',
-    setValue: (value: string) => {
-      if (!viewRef.current) return
-      const view = viewRef.current
-      view.dispatch({
-        changes: {
-          from: 0,
-          to: view.state.doc.length,
-          insert: value
-        }
-      })
-    },
-    updateDecorations: (lines: DiffLineInfo[]) => {
-      if (!viewRef.current) return
-      viewRef.current.dispatch({
-        effects: setDiffDecorations.of({ lines, isDark })
-      })
-    },
-    setScrollLeft: (scrollLeft: number) => {
-      if (!viewRef.current) return
-      isSyncingScrollRef.current = true
-      viewRef.current.scrollDOM.scrollLeft = scrollLeft
-      setTimeout(() => {
-        isSyncingScrollRef.current = false
-      }, 50)
-    }
-  }), [isDark])
+  useImperativeHandle(
+    ref,
+    () => ({
+      getValue: () => viewRef.current?.state.doc.toString() || '',
+      setValue: (value: string) => {
+        if (!viewRef.current) return
+        const view = viewRef.current
+        view.dispatch({
+          changes: {
+            from: 0,
+            to: view.state.doc.length,
+            insert: value,
+          },
+        })
+      },
+      updateDecorations: (lines: DiffLineInfo[]) => {
+        if (!viewRef.current) return
+        viewRef.current.dispatch({
+          effects: setDiffDecorations.of({ lines, isDark }),
+        })
+      },
+      setScrollLeft: (scrollLeft: number) => {
+        if (!viewRef.current) return
+        isSyncingScrollRef.current = true
+        viewRef.current.scrollDOM.scrollLeft = scrollLeft
+        setTimeout(() => {
+          isSyncingScrollRef.current = false
+        }, 50)
+      },
+    }),
+    [isDark]
+  )
 
   // 创建编辑器
   useEffect(() => {
@@ -287,34 +284,34 @@ export const DiffEditor = forwardRef<DiffEditorHandle, DiffEditorProps>((props, 
         bracketMatching(),
         closeBrackets(),
         highlightSelectionMatches(),
-        
+
         // JSON 支持
         json(),
-        
+
         // 代码折叠
         foldGutter({
           openText: '▼',
-          closedText: '▶'
+          closedText: '▶',
         }),
-        
+
         // 自动补全
         autocompletion(),
-        
+
         // 主题
         schemaEditorDark,
         schemaEditorDarkHighlighting,
-        
+
         // Diff 装饰
         diffDecorationsField,
         lineBackgroundTheme,
-        
+
         // 禁用换行，使用水平滚动
         // EditorView.lineWrapping,  // 不启用换行
-        
+
         // 只读控制
         EditorView.editable.of(!readOnly),
         EditorState.readOnly.of(readOnly),
-        
+
         // 键盘映射
         keymap.of([
           ...defaultKeymap,
@@ -322,21 +319,21 @@ export const DiffEditor = forwardRef<DiffEditorHandle, DiffEditorProps>((props, 
           ...foldKeymap,
           ...closeBracketsKeymap,
           ...searchKeymap,
-          indentWithTab
+          indentWithTab,
         ]),
-        
+
         // 变化监听
         EditorView.updateListener.of((update: ViewUpdate) => {
           if (update.docChanged) {
             onChangeRef.current?.(update.state.doc.toString())
           }
-        })
-      ]
+        }),
+      ],
     })
 
     const view = new EditorView({
       state,
-      parent: containerRef.current
+      parent: containerRef.current,
     })
 
     viewRef.current = view
@@ -344,7 +341,7 @@ export const DiffEditor = forwardRef<DiffEditorHandle, DiffEditorProps>((props, 
     // 初始化装饰
     if (diffLines.length > 0) {
       view.dispatch({
-        effects: setDiffDecorations.of({ lines: diffLines, isDark })
+        effects: setDiffDecorations.of({ lines: diffLines, isDark }),
       })
     }
 
@@ -366,9 +363,9 @@ export const DiffEditor = forwardRef<DiffEditorHandle, DiffEditorProps>((props, 
   // 更新 diff 装饰
   useEffect(() => {
     if (!viewRef.current || diffLines.length === 0) return
-    
+
     viewRef.current.dispatch({
-      effects: setDiffDecorations.of({ lines: diffLines, isDark })
+      effects: setDiffDecorations.of({ lines: diffLines, isDark }),
     })
   }, [diffLines, isDark])
 
@@ -376,4 +373,3 @@ export const DiffEditor = forwardRef<DiffEditorHandle, DiffEditorProps>((props, 
 })
 
 DiffEditor.displayName = 'DiffEditor'
-

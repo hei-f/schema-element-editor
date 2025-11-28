@@ -5,8 +5,8 @@ import { DraftManager, draftManager } from '../draft-manager'
 jest.mock('@/shared/utils/logger', () => ({
   logger: {
     log: jest.fn(),
-    error: jest.fn()
-  }
+    error: jest.fn(),
+  },
 }))
 
 import { logger } from '@/shared/utils/logger'
@@ -29,7 +29,7 @@ describe('DraftManager 测试', () => {
     it('应该调用storage获取草稿', async () => {
       const mockDraft: Draft = {
         content: 'test content',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       }
       const mockGetter = jest.fn().mockResolvedValue(mockDraft)
 
@@ -55,10 +55,13 @@ describe('DraftManager 测试', () => {
 
       await manager.saveDraft('test-key', 'test content', mockSaver)
 
-      expect(mockSaver).toHaveBeenCalledWith('test-key', expect.objectContaining({
-        content: 'test content',
-        timestamp: expect.any(Number)
-      }))
+      expect(mockSaver).toHaveBeenCalledWith(
+        'test-key',
+        expect.objectContaining({
+          content: 'test content',
+          timestamp: expect.any(Number),
+        })
+      )
 
       const savedDraft = mockSaver.mock.calls[0][1] as Draft
       expect(savedDraft.timestamp).toBeGreaterThanOrEqual(beforeSave)
@@ -69,9 +72,12 @@ describe('DraftManager 测试', () => {
 
       await manager.saveDraft('test-key', '', mockSaver)
 
-      expect(mockSaver).toHaveBeenCalledWith('test-key', expect.objectContaining({
-        content: ''
-      }))
+      expect(mockSaver).toHaveBeenCalledWith(
+        'test-key',
+        expect.objectContaining({
+          content: '',
+        })
+      )
     })
   })
 
@@ -89,7 +95,7 @@ describe('DraftManager 测试', () => {
     it('未过期的草稿应该返回false', () => {
       const draft: Draft = {
         content: 'test',
-        timestamp: Date.now() - 12 * 60 * 60 * 1000 // 12小时前
+        timestamp: Date.now() - 12 * 60 * 60 * 1000, // 12小时前
       }
 
       const result = manager.isDraftExpired(draft, 1) // 保留1天
@@ -100,7 +106,7 @@ describe('DraftManager 测试', () => {
     it('已过期的草稿应该返回true', () => {
       const draft: Draft = {
         content: 'test',
-        timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000 // 2天前
+        timestamp: Date.now() - 2 * 24 * 60 * 60 * 1000, // 2天前
       }
 
       const result = manager.isDraftExpired(draft, 1) // 保留1天
@@ -112,7 +118,7 @@ describe('DraftManager 测试', () => {
       const oneDayInMs = 24 * 60 * 60 * 1000
       const draft: Draft = {
         content: 'test',
-        timestamp: Date.now() - oneDayInMs - 1000 // 刚过1天
+        timestamp: Date.now() - oneDayInMs - 1000, // 刚过1天
       }
 
       const result = manager.isDraftExpired(draft, 1)
@@ -123,7 +129,7 @@ describe('DraftManager 测试', () => {
     it('应该支持不同的保留天数', () => {
       const draft: Draft = {
         content: 'test',
-        timestamp: Date.now() - 5 * 24 * 60 * 60 * 1000 // 5天前
+        timestamp: Date.now() - 5 * 24 * 60 * 60 * 1000, // 5天前
       }
 
       expect(manager.isDraftExpired(draft, 3)).toBe(true)
@@ -138,7 +144,7 @@ describe('DraftManager 测试', () => {
         'draft:key1': { content: 'test1', timestamp: now - 2 * 24 * 60 * 60 * 1000 } as Draft, // 2天前
         'draft:key2': { content: 'test2', timestamp: now - 12 * 60 * 60 * 1000 } as Draft, // 12小时前
         'draft:key3': { content: 'test3', timestamp: now - 3 * 24 * 60 * 60 * 1000 } as Draft, // 3天前
-        'other:key': { content: 'test4', timestamp: now - 5 * 24 * 60 * 60 * 1000 } as Draft // 不是draft前缀
+        'other:key': { content: 'test4', timestamp: now - 5 * 24 * 60 * 60 * 1000 } as Draft, // 不是draft前缀
       }
 
       const result = manager.findExpiredDraftKeys(allDrafts, 1, 'draft:')
@@ -154,7 +160,7 @@ describe('DraftManager 测试', () => {
       const now = Date.now()
       const allDrafts = {
         'draft:key1': { content: 'test1', timestamp: now - 12 * 60 * 60 * 1000 } as Draft,
-        'draft:key2': { content: 'test2', timestamp: now - 6 * 60 * 60 * 1000 } as Draft
+        'draft:key2': { content: 'test2', timestamp: now - 6 * 60 * 60 * 1000 } as Draft,
       }
 
       const result = manager.findExpiredDraftKeys(allDrafts, 1, 'draft:')
@@ -173,7 +179,7 @@ describe('DraftManager 测试', () => {
       const allDrafts = {
         'draft:key1': { content: 'test1', timestamp: now - 2 * 24 * 60 * 60 * 1000 } as Draft,
         'mydraft:key2': { content: 'test2', timestamp: now - 2 * 24 * 60 * 60 * 1000 } as Draft,
-        'other:key3': { content: 'test3', timestamp: now - 2 * 24 * 60 * 60 * 1000 } as Draft
+        'other:key3': { content: 'test3', timestamp: now - 2 * 24 * 60 * 60 * 1000 } as Draft,
       }
 
       const result = manager.findExpiredDraftKeys(allDrafts, 1, 'draft:')
@@ -189,7 +195,7 @@ describe('DraftManager 测试', () => {
       const mockAllData = {
         'draft:expired1': { content: 'test1', timestamp: now - 2 * 24 * 60 * 60 * 1000 } as Draft,
         'draft:expired2': { content: 'test2', timestamp: now - 3 * 24 * 60 * 60 * 1000 } as Draft,
-        'draft:valid': { content: 'test3', timestamp: now - 12 * 60 * 60 * 1000 } as Draft
+        'draft:valid': { content: 'test3', timestamp: now - 12 * 60 * 60 * 1000 } as Draft,
       }
       const mockGetAll = jest.fn().mockResolvedValue(mockAllData)
       const mockRemove = jest.fn().mockResolvedValue(undefined)
@@ -204,7 +210,7 @@ describe('DraftManager 测试', () => {
     it('没有过期草稿时不应该调用删除', async () => {
       const now = Date.now()
       const mockAllData = {
-        'draft:key': { content: 'test', timestamp: now } as Draft
+        'draft:key': { content: 'test', timestamp: now } as Draft,
       }
       const mockGetAll = jest.fn().mockResolvedValue(mockAllData)
       const mockRemove = jest.fn()
@@ -230,7 +236,7 @@ describe('DraftManager 测试', () => {
     it('删除失败时应该抛出错误', async () => {
       const now = Date.now()
       const mockAllData = {
-        'draft:expired': { content: 'test', timestamp: now - 2 * 24 * 60 * 60 * 1000 } as Draft
+        'draft:expired': { content: 'test', timestamp: now - 2 * 24 * 60 * 60 * 1000 } as Draft,
       }
       const mockGetAll = jest.fn().mockResolvedValue(mockAllData)
       const mockRemove = jest.fn().mockRejectedValue(new Error('Delete error'))
@@ -255,7 +261,7 @@ describe('DraftManager 测试', () => {
       // 模拟获取草稿
       const savedDraft = mockSaver.mock.calls[0][1] as Draft
       mockGetter.mockResolvedValue(savedDraft)
-      
+
       const retrieved = await manager.getDraft('test-key', mockGetter)
       expect(retrieved).toEqual(savedDraft)
 
@@ -267,15 +273,16 @@ describe('DraftManager 测试', () => {
     it('应该处理大量草稿的清理', async () => {
       const now = Date.now()
       const mockAllData: Record<string, Draft> = {}
-      
+
       // 创建100个草稿，一半过期
       for (let i = 0; i < 100; i++) {
-        const timestamp = i < 50 
-          ? now - 2 * 24 * 60 * 60 * 1000 // 过期
-          : now - 12 * 60 * 60 * 1000 // 未过期
+        const timestamp =
+          i < 50
+            ? now - 2 * 24 * 60 * 60 * 1000 // 过期
+            : now - 12 * 60 * 60 * 1000 // 未过期
         mockAllData[`draft:key${i}`] = {
           content: `content${i}`,
-          timestamp
+          timestamp,
         }
       }
 
@@ -285,10 +292,9 @@ describe('DraftManager 测试', () => {
       const count = await manager.cleanExpiredDrafts(1, 'draft:', mockGetAll, mockRemove)
 
       expect(count).toBe(50)
-      expect(mockRemove).toHaveBeenCalledWith(expect.arrayContaining([
-        'draft:key0', 'draft:key1', 'draft:key49'
-      ]))
+      expect(mockRemove).toHaveBeenCalledWith(
+        expect.arrayContaining(['draft:key0', 'draft:key1', 'draft:key49'])
+      )
     })
   })
 })
-

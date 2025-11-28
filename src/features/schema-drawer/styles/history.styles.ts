@@ -20,20 +20,20 @@ export const HistoryMenuItem = styled.div<{ isActive?: boolean }>`
   display: flex;
   align-items: center;
   gap: 10px;
-  background: ${props => props.isActive ? '#e6f7ff' : 'transparent'};
+  background: ${(props) => (props.isActive ? '#e6f7ff' : 'transparent')};
   transition: background 0.2s ease;
   pointer-events: none; /* 让点击事件穿透到 Menu.Item */
-  
+
   &:hover {
-    background: ${props => props.isActive ? '#e6f7ff' : '#f5f5f5'};
+    background: ${(props) => (props.isActive ? '#e6f7ff' : '#f5f5f5')};
   }
-  
+
   .history-icon {
     font-size: 16px;
     flex-shrink: 0;
     line-height: 1;
   }
-  
+
   .history-info {
     flex: 1;
     min-width: 0;
@@ -41,23 +41,23 @@ export const HistoryMenuItem = styled.div<{ isActive?: boolean }>`
     flex-direction: column;
     gap: 2px;
   }
-  
+
   .history-time {
     font-size: 11px;
     color: #8c8c8c;
     line-height: 1.4;
   }
-  
+
   .history-desc {
     font-size: 13px;
     color: #262626;
-    font-weight: ${props => props.isActive ? '500' : '400'};
+    font-weight: ${(props) => (props.isActive ? '500' : '400')};
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     line-height: 1.4;
   }
-  
+
   .history-check {
     color: #1890ff;
     font-weight: 600;
@@ -77,7 +77,7 @@ export const HistoryClearButton = styled.div`
   border-top: 1px solid #f0f0f0;
   transition: background 0.2s ease;
   pointer-events: none; /* 让点击事件穿透到 Menu.Item */
-  
+
   &:hover {
     background: #fff1f0;
   }
@@ -92,4 +92,3 @@ export const HistoryEmptyState = styled.div`
   color: #8c8c8c;
   font-size: 13px;
 `
-

@@ -4,18 +4,18 @@ import { FavoritesManager } from '../FavoritesManager'
 
 // Mock子组件
 jest.mock('../AddFavoriteModal', () => ({
-  AddFavoriteModal: ({ visible }: any) => 
-    visible ? <div data-testid="add-favorite-modal">AddFavoriteModal</div> : null
+  AddFavoriteModal: ({ visible }: any) =>
+    visible ? <div data-testid="add-favorite-modal">AddFavoriteModal</div> : null,
 }))
 
 jest.mock('../FavoritesListModal', () => ({
-  FavoritesListModal: ({ visible }: any) => 
-    visible ? <div data-testid="favorites-list-modal">FavoritesListModal</div> : null
+  FavoritesListModal: ({ visible }: any) =>
+    visible ? <div data-testid="favorites-list-modal">FavoritesListModal</div> : null,
 }))
 
 jest.mock('../FavoriteEditModal', () => ({
-  FavoriteEditModal: ({ visible }: any) => 
-    visible ? <div data-testid="edit-modal">FavoriteEditModal</div> : null
+  FavoriteEditModal: ({ visible }: any) =>
+    visible ? <div data-testid="edit-modal">FavoriteEditModal</div> : null,
 }))
 
 describe('FavoritesManager组件测试', () => {
@@ -24,7 +24,7 @@ describe('FavoritesManager组件测试', () => {
     name: '测试收藏',
     content: '{"test": "data"}',
     timestamp: Date.now(),
-    lastUsedTime: Date.now()
+    lastUsedTime: Date.now(),
   }
 
   const defaultProps = {
@@ -44,7 +44,7 @@ describe('FavoritesManager组件测试', () => {
     onApplyFavorite: jest.fn(),
     onDeleteFavorite: jest.fn(),
     onSaveEdit: jest.fn(),
-    onCloseEditModal: jest.fn()
+    onCloseEditModal: jest.fn(),
   }
 
   beforeEach(() => {
@@ -59,7 +59,7 @@ describe('FavoritesManager组件测试', () => {
 
     it('应该在所有modal都不可见时不渲染任何modal', () => {
       const { queryByTestId } = render(<FavoritesManager {...defaultProps} />)
-      
+
       expect(queryByTestId('add-favorite-modal')).not.toBeInTheDocument()
       expect(queryByTestId('favorites-list-modal')).not.toBeInTheDocument()
       expect(queryByTestId('preview-modal')).not.toBeInTheDocument()
@@ -71,7 +71,7 @@ describe('FavoritesManager组件测试', () => {
       const { getByTestId } = render(
         <FavoritesManager {...defaultProps} addFavoriteModalVisible={true} />
       )
-      
+
       expect(getByTestId('add-favorite-modal')).toBeInTheDocument()
     })
 
@@ -79,7 +79,7 @@ describe('FavoritesManager组件测试', () => {
       const { queryByTestId } = render(
         <FavoritesManager {...defaultProps} addFavoriteModalVisible={false} />
       )
-      
+
       expect(queryByTestId('add-favorite-modal')).not.toBeInTheDocument()
     })
   })
@@ -89,7 +89,7 @@ describe('FavoritesManager组件测试', () => {
       const { getByTestId } = render(
         <FavoritesManager {...defaultProps} favoritesModalVisible={true} />
       )
-      
+
       expect(getByTestId('favorites-list-modal')).toBeInTheDocument()
     })
 
@@ -97,17 +97,15 @@ describe('FavoritesManager组件测试', () => {
       const { queryByTestId } = render(
         <FavoritesManager {...defaultProps} favoritesModalVisible={false} />
       )
-      
+
       expect(queryByTestId('favorites-list-modal')).not.toBeInTheDocument()
     })
   })
 
   describe('FavoriteEditModal显示', () => {
     it('应该在editModalVisible为true时渲染FavoriteEditModal', () => {
-      const { getByTestId } = render(
-        <FavoritesManager {...defaultProps} editModalVisible={true} />
-      )
-      
+      const { getByTestId } = render(<FavoritesManager {...defaultProps} editModalVisible={true} />)
+
       expect(getByTestId('edit-modal')).toBeInTheDocument()
     })
 
@@ -115,7 +113,7 @@ describe('FavoritesManager组件测试', () => {
       const { queryByTestId } = render(
         <FavoritesManager {...defaultProps} editModalVisible={false} />
       )
-      
+
       expect(queryByTestId('edit-modal')).not.toBeInTheDocument()
     })
   })
@@ -130,7 +128,7 @@ describe('FavoritesManager组件测试', () => {
           editModalVisible={true}
         />
       )
-      
+
       expect(getByTestId('add-favorite-modal')).toBeInTheDocument()
       expect(getByTestId('favorites-list-modal')).toBeInTheDocument()
       expect(getByTestId('edit-modal')).toBeInTheDocument()
@@ -144,7 +142,7 @@ describe('FavoritesManager组件测试', () => {
           editModalVisible={true}
         />
       )
-      
+
       expect(getByTestId('add-favorite-modal')).toBeInTheDocument()
       expect(queryByTestId('favorites-list-modal')).not.toBeInTheDocument()
       expect(getByTestId('edit-modal')).toBeInTheDocument()
@@ -154,10 +152,8 @@ describe('FavoritesManager组件测试', () => {
   describe('Props传递', () => {
     it('应该接收favoritesList prop', () => {
       const favorites = [mockFavorite]
-      const { container } = render(
-        <FavoritesManager {...defaultProps} favoritesList={favorites} />
-      )
-      
+      const { container } = render(<FavoritesManager {...defaultProps} favoritesList={favorites} />)
+
       expect(container).toBeInTheDocument()
     })
 
@@ -165,7 +161,7 @@ describe('FavoritesManager组件测试', () => {
       const { container } = render(
         <FavoritesManager {...defaultProps} favoriteNameInput="测试名称" />
       )
-      
+
       expect(container).toBeInTheDocument()
     })
   })
@@ -180,23 +176,19 @@ describe('FavoritesManager组件测试', () => {
         onPreviewFavorite: jest.fn(),
         onApplyFavorite: jest.fn(),
         onDeleteFavorite: jest.fn(),
-        onClosePreviewModal: jest.fn()
+        onClosePreviewModal: jest.fn(),
       }
-      
-      const { container } = render(
-        <FavoritesManager {...defaultProps} {...callbacks} />
-      )
-      
+
+      const { container } = render(<FavoritesManager {...defaultProps} {...callbacks} />)
+
       expect(container).toBeInTheDocument()
     })
   })
 
   describe('边界情况', () => {
     it('应该处理空的favoritesList', () => {
-      const { container } = render(
-        <FavoritesManager {...defaultProps} favoritesList={[]} />
-      )
-      
+      const { container } = render(<FavoritesManager {...defaultProps} favoritesList={[]} />)
+
       expect(container).toBeInTheDocument()
     })
 
@@ -204,21 +196,19 @@ describe('FavoritesManager组件测试', () => {
       const manyFavorites = Array.from({ length: 100 }, (_, i) => ({
         ...mockFavorite,
         id: `fav_${i}`,
-        name: `收藏${i}`
+        name: `收藏${i}`,
       }))
-      
+
       const { container } = render(
         <FavoritesManager {...defaultProps} favoritesList={manyFavorites} />
       )
-      
+
       expect(container).toBeInTheDocument()
     })
 
     it('应该处理空字符串的input值', () => {
-      const { container } = render(
-        <FavoritesManager {...defaultProps} favoriteNameInput="" />
-      )
-      
+      const { container } = render(<FavoritesManager {...defaultProps} favoriteNameInput="" />)
+
       expect(container).toBeInTheDocument()
     })
 
@@ -227,18 +217,15 @@ describe('FavoritesManager组件测试', () => {
       const { container } = render(
         <FavoritesManager {...defaultProps} favoriteNameInput={longInput} />
       )
-      
+
       expect(container).toBeInTheDocument()
     })
 
     it('应该处理特殊字符的输入', () => {
       const { container } = render(
-        <FavoritesManager
-          {...defaultProps}
-          favoriteNameInput="<script>alert('xss')</script>"
-        />
+        <FavoritesManager {...defaultProps} favoriteNameInput="<script>alert('xss')</script>" />
       )
-      
+
       expect(container).toBeInTheDocument()
     })
   })
@@ -248,13 +235,11 @@ describe('FavoritesManager组件测试', () => {
       const { rerender, getByTestId, queryByTestId } = render(
         <FavoritesManager {...defaultProps} addFavoriteModalVisible={false} />
       )
-      
+
       expect(queryByTestId('add-favorite-modal')).not.toBeInTheDocument()
-      
-      rerender(
-        <FavoritesManager {...defaultProps} addFavoriteModalVisible={true} />
-      )
-      
+
+      rerender(<FavoritesManager {...defaultProps} addFavoriteModalVisible={true} />)
+
       expect(getByTestId('add-favorite-modal')).toBeInTheDocument()
     })
 
@@ -262,15 +247,12 @@ describe('FavoritesManager组件测试', () => {
       const { rerender, container } = render(
         <FavoritesManager {...defaultProps} favoritesList={[]} />
       )
-      
+
       expect(container).toBeInTheDocument()
-      
-      rerender(
-        <FavoritesManager {...defaultProps} favoritesList={[mockFavorite]} />
-      )
-      
+
+      rerender(<FavoritesManager {...defaultProps} favoritesList={[mockFavorite]} />)
+
       expect(container).toBeInTheDocument()
     })
   })
 })
-

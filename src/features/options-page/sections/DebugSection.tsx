@@ -33,4 +33,3 @@ export const DebugSection: React.FC<DebugSectionProps> = (props) => {
     </SectionCard>
   )
 }
-

@@ -58,18 +58,18 @@ export function computeInlineDiff(leftContent: string, rightContent: string): In
 function computeSimilarity(line1: string, line2: string): number {
   if (line1 === line2) return 1
   if (!line1 || !line2) return 0
-  
+
   // 使用简单的字符匹配比例
   const longer = line1.length > line2.length ? line1 : line2
   const shorter = line1.length > line2.length ? line2 : line1
-  
+
   if (longer.length === 0) return 1
-  
+
   // 计算公共字符数
   let matches = 0
   const shorterChars = shorter.split('')
   const longerChars = longer.split('')
-  
+
   for (const char of shorterChars) {
     const idx = longerChars.indexOf(char)
     if (idx !== -1) {
@@ -77,7 +77,7 @@ function computeSimilarity(line1: string, line2: string): number {
       longerChars.splice(idx, 1)
     }
   }
-  
+
   return matches / longer.length
 }
 
@@ -90,16 +90,16 @@ function smartPairLines(
   addedLines: string[]
 ): Array<{ left: string | null; right: string | null; isModified: boolean }> {
   const result: Array<{ left: string | null; right: string | null; isModified: boolean }> = []
-  
+
   const usedRemoved = new Set<number>()
   const usedAdded = new Set<number>()
-  
+
   // 相似度阈值：超过此值才认为是修改而不是删除+新增
   const SIMILARITY_THRESHOLD = 0.3
-  
+
   // 找出相似的行对
   const pairs: Array<{ ri: number; ai: number; similarity: number }> = []
-  
+
   for (let ri = 0; ri < removedLines.length; ri++) {
     for (let ai = 0; ai < addedLines.length; ai++) {
       const similarity = computeSimilarity(removedLines[ri], addedLines[ai])
@@ -108,10 +108,10 @@ function smartPairLines(
       }
     }
   }
-  
+
   // 按相似度降序排序
   pairs.sort((a, b) => b.similarity - a.similarity)
-  
+
   // 贪心匹配
   const matchedPairs: Array<{ ri: number; ai: number }> = []
   for (const pair of pairs) {
@@ -121,19 +121,19 @@ function smartPairLines(
       usedAdded.add(pair.ai)
     }
   }
-  
+
   // 按位置排序匹配对
   matchedPairs.sort((a, b) => a.ri - b.ri)
-  
+
   // 构建结果：先处理未匹配的 added（在开头），然后处理匹配对和未匹配的 removed
   let ri = 0
   let ai = 0
   let matchIdx = 0
-  
+
   while (ri < removedLines.length || ai < addedLines.length) {
     // 检查当前 removed 是否有匹配
     const currentMatch = matchedPairs[matchIdx]
-    
+
     if (currentMatch && currentMatch.ri === ri) {
       // 处理匹配对之前的未匹配 added
       while (ai < currentMatch.ai) {
@@ -142,12 +142,12 @@ function smartPairLines(
         }
         ai++
       }
-      
+
       // 处理匹配对
       result.push({
         left: removedLines[ri],
         right: addedLines[currentMatch.ai],
-        isModified: true
+        isModified: true,
       })
       ri++
       ai = currentMatch.ai + 1
@@ -166,7 +166,7 @@ function smartPairLines(
       if (ai < addedLines.length) ai++
     }
   }
-  
+
   return result
 }
 
@@ -176,30 +176,30 @@ function smartPairLines(
  */
 export function computeLineDiff(leftContent: string, rightContent: string): DiffResult {
   const changes = diffLines(leftContent, rightContent)
-  
+
   const rows: DiffRow[] = []
   const leftLineMap = new Map<number, number>()
   const rightLineMap = new Map<number, number>()
-  
+
   let leftLineNum = 1
   let rightLineNum = 1
   let visualIndex = 0
-  
+
   // 预处理：将 changes 转换为更易处理的格式
   const processedChanges: Array<{
     type: 'unchanged' | 'removed' | 'added'
     lines: string[]
   }> = []
-  
+
   for (const change of changes) {
     const lines = change.value.split('\n')
     // 移除最后一个空字符串（由于 split 产生）
     if (lines[lines.length - 1] === '') {
       lines.pop()
     }
-    
+
     if (lines.length === 0) continue
-    
+
     if (change.added) {
       processedChanges.push({ type: 'added', lines })
     } else if (change.removed) {
@@ -208,24 +208,24 @@ export function computeLineDiff(leftContent: string, rightContent: string): Diff
       processedChanges.push({ type: 'unchanged', lines })
     }
   }
-  
+
   // 处理 changes
   let i = 0
   while (i < processedChanges.length) {
     const current = processedChanges[i]
-    
+
     if (current.type === 'unchanged') {
       // 未变化的行
       for (const line of current.lines) {
         leftLineMap.set(leftLineNum, visualIndex)
         rightLineMap.set(rightLineNum, visualIndex)
-        
+
         rows.push({
           left: { type: 'unchanged', content: line, lineNumber: leftLineNum },
           right: { type: 'unchanged', content: line, lineNumber: rightLineNum },
-          visualIndex
+          visualIndex,
         })
-        
+
         leftLineNum++
         rightLineNum++
         visualIndex++
@@ -234,74 +234,74 @@ export function computeLineDiff(leftContent: string, rightContent: string): Diff
     } else if (current.type === 'removed') {
       // 检查下一个是否是 added
       const next = processedChanges[i + 1]
-      
+
       if (next && next.type === 'added') {
         // 使用智能配对
         const pairedLines = smartPairLines(current.lines, next.lines)
-        
+
         for (const pair of pairedLines) {
           if (pair.isModified && pair.left !== null && pair.right !== null) {
             // 修改的行
             leftLineMap.set(leftLineNum, visualIndex)
             rightLineMap.set(rightLineNum, visualIndex)
-            
+
             rows.push({
-              left: { 
-                type: 'modified', 
-                content: pair.left, 
+              left: {
+                type: 'modified',
+                content: pair.left,
                 lineNumber: leftLineNum,
-                pairContent: pair.right
+                pairContent: pair.right,
               },
-              right: { 
-                type: 'modified', 
-                content: pair.right, 
+              right: {
+                type: 'modified',
+                content: pair.right,
                 lineNumber: rightLineNum,
-                pairContent: pair.left
+                pairContent: pair.left,
               },
-              visualIndex
+              visualIndex,
             })
-            
+
             leftLineNum++
             rightLineNum++
           } else if (pair.left !== null) {
             // 只有左边（删除）
             leftLineMap.set(leftLineNum, visualIndex)
-            
+
             rows.push({
               left: { type: 'removed', content: pair.left, lineNumber: leftLineNum },
               right: { type: 'placeholder', content: '', lineNumber: null },
-              visualIndex
+              visualIndex,
             })
-            
+
             leftLineNum++
           } else if (pair.right !== null) {
             // 只有右边（新增）
             rightLineMap.set(rightLineNum, visualIndex)
-            
+
             rows.push({
               left: { type: 'placeholder', content: '', lineNumber: null },
               right: { type: 'added', content: pair.right, lineNumber: rightLineNum },
-              visualIndex
+              visualIndex,
             })
-            
+
             rightLineNum++
           }
-          
+
           visualIndex++
         }
-        
-        i += 2  // 跳过 added
+
+        i += 2 // 跳过 added
       } else {
         // 纯 removed
         for (const line of current.lines) {
           leftLineMap.set(leftLineNum, visualIndex)
-          
+
           rows.push({
             left: { type: 'removed', content: line, lineNumber: leftLineNum },
             right: { type: 'placeholder', content: '', lineNumber: null },
-            visualIndex
+            visualIndex,
           })
-          
+
           leftLineNum++
           visualIndex++
         }
@@ -311,20 +311,20 @@ export function computeLineDiff(leftContent: string, rightContent: string): Diff
       // 纯 added（前面没有 removed）
       for (const line of current.lines) {
         rightLineMap.set(rightLineNum, visualIndex)
-        
+
         rows.push({
           left: { type: 'placeholder', content: '', lineNumber: null },
           right: { type: 'added', content: line, lineNumber: rightLineNum },
-          visualIndex
+          visualIndex,
         })
-        
+
         rightLineNum++
         visualIndex++
       }
       i++
     }
   }
-  
+
   return { rows, leftLineMap, rightLineMap }
 }
 
@@ -345,4 +345,3 @@ export function getScrollTopByVisualIndex(visualIndex: number, lineHeight: numbe
 export function getVisualIndexByScrollTop(scrollTop: number, lineHeight: number): number {
   return Math.floor(scrollTop / lineHeight)
 }
-

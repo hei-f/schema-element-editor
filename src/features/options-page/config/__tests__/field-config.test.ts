@@ -1,4 +1,9 @@
-import { FIELD_GROUPS, FIELD_PATH_STORAGE_MAP, findFieldGroup, isDebounceField } from '../field-config'
+import {
+  FIELD_GROUPS,
+  FIELD_PATH_STORAGE_MAP,
+  findFieldGroup,
+  isDebounceField,
+} from '../field-config'
 
 describe('field-config测试', () => {
   describe('FIELD_PATH_STORAGE_MAP', () => {
@@ -157,11 +162,10 @@ describe('field-config测试', () => {
     })
 
     it('每个组都应该有save方法', () => {
-      Object.values(FIELD_GROUPS).forEach(group => {
+      Object.values(FIELD_GROUPS).forEach((group) => {
         expect(group.save).toBeDefined()
         expect(typeof group.save).toBe('function')
       })
     })
   })
 })
-

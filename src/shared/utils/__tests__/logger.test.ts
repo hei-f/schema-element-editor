@@ -62,21 +62,17 @@ describe('Logger工具测试', () => {
     it('error应该始终输出（不受启用状态影响）', () => {
       const { logger } = require('../logger')
       logger.error('error message', 'details')
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith('error message', 'details')
     })
 
     it('应该支持多个参数', () => {
       const { logger } = require('../logger')
       const error = new Error('test error')
-      
+
       logger.error('Error occurred:', error, { code: 500 })
-      
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error occurred:',
-        error,
-        { code: 500 }
-      )
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Error occurred:', error, { code: 500 })
     })
 
     it('应该支持无参数调用', () => {
@@ -89,7 +85,15 @@ describe('Logger工具测试', () => {
       const { logger } = require('../logger')
       logger.error('Error:', null, undefined, true, false, 0, '', [1, 2], { a: 1 })
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error:', null, undefined, true, false, 0, '', [1, 2], { a: 1 }
+        'Error:',
+        null,
+        undefined,
+        true,
+        false,
+        0,
+        '',
+        [1, 2],
+        { a: 1 }
       )
     })
   })
@@ -153,7 +157,7 @@ describe('Logger工具测试', () => {
 
     it('info应该处理特殊字符', () => {
       const { logger } = require('../logger')
-      logger.info('特殊字符: \n\r\t\'\"\\', '🎉', '👍')
+      logger.info('特殊字符: \n\r\t\'"\\', '🎉', '👍')
       expect(consoleInfoSpy).not.toHaveBeenCalled() // 默认禁用
     })
 
@@ -170,7 +174,7 @@ describe('Logger工具测试', () => {
       logger.warn(null, undefined)
       logger.info(null, undefined)
       logger.error(null, undefined)
-      
+
       // error始终输出
       expect(consoleErrorSpy).toHaveBeenCalledWith(null, undefined)
       // 其他方法默认不输出
@@ -180,6 +184,3 @@ describe('Logger工具测试', () => {
     })
   })
 })
-
-
-

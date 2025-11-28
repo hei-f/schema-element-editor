@@ -7,8 +7,8 @@ jest.mock('@/shared/utils/logger', () => ({
   logger: {
     log: jest.fn(),
     warn: jest.fn(),
-    error: jest.fn()
-  }
+    error: jest.fn(),
+  },
 }))
 
 describe('useEditHistory Hook 测试', () => {
@@ -19,7 +19,7 @@ describe('useEditHistory Hook 测试', () => {
     editorValue: 'initial content',
     maxHistoryCount: 5,
     onLoadVersion: mockOnLoadVersion,
-    onClearHistory: mockOnClearHistory
+    onClearHistory: mockOnClearHistory,
   }
 
   beforeEach(() => {
@@ -42,15 +42,17 @@ describe('useEditHistory Hook 测试', () => {
 
     it('应该从 sessionStorage 加载历史', () => {
       const mockHistory = {
-        entries: [{
-          id: '1',
-          content: 'test',
-          timestamp: Date.now(),
-          type: HistoryEntryType.AutoSave,
-          description: '自动保存'
-        }],
+        entries: [
+          {
+            id: '1',
+            content: 'test',
+            timestamp: Date.now(),
+            type: HistoryEntryType.AutoSave,
+            description: '自动保存',
+          },
+        ],
         specialEntries: [],
-        currentIndex: 0
+        currentIndex: 0,
       }
       sessionStorage.setItem('edit-history:test-params', JSON.stringify(mockHistory))
 
@@ -143,11 +145,7 @@ describe('useEditHistory Hook 测试', () => {
       const { result } = renderHook(() => useEditHistory(defaultProps))
 
       act(() => {
-        result.current.recordSpecialVersion(
-          HistoryEntryType.Save,
-          '保存版本',
-          'saved content'
-        )
+        result.current.recordSpecialVersion(HistoryEntryType.Save, '保存版本', 'saved content')
       })
 
       expect(result.current.history).toHaveLength(1)
@@ -157,10 +155,12 @@ describe('useEditHistory Hook 测试', () => {
     })
 
     it('特殊版本应该使用 editorValue 如果未提供 content', () => {
-      const { result } = renderHook(() => useEditHistory({
-        ...defaultProps,
-        editorValue: 'current editor value'
-      }))
+      const { result } = renderHook(() =>
+        useEditHistory({
+          ...defaultProps,
+          editorValue: 'current editor value',
+        })
+      )
 
       act(() => {
         result.current.recordSpecialVersion(HistoryEntryType.Draft, '草稿')
@@ -171,10 +171,12 @@ describe('useEditHistory Hook 测试', () => {
 
     it('特殊版本不应该计入数量限制', async () => {
       jest.useFakeTimers()
-      const { result } = renderHook(() => useEditHistory({
-        ...defaultProps,
-        maxHistoryCount: 2
-      }))
+      const { result } = renderHook(() =>
+        useEditHistory({
+          ...defaultProps,
+          maxHistoryCount: 2,
+        })
+      )
 
       // 添加 2 个普通版本（通过防抖）
       act(() => {
@@ -183,7 +185,7 @@ describe('useEditHistory Hook 测试', () => {
       act(() => {
         jest.advanceTimersByTime(2000)
       })
-      
+
       await waitFor(() => {
         expect(result.current.history.length).toBeGreaterThan(0)
       })
@@ -214,7 +216,7 @@ describe('useEditHistory Hook 测试', () => {
       await waitFor(() => {
         expect(result.current.history).toHaveLength(5)
       })
-      
+
       jest.useRealTimers()
     })
   })
@@ -325,10 +327,12 @@ describe('useEditHistory Hook 测试', () => {
     })
 
     it('超过限制时应该删除最旧的记录', async () => {
-      const { result } = renderHook(() => useEditHistory({
-        ...defaultProps,
-        maxHistoryCount: 3
-      }))
+      const { result } = renderHook(() =>
+        useEditHistory({
+          ...defaultProps,
+          maxHistoryCount: 3,
+        })
+      )
 
       // 添加 4 个普通版本
       for (let i = 1; i <= 4; i++) {
@@ -343,8 +347,8 @@ describe('useEditHistory Hook 测试', () => {
 
       // 应该只保留最新的 3 个
       expect(result.current.history).toHaveLength(3)
-      expect(result.current.history.some(e => e.content === 'content 1')).toBe(false)
-      expect(result.current.history.some(e => e.content === 'content 4')).toBe(true)
+      expect(result.current.history.some((e) => e.content === 'content 1')).toBe(false)
+      expect(result.current.history.some((e) => e.content === 'content 4')).toBe(true)
     })
   })
 
@@ -358,7 +362,7 @@ describe('useEditHistory Hook 测试', () => {
 
       const stored = sessionStorage.getItem('edit-history:test-params')
       expect(stored).toBeTruthy()
-      
+
       const data = JSON.parse(stored!)
       expect(data.specialEntries).toHaveLength(1)
       expect(data.specialEntries[0].content).toBe('content')
@@ -367,14 +371,16 @@ describe('useEditHistory Hook 测试', () => {
     it('应该从 sessionStorage 恢复历史', () => {
       const mockData = {
         entries: [],
-        specialEntries: [{
-          id: '1',
-          content: 'restored content',
-          timestamp: Date.now(),
-          type: HistoryEntryType.Save,
-          description: '保存版本'
-        }],
-        currentIndex: 0
+        specialEntries: [
+          {
+            id: '1',
+            content: 'restored content',
+            timestamp: Date.now(),
+            type: HistoryEntryType.Save,
+            description: '保存版本',
+          },
+        ],
+        currentIndex: 0,
       }
       sessionStorage.setItem('edit-history:test-params', JSON.stringify(mockData))
 
@@ -418,10 +424,12 @@ describe('useEditHistory Hook 测试', () => {
     })
 
     it('enabled=false 时 recordChange 应该跳过记录', async () => {
-      const { result } = renderHook(() => useEditHistory({
-        ...defaultProps,
-        enabled: false
-      }))
+      const { result } = renderHook(() =>
+        useEditHistory({
+          ...defaultProps,
+          enabled: false,
+        })
+      )
 
       act(() => {
         result.current.recordChange('new content')
@@ -437,10 +445,12 @@ describe('useEditHistory Hook 测试', () => {
     })
 
     it('enabled=false 时 recordSpecialVersion 应该跳过记录', () => {
-      const { result } = renderHook(() => useEditHistory({
-        ...defaultProps,
-        enabled: false
-      }))
+      const { result } = renderHook(() =>
+        useEditHistory({
+          ...defaultProps,
+          enabled: false,
+        })
+      )
 
       act(() => {
         result.current.recordSpecialVersion(HistoryEntryType.Save, '保存版本', 'content')
@@ -452,22 +462,26 @@ describe('useEditHistory Hook 测试', () => {
     it('enabled=false 时初始化应该清空历史状态', () => {
       // 先在 sessionStorage 中存储一些历史
       const mockHistory = {
-        entries: [{
-          id: '1',
-          content: 'test',
-          timestamp: Date.now(),
-          type: HistoryEntryType.AutoSave,
-          description: '自动保存'
-        }],
+        entries: [
+          {
+            id: '1',
+            content: 'test',
+            timestamp: Date.now(),
+            type: HistoryEntryType.AutoSave,
+            description: '自动保存',
+          },
+        ],
         specialEntries: [],
-        currentIndex: 0
+        currentIndex: 0,
       }
       sessionStorage.setItem('edit-history:test-params', JSON.stringify(mockHistory))
 
-      const { result } = renderHook(() => useEditHistory({
-        ...defaultProps,
-        enabled: false
-      }))
+      const { result } = renderHook(() =>
+        useEditHistory({
+          ...defaultProps,
+          enabled: false,
+        })
+      )
 
       // enabled=false 时不应该加载历史
       expect(result.current.history).toHaveLength(0)
@@ -476,10 +490,12 @@ describe('useEditHistory Hook 测试', () => {
     })
 
     it('enabled=true 时功能应该正常工作（默认行为）', async () => {
-      const { result } = renderHook(() => useEditHistory({
-        ...defaultProps,
-        enabled: true
-      }))
+      const { result } = renderHook(() =>
+        useEditHistory({
+          ...defaultProps,
+          enabled: true,
+        })
+      )
 
       act(() => {
         result.current.recordChange('new content')
@@ -507,10 +523,9 @@ describe('useEditHistory Hook 测试', () => {
 
     it('loadHistoryVersion 在 enabled=false 时仍然可以工作', () => {
       // 先启用状态下添加历史
-      const { result, rerender } = renderHook(
-        (props) => useEditHistory(props),
-        { initialProps: { ...defaultProps, enabled: true } }
-      )
+      const { result, rerender } = renderHook((props) => useEditHistory(props), {
+        initialProps: { ...defaultProps, enabled: true },
+      })
 
       act(() => {
         result.current.recordSpecialVersion(HistoryEntryType.Save, '版本1', 'content 1')
@@ -531,10 +546,12 @@ describe('useEditHistory Hook 测试', () => {
     })
 
     it('clearHistory 在 enabled=false 时仍然可以工作', () => {
-      const { result } = renderHook(() => useEditHistory({
-        ...defaultProps,
-        enabled: false
-      }))
+      const { result } = renderHook(() =>
+        useEditHistory({
+          ...defaultProps,
+          enabled: false,
+        })
+      )
 
       // clearHistory 应该仍然可以调用，不会报错
       act(() => {
@@ -546,4 +563,3 @@ describe('useEditHistory Hook 测试', () => {
     })
   })
 })
-

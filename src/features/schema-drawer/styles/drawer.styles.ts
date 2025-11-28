@@ -108,7 +108,7 @@ export const DrawerTitleActions = styled.div`
 export const PreviewResizer = styled.div<{ $isDragging?: boolean }>`
   width: 8px;
   height: 100%;
-  background: ${props => props.$isDragging ? '#1890ff' : '#d9d9d9'};
+  background: ${(props) => (props.$isDragging ? '#1890ff' : '#d9d9d9')};
   cursor: col-resize;
   flex-shrink: 0;
   position: relative;
@@ -117,11 +117,11 @@ export const PreviewResizer = styled.div<{ $isDragging?: boolean }>`
   border-right: 1px solid #bfbfbf;
   user-select: none;
   z-index: 10;
-  
+
   &:hover {
     background: #1890ff;
   }
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -157,7 +157,7 @@ export const PreviewEditorRow = styled.div`
  * 预览占位区域
  */
 export const PreviewPlaceholder = styled.div<{ $width: number }>`
-  width: ${props => props.$width}%;
+  width: ${(props) => props.$width}%;
   background: #f5f5f5;
   display: flex;
   align-items: center;
@@ -175,7 +175,7 @@ export const DragOverlay = styled.div<{ $width: number }>`
   position: absolute;
   top: 0;
   left: 0;
-  width: ${props => props.$width}%;
+  width: ${(props) => props.$width}%;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -184,10 +184,10 @@ export const DragOverlay = styled.div<{ $width: number }>`
   z-index: 5;
   pointer-events: none;
   box-sizing: border-box;
-  
+
   /* 虚线边框 */
   border: 2px dashed rgba(24, 144, 255, 0.6);
-  
+
   /* 静止条纹效果 */
   background-image: linear-gradient(
     45deg,
@@ -230,4 +230,3 @@ export const PreviewEditorContainer = styled.div`
   flex-direction: column;
   position: relative;
 `
-

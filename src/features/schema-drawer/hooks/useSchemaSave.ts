@@ -31,7 +31,7 @@ export const useSchemaSave = ({
   wasStringData,
   paramsKey,
   onSaveSuccess,
-  onSave
+  onSave,
 }: UseSchemaSaveProps): UseSchemaSaveReturn => {
   const [isSaving, setIsSaving] = useState(false)
 
@@ -40,21 +40,21 @@ export const useSchemaSave = ({
    */
   const handleSave = async (): Promise<void> => {
     setIsSaving(true)
-    
+
     try {
       // 使用SchemaTransformer准备保存数据
       const result = schemaTransformer.prepareSaveData(editorValue, wasStringData)
-      
+
       if (!result.success) {
         throw new Error(result.error || '数据转换失败')
       }
-      
+
       // 调用保存API
       await onSave(result.data)
-      
+
       // 删除草稿
       await storage.deleteDraft(paramsKey)
-      
+
       // 触发成功回调
       onSaveSuccess()
     } catch (error: any) {
@@ -66,6 +66,6 @@ export const useSchemaSave = ({
 
   return {
     isSaving,
-    handleSave
+    handleSave,
   }
 }

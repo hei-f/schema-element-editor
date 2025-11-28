@@ -43,7 +43,7 @@ export enum ContentType {
   /** 原始字符串 */
   RawString = 'rawString',
   /** 其他类型 */
-  Other = 'other'
+  Other = 'other',
 }
 
 /**
@@ -331,7 +331,7 @@ export enum HistoryEntryType {
   /** ⭐ 应用收藏 */
   Favorite = 'favorite',
   /** 🔄 手动记录 */
-  Manual = 'manual'
+  Manual = 'manual',
 }
 
 /**
@@ -462,8 +462,6 @@ export interface PreviewFunctionResultPayload {
   exists: boolean
 }
 
-
-
 /**
  * 获取Schema的函数类型
  * @template T Schema数据类型，不能是 null 或 undefined
@@ -499,4 +497,3 @@ declare global {
     [key: string]: GetSchemaFunction | UpdateSchemaFunction | PreviewFunction | any
   }
 }
-

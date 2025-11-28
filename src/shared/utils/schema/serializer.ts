@@ -21,12 +21,12 @@ export const serializeJson = (data: any): JsonProcessResult => {
     const jsonString = JSON.stringify(data, null, 2)
     return {
       success: true,
-      data: jsonString
+      data: jsonString,
     }
   } catch (error) {
     return {
       success: false,
-      error: (error as Error).message
+      error: (error as Error).message,
     }
   }
 }
@@ -48,12 +48,12 @@ export const deserializeJson = (input: string): JsonProcessResult => {
 
   try {
     let parsed: any = input.trim()
-    
+
     // 如果输入为空
     if (!parsed) {
       return {
         success: false,
-        error: '输入内容为空'
+        error: '输入内容为空',
       }
     }
 
@@ -71,7 +71,7 @@ export const deserializeJson = (input: string): JsonProcessResult => {
         const nextParsed = JSON.parse(parsed)
         parsed = nextParsed
         parseCount++
-      } catch (error) {
+      } catch (_error) {
         // 解析失败，说明字符串格式有问题或已经是最终结果
         break
       }
@@ -83,7 +83,7 @@ export const deserializeJson = (input: string): JsonProcessResult => {
         success: true,
         data: JSON.stringify(parsed, null, 2),
         parseCount,
-        error: '已达到最大解析深度，可能存在过度序列化'
+        error: '已达到最大解析深度，可能存在过度序列化',
       }
     }
 
@@ -91,7 +91,7 @@ export const deserializeJson = (input: string): JsonProcessResult => {
     if (parseCount === 0 && typeof parsed === 'string') {
       return {
         success: false,
-        error: '无法解析为有效的JSON格式，请检查输入内容'
+        error: '无法解析为有效的JSON格式，请检查输入内容',
       }
     }
 
@@ -99,12 +99,12 @@ export const deserializeJson = (input: string): JsonProcessResult => {
     return {
       success: true,
       data: typeof parsed === 'string' ? parsed : JSON.stringify(parsed, null, 2),
-      parseCount: parseCount > 0 ? parseCount : undefined
+      parseCount: parseCount > 0 ? parseCount : undefined,
     }
   } catch (error) {
     return {
       success: false,
-      error: `解析失败: ${(error as Error).message}`
+      error: `解析失败: ${(error as Error).message}`,
     }
   }
 }
@@ -116,7 +116,7 @@ export const deserializeJson = (input: string): JsonProcessResult => {
  */
 export const tryFixJsonString = (input: string): string => {
   const trimmed = input.trim()
-  
+
   // 策略1: 尝试直接解析（可能已经是有效JSON）
   try {
     JSON.parse(trimmed)
@@ -124,7 +124,7 @@ export const tryFixJsonString = (input: string): string => {
   } catch (error) {
     console.debug('JSON 解析失败，尝试修复:', error)
   }
-  
+
   // 策略2: 移除首尾的额外引号（针对过度序列化）
   if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
     try {
@@ -137,7 +137,7 @@ export const tryFixJsonString = (input: string): string => {
       console.debug('反转义修复失败，尝试其他策略:', error)
     }
   }
-  
+
   // 策略3: 处理文本形式的转义符（不在引号包裹内）
   // 例如：[{\"key\":\"value\"}] -> [{"key":"value"}]
   if (trimmed.includes('\\') && !trimmed.startsWith('"')) {
@@ -149,7 +149,6 @@ export const tryFixJsonString = (input: string): string => {
       console.debug('所有修复策略失败，返回原始输入:', error)
     }
   }
-  
+
   return trimmed
 }
-

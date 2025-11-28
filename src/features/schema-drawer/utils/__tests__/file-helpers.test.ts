@@ -3,7 +3,7 @@ import {
   detectFileFormat,
   generateExportFileName,
   MAX_FILE_SIZE,
-  validateFileSize
+  validateFileSize,
 } from '../file-helpers'
 import type { ExportMetadata } from '../../types/export'
 
@@ -11,19 +11,19 @@ describe('file-helpers', () => {
   describe('generateExportFileName', () => {
     it('应该生成正确格式的文件名', () => {
       const fileName = generateExportFileName('param1,param2')
-      
+
       expect(fileName).toMatch(/^content-param1_param2-\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.json$/)
     })
 
     it('应该清理参数键中的非法字符', () => {
       const fileName = generateExportFileName('param@#$1,param!2')
-      
+
       expect(fileName).toMatch(/^content-param___1_param_2-/)
     })
 
     it('应该保留合法字符（字母、数字、连字符、下划线）', () => {
       const fileName = generateExportFileName('test-param_123')
-      
+
       expect(fileName).toContain('content-test-param_123-')
     })
   })
@@ -38,8 +38,8 @@ describe('file-helpers', () => {
           exportedAt: '2025-11-24T10:00:00.000Z',
           version: '1.0.0',
           wasStringData: false,
-          url: 'https://example.com'
-        }
+          url: 'https://example.com',
+        },
       }
 
       const result = detectFileFormat(data)
@@ -49,8 +49,8 @@ describe('file-helpers', () => {
         content: { type: 'card' },
         metadata: expect.objectContaining({
           params: 'test',
-          wasStringData: false
-        })
+          wasStringData: false,
+        }),
       })
     })
 
@@ -61,33 +61,33 @@ describe('file-helpers', () => {
 
       expect(result).toEqual({
         hasMetadata: false,
-        content: { type: 'card', title: 'test' }
+        content: { type: 'card', title: 'test' },
       })
     })
 
     it('当标记字段不是 true 时应该识别为普通文件', () => {
       const data = {
         __SCHEMA_EDITOR_EXPORT__: false,
-        content: { type: 'card' }
+        content: { type: 'card' },
       }
 
       const result = detectFileFormat(data)
 
       expect(result).toEqual({
         hasMetadata: false,
-        content: data
+        content: data,
       })
     })
 
     it('应该处理 null 和 undefined', () => {
       expect(detectFileFormat(null)).toEqual({
         hasMetadata: false,
-        content: null
+        content: null,
       })
 
       expect(detectFileFormat(undefined)).toEqual({
         hasMetadata: false,
-        content: undefined
+        content: undefined,
       })
     })
   })
@@ -95,21 +95,21 @@ describe('file-helpers', () => {
   describe('validateFileSize', () => {
     it('应该接受小于限制的文件', () => {
       const file = new File(['test'], 'test.json', { type: 'application/json' })
-      
+
       expect(validateFileSize(file)).toBe(true)
     })
 
     it('应该接受等于限制的文件', () => {
       const content = 'x'.repeat(MAX_FILE_SIZE)
       const file = new File([content], 'test.json', { type: 'application/json' })
-      
+
       expect(validateFileSize(file)).toBe(true)
     })
 
     it('应该拒绝超过限制的文件', () => {
       const content = 'x'.repeat(MAX_FILE_SIZE + 1)
       const file = new File([content], 'test.json', { type: 'application/json' })
-      
+
       expect(validateFileSize(file)).toBe(false)
     })
   })
@@ -122,7 +122,7 @@ describe('file-helpers', () => {
         exportedAt: '2025-11-24T10:00:00.000Z',
         version: '1.0.0',
         wasStringData: false,
-        url: 'https://example.com'
+        url: 'https://example.com',
       }
 
       const result = buildExportData(content, metadata)
@@ -130,7 +130,7 @@ describe('file-helpers', () => {
       expect(result).toEqual({
         __SCHEMA_EDITOR_EXPORT__: true,
         content,
-        metadata
+        metadata,
       })
     })
 
@@ -141,7 +141,7 @@ describe('file-helpers', () => {
         exportedAt: '2025-11-24T10:00:00.000Z',
         version: '1.0.0',
         wasStringData: false,
-        url: 'https://example.com'
+        url: 'https://example.com',
       }
 
       const result = buildExportData(content, metadata)
@@ -157,4 +157,3 @@ describe('file-helpers', () => {
     })
   })
 })
-
