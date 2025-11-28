@@ -2,7 +2,7 @@ import { MessageType } from '@/shared/types'
 
 /**
  * Background Service Worker 测试
- * 
+ *
  * 注意：由于 service-worker.ts 在实际运行时会立即执行顶层代码，
  * 我们在这里测试核心逻辑而不是导入整个模块
  */
@@ -14,22 +14,20 @@ describe('Background Service Worker', () => {
 
     // Mock storage
     mockStorage = {
-      isActive: false
+      isActive: false,
     }
-
     ;(chrome.storage.local.get as jest.Mock).mockImplementation((keys: string | string[]) => {
       if (typeof keys === 'string') {
         return Promise.resolve({ [keys]: mockStorage[keys] })
       }
       const result: any = {}
       if (Array.isArray(keys)) {
-        keys.forEach(key => {
+        keys.forEach((key) => {
           result[key] = mockStorage[key]
         })
       }
       return Promise.resolve(result)
     })
-
     ;(chrome.storage.local.set as jest.Mock).mockImplementation((items: any) => {
       Object.assign(mockStorage, items)
       return Promise.resolve()
@@ -40,7 +38,7 @@ describe('Background Service Worker', () => {
     it('应该切换激活状态从 false 到 true', async () => {
       const mockTabs = [
         { id: 1, url: 'https://example.com' },
-        { id: 2, url: 'https://test.com' }
+        { id: 2, url: 'https://test.com' },
       ]
 
       ;(chrome.tabs.query as jest.Mock).mockResolvedValue(mockTabs)
@@ -82,7 +80,7 @@ describe('Background Service Worker', () => {
       const mockTabs = [
         { id: 1, url: 'https://example.com' },
         { id: 2, url: 'https://test.com' },
-        { id: 3, url: 'https://another.com' }
+        { id: 3, url: 'https://another.com' },
       ]
 
       ;(chrome.tabs.query as jest.Mock).mockResolvedValue(mockTabs)
@@ -98,7 +96,7 @@ describe('Background Service Worker', () => {
       const mockTabs = [
         { id: 1, url: 'https://example.com' },
         { id: 2, url: 'https://test.com' },
-        { id: 3, url: 'https://another.com' }
+        { id: 3, url: 'https://another.com' },
       ]
 
       ;(chrome.tabs.query as jest.Mock).mockResolvedValue(mockTabs)
@@ -107,15 +105,15 @@ describe('Background Service Worker', () => {
       // 模拟广播逻辑
       const broadcastToAllTabs = async (isActive: boolean) => {
         const tabs = await chrome.tabs.query({})
-        
+
         for (const tab of tabs) {
           if (tab.id) {
             try {
               await chrome.tabs.sendMessage(tab.id, {
                 type: MessageType.ACTIVE_STATE_CHANGED,
-                payload: { isActive }
+                payload: { isActive },
               })
-            } catch (error) {
+            } catch (_error) {
               // 忽略错误
             }
           }
@@ -127,15 +125,15 @@ describe('Background Service Worker', () => {
       expect(chrome.tabs.sendMessage).toHaveBeenCalledTimes(3)
       expect(chrome.tabs.sendMessage).toHaveBeenCalledWith(1, {
         type: MessageType.ACTIVE_STATE_CHANGED,
-        payload: { isActive: true }
+        payload: { isActive: true },
       })
       expect(chrome.tabs.sendMessage).toHaveBeenCalledWith(2, {
         type: MessageType.ACTIVE_STATE_CHANGED,
-        payload: { isActive: true }
+        payload: { isActive: true },
       })
       expect(chrome.tabs.sendMessage).toHaveBeenCalledWith(3, {
         type: MessageType.ACTIVE_STATE_CHANGED,
-        payload: { isActive: true }
+        payload: { isActive: true },
       })
     })
 
@@ -143,7 +141,7 @@ describe('Background Service Worker', () => {
       const mockTabs = [
         { id: 1, url: 'https://example.com' },
         { url: 'https://no-id.com' }, // 没有 id
-        { id: 3, url: 'https://another.com' }
+        { id: 3, url: 'https://another.com' },
       ]
 
       ;(chrome.tabs.query as jest.Mock).mockResolvedValue(mockTabs)
@@ -151,15 +149,15 @@ describe('Background Service Worker', () => {
 
       const broadcastToAllTabs = async (isActive: boolean) => {
         const tabs = await chrome.tabs.query({})
-        
+
         for (const tab of tabs) {
           if (tab.id) {
             try {
               await chrome.tabs.sendMessage(tab.id, {
                 type: MessageType.ACTIVE_STATE_CHANGED,
-                payload: { isActive }
+                payload: { isActive },
               })
-            } catch (error) {
+            } catch (_error) {
               // 忽略错误
             }
           }
@@ -180,11 +178,11 @@ describe('Background Service Worker', () => {
       const mockTabs = [
         { id: 1, url: 'https://example.com' },
         { id: 2, url: 'chrome://extensions' }, // 特殊页面
-        { id: 3, url: 'https://another.com' }
+        { id: 3, url: 'https://another.com' },
       ]
 
       ;(chrome.tabs.query as jest.Mock).mockResolvedValue(mockTabs)
-      
+
       // 模拟第二个标签页发送失败
       ;(chrome.tabs.sendMessage as jest.Mock).mockImplementation((tabId: number) => {
         if (tabId === 2) {
@@ -195,15 +193,15 @@ describe('Background Service Worker', () => {
 
       const broadcastToAllTabs = async (isActive: boolean) => {
         const tabs = await chrome.tabs.query({})
-        
+
         for (const tab of tabs) {
           if (tab.id) {
             try {
               await chrome.tabs.sendMessage(tab.id, {
                 type: MessageType.ACTIVE_STATE_CHANGED,
-                payload: { isActive }
+                payload: { isActive },
               })
-            } catch (error) {
+            } catch (_error) {
               // 忽略错误，继续处理其他标签页
             }
           }
@@ -223,15 +221,15 @@ describe('Background Service Worker', () => {
       const broadcastToAllTabs = async (isActive: boolean) => {
         try {
           const tabs = await chrome.tabs.query({})
-          
+
           for (const tab of tabs) {
             if (tab.id) {
               try {
                 await chrome.tabs.sendMessage(tab.id, {
                   type: MessageType.ACTIVE_STATE_CHANGED,
-                  payload: { isActive }
+                  payload: { isActive },
                 })
-              } catch (error) {
+              } catch (_error) {
                 // 忽略发送错误
               }
             }
@@ -254,62 +252,62 @@ describe('Background Service Worker', () => {
     it('应该为激活状态设置正确的图标', async () => {
       const updateIconState = async (isActive: boolean) => {
         await chrome.action.setTitle({
-          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`
+          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
         })
-        
+
         const iconSuffix = isActive ? 'active' : 'inactive'
         await chrome.action.setIcon({
           path: {
             16: `icons/icon-${iconSuffix}-16.png`,
             48: `icons/icon-${iconSuffix}-48.png`,
-            128: `icons/icon-${iconSuffix}-128.png`
-          }
+            128: `icons/icon-${iconSuffix}-128.png`,
+          },
         })
       }
 
       await updateIconState(true)
 
       expect(chrome.action.setTitle).toHaveBeenCalledWith({
-        title: 'Schema Editor - 已激活 ✓'
+        title: 'Schema Editor - 已激活 ✓',
       })
 
       expect(chrome.action.setIcon).toHaveBeenCalledWith({
         path: {
           16: 'icons/icon-active-16.png',
           48: 'icons/icon-active-48.png',
-          128: 'icons/icon-active-128.png'
-        }
+          128: 'icons/icon-active-128.png',
+        },
       })
     })
 
     it('应该为未激活状态设置正确的图标', async () => {
       const updateIconState = async (isActive: boolean) => {
         await chrome.action.setTitle({
-          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`
+          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
         })
-        
+
         const iconSuffix = isActive ? 'active' : 'inactive'
         await chrome.action.setIcon({
           path: {
             16: `icons/icon-${iconSuffix}-16.png`,
             48: `icons/icon-${iconSuffix}-48.png`,
-            128: `icons/icon-${iconSuffix}-128.png`
-          }
+            128: `icons/icon-${iconSuffix}-128.png`,
+          },
         })
       }
 
       await updateIconState(false)
 
       expect(chrome.action.setTitle).toHaveBeenCalledWith({
-        title: 'Schema Editor - 未激活'
+        title: 'Schema Editor - 未激活',
       })
 
       expect(chrome.action.setIcon).toHaveBeenCalledWith({
         path: {
           16: 'icons/icon-inactive-16.png',
           48: 'icons/icon-inactive-48.png',
-          128: 'icons/icon-inactive-128.png'
-        }
+          128: 'icons/icon-inactive-128.png',
+        },
       })
     })
   })
@@ -318,11 +316,10 @@ describe('Background Service Worker', () => {
     it('应该正确处理从未激活到激活的完整流程', async () => {
       const mockTabs = [
         { id: 1, url: 'https://example.com' },
-        { id: 2, url: 'https://test.com' }
+        { id: 2, url: 'https://test.com' },
       ]
 
       mockStorage.isActive = false
-
       ;(chrome.tabs.query as jest.Mock).mockResolvedValue(mockTabs)
       ;(chrome.tabs.sendMessage as jest.Mock).mockResolvedValue(undefined)
 
@@ -336,14 +333,14 @@ describe('Background Service Worker', () => {
         // 2. 更新图标状态
         const iconSuffix = newState ? 'active' : 'inactive'
         await chrome.action.setTitle({
-          title: `Schema Editor - ${newState ? '已激活 ✓' : '未激活'}`
+          title: `Schema Editor - ${newState ? '已激活 ✓' : '未激活'}`,
         })
         await chrome.action.setIcon({
           path: {
             16: `icons/icon-${iconSuffix}-16.png`,
             48: `icons/icon-${iconSuffix}-48.png`,
-            128: `icons/icon-${iconSuffix}-128.png`
-          }
+            128: `icons/icon-${iconSuffix}-128.png`,
+          },
         })
 
         // 3. 广播到所有标签页
@@ -353,9 +350,9 @@ describe('Background Service Worker', () => {
             try {
               await chrome.tabs.sendMessage(tab.id, {
                 type: MessageType.ACTIVE_STATE_CHANGED,
-                payload: { isActive: newState }
+                payload: { isActive: newState },
               })
-            } catch (error) {
+            } catch (_error) {
               // 忽略错误
             }
           }
@@ -383,18 +380,18 @@ describe('Background Service Worker', () => {
       const restoreIconState = async () => {
         const result = await chrome.storage.local.get('isActive')
         const isActive = result.isActive ?? false
-        
+
         await chrome.action.setTitle({
-          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`
+          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
         })
-        
+
         const iconSuffix = isActive ? 'active' : 'inactive'
         await chrome.action.setIcon({
           path: {
             16: `icons/icon-${iconSuffix}-16.png`,
             48: `icons/icon-${iconSuffix}-48.png`,
-            128: `icons/icon-${iconSuffix}-128.png`
-          }
+            128: `icons/icon-${iconSuffix}-128.png`,
+          },
         })
 
         return isActive
@@ -405,14 +402,14 @@ describe('Background Service Worker', () => {
       expect(restoredState).toBe(true)
       expect(chrome.storage.local.get).toHaveBeenCalledWith('isActive')
       expect(chrome.action.setTitle).toHaveBeenCalledWith({
-        title: 'Schema Editor - 已激活 ✓'
+        title: 'Schema Editor - 已激活 ✓',
       })
       expect(chrome.action.setIcon).toHaveBeenCalledWith({
         path: {
           16: 'icons/icon-active-16.png',
           48: 'icons/icon-active-48.png',
-          128: 'icons/icon-active-128.png'
-        }
+          128: 'icons/icon-active-128.png',
+        },
       })
     })
 
@@ -422,18 +419,18 @@ describe('Background Service Worker', () => {
       const restoreIconState = async () => {
         const result = await chrome.storage.local.get('isActive')
         const isActive = result.isActive ?? false
-        
+
         await chrome.action.setTitle({
-          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`
+          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
         })
-        
+
         const iconSuffix = isActive ? 'active' : 'inactive'
         await chrome.action.setIcon({
           path: {
             16: `icons/icon-${iconSuffix}-16.png`,
             48: `icons/icon-${iconSuffix}-48.png`,
-            128: `icons/icon-${iconSuffix}-128.png`
-          }
+            128: `icons/icon-${iconSuffix}-128.png`,
+          },
         })
 
         return isActive
@@ -444,14 +441,14 @@ describe('Background Service Worker', () => {
       expect(restoredState).toBe(false)
       expect(chrome.storage.local.get).toHaveBeenCalledWith('isActive')
       expect(chrome.action.setTitle).toHaveBeenCalledWith({
-        title: 'Schema Editor - 未激活'
+        title: 'Schema Editor - 未激活',
       })
       expect(chrome.action.setIcon).toHaveBeenCalledWith({
         path: {
           16: 'icons/icon-inactive-16.png',
           48: 'icons/icon-inactive-48.png',
-          128: 'icons/icon-inactive-128.png'
-        }
+          128: 'icons/icon-inactive-128.png',
+        },
       })
     })
 
@@ -462,18 +459,18 @@ describe('Background Service Worker', () => {
       const restoreIconState = async () => {
         const result = await chrome.storage.local.get('isActive')
         const isActive = result.isActive ?? false
-        
+
         await chrome.action.setTitle({
-          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`
+          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
         })
-        
+
         const iconSuffix = isActive ? 'active' : 'inactive'
         await chrome.action.setIcon({
           path: {
             16: `icons/icon-${iconSuffix}-16.png`,
             48: `icons/icon-${iconSuffix}-48.png`,
-            128: `icons/icon-${iconSuffix}-128.png`
-          }
+            128: `icons/icon-${iconSuffix}-128.png`,
+          },
         })
 
         return isActive
@@ -483,14 +480,14 @@ describe('Background Service Worker', () => {
 
       expect(restoredState).toBe(false)
       expect(chrome.action.setTitle).toHaveBeenCalledWith({
-        title: 'Schema Editor - 未激活'
+        title: 'Schema Editor - 未激活',
       })
       expect(chrome.action.setIcon).toHaveBeenCalledWith({
         path: {
           16: 'icons/icon-inactive-16.png',
           48: 'icons/icon-inactive-48.png',
-          128: 'icons/icon-inactive-128.png'
-        }
+          128: 'icons/icon-inactive-128.png',
+        },
       })
     })
 
@@ -500,7 +497,7 @@ describe('Background Service Worker', () => {
 
       const restoreIconState = async () => {
         let isActive = false
-        
+
         try {
           const result = await chrome.storage.local.get('isActive')
           isActive = result.isActive ?? false
@@ -508,18 +505,18 @@ describe('Background Service Worker', () => {
           console.error('获取激活状态失败:', error)
           isActive = false
         }
-        
+
         await chrome.action.setTitle({
-          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`
+          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
         })
-        
+
         const iconSuffix = isActive ? 'active' : 'inactive'
         await chrome.action.setIcon({
           path: {
             16: `icons/icon-${iconSuffix}-16.png`,
             48: `icons/icon-${iconSuffix}-48.png`,
-            128: `icons/icon-${iconSuffix}-128.png`
-          }
+            128: `icons/icon-${iconSuffix}-128.png`,
+          },
         })
 
         return isActive
@@ -529,16 +526,15 @@ describe('Background Service Worker', () => {
 
       expect(restoredState).toBe(false)
       expect(chrome.action.setTitle).toHaveBeenCalledWith({
-        title: 'Schema Editor - 未激活'
+        title: 'Schema Editor - 未激活',
       })
       expect(chrome.action.setIcon).toHaveBeenCalledWith({
         path: {
           16: 'icons/icon-inactive-16.png',
           48: 'icons/icon-inactive-48.png',
-          128: 'icons/icon-inactive-128.png'
-        }
+          128: 'icons/icon-inactive-128.png',
+        },
       })
     })
   })
 })
-

@@ -45,12 +45,14 @@ export const useDraftManagement = ({
   onLoadDraft,
   onSuccess,
   onWarning,
-  onError
+  onError,
 }: UseDraftManagementProps): UseDraftManagementReturn => {
   const [hasDraft, setHasDraft] = useState(false)
   const [showDraftNotification, setShowDraftNotification] = useState(false)
-  const [draftAutoSaveStatus, setDraftAutoSaveStatus] = useState<'idle' | 'saving' | 'success'>('idle')
-  
+  const [draftAutoSaveStatus, setDraftAutoSaveStatus] = useState<'idle' | 'saving' | 'success'>(
+    'idle'
+  )
+
   const draftAutoSaveTimerRef = useRef<NodeJS.Timeout | null>(null)
   const draftNotificationTimerRef = useRef<NodeJS.Timeout | null>(null)
   const autoSaveDebounce = 3000
@@ -65,7 +67,7 @@ export const useDraftManagement = ({
       setShowDraftNotification(false)
       return
     }
-    
+
     try {
       const draft = await storage.getDraft(paramsKey)
       if (draft) {
@@ -88,13 +90,14 @@ export const useDraftManagement = ({
     if (!enabled) {
       return
     }
-    
+
     try {
       await storage.saveDraft(paramsKey, editorValue)
       setHasDraft(true)
       setShowDraftNotification(true)
       onSuccess?.('草稿已保存')
     } catch (error) {
+      console.error('保存草稿失败:', error)
       onError?.('保存草稿失败')
     }
   }, [paramsKey, editorValue, enabled, onSuccess, onError])
@@ -113,6 +116,7 @@ export const useDraftManagement = ({
         setHasDraft(false)
       }
     } catch (error) {
+      console.error('加载草稿失败:', error)
       onError?.('加载草稿失败')
     }
   }, [paramsKey, onLoadDraft, onSuccess, onWarning, onError])
@@ -130,7 +134,7 @@ export const useDraftManagement = ({
         getContainer: shadowRootManager.getContainer,
         onOk: async () => {
           await loadDraftContent()
-        }
+        },
       })
     } else {
       await loadDraftContent()
@@ -155,9 +159,10 @@ export const useDraftManagement = ({
           setShowDraftNotification(false)
           onSuccess?.('草稿已删除')
         } catch (error) {
+          console.error('删除草稿失败:', error)
           onError?.('删除草稿失败')
         }
-      }
+      },
     })
   }, [paramsKey, onSuccess, onError])
 
@@ -165,38 +170,41 @@ export const useDraftManagement = ({
    * 草稿自动保存（防抖）
    * 只有在启用自动保存且不是首次加载时才执行
    */
-  const debouncedAutoSaveDraft = useCallback((value: string) => {
-    // 功能禁用时跳过
-    if (!enabled) {
-      return
-    }
-    
-    // 如果未启用自动保存或是首次加载，则不执行
-    if (!autoSaveDraft || isFirstLoad) {
-      return
-    }
-
-    if (draftAutoSaveTimerRef.current) {
-      clearTimeout(draftAutoSaveTimerRef.current)
-    }
-
-    setDraftAutoSaveStatus('saving')
-    
-    draftAutoSaveTimerRef.current = setTimeout(async () => {
-      try {
-        await storage.saveDraft(paramsKey, value)
-        setHasDraft(true)
-        setDraftAutoSaveStatus('success')
-        
-        setTimeout(() => {
-          setDraftAutoSaveStatus('idle')
-        }, 2000)
-      } catch (error) {
-        logger.error('自动保存草稿失败:', error)
-        setDraftAutoSaveStatus('idle')
+  const debouncedAutoSaveDraft = useCallback(
+    (value: string) => {
+      // 功能禁用时跳过
+      if (!enabled) {
+        return
       }
-    }, autoSaveDebounce)
-  }, [paramsKey, autoSaveDraft, isFirstLoad, enabled])
+
+      // 如果未启用自动保存或是首次加载，则不执行
+      if (!autoSaveDraft || isFirstLoad) {
+        return
+      }
+
+      if (draftAutoSaveTimerRef.current) {
+        clearTimeout(draftAutoSaveTimerRef.current)
+      }
+
+      setDraftAutoSaveStatus('saving')
+
+      draftAutoSaveTimerRef.current = setTimeout(async () => {
+        try {
+          await storage.saveDraft(paramsKey, value)
+          setHasDraft(true)
+          setDraftAutoSaveStatus('success')
+
+          setTimeout(() => {
+            setDraftAutoSaveStatus('idle')
+          }, 2000)
+        } catch (error) {
+          logger.error('自动保存草稿失败:', error)
+          setDraftAutoSaveStatus('idle')
+        }
+      }, autoSaveDebounce)
+    },
+    [paramsKey, autoSaveDraft, isFirstLoad, enabled]
+  )
 
   /**
    * 监听showDraftNotification变化，显示3秒后自动消失
@@ -206,12 +214,12 @@ export const useDraftManagement = ({
       if (draftNotificationTimerRef.current) {
         clearTimeout(draftNotificationTimerRef.current)
       }
-      
+
       draftNotificationTimerRef.current = setTimeout(() => {
         setShowDraftNotification(false)
       }, 3000)
     }
-    
+
     return () => {
       if (draftNotificationTimerRef.current) {
         clearTimeout(draftNotificationTimerRef.current)
@@ -238,7 +246,6 @@ export const useDraftManagement = ({
     handleSaveDraft,
     handleLoadDraft,
     handleDeleteDraft,
-    debouncedAutoSaveDraft
+    debouncedAutoSaveDraft,
   }
 }
-

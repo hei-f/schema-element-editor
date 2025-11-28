@@ -3,7 +3,7 @@ import { schemaTransformer, SchemaTransformer } from '../schema-transformer'
 // Mock transformers
 jest.mock('@/shared/utils/schema/serializer', () => ({
   serializeJson: jest.fn(),
-  deserializeJson: jest.fn()
+  deserializeJson: jest.fn(),
 }))
 
 jest.mock('@/shared/utils/schema/transformers', () => ({
@@ -12,7 +12,7 @@ jest.mock('@/shared/utils/schema/transformers', () => ({
   convertToMarkdownString: jest.fn(),
   parserSchemaNodeToMarkdown: jest.fn(),
   isElementsArray: jest.fn(),
-  isStringData: jest.fn()
+  isStringData: jest.fn(),
 }))
 
 import { deserializeJson, serializeJson } from '@/shared/utils/schema/serializer'
@@ -22,15 +22,19 @@ import {
   formatJsonString,
   isElementsArray,
   isStringData,
-  parserSchemaNodeToMarkdown
+  parserSchemaNodeToMarkdown,
 } from '@/shared/utils/schema/transformers'
 
 const mockSerializeJson = serializeJson as jest.MockedFunction<typeof serializeJson>
 const mockDeserializeJson = deserializeJson as jest.MockedFunction<typeof deserializeJson>
 const mockFormatJsonString = formatJsonString as jest.MockedFunction<typeof formatJsonString>
 const mockConvertToASTString = convertToASTString as jest.MockedFunction<typeof convertToASTString>
-const mockConvertToMarkdownString = convertToMarkdownString as jest.MockedFunction<typeof convertToMarkdownString>
-const mockParserSchemaNodeToMarkdown = parserSchemaNodeToMarkdown as jest.MockedFunction<typeof parserSchemaNodeToMarkdown>
+const mockConvertToMarkdownString = convertToMarkdownString as jest.MockedFunction<
+  typeof convertToMarkdownString
+>
+const mockParserSchemaNodeToMarkdown = parserSchemaNodeToMarkdown as jest.MockedFunction<
+  typeof parserSchemaNodeToMarkdown
+>
 const mockIsElementsArray = isElementsArray as jest.MockedFunction<typeof isElementsArray>
 const mockIsStringData = isStringData as jest.MockedFunction<typeof isStringData>
 
@@ -150,10 +154,7 @@ describe('SchemaTransformer 测试', () => {
         mockIsStringData.mockReturnValue(false)
         mockParserSchemaNodeToMarkdown.mockReturnValue('# Markdown')
 
-        const result = schemaTransformer.prepareSaveData(
-          JSON.stringify(elements),
-          true
-        )
+        const result = schemaTransformer.prepareSaveData(JSON.stringify(elements), true)
 
         expect(result.success).toBe(true)
         expect(result.data).toBe('# Markdown')
@@ -164,10 +165,7 @@ describe('SchemaTransformer 测试', () => {
         mockIsElementsArray.mockReturnValue(false)
         mockIsStringData.mockReturnValue(true)
 
-        const result = schemaTransformer.prepareSaveData(
-          JSON.stringify(stringData),
-          true
-        )
+        const result = schemaTransformer.prepareSaveData(JSON.stringify(stringData), true)
 
         expect(result.success).toBe(true)
         expect(result.data).toBe(stringData)
@@ -178,10 +176,7 @@ describe('SchemaTransformer 测试', () => {
         mockIsElementsArray.mockReturnValue(false)
         mockIsStringData.mockReturnValue(false)
 
-        const result = schemaTransformer.prepareSaveData(
-          JSON.stringify(obj),
-          true
-        )
+        const result = schemaTransformer.prepareSaveData(JSON.stringify(obj), true)
 
         expect(result.success).toBe(true)
         expect(result.data).toBe(JSON.stringify(obj))
@@ -192,10 +187,7 @@ describe('SchemaTransformer 测试', () => {
       it('应该直接返回解析后的对象', () => {
         const obj = { key: 'value', nested: { data: 123 } }
 
-        const result = schemaTransformer.prepareSaveData(
-          JSON.stringify(obj),
-          false
-        )
+        const result = schemaTransformer.prepareSaveData(JSON.stringify(obj), false)
 
         expect(result.success).toBe(true)
         expect(result.data).toEqual(obj)
@@ -204,10 +196,7 @@ describe('SchemaTransformer 测试', () => {
       it('数组应该直接返回', () => {
         const arr = [1, 2, 3]
 
-        const result = schemaTransformer.prepareSaveData(
-          JSON.stringify(arr),
-          false
-        )
+        const result = schemaTransformer.prepareSaveData(JSON.stringify(arr), false)
 
         expect(result.success).toBe(true)
         expect(result.data).toEqual(arr)
@@ -216,10 +205,7 @@ describe('SchemaTransformer 测试', () => {
 
     describe('错误处理', () => {
       it('无效JSON应该返回错误', () => {
-        const result = schemaTransformer.prepareSaveData(
-          '{invalid json',
-          false
-        )
+        const result = schemaTransformer.prepareSaveData('{invalid json', false)
 
         expect(result.success).toBe(false)
         expect(result.error).toContain('数据解析失败')
@@ -284,15 +270,12 @@ describe('SchemaTransformer 测试', () => {
     it('应该处理复杂的保存场景 - Elements到Markdown', () => {
       const complexElements = [
         { type: 'element', name: 'div', children: [] },
-        { type: 'element', name: 'span', children: [] }
+        { type: 'element', name: 'span', children: [] },
       ]
       mockIsElementsArray.mockReturnValue(true)
       mockParserSchemaNodeToMarkdown.mockReturnValue('# Complex Markdown')
 
-      const result = schemaTransformer.prepareSaveData(
-        JSON.stringify(complexElements),
-        true
-      )
+      const result = schemaTransformer.prepareSaveData(JSON.stringify(complexElements), true)
 
       expect(result.success).toBe(true)
       expect(result.data).toBe('# Complex Markdown')
@@ -303,20 +286,16 @@ describe('SchemaTransformer 测试', () => {
         level1: {
           level2: {
             level3: {
-              data: 'deep'
-            }
-          }
-        }
+              data: 'deep',
+            },
+          },
+        },
       }
 
-      const result = schemaTransformer.prepareSaveData(
-        JSON.stringify(nested),
-        false
-      )
+      const result = schemaTransformer.prepareSaveData(JSON.stringify(nested), false)
 
       expect(result.success).toBe(true)
       expect(result.data).toEqual(nested)
     })
   })
 })
-

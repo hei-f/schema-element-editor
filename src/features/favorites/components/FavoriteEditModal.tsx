@@ -3,7 +3,13 @@ import { CodeMirrorEditor } from '@/features/schema-drawer/components/CodeMirror
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { Button, Modal } from 'antd'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { EditModalContent, EditModalNameInput, EditorContainer, ErrorAlert, FullWidthVerticalSpace } from '../styles/modals.styles'
+import {
+  EditModalContent,
+  EditModalNameInput,
+  EditorContainer,
+  ErrorAlert,
+  FullWidthVerticalSpace,
+} from '../styles/modals.styles'
 
 interface FavoriteEditModalProps {
   visible: boolean
@@ -23,7 +29,7 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = ({
   initialName,
   initialContent,
   onSave,
-  onClose
+  onClose,
 }) => {
   const [name, setName] = useState('')
   const [content, setContent] = useState('')
@@ -80,7 +86,7 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = ({
         setJsonError('内容不能为空')
         return
       }
-      
+
       try {
         JSON.parse(content)
         setJsonError(null)
@@ -95,11 +101,14 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = ({
   /**
    * 处理名称变化
    */
-  const handleNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setName(value)
-    validateName(value)
-  }, [validateName])
+  const handleNameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value
+      setName(value)
+      validateName(value)
+    },
+    [validateName]
+  )
 
   /**
    * 处理内容变化
@@ -139,7 +148,8 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = ({
       await onSave(favoriteId, name.trim(), content)
       onClose()
     } catch (error) {
-      // 错误由父组件处理
+      // 错误由父组件处理，但仍需打印以便调试
+      console.error('保存收藏失败:', error)
     } finally {
       setIsSaving(false)
     }
@@ -158,7 +168,7 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = ({
         getContainer: shadowRootManager.getContainer,
         onOk: () => {
           onClose()
-        }
+        },
       })
     } else {
       onClose()
@@ -181,18 +191,18 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = ({
         <Button key="cancel" onClick={handleClose} disabled={isSaving}>
           取消
         </Button>,
-        <Button 
-          key="save" 
-          type="primary" 
+        <Button
+          key="save"
+          type="primary"
           onClick={handleSave}
           disabled={isSaveDisabled}
           loading={isSaving}
         >
           保存
-        </Button>
+        </Button>,
       ]}
       styles={{
-        body: { padding: '16px' }
+        body: { padding: '16px' },
       }}
     >
       <EditModalContent>
@@ -207,9 +217,7 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = ({
               maxLength={50}
               showCount
             />
-            {nameError && (
-              <ErrorAlert message={nameError} type="error" showIcon />
-            )}
+            {nameError && <ErrorAlert message={nameError} type="error" showIcon />}
           </div>
 
           {/* JSON 编辑器 */}
@@ -224,13 +232,10 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = ({
                 placeholder="在此输入 JSON 内容..."
               />
             </EditorContainer>
-            {jsonError && (
-              <ErrorAlert message={jsonError} type="error" showIcon />
-            )}
+            {jsonError && <ErrorAlert message={jsonError} type="error" showIcon />}
           </div>
         </FullWidthVerticalSpace>
       </EditModalContent>
     </Modal>
   )
 }
-

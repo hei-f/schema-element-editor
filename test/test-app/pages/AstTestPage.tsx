@@ -14,12 +14,16 @@ const PageContainer = styled.div`
 
 const ResultCard = styled(Card)<{ $status?: 'success' | 'warning' | 'error' }>`
   .ant-card-head {
-    border-bottom-color: ${props => {
+    border-bottom-color: ${(props) => {
       switch (props.$status) {
-        case 'error': return '#a61d24';
-        case 'warning': return '#d89614';
-        case 'success': return '#49aa19';
-        default: return '#303030';
+        case 'error':
+          return '#a61d24'
+        case 'warning':
+          return '#d89614'
+        case 'success':
+          return '#49aa19'
+        default:
+          return '#303030'
       }
     }};
   }
@@ -84,7 +88,7 @@ export const AstTestPage: React.FC = () => {
     newResults.push({
       step: 1,
       title: '原始 Markdown 字符串',
-      data: input
+      data: input,
     })
 
     try {
@@ -93,14 +97,14 @@ export const AstTestPage: React.FC = () => {
         step: 2,
         title: 'parserMarkdownToSlateNode → AST',
         data: ast1,
-        nodeCount: ast1.length
+        nodeCount: ast1.length,
       })
 
       const markdown2 = parserSlateNodeToMarkdown(ast1)
       newResults.push({
         step: 3,
         title: 'parserSlateNodeToMarkdown → 字符串',
-        data: markdown2
+        data: markdown2,
       })
 
       const ast2 = parserMarkdownToSlateNode(markdown2)?.schema || []
@@ -108,14 +112,14 @@ export const AstTestPage: React.FC = () => {
         step: 4,
         title: 'parserMarkdownToSlateNode → AST（第二次）',
         data: ast2,
-        nodeCount: ast2.length
+        nodeCount: ast2.length,
       })
     } catch (error: any) {
       newResults.push({
         step: newResults.length + 1,
         title: '转换出错',
         data: null,
-        error: error.message
+        error: error.message,
       })
     }
 
@@ -144,7 +148,8 @@ export const AstTestPage: React.FC = () => {
     <PageContainer>
       <Title level={3}>🔬 AST 转换测试</Title>
       <Text type="secondary" style={{ display: 'block', marginBottom: 24 }}>
-        直接测试 <code>parserMarkdownToSlateNode</code> 和 <code>parserSlateNodeToMarkdown</code> 函数的往返一致性
+        直接测试 <code>parserMarkdownToSlateNode</code> 和 <code>parserSlateNodeToMarkdown</code>{' '}
+        函数的往返一致性
       </Text>
 
       <Card title="输入 Markdown 字符串" style={{ marginBottom: 24 }}>
@@ -162,7 +167,13 @@ export const AstTestPage: React.FC = () => {
           <Button icon={<ClearOutlined />} onClick={() => setResults([])}>
             清除结果
           </Button>
-          <Button icon={<ReloadOutlined />} onClick={() => { setInput(DEFAULT_INPUT); setResults([]) }}>
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={() => {
+              setInput(DEFAULT_INPUT)
+              setResults([])
+            }}
+          >
             重置输入
           </Button>
         </Space>
@@ -180,7 +191,13 @@ export const AstTestPage: React.FC = () => {
                       <Tag color={getStepColor(result.step)}>Step {result.step}</Tag>
                       <span>{result.title}</span>
                       {result.nodeCount !== undefined && (
-                        <Tag color={result.step === 4 && results[1]?.nodeCount !== result.nodeCount ? 'red' : 'default'}>
+                        <Tag
+                          color={
+                            result.step === 4 && results[1]?.nodeCount !== result.nodeCount
+                              ? 'red'
+                              : 'default'
+                          }
+                        >
                           节点数: {result.nodeCount}
                           {result.step === 4 && results[1]?.nodeCount !== result.nodeCount && (
                             <> (原: {results[1]?.nodeCount})</>
@@ -211,10 +228,20 @@ export const AstTestPage: React.FC = () => {
               message="检测到往返转换不一致"
               description={
                 <ul style={{ margin: '8px 0 0 0', paddingLeft: 20 }}>
-                  <li>第一次转换后 AST 节点数: <code>{results[1]?.nodeCount}</code></li>
-                  <li>第二次转换后 AST 节点数: <code>{results[3]?.nodeCount}</code></li>
-                  <li>这是因为 <code>parserSlateNodeToMarkdown</code> 将 <code>otherProps</code> 序列化为 HTML 注释</li>
-                  <li>而 <code>parserMarkdownToSlateNode</code> 将 HTML 注释解析为独立的 <code>code</code> 节点</li>
+                  <li>
+                    第一次转换后 AST 节点数: <code>{results[1]?.nodeCount}</code>
+                  </li>
+                  <li>
+                    第二次转换后 AST 节点数: <code>{results[3]?.nodeCount}</code>
+                  </li>
+                  <li>
+                    这是因为 <code>parserSlateNodeToMarkdown</code> 将 <code>otherProps</code>{' '}
+                    序列化为 HTML 注释
+                  </li>
+                  <li>
+                    而 <code>parserMarkdownToSlateNode</code> 将 HTML 注释解析为独立的{' '}
+                    <code>code</code> 节点
+                  </li>
                 </ul>
               }
             />
@@ -228,7 +255,10 @@ export const AstTestPage: React.FC = () => {
         message="测试说明"
         description={
           <ul style={{ margin: '8px 0 0 0', paddingLeft: 20 }}>
-            <li>此工具直接调用 <code>@ant-design/agentic-ui</code> 库的 <code>parserMarkdownToSlateNode</code> 和 <code>parserSlateNodeToMarkdown</code> 方法</li>
+            <li>
+              此工具直接调用 <code>@ant-design/agentic-ui</code> 库的{' '}
+              <code>parserMarkdownToSlateNode</code> 和 <code>parserSlateNodeToMarkdown</code> 方法
+            </li>
             <li>点击"运行测试"可以看到完整的转换流程和结果对比</li>
             <li>如果节点数发生变化，说明存在往返转换不一致的问题</li>
           </ul>
@@ -237,4 +267,3 @@ export const AstTestPage: React.FC = () => {
     </PageContainer>
   )
 }
-

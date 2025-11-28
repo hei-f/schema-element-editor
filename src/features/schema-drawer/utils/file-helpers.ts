@@ -25,14 +25,14 @@ export function detectFileFormat(data: any): FileDetectionResult {
     return {
       hasMetadata: true,
       content: data.content,
-      metadata: data.metadata
+      metadata: data.metadata,
     }
   }
-  
+
   // 普通 JSON 文件
   return {
     hasMetadata: false,
-    content: data
+    content: data,
   }
 }
 
@@ -51,14 +51,10 @@ export function validateFileSize(file: File): boolean {
  * @param metadata - 元数据
  * @returns 导出文件格式
  */
-export function buildExportData(
-  content: any,
-  metadata: ExportMetadata
-): ExportFileFormat {
+export function buildExportData(content: any, metadata: ExportMetadata): ExportFileFormat {
   return {
     __SCHEMA_EDITOR_EXPORT__: true,
     content,
-    metadata
+    metadata,
   }
 }
-

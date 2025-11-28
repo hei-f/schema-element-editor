@@ -3,11 +3,11 @@ import { Form, Switch } from 'antd'
 import React from 'react'
 import { ColorPickerField } from '../components/ColorPickerField'
 import { SectionCard } from '../components/SectionCard'
-import { 
+import {
   FormSectionLabel,
   FixedWidthInput,
   FixedWidthInputNumber,
-  SpacedAlert
+  SpacedAlert,
 } from '../styles/layout.styles'
 
 interface ElementDetectionSectionProps {
@@ -50,8 +50,9 @@ export const ElementDetectionSection: React.FC<ElementDetectionSectionProps> = (
 
       <Form.Item
         noStyle
-        shouldUpdate={(prevValues, currentValues) => 
-          prevValues.searchConfig?.limitUpwardSearch !== currentValues.searchConfig?.limitUpwardSearch
+        shouldUpdate={(prevValues, currentValues) =>
+          prevValues.searchConfig?.limitUpwardSearch !==
+          currentValues.searchConfig?.limitUpwardSearch
         }
       >
         {({ getFieldValue }) => {
@@ -92,17 +93,12 @@ export const ElementDetectionSection: React.FC<ElementDetectionSectionProps> = (
         name={FORM_PATHS.highlightAllConfig.keyBinding}
         rules={[
           { required: true, message: '请输入快捷键' },
-          { pattern: /^[a-zA-Z0-9]$/, message: '请输入单个字母或数字' }
+          { pattern: /^[a-zA-Z0-9]$/, message: '请输入单个字母或数字' },
         ]}
         extra="输入单个字母或数字（0-9、A-Z），使用时按 Alt + [字符]"
         normalize={(value) => value?.toLowerCase()}
       >
-        <FixedWidthInput
-          placeholder="a"
-          maxLength={1}
-          $width={80}
-          prefix="Alt +"
-        />
+        <FixedWidthInput placeholder="a" maxLength={1} $width={80} prefix="Alt +" />
       </Form.Item>
 
       <Form.Item
@@ -110,24 +106,21 @@ export const ElementDetectionSection: React.FC<ElementDetectionSectionProps> = (
         name={FORM_PATHS.highlightAllConfig.maxHighlightCount}
         rules={[
           { required: true, message: '请输入最大高亮数量' },
-          { type: 'number', min: 100, max: 1000, message: '请输入 100-1000 之间的数字' }
+          { type: 'number', min: 100, max: 1000, message: '请输入 100-1000 之间的数字' },
         ]}
         extra="避免页面卡顿，建议 100-1000 之间"
       >
-        <FixedWidthInputNumber
-          min={100}
-          max={1000}
-          step={50}
-          $width={150}
-          suffix="个"
-        />
+        <FixedWidthInputNumber min={100} max={1000} step={50} $width={150} suffix="个" />
       </Form.Item>
 
       <SpacedAlert
         message="高亮所有元素说明"
         description={
           <div>
-            <p>1. 按住 Alt 键并按下配置的快捷键（默认 A），高亮所有带有 data-{attributeName} 属性的元素</p>
+            <p>
+              1. 按住 Alt 键并按下配置的快捷键（默认 A），高亮所有带有 data-{attributeName}{' '}
+              属性的元素
+            </p>
             <p>2. 松开 Alt 键，自动清除所有高亮</p>
             <p>3. 高亮时会显示每个元素的参数值标签</p>
           </div>
@@ -153,17 +146,12 @@ export const ElementDetectionSection: React.FC<ElementDetectionSectionProps> = (
         name={FORM_PATHS.recordingModeConfig.keyBinding}
         rules={[
           { required: true, message: '请输入快捷键' },
-          { pattern: /^[a-zA-Z0-9]$/, message: '请输入单个字母或数字' }
+          { pattern: /^[a-zA-Z0-9]$/, message: '请输入单个字母或数字' },
         ]}
         extra="输入单个字母或数字（0-9、A-Z），使用时按 Alt + [字符]"
         normalize={(value) => value?.toLowerCase()}
       >
-        <FixedWidthInput
-          placeholder="r"
-          maxLength={1}
-          $width={80}
-          prefix="Alt +"
-        />
+        <FixedWidthInput placeholder="r" maxLength={1} $width={80} prefix="Alt +" />
       </Form.Item>
 
       <Form.Item
@@ -179,17 +167,11 @@ export const ElementDetectionSection: React.FC<ElementDetectionSectionProps> = (
         name={FORM_PATHS.recordingModeConfig.pollingInterval}
         rules={[
           { required: true, message: '请输入轮询间隔' },
-          { type: 'number', min: 50, max: 1000, message: '请输入 50-1000 之间的数字' }
+          { type: 'number', min: 50, max: 1000, message: '请输入 50-1000 之间的数字' },
         ]}
         extra="Schema 变化检测的频率，建议 100ms"
       >
-        <FixedWidthInputNumber
-          min={50}
-          max={1000}
-          step={50}
-          $width={150}
-          suffix="ms"
-        />
+        <FixedWidthInputNumber min={50} max={1000} step={50} $width={150} suffix="ms" />
       </Form.Item>
 
       <SpacedAlert
@@ -209,4 +191,3 @@ export const ElementDetectionSection: React.FC<ElementDetectionSectionProps> = (
     </SectionCard>
   )
 }
-

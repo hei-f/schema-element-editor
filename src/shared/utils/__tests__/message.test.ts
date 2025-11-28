@@ -1,5 +1,11 @@
 import { MessageType } from '@/shared/types'
-import { listenChromeMessages, listenPageMessages, postMessageToPage, sendMessageToBackground, sendMessageToContent } from '../browser/message'
+import {
+  listenChromeMessages,
+  listenPageMessages,
+  postMessageToPage,
+  sendMessageToBackground,
+  sendMessageToContent,
+} from '../browser/message'
 
 describe('Message工具测试', () => {
   beforeEach(() => {
@@ -10,7 +16,7 @@ describe('Message工具测试', () => {
     it('应该发送消息到background', async () => {
       const message = {
         type: MessageType.GET_SCHEMA,
-        payload: { params: 'test-param' }
+        payload: { params: 'test-param' },
       }
 
       ;(chrome.runtime.sendMessage as jest.Mock).mockResolvedValue({ success: true })
@@ -24,7 +30,7 @@ describe('Message工具测试', () => {
       const messages = [
         { type: MessageType.GET_SCHEMA, payload: { params: 'param1' } },
         { type: MessageType.UPDATE_SCHEMA, payload: { schema: {}, params: 'param2' } },
-        { type: MessageType.TOGGLE_ACTIVE, payload: { active: true } }
+        { type: MessageType.TOGGLE_ACTIVE, payload: { active: true } },
       ]
 
       ;(chrome.runtime.sendMessage as jest.Mock).mockResolvedValue({ success: true })
@@ -39,7 +45,7 @@ describe('Message工具测试', () => {
     it('应该返回响应数据', async () => {
       const message = {
         type: MessageType.GET_SCHEMA,
-        payload: { params: 'test' }
+        payload: { params: 'test' },
       }
       const mockResponse = { data: { key: 'value' } }
 
@@ -55,7 +61,7 @@ describe('Message工具测试', () => {
     it('应该发送消息到页面', () => {
       const message = {
         type: MessageType.GET_SCHEMA,
-        payload: { params: 'test-param' }
+        payload: { params: 'test-param' },
       }
 
       postMessageToPage(message)
@@ -63,7 +69,7 @@ describe('Message工具测试', () => {
       expect(window.postMessage).toHaveBeenCalledWith(
         {
           source: 'schema-editor-content',
-          ...message
+          ...message,
         },
         '*'
       )
@@ -72,7 +78,7 @@ describe('Message工具测试', () => {
     it('应该包含正确的source标识', () => {
       const message = {
         type: MessageType.UPDATE_SCHEMA,
-        payload: { schema: { key: 'value' }, params: 'param1' }
+        payload: { schema: { key: 'value' }, params: 'param1' },
       }
 
       postMessageToPage(message)
@@ -86,10 +92,10 @@ describe('Message工具测试', () => {
       const messages = [
         { type: MessageType.GET_SCHEMA, payload: { params: 'p1' } },
         { type: MessageType.UPDATE_SCHEMA, payload: { schema: {}, params: 'p2' } },
-        { type: MessageType.SCHEMA_RESPONSE, payload: { success: true, data: {} } }
+        { type: MessageType.SCHEMA_RESPONSE, payload: { success: true, data: {} } },
       ]
 
-      messages.forEach(msg => {
+      messages.forEach((msg) => {
         postMessageToPage(msg)
       })
 
@@ -102,16 +108,16 @@ describe('Message工具测试', () => {
           nested: {
             deep: {
               value: [1, 2, 3],
-              obj: { key: 'value' }
-            }
-          }
+              obj: { key: 'value' },
+            },
+          },
         },
-        params: 'complex,nested,params'
+        params: 'complex,nested,params',
       }
 
       postMessageToPage({
         type: MessageType.UPDATE_SCHEMA,
-        payload: complexPayload
+        payload: complexPayload,
       })
 
       const call = (window.postMessage as jest.Mock).mock.calls[0]
@@ -131,7 +137,7 @@ describe('Message工具测试', () => {
     it('消息类型应该是唯一的', () => {
       const types = Object.values(MessageType)
       const uniqueTypes = new Set(types)
-      
+
       expect(uniqueTypes.size).toBe(types.length)
     })
   })
@@ -140,7 +146,7 @@ describe('Message工具测试', () => {
     it('GET_SCHEMA消息应该包含params', () => {
       const message = {
         type: MessageType.GET_SCHEMA,
-        payload: { params: 'test' }
+        payload: { params: 'test' },
       }
 
       postMessageToPage(message)
@@ -154,8 +160,8 @@ describe('Message工具测试', () => {
         type: MessageType.UPDATE_SCHEMA,
         payload: {
           schema: { key: 'value' },
-          params: 'param1'
-        }
+          params: 'param1',
+        },
       }
 
       postMessageToPage(message)
@@ -170,8 +176,8 @@ describe('Message工具测试', () => {
         type: MessageType.SCHEMA_RESPONSE,
         payload: {
           success: true,
-          data: { result: 'test' }
-        }
+          data: { result: 'test' },
+        },
       }
 
       postMessageToPage(message)
@@ -187,7 +193,7 @@ describe('Message工具测试', () => {
       const tabId = 123
       const message = {
         type: MessageType.GET_SCHEMA,
-        payload: { params: 'test-param' }
+        payload: { params: 'test-param' },
       }
 
       ;(chrome.tabs.sendMessage as jest.Mock).mockResolvedValue({ success: true })
@@ -201,7 +207,7 @@ describe('Message工具测试', () => {
       const tabId = 456
       const message = {
         type: MessageType.UPDATE_SCHEMA,
-        payload: { schema: {}, params: 'test' }
+        payload: { schema: {}, params: 'test' },
       }
       const mockResponse = { data: { key: 'value' } }
 
@@ -216,7 +222,7 @@ describe('Message工具测试', () => {
       const tabId = 789
       const message = {
         type: MessageType.GET_SCHEMA,
-        payload: { params: 'test' }
+        payload: { params: 'test' },
       }
 
       ;(chrome.tabs.sendMessage as jest.Mock).mockRejectedValue(new Error('Tab not found'))
@@ -269,9 +275,9 @@ describe('Message工具测试', () => {
         data: {
           source: 'schema-editor-injected',
           type: MessageType.GET_SCHEMA,
-          payload: {}
+          payload: {},
         },
-        source: window
+        source: window,
       })
 
       window.dispatchEvent(event)
@@ -279,7 +285,7 @@ describe('Message工具测试', () => {
       expect(handler).toHaveBeenCalledWith({
         source: 'schema-editor-injected',
         type: MessageType.GET_SCHEMA,
-        payload: {}
+        payload: {},
       })
 
       cleanup()
@@ -293,9 +299,9 @@ describe('Message工具测试', () => {
         data: {
           source: 'schema-editor-injected',
           type: MessageType.GET_SCHEMA,
-          payload: {}
+          payload: {},
         },
-        source: {} as Window
+        source: {} as Window,
       })
 
       window.dispatchEvent(event)
@@ -313,9 +319,9 @@ describe('Message工具测试', () => {
         data: {
           source: 'other-source',
           type: MessageType.GET_SCHEMA,
-          payload: {}
+          payload: {},
         },
-        source: window
+        source: window,
       })
 
       window.dispatchEvent(event)
@@ -335,9 +341,9 @@ describe('Message工具测试', () => {
         data: {
           source: 'schema-editor-injected',
           type: MessageType.GET_SCHEMA,
-          payload: {}
+          payload: {},
         },
-        source: window
+        source: window,
       })
 
       window.dispatchEvent(event)
@@ -350,10 +356,12 @@ describe('Message工具测试', () => {
     it('应该处理sendMessageToBackground失败', async () => {
       ;(chrome.runtime.sendMessage as jest.Mock).mockRejectedValue(new Error('SendMessage failed'))
 
-      await expect(sendMessageToBackground({
-        type: MessageType.TOGGLE_ACTIVE,
-        payload: { active: true }
-      })).rejects.toThrow('SendMessage failed')
+      await expect(
+        sendMessageToBackground({
+          type: MessageType.TOGGLE_ACTIVE,
+          payload: { active: true },
+        })
+      ).rejects.toThrow('SendMessage failed')
     })
   })
 
@@ -362,10 +370,10 @@ describe('Message工具测试', () => {
       for (let i = 0; i < 100; i++) {
         postMessageToPage({
           type: MessageType.GET_SCHEMA,
-          payload: { params: `param${i}` }
+          payload: { params: `param${i}` },
         })
       }
-      
+
       // 验证所有消息都被发送
       expect(window.postMessage).toHaveBeenCalledTimes(100)
     })
@@ -378,7 +386,7 @@ describe('Message工具测试', () => {
 
       await sendMessageToBackground({
         type: MessageType.GET_SCHEMA,
-        payload: { params: longParams }
+        payload: { params: longParams },
       })
 
       expect(chrome.runtime.sendMessage).toHaveBeenCalled()
@@ -389,13 +397,13 @@ describe('Message工具测试', () => {
         data: Array.from({ length: 1000 }, (_, i) => ({
           id: i,
           name: `Item ${i}`,
-          values: [1, 2, 3, 4, 5]
-        }))
+          values: [1, 2, 3, 4, 5],
+        })),
       }
 
       postMessageToPage({
         type: MessageType.UPDATE_SCHEMA,
-        payload: { schema: largeSchema, params: 'test' }
+        payload: { schema: largeSchema, params: 'test' },
       })
 
       expect(window.postMessage).toHaveBeenCalled()
@@ -404,12 +412,12 @@ describe('Message工具测试', () => {
     it('应该处理包含特殊字符的payload', () => {
       const specialPayload = {
         params: '<script>alert("xss")</script>',
-        schema: { key: '\'"\n\r\t' }
+        schema: { key: '\'"\n\r\t' },
       }
 
       postMessageToPage({
         type: MessageType.UPDATE_SCHEMA,
-        payload: specialPayload
+        payload: specialPayload,
       })
 
       const call = (window.postMessage as jest.Mock).mock.calls[0]
@@ -418,12 +426,12 @@ describe('Message工具测试', () => {
 
     it('应该处理Unicode字符', () => {
       const unicodePayload = {
-        params: '参数名称,🎉,👍,测试'
+        params: '参数名称,🎉,👍,测试',
       }
 
       postMessageToPage({
         type: MessageType.GET_SCHEMA,
-        payload: unicodePayload
+        payload: unicodePayload,
       })
 
       expect(window.postMessage).toHaveBeenCalled()
@@ -432,7 +440,7 @@ describe('Message工具测试', () => {
     it('应该处理null payload', () => {
       postMessageToPage({
         type: MessageType.SCHEMA_RESPONSE,
-        payload: null as any
+        payload: null as any,
       })
 
       expect(window.postMessage).toHaveBeenCalled()
@@ -440,7 +448,7 @@ describe('Message工具测试', () => {
 
     it('应该处理undefined payload', () => {
       postMessageToPage({
-        type: MessageType.TOGGLE_ACTIVE
+        type: MessageType.TOGGLE_ACTIVE,
       } as any)
 
       expect(window.postMessage).toHaveBeenCalled()
@@ -456,13 +464,13 @@ describe('Message工具测试', () => {
         MessageType.SCHEMA_RESPONSE,
         MessageType.UPDATE_RESULT,
         MessageType.ELEMENT_CLICKED,
-        MessageType.ACTIVE_STATE_CHANGED
+        MessageType.ACTIVE_STATE_CHANGED,
       ]
 
-      allTypes.forEach(type => {
+      allTypes.forEach((type) => {
         postMessageToPage({
           type,
-          payload: {}
+          payload: {},
         })
       })
 
@@ -470,4 +478,3 @@ describe('Message工具测试', () => {
     })
   })
 })
-

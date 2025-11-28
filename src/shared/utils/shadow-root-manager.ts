@@ -1,6 +1,6 @@
 /**
  * ShadowRoot 全局管理器
- * 
+ *
  * 提供全局访问 shadowRoot 的单例模式
  * shadowRoot 在应用初始化时设置，整个生命周期内保持不变
  */
@@ -24,9 +24,7 @@ class ShadowRootManager {
    */
   static get(): ShadowRoot {
     if (!this.instance) {
-      throw new Error(
-        'ShadowRoot not initialized. Call shadowRootManager.init() first.'
-      )
+      throw new Error('ShadowRoot not initialized. Call shadowRootManager.init() first.')
     }
     return this.instance
   }
@@ -48,4 +46,3 @@ class ShadowRootManager {
 }
 
 export const shadowRootManager = ShadowRootManager
-

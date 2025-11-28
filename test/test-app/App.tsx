@@ -23,7 +23,7 @@ const Logo = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
-  
+
   .logo-icon {
     font-size: 24px;
     color: #1677ff;
@@ -90,11 +90,8 @@ export const TestApp: React.FC = () => {
             style={{ height: '100%', paddingTop: 8 }}
           />
         </AppSider>
-        <AppContent>
-          {renderPage()}
-        </AppContent>
+        <AppContent>{renderPage()}</AppContent>
       </Layout>
     </AppLayout>
   )
 }
-

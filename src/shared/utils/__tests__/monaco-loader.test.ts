@@ -1,26 +1,38 @@
 /**
  * Monaco Loader 测试
- * 
+ *
  * 测试 Monaco Editor 配置逻辑和重复配置检测
  */
 
 // Mock monaco-editor modules
 jest.mock('monaco-editor', () => ({}), { virtual: true })
-jest.mock('monaco-editor/esm/vs/editor/editor.worker?worker', () => {
-  return jest.fn().mockImplementation(() => ({
-    terminate: jest.fn()
-  }))
-}, { virtual: true })
-jest.mock('monaco-editor/esm/vs/language/json/json.worker?worker', () => {
-  return jest.fn().mockImplementation(() => ({
-    terminate: jest.fn()
-  }))
-}, { virtual: true })
-jest.mock('@monaco-editor/react', () => ({
-  loader: {
-    config: jest.fn()
-  }
-}), { virtual: true })
+jest.mock(
+  'monaco-editor/esm/vs/editor/editor.worker?worker',
+  () => {
+    return jest.fn().mockImplementation(() => ({
+      terminate: jest.fn(),
+    }))
+  },
+  { virtual: true }
+)
+jest.mock(
+  'monaco-editor/esm/vs/language/json/json.worker?worker',
+  () => {
+    return jest.fn().mockImplementation(() => ({
+      terminate: jest.fn(),
+    }))
+  },
+  { virtual: true }
+)
+jest.mock(
+  '@monaco-editor/react',
+  () => ({
+    loader: {
+      config: jest.fn(),
+    },
+  }),
+  { virtual: true }
+)
 
 describe('Monaco Loader', () => {
   let originalMonacoEnvironment: any
@@ -35,11 +47,11 @@ describe('Monaco Loader', () => {
 
     // 清除模块缓存并重新导入
     jest.resetModules()
-    
+
     // 模拟 configureMonaco 函数的核心逻辑
     configureMonaco = () => {
       const existingEnv = (self as any).MonacoEnvironment
-      
+
       if (!existingEnv) {
         // 页面没有配置，提供扩展自己的 Worker 配置
         ;(self as any).MonacoEnvironment = {
@@ -49,7 +61,7 @@ describe('Monaco Loader', () => {
               return { type: 'json-worker' }
             }
             return { type: 'editor-worker' }
-          }
+          },
         }
         return true
       } else {
@@ -107,7 +119,7 @@ describe('Monaco Loader', () => {
     it('应该在已有配置时返回 false', () => {
       // 预先设置 MonacoEnvironment
       ;(self as any).MonacoEnvironment = {
-        getWorker: jest.fn()
+        getWorker: jest.fn(),
       }
 
       const result = configureMonaco()
@@ -119,7 +131,7 @@ describe('Monaco Loader', () => {
       const existingGetWorker = jest.fn()
       ;(self as any).MonacoEnvironment = {
         getWorker: existingGetWorker,
-        customProperty: 'custom-value'
+        customProperty: 'custom-value',
       }
 
       configureMonaco()
@@ -151,7 +163,7 @@ describe('Monaco Loader', () => {
       configureMonaco()
 
       const getWorker = (self as any).MonacoEnvironment.getWorker
-      
+
       // 测试函数参数
       const worker = getWorker('moduleId', 'json')
       expect(worker).toBeDefined()
@@ -161,7 +173,7 @@ describe('Monaco Loader', () => {
       configureMonaco()
 
       const getWorker = (self as any).MonacoEnvironment.getWorker
-      
+
       const jsonWorker = getWorker(null, 'json')
       const defaultWorker = getWorker(null, 'other')
 
@@ -195,7 +207,7 @@ describe('Monaco Loader', () => {
 
     it('应该处理 MonacoEnvironment 只有部分属性的情况', () => {
       ;(self as any).MonacoEnvironment = {
-        someOtherProperty: 'value'
+        someOtherProperty: 'value',
       }
 
       const result = configureMonaco()
@@ -240,4 +252,3 @@ describe('Monaco Loader', () => {
     })
   })
 })
-

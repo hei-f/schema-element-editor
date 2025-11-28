@@ -51,8 +51,8 @@ export const isElementsArray = (data: unknown): data is Elements[] => {
   if (!Array.isArray(data) || data.length === 0) {
     return false
   }
-  
-  return data.every(item => {
+
+  return data.every((item) => {
     return (
       item !== null &&
       typeof item === 'object' &&
@@ -83,18 +83,18 @@ export const formatJsonString = (jsonString: string): TransformResult => {
 export const convertToASTString = (jsonString: string): TransformResult => {
   try {
     const parsed = JSON.parse(jsonString)
-    
+
     if (!isStringData(parsed)) {
       return { success: false, error: '当前内容不是字符串类型' }
     }
-    
+
     const elements = parseMarkdownString(parsed)
-    
+
     if (elements.length > 0) {
       const formatted = JSON.stringify(elements, null, 2)
       return { success: true, data: formatted }
     }
-    
+
     return { success: false, error: '无法解析为有效的AST结构' }
   } catch (error: any) {
     return { success: false, error: error.message }
@@ -107,11 +107,11 @@ export const convertToASTString = (jsonString: string): TransformResult => {
 export const convertToMarkdownString = (jsonString: string): TransformResult => {
   try {
     const parsed = JSON.parse(jsonString)
-    
+
     if (!isElementsArray(parsed)) {
       return { success: false, error: '当前内容不是Elements[]类型' }
     }
-    
+
     const markdownString = parserSchemaNodeToMarkdown(parsed)
     const formatted = JSON.stringify(markdownString, null, 2)
     return { success: true, data: formatted }
@@ -119,4 +119,3 @@ export const convertToMarkdownString = (jsonString: string): TransformResult => 
     return { success: false, error: error.message }
   }
 }
-

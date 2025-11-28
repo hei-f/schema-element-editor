@@ -11,7 +11,7 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
   searchConfig: {
     limitUpwardSearch: false,
     searchDepthUp: 5,
-    throttleInterval: 16
+    throttleInterval: 16,
   },
   getFunctionName: '__getContentById',
   updateFunctionName: '__updateContentById',
@@ -27,7 +27,7 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     importExport: true,
     draft: true,
     favorites: true,
-    history: true
+    history: true,
   },
   highlightColor: '#39C5BB',
   maxFavoritesCount: 50,
@@ -37,23 +37,23 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
   previewConfig: {
     previewWidth: 40,
     updateDelay: 500,
-    autoUpdate: false
+    autoUpdate: false,
   },
   maxHistoryCount: 50,
   highlightAllConfig: {
     enabled: true,
     keyBinding: 'a',
-    maxHighlightCount: 500
+    maxHighlightCount: 500,
   },
   recordingModeConfig: {
     enabled: true,
     keyBinding: 'r',
     highlightColor: '#FF4D4F',
-    pollingInterval: 100
+    pollingInterval: 100,
   },
   enableAstTypeHints: true,
   exportConfig: {
-    customFileName: false
+    customFileName: false,
   },
   editorTheme: 'schemaEditorDark',
   apiConfig: {
@@ -61,16 +61,16 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     requestTimeout: 5,
     sourceConfig: {
       contentSource: 'schema-editor-content',
-      hostSource: 'schema-editor-host'
+      hostSource: 'schema-editor-host',
     },
     messageTypes: {
       getSchema: 'GET_SCHEMA',
       updateSchema: 'UPDATE_SCHEMA',
       checkPreview: 'CHECK_PREVIEW',
       renderPreview: 'RENDER_PREVIEW',
-      cleanupPreview: 'CLEANUP_PREVIEW'
-    }
-  }
+      cleanupPreview: 'CLEANUP_PREVIEW',
+    },
+  },
 } as const
 
 /**
@@ -101,7 +101,5 @@ export const STORAGE_KEYS = {
   EXPORT_CONFIG: 'exportConfig',
   EDITOR_THEME: 'editorTheme',
   PREVIEW_FUNCTION_NAME: 'previewFunctionName',
-  API_CONFIG: 'apiConfig'
+  API_CONFIG: 'apiConfig',
 } as const
-
-

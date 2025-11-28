@@ -21,7 +21,7 @@ export function syntaxTree(_state: EditorState): Tree {
       isAnonymous: false,
       isTop: true,
       prop: () => undefined,
-      is: () => false
+      is: () => false,
     },
     topNode: {
       type: {
@@ -32,7 +32,7 @@ export function syntaxTree(_state: EditorState): Tree {
         isAnonymous: false,
         isTop: true,
         prop: () => undefined,
-        is: () => false
+        is: () => false,
       },
       from: 0,
       to: 0,
@@ -45,13 +45,23 @@ export function syntaxTree(_state: EditorState): Tree {
       getChild: () => null,
       getChildren: () => [],
       cursor: () => null,
-      resolve: function() { return this },
-      resolveInner: function() { return this },
-      enterUnfinishedNodesBefore: function() { return this },
-      toTree: function() { return mockTree as any },
+      resolve: function () {
+        return this
+      },
+      resolveInner: function () {
+        return this
+      },
+      enterUnfinishedNodesBefore: function () {
+        return this
+      },
+      toTree: function () {
+        return mockTree as any
+      },
       matchContext: () => false,
-      get node() { return this },
-      tree: null
+      get node() {
+        return this
+      },
+      tree: null,
     },
     length: 0,
     /**
@@ -67,7 +77,7 @@ export function syntaxTree(_state: EditorState): Tree {
           isAnonymous: false,
           isTop: false,
           prop: () => undefined,
-          is: () => false
+          is: () => false,
         },
         from: pos,
         to: pos,
@@ -80,23 +90,35 @@ export function syntaxTree(_state: EditorState): Tree {
         getChild: () => null,
         getChildren: () => [],
         cursor: () => null,
-        resolve: function() { return this },
-        resolveInner: function() { return this },
-        enterUnfinishedNodesBefore: function() { return this },
+        resolve: function () {
+          return this
+        },
+        resolveInner: function () {
+          return this
+        },
+        enterUnfinishedNodesBefore: function () {
+          return this
+        },
         toTree: () => mockTree as any,
         matchContext: () => false,
-        get node() { return this },
-        tree: null
+        get node() {
+          return this
+        },
+        tree: null,
       } as any
     },
-    resolve: function() { return this.topNode },
+    resolve: function () {
+      return this.topNode
+    },
     iterate: () => {},
     prop: () => undefined,
     propValues: () => [],
-    balance: function() { return this as any },
-    cursor: () => null
+    balance: function () {
+      return this as any
+    },
+    cursor: () => null,
   }
-  
+
   return mockTree as any as Tree
 }
 
@@ -106,8 +128,8 @@ export function syntaxTree(_state: EditorState): Tree {
 export const Language = {
   define: () => ({}),
   data: {
-    of: () => ({})
-  }
+    of: () => ({}),
+  },
 }
 
 /**
@@ -116,4 +138,3 @@ export const Language = {
 export const language = () => ({})
 export const syntaxHighlighting = () => ({})
 export const defaultHighlightStyle = {}
-

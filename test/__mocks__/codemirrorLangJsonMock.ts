@@ -9,8 +9,8 @@ export function json() {
   return {
     language: {
       name: 'json',
-      parser: {}
-    }
+      parser: {},
+    },
   }
 }
 
@@ -19,7 +19,7 @@ export function json() {
  */
 export const jsonLanguage = {
   name: 'json',
-  parser: {}
+  parser: {},
 }
 
 /**
@@ -28,4 +28,3 @@ export const jsonLanguage = {
 export function jsonParseLinter() {
   return () => []
 }
-

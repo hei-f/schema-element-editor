@@ -21,14 +21,14 @@ export const injectPageScript = async (): Promise<void> => {
     logger.log('postMessage 模式，跳过脚本注入')
     return
   }
-  
+
   // 检查是否已经注入过
   if ((window as any).__SCHEMA_EDITOR_INJECTED__) {
     // 即使已注入，也要同步配置（配置可能已更新）
     await syncConfigToInjectedScript()
     return
   }
-  
+
   return new Promise((resolve) => {
     const script = document.createElement('script')
     script.src = chrome.runtime.getURL('injected.js')
@@ -53,9 +53,9 @@ export const syncConfigToInjectedScript = async (): Promise<void> => {
     const [getFunctionName, updateFunctionName, previewFunctionName] = await Promise.all([
       storage.getGetFunctionName(),
       storage.getUpdateFunctionName(),
-      storage.getPreviewFunctionName()
+      storage.getPreviewFunctionName(),
     ])
-    
+
     window.postMessage(
       {
         source: 'schema-editor-content',
@@ -63,8 +63,8 @@ export const syncConfigToInjectedScript = async (): Promise<void> => {
         payload: {
           getFunctionName,
           updateFunctionName,
-          previewFunctionName
-        }
+          previewFunctionName,
+        },
       },
       '*'
     )
@@ -72,4 +72,3 @@ export const syncConfigToInjectedScript = async (): Promise<void> => {
     logger.error('❌ 同步配置失败:', error)
   }
 }
-

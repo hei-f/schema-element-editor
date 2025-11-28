@@ -1,6 +1,13 @@
 import { Collapse } from 'antd'
 import React from 'react'
-import { CardSubtitle, PanelActionButton, PanelActions, PanelHeader, PanelTitle, StyledCollapse } from '../styles/layout.styles'
+import {
+  CardSubtitle,
+  PanelActionButton,
+  PanelActions,
+  PanelHeader,
+  PanelTitle,
+  StyledCollapse,
+} from '../styles/layout.styles'
 
 const { Panel } = Collapse
 
@@ -30,7 +37,15 @@ interface SectionCardProps {
  * 可折叠的配置区块，带标题和副标题
  */
 export const SectionCard: React.FC<SectionCardProps> = (props) => {
-  const { title, subtitle, children, panelKey, defaultActive = true, onResetDefault, extraActions } = props
+  const {
+    title,
+    subtitle,
+    children,
+    panelKey,
+    defaultActive = true,
+    onResetDefault,
+    extraActions,
+  } = props
 
   const handleResetClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -59,9 +74,7 @@ export const SectionCard: React.FC<SectionCardProps> = (props) => {
             </PanelActionButton>
           ))}
           {onResetDefault && (
-            <PanelActionButton onClick={handleResetClick}>
-              恢复默认
-            </PanelActionButton>
+            <PanelActionButton onClick={handleResetClick}>恢复默认</PanelActionButton>
           )}
         </PanelActions>
       )}
@@ -69,9 +82,7 @@ export const SectionCard: React.FC<SectionCardProps> = (props) => {
   )
 
   return (
-    <StyledCollapse 
-      defaultActiveKey={defaultActive ? [panelKey] : []}
-    >
+    <StyledCollapse defaultActiveKey={defaultActive ? [panelKey] : []}>
       <Panel header={headerContent} key={panelKey}>
         {subtitle && <CardSubtitle>{subtitle}</CardSubtitle>}
         {children}

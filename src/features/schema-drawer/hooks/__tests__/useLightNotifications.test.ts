@@ -40,7 +40,7 @@ describe('useLightNotifications Hook 测试', () => {
         result.current.showLightNotification('通知2')
       })
 
-      const ids = result.current.lightNotifications.map(n => n.id)
+      const ids = result.current.lightNotifications.map((n) => n.id)
       expect(ids[0]).not.toBe(ids[1])
     })
 
@@ -242,4 +242,3 @@ describe('useLightNotifications Hook 测试', () => {
     })
   })
 })
-

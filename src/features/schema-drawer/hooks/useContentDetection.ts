@@ -34,15 +34,15 @@ export const useContentDetection = (): UseContentDetectionReturn => {
 
     try {
       const parsed = JSON.parse(value)
-      
+
       if (isElementsArray(parsed)) {
         return { type: ContentType.Ast, canParse: true }
       }
-      
+
       if (isStringData(parsed)) {
         return { type: ContentType.RawString, canParse: true }
       }
-      
+
       return { type: ContentType.Other, canParse: true }
     } catch (error) {
       console.debug('内容类型检测失败:', error)
@@ -53,17 +53,20 @@ export const useContentDetection = (): UseContentDetectionReturn => {
   /**
    * 带防抖的内容检测（300ms防抖）
    */
-  const debouncedDetectContent = useCallback((value: string) => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current)
-    }
+  const debouncedDetectContent = useCallback(
+    (value: string) => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
 
-    debounceTimerRef.current = setTimeout(() => {
-      const result = detectContentType(value)
-      setContentType(result.type)
-      setCanParse(result.canParse)
-    }, 300)
-  }, [detectContentType])
+      debounceTimerRef.current = setTimeout(() => {
+        const result = detectContentType(value)
+        setContentType(result.type)
+        setCanParse(result.canParse)
+      }, 300)
+    },
+    [detectContentType]
+  )
 
   /**
    * 手动更新内容类型（用于外部转换后同步状态）
@@ -78,7 +81,6 @@ export const useContentDetection = (): UseContentDetectionReturn => {
     canParse,
     detectContentType,
     debouncedDetectContent,
-    updateContentType
+    updateContentType,
   }
 }
-

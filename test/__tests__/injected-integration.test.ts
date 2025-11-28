@@ -16,7 +16,7 @@ describe('Injected Script 集成测试', () => {
     // Mock chrome.storage.local
     mockStorage = {
       getFunctionName: '__getSchemaByParams',
-      updateFunctionName: '__updateSchemaByParams'
+      updateFunctionName: '__updateSchemaByParams',
     }
 
     global.chrome = {
@@ -24,9 +24,9 @@ describe('Injected Script 集成测试', () => {
         local: {
           get: jest.fn((_keys: string[], callback: (result: any) => void) => {
             callback(mockStorage)
-          })
-        }
-      }
+          }),
+        },
+      },
     } as any
 
     // Mock window.addEventListener
@@ -54,12 +54,12 @@ describe('Injected Script 集成测试', () => {
   function simulateInjectedScript() {
     const MESSAGE_SOURCE = {
       FROM_CONTENT: 'schema-editor-content',
-      FROM_INJECTED: 'schema-editor-injected'
+      FROM_INJECTED: 'schema-editor-injected',
     }
 
     const functionNames = {
       get: '__getSchemaByParams',
-      update: '__updateSchemaByParams'
+      update: '__updateSchemaByParams',
     }
 
     // 监听消息
@@ -84,7 +84,7 @@ describe('Injected Script 集成测试', () => {
 
     function handleConfigSync(payload: any) {
       const { getFunctionName, updateFunctionName } = payload || {}
-      
+
       if (getFunctionName) {
         functionNames.get = getFunctionName
       }
@@ -101,7 +101,7 @@ describe('Injected Script 集成测试', () => {
         if (typeof getFn !== 'function') {
           sendResponse('SCHEMA_RESPONSE', {
             success: false,
-            error: `页面未提供${functionNames.get}方法`
+            error: `页面未提供${functionNames.get}方法`,
           })
           return
         }
@@ -109,12 +109,12 @@ describe('Injected Script 集成测试', () => {
         const schema = getFn(params)
         sendResponse('SCHEMA_RESPONSE', {
           success: true,
-          data: schema
+          data: schema,
         })
       } catch (error: any) {
         sendResponse('SCHEMA_RESPONSE', {
           success: false,
-          error: error.message || '获取Schema时发生错误'
+          error: error.message || '获取Schema时发生错误',
         })
       }
     }
@@ -127,7 +127,7 @@ describe('Injected Script 集成测试', () => {
         if (typeof updateFn !== 'function') {
           sendResponse('UPDATE_RESULT', {
             success: false,
-            error: `页面未提供${functionNames.update}方法`
+            error: `页面未提供${functionNames.update}方法`,
           })
           return
         }
@@ -135,12 +135,12 @@ describe('Injected Script 集成测试', () => {
         const result = updateFn(schema, params)
         sendResponse('UPDATE_RESULT', {
           success: !!result,
-          message: result ? '更新成功' : '更新失败'
+          message: result ? '更新成功' : '更新失败',
         })
       } catch (error: any) {
         sendResponse('UPDATE_RESULT', {
           success: false,
-          error: error.message || '更新Schema时发生错误'
+          error: error.message || '更新Schema时发生错误',
         })
       }
     }
@@ -150,7 +150,7 @@ describe('Injected Script 集成测试', () => {
         {
           source: MESSAGE_SOURCE.FROM_INJECTED,
           type,
-          payload
+          payload,
         },
         '*'
       )
@@ -165,10 +165,10 @@ describe('Injected Script 集成测试', () => {
   function triggerMessage(data: any) {
     const event = {
       source: window,
-      data
+      data,
     } as unknown as MessageEvent
 
-    messageListeners.forEach(listener => listener(event))
+    messageListeners.forEach((listener) => listener(event))
   }
 
   describe('默认函数名', () => {
@@ -176,7 +176,7 @@ describe('Injected Script 集成测试', () => {
       // 设置页面函数
       ;(window as any).__getSchemaByParams = jest.fn((params: string) => ({
         data: 'test',
-        params
+        params,
       }))
 
       // 初始化脚本
@@ -186,7 +186,7 @@ describe('Injected Script 集成测试', () => {
       triggerMessage({
         source: 'schema-editor-content',
         type: 'GET_SCHEMA',
-        payload: { params: 'param1,param2' }
+        payload: { params: 'param1,param2' },
       })
 
       // 验证页面函数被调用
@@ -201,9 +201,9 @@ describe('Injected Script 集成测试', () => {
           success: true,
           data: {
             data: 'test',
-            params: 'param1,param2'
-          }
-        }
+            params: 'param1,param2',
+          },
+        },
       })
     })
 
@@ -217,8 +217,8 @@ describe('Injected Script 集成测试', () => {
         type: 'UPDATE_SCHEMA',
         payload: {
           schema: { updated: 'data' },
-          params: 'param1,param2'
-        }
+          params: 'param1,param2',
+        },
       })
 
       expect((window as any).__updateSchemaByParams).toHaveBeenCalledWith(
@@ -231,8 +231,8 @@ describe('Injected Script 集成测试', () => {
         type: 'UPDATE_RESULT',
         payload: {
           success: true,
-          message: '更新成功'
-        }
+          message: '更新成功',
+        },
       })
     })
 
@@ -245,7 +245,7 @@ describe('Injected Script 集成测试', () => {
       triggerMessage({
         source: 'schema-editor-content',
         type: 'GET_SCHEMA',
-        payload: { params: 'test' }
+        payload: { params: 'test' },
       })
 
       expect(postedMessages).toHaveLength(1)
@@ -254,8 +254,8 @@ describe('Injected Script 集成测试', () => {
         type: 'SCHEMA_RESPONSE',
         payload: {
           success: false,
-          error: '页面未提供__getSchemaByParams方法'
-        }
+          error: '页面未提供__getSchemaByParams方法',
+        },
       })
     })
   })
@@ -264,7 +264,7 @@ describe('Injected Script 集成测试', () => {
     it('应该使用自定义函数名获取Schema', () => {
       ;(window as any).myCustomGetFn = jest.fn((params: string) => ({
         custom: 'data',
-        params
+        params,
       }))
 
       simulateInjectedScript()
@@ -275,15 +275,15 @@ describe('Injected Script 集成测试', () => {
         type: 'CONFIG_SYNC',
         payload: {
           getFunctionName: 'myCustomGetFn',
-          updateFunctionName: 'myCustomUpdateFn'
-        }
+          updateFunctionName: 'myCustomUpdateFn',
+        },
       })
 
       // 再发送 GET_SCHEMA 消息
       triggerMessage({
         source: 'schema-editor-content',
         type: 'GET_SCHEMA',
-        payload: { params: 'custom-params' }
+        payload: { params: 'custom-params' },
       })
 
       // 验证自定义函数被调用
@@ -297,9 +297,9 @@ describe('Injected Script 集成测试', () => {
           success: true,
           data: {
             custom: 'data',
-            params: 'custom-params'
-          }
-        }
+            params: 'custom-params',
+          },
+        },
       })
     })
 
@@ -314,8 +314,8 @@ describe('Injected Script 集成测试', () => {
         type: 'CONFIG_SYNC',
         payload: {
           getFunctionName: 'myCustomGetFn',
-          updateFunctionName: 'myCustomUpdateFn'
-        }
+          updateFunctionName: 'myCustomUpdateFn',
+        },
       })
 
       // 再发送 UPDATE_SCHEMA 消息
@@ -324,8 +324,8 @@ describe('Injected Script 集成测试', () => {
         type: 'UPDATE_SCHEMA',
         payload: {
           schema: { custom: 'update' },
-          params: 'custom-params'
-        }
+          params: 'custom-params',
+        },
       })
 
       expect((window as any).myCustomUpdateFn).toHaveBeenCalledWith(
@@ -338,8 +338,8 @@ describe('Injected Script 集成测试', () => {
         type: 'UPDATE_RESULT',
         payload: {
           success: true,
-          message: '更新成功'
-        }
+          message: '更新成功',
+        },
       })
     })
 
@@ -354,15 +354,15 @@ describe('Injected Script 集成测试', () => {
         source: 'schema-editor-content',
         type: 'CONFIG_SYNC',
         payload: {
-          getFunctionName: 'myCustomGetFn'
-        }
+          getFunctionName: 'myCustomGetFn',
+        },
       })
 
       // 再发送 GET_SCHEMA 消息
       triggerMessage({
         source: 'schema-editor-content',
         type: 'GET_SCHEMA',
-        payload: { params: 'test' }
+        payload: { params: 'test' },
       })
 
       expect(postedMessages).toHaveLength(1)
@@ -371,8 +371,8 @@ describe('Injected Script 集成测试', () => {
         type: 'SCHEMA_RESPONSE',
         payload: {
           success: false,
-          error: '页面未提供myCustomGetFn方法'
-        }
+          error: '页面未提供myCustomGetFn方法',
+        },
       })
     })
 
@@ -387,8 +387,8 @@ describe('Injected Script 集成测试', () => {
         source: 'schema-editor-content',
         type: 'CONFIG_SYNC',
         payload: {
-          updateFunctionName: 'myCustomUpdateFn'
-        }
+          updateFunctionName: 'myCustomUpdateFn',
+        },
       })
 
       // 再发送 UPDATE_SCHEMA 消息
@@ -397,8 +397,8 @@ describe('Injected Script 集成测试', () => {
         type: 'UPDATE_SCHEMA',
         payload: {
           schema: { data: 'test' },
-          params: 'test'
-        }
+          params: 'test',
+        },
       })
 
       expect(postedMessages).toHaveLength(1)
@@ -407,8 +407,8 @@ describe('Injected Script 集成测试', () => {
         type: 'UPDATE_RESULT',
         payload: {
           success: false,
-          error: '页面未提供myCustomUpdateFn方法'
-        }
+          error: '页面未提供myCustomUpdateFn方法',
+        },
       })
     })
   })
@@ -424,7 +424,7 @@ describe('Injected Script 集成测试', () => {
       triggerMessage({
         source: 'schema-editor-content',
         type: 'GET_SCHEMA',
-        payload: { params: 'test' }
+        payload: { params: 'test' },
       })
 
       expect(postedMessages[0]).toEqual({
@@ -432,8 +432,8 @@ describe('Injected Script 集成测试', () => {
         type: 'SCHEMA_RESPONSE',
         payload: {
           success: false,
-          error: 'Function execution error'
-        }
+          error: 'Function execution error',
+        },
       })
     })
 
@@ -449,8 +449,8 @@ describe('Injected Script 集成测试', () => {
         type: 'UPDATE_SCHEMA',
         payload: {
           schema: { data: 'test' },
-          params: 'test'
-        }
+          params: 'test',
+        },
       })
 
       expect(postedMessages[0]).toEqual({
@@ -458,8 +458,8 @@ describe('Injected Script 集成测试', () => {
         type: 'UPDATE_RESULT',
         payload: {
           success: false,
-          error: 'Update error'
-        }
+          error: 'Update error',
+        },
       })
     })
   })
@@ -578,15 +578,15 @@ describe('Injected Script 集成测试', () => {
         type: 'CONFIG_SYNC',
         payload: {
           getFunctionName: 'syncedGetFn',
-          updateFunctionName: 'syncedUpdateFn'
-        }
+          updateFunctionName: 'syncedUpdateFn',
+        },
       })
 
       // 触发 GET_SCHEMA 验证配置已更新
       triggerMessage({
         source: 'schema-editor-content',
         type: 'GET_SCHEMA',
-        payload: { params: 'test' }
+        payload: { params: 'test' },
       })
 
       expect((window as any).syncedGetFn).toHaveBeenCalledWith('test')
@@ -603,15 +603,15 @@ describe('Injected Script 集成测试', () => {
         source: 'schema-editor-content',
         type: 'CONFIG_SYNC',
         payload: {
-          getFunctionName: 'partialGetFn'
-        }
+          getFunctionName: 'partialGetFn',
+        },
       })
 
       // 验证 get 函数名已更新
       triggerMessage({
         source: 'schema-editor-content',
         type: 'GET_SCHEMA',
-        payload: { params: 'test' }
+        payload: { params: 'test' },
       })
       expect((window as any).partialGetFn).toHaveBeenCalled()
 
@@ -619,7 +619,7 @@ describe('Injected Script 集成测试', () => {
       triggerMessage({
         source: 'schema-editor-content',
         type: 'UPDATE_SCHEMA',
-        payload: { schema: {}, params: 'test' }
+        payload: { schema: {}, params: 'test' },
       })
       expect((window as any).__updateSchemaByParams).toHaveBeenCalled()
     })
@@ -633,18 +633,17 @@ describe('Injected Script 集成测试', () => {
       triggerMessage({
         source: 'schema-editor-content',
         type: 'CONFIG_SYNC',
-        payload: {}
+        payload: {},
       })
 
       // 验证仍使用默认函数名
       triggerMessage({
         source: 'schema-editor-content',
         type: 'GET_SCHEMA',
-        payload: { params: 'test' }
+        payload: { params: 'test' },
       })
 
       expect((window as any).__getSchemaByParams).toHaveBeenCalled()
     })
   })
 })
-

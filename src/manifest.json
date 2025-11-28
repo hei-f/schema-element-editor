@@ -1,16 +1,10 @@
 {
   "manifest_version": 3,
   "name": "Schema Editor",
-  "version": "1.12.1",
+  "version": "1.12.2",
   "description": "DOM元素Schema查看和编辑工具",
-  "permissions": [
-    "storage",
-    "activeTab",
-    "scripting"
-  ],
-  "host_permissions": [
-    "<all_urls>"
-  ],
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "src/core/background/service-worker.ts",
     "type": "module"
@@ -38,12 +32,8 @@
   },
   "web_accessible_resources": [
     {
-      "resources": [
-        "injected.js",
-        "node_modules/antd/dist/reset.css"
-      ],
+      "resources": ["injected.js", "node_modules/antd/dist/reset.css"],
       "matches": ["<all_urls>"]
     }
   ]
 }
-

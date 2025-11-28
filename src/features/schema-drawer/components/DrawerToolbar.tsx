@@ -3,16 +3,16 @@ import { ContentType } from '@/shared/types'
 import { Button, Segmented, Tooltip } from 'antd'
 import { CopyOutlined, CheckOutlined, DiffOutlined } from '@ant-design/icons'
 import React, { useState } from 'react'
-import { 
-  AttributeTag, 
+import {
+  AttributeTag,
   AttributeTagWrapper,
-  ButtonGroup, 
+  ButtonGroup,
   CopyIconWrapper,
-  ParamItem, 
-  ParamLabel, 
-  ParamsContainer, 
+  ParamItem,
+  ParamLabel,
+  ParamsContainer,
   StyledCopyIcon,
-  EditorToolbar as StyledEditorToolbar 
+  EditorToolbar as StyledEditorToolbar,
 } from '../styles/toolbar.styles'
 
 interface DrawerToolbarProps {
@@ -50,7 +50,7 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
   onDeserialize,
   onSegmentChange,
   onRenderPreview,
-  onEnterDiffMode
+  onEnterDiffMode,
 }) => {
   // 复制状态管理: { [index: number]: 'idle' | 'copied' }
   const [copyStatus, setCopyStatus] = useState<Record<number, 'idle' | 'copied'>>({})
@@ -60,16 +60,16 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
    */
   const handleCopy = async (param: string, index: number, e: React.MouseEvent) => {
     e.stopPropagation()
-    
+
     try {
       await navigator.clipboard.writeText(param)
-      
+
       // 设置为已复制状态
-      setCopyStatus(prev => ({ ...prev, [index]: 'copied' }))
-      
+      setCopyStatus((prev) => ({ ...prev, [index]: 'copied' }))
+
       // 2秒后恢复为idle状态
       setTimeout(() => {
-        setCopyStatus(prev => ({ ...prev, [index]: 'idle' }))
+        setCopyStatus((prev) => ({ ...prev, [index]: 'idle' }))
       }, 2000)
     } catch (err) {
       console.error('复制失败:', err)
@@ -87,16 +87,12 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
                 <Tooltip title={param} placement="topLeft">
                   <AttributeTagWrapper>
                     <AttributeTag>{param}</AttributeTag>
-                    <CopyIconWrapper 
+                    <CopyIconWrapper
                       className="copy-icon-wrapper"
                       onClick={(e) => handleCopy(param, index, e)}
                     >
                       <StyledCopyIcon $isSuccess={copyStatus[index] === 'copied'}>
-                        {copyStatus[index] === 'copied' ? (
-                          <CheckOutlined />
-                        ) : (
-                          <CopyOutlined />
-                        )}
+                        {copyStatus[index] === 'copied' ? <CheckOutlined /> : <CopyOutlined />}
                       </StyledCopyIcon>
                     </CopyIconWrapper>
                   </AttributeTagWrapper>
@@ -108,21 +104,17 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
       </ParamsContainer>
       <ButtonGroup>
         {previewEnabled && onRenderPreview && (
-          <Button 
-            size="small" 
-            type="primary"
-            onClick={onRenderPreview}
-          >
+          <Button size="small" type="primary" onClick={onRenderPreview}>
             更新预览
           </Button>
         )}
         {toolbarButtons.astRawStringToggle && (
-          <Tooltip 
+          <Tooltip
             title={
-              isRecording 
-                ? '录制中不可切换' 
-                : contentType === ContentType.Other 
-                  ? '当前数据类型错误' 
+              isRecording
+                ? '录制中不可切换'
+                : contentType === ContentType.Other
+                  ? '当前数据类型错误'
                   : ''
             }
           >
@@ -131,7 +123,7 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
               shape="round"
               options={[
                 { label: 'AST', value: ContentType.Ast },
-                { label: 'RawString', value: ContentType.RawString }
+                { label: 'RawString', value: ContentType.RawString },
               ]}
               value={contentType === ContentType.Other ? undefined : contentType}
               onChange={onSegmentChange}
@@ -141,41 +133,26 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
         )}
         {toolbarButtons.deserialize && (
           <Tooltip title={!canParse ? '当前内容不是有效的 JSON 格式' : ''}>
-            <Button 
-              size="small" 
-              onClick={onDeserialize}
-              disabled={!canParse}
-            >
+            <Button size="small" onClick={onDeserialize} disabled={!canParse}>
               反序列化
             </Button>
           </Tooltip>
         )}
         {toolbarButtons.serialize && (
-          <Button 
-            size="small" 
-            onClick={onSerialize}
-          >
+          <Button size="small" onClick={onSerialize}>
             序列化
           </Button>
         )}
         {toolbarButtons.format && (
           <Tooltip title={!canParse ? '当前内容不是有效的 JSON 格式' : ''}>
-            <Button 
-              size="small" 
-              onClick={onFormat}
-              disabled={!canParse}
-            >
+            <Button size="small" onClick={onFormat} disabled={!canParse}>
               格式化
             </Button>
           </Tooltip>
         )}
         {showDiffButton && onEnterDiffMode && (
           <Tooltip title="对比模式：对比两段内容的差异">
-            <Button 
-              size="small" 
-              icon={<DiffOutlined />}
-              onClick={onEnterDiffMode}
-            >
+            <Button size="small" icon={<DiffOutlined />} onClick={onEnterDiffMode}>
               对比
             </Button>
           </Tooltip>
@@ -184,4 +161,3 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
     </StyledEditorToolbar>
   )
 }
-

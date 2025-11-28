@@ -19,7 +19,7 @@ class PreviewContainerManager {
     } else {
       this.updatePosition(position)
     }
-    
+
     return PREVIEW_CONTAINER_ID
   }
 
@@ -28,7 +28,7 @@ class PreviewContainerManager {
    */
   updatePosition(position: PreviewPosition): void {
     if (!this.container) return
-    
+
     this.container.style.left = `${position.left}px`
     this.container.style.top = `${position.top}px`
     this.container.style.width = `${position.width}px`
@@ -99,4 +99,3 @@ class PreviewContainerManager {
 
 /** 预览容器管理器单例 */
 export const previewContainerManager = new PreviewContainerManager()
-

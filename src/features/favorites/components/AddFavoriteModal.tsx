@@ -18,7 +18,7 @@ export const AddFavoriteModal: React.FC<AddFavoriteModalProps> = ({
   favoriteNameInput,
   onInputChange,
   onAdd,
-  onClose
+  onClose,
 }) => {
   return (
     <Modal
@@ -40,4 +40,3 @@ export const AddFavoriteModal: React.FC<AddFavoriteModalProps> = ({
     </Modal>
   )
 }
-

@@ -13,10 +13,10 @@ export const SECTION_KEYS = {
   FEATURE_TOGGLE: 'featureToggle',
   PREVIEW_CONFIG: 'previewConfig',
   DATA_MANAGEMENT: 'dataManagement',
-  DEBUG: 'debug'
+  DEBUG: 'debug',
 } as const
 
-export type SectionKey = typeof SECTION_KEYS[keyof typeof SECTION_KEYS]
+export type SectionKey = (typeof SECTION_KEYS)[keyof typeof SECTION_KEYS]
 
 /**
  * 各卡片对应的默认值键映射
@@ -24,13 +24,29 @@ export type SectionKey = typeof SECTION_KEYS[keyof typeof SECTION_KEYS]
  * value: 该区块包含的配置字段名数组
  */
 export const SECTION_DEFAULT_KEYS: Record<SectionKey, readonly string[]> = {
-  [SECTION_KEYS.INTEGRATION_CONFIG]: ['apiConfig', 'attributeName', 'getFunctionName', 'updateFunctionName', 'previewFunctionName'],
-  [SECTION_KEYS.ELEMENT_DETECTION]: ['searchConfig', 'highlightColor', 'highlightAllConfig', 'recordingModeConfig'],
+  [SECTION_KEYS.INTEGRATION_CONFIG]: [
+    'apiConfig',
+    'attributeName',
+    'getFunctionName',
+    'updateFunctionName',
+    'previewFunctionName',
+  ],
+  [SECTION_KEYS.ELEMENT_DETECTION]: [
+    'searchConfig',
+    'highlightColor',
+    'highlightAllConfig',
+    'recordingModeConfig',
+  ],
   [SECTION_KEYS.EDITOR_CONFIG]: ['drawerWidth', 'enableAstTypeHints', 'editorTheme'],
   [SECTION_KEYS.FEATURE_TOGGLE]: ['toolbarButtons'],
   [SECTION_KEYS.PREVIEW_CONFIG]: ['previewConfig'],
-  [SECTION_KEYS.DATA_MANAGEMENT]: ['maxFavoritesCount', 'autoSaveDraft', 'maxHistoryCount', 'exportConfig'],
-  [SECTION_KEYS.DEBUG]: ['enableDebugLog', 'autoParseString']
+  [SECTION_KEYS.DATA_MANAGEMENT]: [
+    'maxFavoritesCount',
+    'autoSaveDraft',
+    'maxHistoryCount',
+    'exportConfig',
+  ],
+  [SECTION_KEYS.DEBUG]: ['enableDebugLog', 'autoParseString'],
 }
 
 /**
@@ -57,27 +73,27 @@ export const FIELD_GROUPS: Record<string, FieldGroup> = {
       FORM_PATHS.apiConfig.messageTypes.updateSchema,
       FORM_PATHS.apiConfig.messageTypes.checkPreview,
       FORM_PATHS.apiConfig.messageTypes.renderPreview,
-      FORM_PATHS.apiConfig.messageTypes.cleanupPreview
+      FORM_PATHS.apiConfig.messageTypes.cleanupPreview,
     ],
     save: async (allValues: any) => {
       await storage.setApiConfig(allValues.apiConfig)
-    }
+    },
   },
   searchConfig: {
     fieldPaths: [
       FORM_PATHS.searchConfig.limitUpwardSearch,
       FORM_PATHS.searchConfig.searchDepthUp,
-      FORM_PATHS.searchConfig.throttleInterval
+      FORM_PATHS.searchConfig.throttleInterval,
     ],
     save: async (allValues: any) => {
       await storage.setSearchConfig(allValues.searchConfig)
-    }
+    },
   },
   functionNames: {
     fieldPaths: [
       FORM_PATHS.getFunctionName,
       FORM_PATHS.updateFunctionName,
-      FORM_PATHS.previewFunctionName
+      FORM_PATHS.previewFunctionName,
     ],
     save: async (allValues: any) => {
       await storage.setFunctionNames(
@@ -85,7 +101,7 @@ export const FIELD_GROUPS: Record<string, FieldGroup> = {
         allValues.updateFunctionName,
         allValues.previewFunctionName
       )
-    }
+    },
   },
   toolbarButtons: {
     fieldPaths: [
@@ -94,50 +110,48 @@ export const FIELD_GROUPS: Record<string, FieldGroup> = {
       FORM_PATHS.toolbarButtons.serialize,
       FORM_PATHS.toolbarButtons.format,
       FORM_PATHS.toolbarButtons.preview,
-      FORM_PATHS.toolbarButtons.importExport
+      FORM_PATHS.toolbarButtons.importExport,
     ],
     save: async (allValues: any) => {
       await storage.setToolbarButtons(allValues.toolbarButtons)
-    }
+    },
   },
   previewConfig: {
     fieldPaths: [
       FORM_PATHS.previewConfig.previewWidth,
       FORM_PATHS.previewConfig.updateDelay,
-      FORM_PATHS.previewConfig.autoUpdate
+      FORM_PATHS.previewConfig.autoUpdate,
     ],
     save: async (allValues: any) => {
       await storage.setPreviewConfig(allValues.previewConfig)
-    }
+    },
   },
   highlightAllConfig: {
     fieldPaths: [
       FORM_PATHS.highlightAllConfig.enabled,
       FORM_PATHS.highlightAllConfig.keyBinding,
-      FORM_PATHS.highlightAllConfig.maxHighlightCount
+      FORM_PATHS.highlightAllConfig.maxHighlightCount,
     ],
     save: async (allValues: any) => {
       await storage.setHighlightAllConfig(allValues.highlightAllConfig)
-    }
+    },
   },
   recordingModeConfig: {
     fieldPaths: [
       FORM_PATHS.recordingModeConfig.enabled,
       FORM_PATHS.recordingModeConfig.keyBinding,
       FORM_PATHS.recordingModeConfig.highlightColor,
-      FORM_PATHS.recordingModeConfig.pollingInterval
+      FORM_PATHS.recordingModeConfig.pollingInterval,
     ],
     save: async (allValues: any) => {
       await storage.setRecordingModeConfig(allValues.recordingModeConfig)
-    }
+    },
   },
   exportConfig: {
-    fieldPaths: [
-      FORM_PATHS.exportConfig.customFileName
-    ],
+    fieldPaths: [FORM_PATHS.exportConfig.customFileName],
     save: async (allValues: any) => {
       await storage.setExportConfig(allValues.exportConfig)
-    }
+    },
   },
 }
 
@@ -167,22 +181,22 @@ export const DEBOUNCE_FIELD_PATHS: readonly (readonly string[])[] = [
   FORM_PATHS.apiConfig.messageTypes.updateSchema,
   FORM_PATHS.apiConfig.messageTypes.checkPreview,
   FORM_PATHS.apiConfig.messageTypes.renderPreview,
-  FORM_PATHS.apiConfig.messageTypes.cleanupPreview
+  FORM_PATHS.apiConfig.messageTypes.cleanupPreview,
 ]
 
 /**
  * 独立字段路径与 storage 方法的映射
  */
 export const FIELD_PATH_STORAGE_MAP: Record<string, string> = {
-  'attributeName': 'setAttributeName',
-  'drawerWidth': 'setDrawerWidth',
-  'autoParseString': 'setAutoParseString',
-  'enableDebugLog': 'setEnableDebugLog',
-  'highlightColor': 'setHighlightColor',
-  'maxFavoritesCount': 'setMaxFavoritesCount',
-  'autoSaveDraft': 'setAutoSaveDraft',
-  'maxHistoryCount': 'setMaxHistoryCount',
-  'enableAstTypeHints': 'setEnableAstTypeHints'
+  attributeName: 'setAttributeName',
+  drawerWidth: 'setDrawerWidth',
+  autoParseString: 'setAutoParseString',
+  enableDebugLog: 'setEnableDebugLog',
+  highlightColor: 'setHighlightColor',
+  maxFavoritesCount: 'setMaxFavoritesCount',
+  autoSaveDraft: 'setAutoSaveDraft',
+  maxHistoryCount: 'setMaxHistoryCount',
+  enableAstTypeHints: 'setEnableAstTypeHints',
 }
 
 /**
@@ -192,7 +206,7 @@ export const FIELD_PATH_STORAGE_MAP: Record<string, string> = {
  */
 export function findFieldGroup(path: readonly string[]): FieldGroup | null {
   for (const group of Object.values(FIELD_GROUPS)) {
-    if (group.fieldPaths.some(fieldPath => pathEqual(fieldPath as string[], path as string[]))) {
+    if (group.fieldPaths.some((fieldPath) => pathEqual(fieldPath as string[], path as string[]))) {
       return group
     }
   }
@@ -205,5 +219,7 @@ export function findFieldGroup(path: readonly string[]): FieldGroup | null {
  * @returns 是否需要防抖
  */
 export function isDebounceField(path: readonly string[]): boolean {
-  return DEBOUNCE_FIELD_PATHS.some(debouncePath => pathEqual(debouncePath as string[], path as string[]))
+  return DEBOUNCE_FIELD_PATHS.some((debouncePath) =>
+    pathEqual(debouncePath as string[], path as string[])
+  )
 }

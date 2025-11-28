@@ -15,11 +15,11 @@ interface TooltipProps {
  * 注意：当前实现中使用原生DOM创建tooltip（在monitor.ts中）
  * 这个组件作为备用方案保留
  */
-export const Tooltip: React.FC<TooltipProps> = ({ 
-  visible, 
-  position, 
-  attributes, 
-  isValid 
+export const Tooltip: React.FC<TooltipProps> = ({
+  visible,
+  position,
+  attributes,
+  isValid,
 }: TooltipProps) => {
   if (!visible) return null
 
@@ -28,11 +28,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
       $isValid={isValid}
       style={{
         left: `${position.x + 15}px`,
-        top: `${position.y + 15}px`
+        top: `${position.y + 15}px`,
       }}
     >
       {formatTooltipContent(attributes, isValid)}
     </TooltipContainer>
   )
 }
-

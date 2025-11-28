@@ -6,7 +6,7 @@ export const isValidHexColor = (color: string): boolean => {
   if (!color || typeof color !== 'string') {
     return false
   }
-  
+
   return /^#[0-9A-Fa-f]{6}$/.test(color) || /^#[0-9A-Fa-f]{3}$/.test(color)
 }
 
@@ -18,11 +18,10 @@ export const normalizeColorValue = (value: unknown, defaultColor: string): strin
   if (!value || typeof value !== 'string') {
     return defaultColor
   }
-  
+
   if (isValidHexColor(value)) {
     return value
   }
-  
+
   return defaultColor
 }
-

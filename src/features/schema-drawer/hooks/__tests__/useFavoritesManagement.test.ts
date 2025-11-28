@@ -9,8 +9,8 @@ import type { Favorite } from '@/shared/types'
 jest.mock('@/shared/utils/browser/storage')
 jest.mock('antd', () => ({
   Modal: {
-    confirm: jest.fn()
-  }
+    confirm: jest.fn(),
+  },
 }))
 
 const mockStorage = storage as jest.Mocked<typeof storage>
@@ -28,7 +28,7 @@ describe('useFavoritesManagement Hook 测试', () => {
     onApplyFavorite: mockOnApplyFavorite,
     onShowLightNotification: mockOnShowLightNotification,
     onWarning: mockOnWarning,
-    onError: mockOnError
+    onError: mockOnError,
   }
 
   const mockFavorite: Favorite = {
@@ -36,17 +36,17 @@ describe('useFavoritesManagement Hook 测试', () => {
     name: '测试收藏',
     content: '{"test": "data"}',
     timestamp: Date.now(),
-    lastUsedTime: Date.now()
+    lastUsedTime: Date.now(),
   }
 
   beforeEach(() => {
     jest.clearAllMocks()
-    
+
     // 初始化 shadowRootManager
     const mockShadowRoot = document.createElement('div') as unknown as ShadowRoot
     shadowRootManager.init(mockShadowRoot)
   })
-  
+
   afterEach(() => {
     shadowRootManager.reset()
   })
@@ -232,10 +232,12 @@ describe('useFavoritesManagement Hook 测试', () => {
         return {} as any
       })
 
-      const { result } = renderHook(() => useFavoritesManagement({
-        ...defaultProps,
-        isModified: true
-      }))
+      const { result } = renderHook(() =>
+        useFavoritesManagement({
+          ...defaultProps,
+          isModified: true,
+        })
+      )
 
       await act(async () => {
         result.current.handleApplyFavorite(mockFavorite)
@@ -244,7 +246,7 @@ describe('useFavoritesManagement Hook 测试', () => {
       expect(mockModal.confirm).toHaveBeenCalledWith(
         expect.objectContaining({
           title: '确认应用收藏',
-          content: '当前内容未保存，应用收藏将替换当前内容，确认吗？'
+          content: '当前内容未保存，应用收藏将替换当前内容，确认吗？',
         })
       )
 
@@ -296,13 +298,15 @@ describe('useFavoritesManagement Hook 测试', () => {
       expect(result.current.editModalVisible).toBe(true)
       expect(result.current.editingFavoriteId).toBe('fav_1')
       expect(result.current.editingName).toBe('测试收藏')
-      expect(result.current.editingContent).toBe(JSON.stringify(JSON.parse('{"test": "data"}'), null, 2))
+      expect(result.current.editingContent).toBe(
+        JSON.stringify(JSON.parse('{"test": "data"}'), null, 2)
+      )
     })
 
     it('非JSON内容应该直接显示', () => {
       const nonJsonFavorite: Favorite = {
         ...mockFavorite,
-        content: 'plain text content'
+        content: 'plain text content',
       }
 
       const { result } = renderHook(() => useFavoritesManagement(defaultProps))
@@ -317,7 +321,7 @@ describe('useFavoritesManagement Hook 测试', () => {
     it('格式化失败时应该显示原始内容', () => {
       const invalidJsonFavorite: Favorite = {
         ...mockFavorite,
-        content: '{invalid json'
+        content: '{invalid json',
       }
 
       const { result } = renderHook(() => useFavoritesManagement(defaultProps))
@@ -374,4 +378,3 @@ describe('useFavoritesManagement Hook 测试', () => {
     })
   })
 })
-

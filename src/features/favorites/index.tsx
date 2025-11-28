@@ -8,4 +8,3 @@ export { AddFavoriteModal } from './components/AddFavoriteModal'
 export { FavoriteEditModal } from './components/FavoriteEditModal'
 export { FavoritesListModal } from './components/FavoritesListModal'
 export { FavoritesManager } from './components/FavoritesManager'
-

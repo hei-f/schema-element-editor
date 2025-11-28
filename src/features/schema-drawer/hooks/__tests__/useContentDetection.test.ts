@@ -5,7 +5,7 @@ import { useContentDetection } from '../useContentDetection'
 // Mock transformers
 jest.mock('@/shared/utils/schema/transformers', () => ({
   isElementsArray: jest.fn(),
-  isStringData: jest.fn()
+  isStringData: jest.fn(),
 }))
 
 import { isElementsArray, isStringData } from '@/shared/utils/schema/transformers'
@@ -109,7 +109,7 @@ describe('useContentDetection Hook 测试', () => {
         nested: { deep: { structure: ['with', 'arrays'] } },
         number: 123,
         boolean: true,
-        null: null
+        null: null,
       })
 
       const detected = result.current.detectContentType(complexJson)
@@ -204,7 +204,7 @@ describe('useContentDetection Hook 测试', () => {
       act(() => {
         result.current.updateContentType({
           type: ContentType.Ast,
-          canParse: true
+          canParse: true,
         })
       })
 
@@ -218,7 +218,7 @@ describe('useContentDetection Hook 测试', () => {
       act(() => {
         result.current.updateContentType({
           type: ContentType.RawString,
-          canParse: true
+          canParse: true,
         })
       })
 
@@ -233,7 +233,7 @@ describe('useContentDetection Hook 测试', () => {
       act(() => {
         result.current.updateContentType({
           type: ContentType.Ast,
-          canParse: true
+          canParse: true,
         })
       })
 
@@ -241,7 +241,7 @@ describe('useContentDetection Hook 测试', () => {
       act(() => {
         result.current.updateContentType({
           type: ContentType.Other,
-          canParse: false
+          canParse: false,
         })
       })
 
@@ -261,7 +261,7 @@ describe('useContentDetection Hook 测试', () => {
       act(() => {
         result.current.updateContentType({
           type: ContentType.Ast,
-          canParse: true
+          canParse: true,
         })
       })
 
@@ -302,7 +302,7 @@ describe('useContentDetection Hook 测试', () => {
         '{"key":"valu',
         '{"key":"value',
         '{"key":"value"',
-        '{"key":"value"}'
+        '{"key":"value"}',
       ]
 
       inputSteps.forEach((input) => {
@@ -374,4 +374,3 @@ describe('useContentDetection Hook 测试', () => {
     })
   })
 })
-

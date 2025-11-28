@@ -7,17 +7,21 @@ import ReactDOM from 'react-dom/client'
 const transformCSSPaths = (cssText: string): string => {
   return cssText.replace(/url\(['"]?([^'")]+)['"]?\)/g, (_match, path) => {
     // 如果已经是绝对路径或 data URI，跳过
-    if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('chrome-extension:')) {
+    if (
+      path.startsWith('http') ||
+      path.startsWith('data:') ||
+      path.startsWith('chrome-extension:')
+    ) {
       return `url('${path}')`
     }
-    
+
     const extensionOrigin = chrome.runtime.getURL('')
-    
+
     // 如果是根路径（如 /assets/xxx），转换为 chrome-extension:// URL
     if (path.startsWith('/')) {
       return `url('${extensionOrigin}${path.substring(1)}')`
     }
-    
+
     // 相对路径（如 ./xxx, ../xxx 或无前缀）
     // 假设这些资源都在 assets 目录下（Vite 构建后的标准输出）
     if (path.startsWith('./')) {
@@ -35,22 +39,30 @@ const transformCSSPaths = (cssText: string): string => {
 /**
  * 使用fetch加载CSS文件内容并注入到Shadow DOM
  */
-const loadAndInjectCSS = async (shadowRoot: ShadowRoot, url: string, sourceName: string): Promise<void> => {
+const loadAndInjectCSS = async (
+  shadowRoot: ShadowRoot,
+  url: string,
+  sourceName: string
+): Promise<void> => {
   try {
     const response = await fetch(url)
     let cssText = await response.text()
-    
+
     // 获取 CSS 文件所在目录的 base URL
     const baseURL = url.substring(0, url.lastIndexOf('/') + 1)
-    
+
     // 替换所有 CSS 中的资源路径（字体、图片等）
     // 匹配所有 url(...) 中的路径
     cssText = cssText.replace(/url\(['"]?([^'")]+)['"]?\)/g, (_match, path) => {
       // 如果已经是绝对路径或 data URI，跳过
-      if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('chrome-extension:')) {
+      if (
+        path.startsWith('http') ||
+        path.startsWith('data:') ||
+        path.startsWith('chrome-extension:')
+      ) {
         return `url('${path}')`
       }
-      
+
       // 处理相对路径和绝对路径
       let absolutePath = ''
       if (path.startsWith('./')) {
@@ -61,7 +73,10 @@ const loadAndInjectCSS = async (shadowRoot: ShadowRoot, url: string, sourceName:
         let currentURL = baseURL
         let relativePath = path
         while (relativePath.startsWith('../')) {
-          currentURL = currentURL.substring(0, currentURL.lastIndexOf('/', currentURL.length - 2) + 1)
+          currentURL = currentURL.substring(
+            0,
+            currentURL.lastIndexOf('/', currentURL.length - 2) + 1
+          )
           relativePath = relativePath.substring(3)
         }
         absolutePath = currentURL + relativePath
@@ -74,10 +89,10 @@ const loadAndInjectCSS = async (shadowRoot: ShadowRoot, url: string, sourceName:
         // 无前缀的相对路径，视为当前目录
         absolutePath = baseURL + path
       }
-      
+
       return `url('${absolutePath}')`
     })
-    
+
     const styleElement = document.createElement('style')
     styleElement.textContent = cssText
     styleElement.setAttribute('data-source', sourceName)
@@ -97,10 +112,10 @@ const loadAllStyles = async (shadowRoot: ShadowRoot): Promise<void> => {
     chrome.runtime.getURL('node_modules/antd/dist/reset.css'),
     'antd'
   )
-  
+
   // 2. 复制页面中已注入的style标签（styled-components等），并转换路径
   const existingStyles = document.querySelectorAll('head > style')
-  
+
   existingStyles.forEach((style) => {
     const clonedStyle = document.createElement('style')
     // 转换CSS路径
@@ -108,17 +123,17 @@ const loadAllStyles = async (shadowRoot: ShadowRoot): Promise<void> => {
     clonedStyle.setAttribute('data-shadow-copied', 'true')
     shadowRoot.appendChild(clonedStyle)
   })
-  
+
   // 3. 复制页面中通过link标签加载的CSS，并转换路径
   const existingLinks = document.querySelectorAll('head > link[rel="stylesheet"]')
-  
+
   for (const link of existingLinks) {
     const href = (link as HTMLLinkElement).href
     if (href) {
       await loadAndInjectCSS(shadowRoot, href, `external-link: ${href}`)
     }
   }
-  
+
   // 4. 监听后续动态添加的样式和link标签，并转换路径
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
@@ -134,7 +149,7 @@ const loadAllStyles = async (shadowRoot: ShadowRoot): Promise<void> => {
           // 动态添加的link标签
           const href = node.href
           if (href) {
-            loadAndInjectCSS(shadowRoot, href, `dynamic-link: ${href}`).catch(error => {
+            loadAndInjectCSS(shadowRoot, href, `dynamic-link: ${href}`).catch((error) => {
               logger.error(`加载动态CSS失败: ${href}`, error)
             })
           }
@@ -142,17 +157,17 @@ const loadAllStyles = async (shadowRoot: ShadowRoot): Promise<void> => {
       })
     })
   })
-  
+
   observer.observe(document.head, {
     childList: true,
-    subtree: false
+    subtree: false,
   })
 }
 
 /**
  * 创建Shadow DOM容器并挂载React应用
  */
-export const createShadowRoot = async (): Promise<{ 
+export const createShadowRoot = async (): Promise<{
   container: HTMLDivElement
   root: ReactDOM.Root
   shadowRoot: ShadowRoot
@@ -196,4 +211,3 @@ export const createShadowRoot = async (): Promise<{
 
   return { container, root, shadowRoot }
 }
-

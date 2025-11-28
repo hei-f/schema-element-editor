@@ -1,5 +1,11 @@
 import { DEFAULT_VALUES, STORAGE_KEYS } from '@/shared/constants/defaults'
-import type { ApiConfig, EditorTheme, HighlightAllConfig, PreviewConfig, RecordingModeConfig } from '@/shared/types'
+import type {
+  ApiConfig,
+  EditorTheme,
+  HighlightAllConfig,
+  PreviewConfig,
+  RecordingModeConfig,
+} from '@/shared/types'
 
 /**
  * 存储字段配置接口
@@ -22,12 +28,12 @@ interface StorageFieldConfig<T> {
 export const SIMPLE_STORAGE_FIELDS = {
   isActive: {
     key: STORAGE_KEYS.IS_ACTIVE,
-    defaultValue: DEFAULT_VALUES.isActive
+    defaultValue: DEFAULT_VALUES.isActive,
   } as StorageFieldConfig<boolean>,
 
   attributeName: {
     key: STORAGE_KEYS.ATTRIBUTE_NAME,
-    defaultValue: DEFAULT_VALUES.attributeName
+    defaultValue: DEFAULT_VALUES.attributeName,
   } as StorageFieldConfig<string>,
 
   drawerWidth: {
@@ -38,27 +44,27 @@ export const SIMPLE_STORAGE_FIELDS = {
         return `${value}px` as string | number
       }
       return value
-    }
+    },
   } as StorageFieldConfig<string | number>,
 
   getFunctionName: {
     key: STORAGE_KEYS.GET_FUNCTION_NAME,
-    defaultValue: DEFAULT_VALUES.getFunctionName
+    defaultValue: DEFAULT_VALUES.getFunctionName,
   } as StorageFieldConfig<string>,
 
   updateFunctionName: {
     key: STORAGE_KEYS.UPDATE_FUNCTION_NAME,
-    defaultValue: DEFAULT_VALUES.updateFunctionName
+    defaultValue: DEFAULT_VALUES.updateFunctionName,
   } as StorageFieldConfig<string>,
 
   autoParseString: {
     key: STORAGE_KEYS.AUTO_PARSE_STRING,
-    defaultValue: DEFAULT_VALUES.autoParseString
+    defaultValue: DEFAULT_VALUES.autoParseString,
   } as StorageFieldConfig<boolean>,
 
   enableDebugLog: {
     key: STORAGE_KEYS.ENABLE_DEBUG_LOG,
-    defaultValue: DEFAULT_VALUES.enableDebugLog
+    defaultValue: DEFAULT_VALUES.enableDebugLog,
   } as StorageFieldConfig<boolean>,
 
   highlightColor: {
@@ -66,32 +72,32 @@ export const SIMPLE_STORAGE_FIELDS = {
     defaultValue: DEFAULT_VALUES.highlightColor,
     validator: (value: any): value is string => {
       return typeof value === 'string' && value.length > 0
-    }
+    },
   } as StorageFieldConfig<string>,
 
   maxFavoritesCount: {
     key: STORAGE_KEYS.MAX_FAVORITES_COUNT,
-    defaultValue: DEFAULT_VALUES.maxFavoritesCount
+    defaultValue: DEFAULT_VALUES.maxFavoritesCount,
   } as StorageFieldConfig<number>,
 
   draftRetentionDays: {
     key: STORAGE_KEYS.DRAFT_RETENTION_DAYS,
-    defaultValue: DEFAULT_VALUES.draftRetentionDays
+    defaultValue: DEFAULT_VALUES.draftRetentionDays,
   } as StorageFieldConfig<number>,
 
   autoSaveDraft: {
     key: STORAGE_KEYS.AUTO_SAVE_DRAFT,
-    defaultValue: DEFAULT_VALUES.autoSaveDraft
+    defaultValue: DEFAULT_VALUES.autoSaveDraft,
   } as StorageFieldConfig<boolean>,
 
   draftAutoSaveDebounce: {
     key: STORAGE_KEYS.DRAFT_AUTO_SAVE_DEBOUNCE,
-    defaultValue: DEFAULT_VALUES.draftAutoSaveDebounce
+    defaultValue: DEFAULT_VALUES.draftAutoSaveDebounce,
   } as StorageFieldConfig<number>,
 
   previewConfig: {
     key: STORAGE_KEYS.PREVIEW_CONFIG,
-    defaultValue: DEFAULT_VALUES.previewConfig
+    defaultValue: DEFAULT_VALUES.previewConfig,
   } as StorageFieldConfig<PreviewConfig>,
 
   maxHistoryCount: {
@@ -99,7 +105,7 @@ export const SIMPLE_STORAGE_FIELDS = {
     defaultValue: DEFAULT_VALUES.maxHistoryCount,
     validator: (value: any): value is number => {
       return typeof value === 'number' && value >= 10 && value <= 200
-    }
+    },
   } as StorageFieldConfig<number>,
 
   highlightAllConfig: {
@@ -111,12 +117,12 @@ export const SIMPLE_STORAGE_FIELDS = {
         typeof value.enabled === 'boolean' &&
         typeof value.keyBinding === 'string' &&
         value.keyBinding.length === 1 &&
-        /^[a-zA-Z0-9]$/.test(value.keyBinding) &&  // 支持字母和数字
+        /^[a-zA-Z0-9]$/.test(value.keyBinding) && // 支持字母和数字
         typeof value.maxHighlightCount === 'number' &&
         value.maxHighlightCount >= 100 &&
         value.maxHighlightCount <= 1000
       )
-    }
+    },
   } as StorageFieldConfig<HighlightAllConfig>,
 
   recordingModeConfig: {
@@ -135,12 +141,12 @@ export const SIMPLE_STORAGE_FIELDS = {
         value.pollingInterval >= 50 &&
         value.pollingInterval <= 1000
       )
-    }
+    },
   } as StorageFieldConfig<RecordingModeConfig>,
 
   enableAstTypeHints: {
     key: STORAGE_KEYS.ENABLE_AST_TYPE_HINTS,
-    defaultValue: DEFAULT_VALUES.enableAstTypeHints
+    defaultValue: DEFAULT_VALUES.enableAstTypeHints,
   } as StorageFieldConfig<boolean>,
 
   editorTheme: {
@@ -148,12 +154,12 @@ export const SIMPLE_STORAGE_FIELDS = {
     defaultValue: DEFAULT_VALUES.editorTheme,
     validator: (value: any): value is EditorTheme => {
       return ['light', 'dark', 'schemaEditorDark'].includes(value)
-    }
+    },
   } as StorageFieldConfig<EditorTheme>,
 
   previewFunctionName: {
     key: STORAGE_KEYS.PREVIEW_FUNCTION_NAME,
-    defaultValue: DEFAULT_VALUES.previewFunctionName
+    defaultValue: DEFAULT_VALUES.previewFunctionName,
   } as StorageFieldConfig<string>,
 
   apiConfig: {
@@ -174,23 +180,32 @@ export const SIMPLE_STORAGE_FIELDS = {
         communicationMode: value.communicationMode ?? DEFAULT_VALUES.apiConfig.communicationMode,
         requestTimeout: value.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout,
         sourceConfig: {
-          contentSource: value.sourceConfig?.contentSource ?? DEFAULT_VALUES.apiConfig.sourceConfig.contentSource,
-          hostSource: value.sourceConfig?.hostSource ?? DEFAULT_VALUES.apiConfig.sourceConfig.hostSource
+          contentSource:
+            value.sourceConfig?.contentSource ??
+            DEFAULT_VALUES.apiConfig.sourceConfig.contentSource,
+          hostSource:
+            value.sourceConfig?.hostSource ?? DEFAULT_VALUES.apiConfig.sourceConfig.hostSource,
         },
         messageTypes: {
-          getSchema: value.messageTypes?.getSchema ?? DEFAULT_VALUES.apiConfig.messageTypes.getSchema,
-          updateSchema: value.messageTypes?.updateSchema ?? DEFAULT_VALUES.apiConfig.messageTypes.updateSchema,
-          checkPreview: value.messageTypes?.checkPreview ?? DEFAULT_VALUES.apiConfig.messageTypes.checkPreview,
-          renderPreview: value.messageTypes?.renderPreview ?? DEFAULT_VALUES.apiConfig.messageTypes.renderPreview,
-          cleanupPreview: value.messageTypes?.cleanupPreview ?? DEFAULT_VALUES.apiConfig.messageTypes.cleanupPreview
-        }
+          getSchema:
+            value.messageTypes?.getSchema ?? DEFAULT_VALUES.apiConfig.messageTypes.getSchema,
+          updateSchema:
+            value.messageTypes?.updateSchema ?? DEFAULT_VALUES.apiConfig.messageTypes.updateSchema,
+          checkPreview:
+            value.messageTypes?.checkPreview ?? DEFAULT_VALUES.apiConfig.messageTypes.checkPreview,
+          renderPreview:
+            value.messageTypes?.renderPreview ??
+            DEFAULT_VALUES.apiConfig.messageTypes.renderPreview,
+          cleanupPreview:
+            value.messageTypes?.cleanupPreview ??
+            DEFAULT_VALUES.apiConfig.messageTypes.cleanupPreview,
+        },
       }
-    }
-  } as StorageFieldConfig<ApiConfig>
+    },
+  } as StorageFieldConfig<ApiConfig>,
 }
 
 /**
  * 字段名称类型
  */
 export type StorageFieldName = keyof typeof SIMPLE_STORAGE_FIELDS
-

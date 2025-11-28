@@ -1,7 +1,19 @@
 import { DEFAULT_VALUES, STORAGE_KEYS } from '@/shared/constants/defaults'
 import { draftManager } from '@/shared/managers/draft-manager'
 import { favoritesManager } from '@/shared/managers/favorites-manager'
-import type { ApiConfig, Draft, EditorTheme, ExportConfig, Favorite, HighlightAllConfig, PreviewConfig, RecordingModeConfig, SearchConfig, StorageData, ToolbarButtonsConfig } from '@/shared/types'
+import type {
+  ApiConfig,
+  Draft,
+  EditorTheme,
+  ExportConfig,
+  Favorite,
+  HighlightAllConfig,
+  PreviewConfig,
+  RecordingModeConfig,
+  SearchConfig,
+  StorageData,
+  ToolbarButtonsConfig,
+} from '@/shared/types'
 import { logger } from '@/shared/utils/logger'
 import { SIMPLE_STORAGE_FIELDS, type StorageFieldName } from './storage-config'
 
@@ -21,15 +33,15 @@ class StorageManager {
     try {
       const result = await chrome.storage.local.get(config.key)
       let value = result[config.key] ?? config.defaultValue
-      
+
       if (config.validator && !config.validator(value)) {
         return config.defaultValue as T
       }
-      
+
       if (config.transformer) {
         value = config.transformer(value)
       }
-      
+
       return value as T
     } catch (error) {
       console.error(`获取${fieldName}失败:`, error)
@@ -44,7 +56,7 @@ class StorageManager {
     const config = SIMPLE_STORAGE_FIELDS[fieldName]
     try {
       await chrome.storage.local.set({
-        [config.key]: value
+        [config.key]: value,
       })
     } catch (error) {
       console.error(`设置${fieldName}失败:`, error)
@@ -124,7 +136,7 @@ class StorageManager {
       const currentConfig = await this.getSearchConfig()
       const newConfig = { ...currentConfig, ...config }
       await chrome.storage.local.set({
-        [this.STORAGE_KEYS.SEARCH_CONFIG]: newConfig
+        [this.STORAGE_KEYS.SEARCH_CONFIG]: newConfig,
       })
     } catch (error) {
       console.error('设置搜索配置失败:', error)
@@ -148,12 +160,16 @@ class StorageManager {
   /**
    * 设置函数名（核心 API + 扩展 API）
    */
-  async setFunctionNames(getFunctionName: string, updateFunctionName: string, previewFunctionName: string): Promise<void> {
+  async setFunctionNames(
+    getFunctionName: string,
+    updateFunctionName: string,
+    previewFunctionName: string
+  ): Promise<void> {
     try {
       await chrome.storage.local.set({
         [this.STORAGE_KEYS.GET_FUNCTION_NAME]: getFunctionName,
         [this.STORAGE_KEYS.UPDATE_FUNCTION_NAME]: updateFunctionName,
-        [this.STORAGE_KEYS.PREVIEW_FUNCTION_NAME]: previewFunctionName
+        [this.STORAGE_KEYS.PREVIEW_FUNCTION_NAME]: previewFunctionName,
       })
     } catch (error) {
       console.error('设置函数名失败:', error)
@@ -209,7 +225,7 @@ class StorageManager {
       const currentConfig = await this.getToolbarButtons()
       const newConfig = { ...currentConfig, ...config }
       await chrome.storage.local.set({
-        [this.STORAGE_KEYS.TOOLBAR_BUTTONS]: newConfig
+        [this.STORAGE_KEYS.TOOLBAR_BUTTONS]: newConfig,
       })
     } catch (error) {
       console.error('设置工具栏按钮配置失败:', error)
@@ -234,7 +250,30 @@ class StorageManager {
    * 获取所有存储数据
    */
   async getAllData(): Promise<StorageData> {
-    const [isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig, recordingModeConfig, enableAstTypeHints, editorTheme, previewFunctionName, apiConfig] = await Promise.all([
+    const [
+      isActive,
+      drawerWidth,
+      attributeName,
+      searchConfig,
+      getFunctionName,
+      updateFunctionName,
+      autoParseString,
+      enableDebugLog,
+      toolbarButtons,
+      highlightColor,
+      maxFavoritesCount,
+      draftRetentionDays,
+      autoSaveDraft,
+      draftAutoSaveDebounce,
+      previewConfig,
+      maxHistoryCount,
+      highlightAllConfig,
+      recordingModeConfig,
+      enableAstTypeHints,
+      editorTheme,
+      previewFunctionName,
+      apiConfig,
+    ] = await Promise.all([
       this.getActiveState(),
       this.getDrawerWidth(),
       this.getAttributeName(),
@@ -256,10 +295,34 @@ class StorageManager {
       this.getEnableAstTypeHints(),
       this.getEditorTheme(),
       this.getPreviewFunctionName(),
-      this.getApiConfig()
+      this.getApiConfig(),
     ])
     const exportConfig = await this.getExportConfig()
-    return { isActive, drawerWidth, attributeName, searchConfig, getFunctionName, updateFunctionName, autoParseString, enableDebugLog, toolbarButtons, highlightColor, maxFavoritesCount, draftRetentionDays, autoSaveDraft, draftAutoSaveDebounce, previewConfig, maxHistoryCount, highlightAllConfig, recordingModeConfig, enableAstTypeHints, exportConfig, editorTheme, previewFunctionName, apiConfig }
+    return {
+      isActive,
+      drawerWidth,
+      attributeName,
+      searchConfig,
+      getFunctionName,
+      updateFunctionName,
+      autoParseString,
+      enableDebugLog,
+      toolbarButtons,
+      highlightColor,
+      maxFavoritesCount,
+      draftRetentionDays,
+      autoSaveDraft,
+      draftAutoSaveDebounce,
+      previewConfig,
+      maxHistoryCount,
+      highlightAllConfig,
+      recordingModeConfig,
+      enableAstTypeHints,
+      exportConfig,
+      editorTheme,
+      previewFunctionName,
+      apiConfig,
+    }
   }
 
   /**
@@ -351,13 +414,9 @@ class StorageManager {
    */
   async saveDraft(paramsKey: string, content: string): Promise<void> {
     try {
-      await draftManager.saveDraft(
-        paramsKey,
-        content,
-        async (key, draft) => {
-          await chrome.storage.local.set({ [key]: draft })
-        }
-      )
+      await draftManager.saveDraft(paramsKey, content, async (key, draft) => {
+        await chrome.storage.local.set({ [key]: draft })
+      })
     } catch (error) {
       console.error('保存草稿失败:', error)
     }
@@ -381,7 +440,7 @@ class StorageManager {
   async cleanExpiredDrafts(): Promise<void> {
     try {
       const retentionDays = await this.getDraftRetentionDays()
-      
+
       await draftManager.cleanExpiredDrafts(
         retentionDays,
         this.STORAGE_KEYS.DRAFTS_PREFIX,
@@ -411,7 +470,7 @@ class StorageManager {
    */
   private async saveFavorites(favorites: Favorite[]): Promise<void> {
     await chrome.storage.local.set({
-      [this.STORAGE_KEYS.FAVORITES]: favorites
+      [this.STORAGE_KEYS.FAVORITES]: favorites,
     })
   }
 
@@ -421,7 +480,7 @@ class StorageManager {
   async addFavorite(name: string, content: string): Promise<void> {
     try {
       const maxCount = await this.getMaxFavoritesCount()
-      
+
       await favoritesManager.addFavorite(
         name,
         content,
@@ -495,7 +554,7 @@ class StorageManager {
         () => this.getFavorites(),
         (favorites) => this.saveFavorites(favorites)
       )
-      
+
       if (cleanedCount > 0) {
         logger.log(`已清理 ${cleanedCount} 个最少使用的收藏`)
       }
@@ -581,7 +640,7 @@ class StorageManager {
       const currentConfig = await this.getExportConfig()
       const newConfig = { ...currentConfig, ...config }
       await chrome.storage.local.set({
-        [this.STORAGE_KEYS.EXPORT_CONFIG]: newConfig
+        [this.STORAGE_KEYS.EXPORT_CONFIG]: newConfig,
       })
     } catch (error) {
       console.error('设置导出配置失败:', error)
@@ -633,4 +692,3 @@ class StorageManager {
 }
 
 export const storage = new StorageManager()
-

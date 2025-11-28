@@ -13,10 +13,11 @@ import {
   DiffEditorHeader,
   SharedScrollContainer,
   DiffEditorsRow,
-  DiffEditorPanel
+  DiffEditorPanel,
 } from '../styles/recording.styles'
 import { schemaTransformer } from '../services/schema-transformer'
-import { DiffEditor, DiffEditorHandle, DiffLineInfo, InlineDiffSegment } from './DiffEditor'
+import type { DiffEditorHandle, DiffLineInfo, InlineDiffSegment } from './DiffEditor'
+import { DiffEditor } from './DiffEditor'
 import { useDiffSync } from '../hooks/useDiffSync'
 import type { DiffRow } from '../utils/diff-algorithm'
 
@@ -58,11 +59,11 @@ function ensureJsonString(content: string): string {
  */
 function transformContent(content: string, mode: DiffDisplayMode): string {
   if (!content) return ''
-  
+
   switch (mode) {
     case 'raw':
       return content
-    
+
     case 'deserialize': {
       const jsonContent = ensureJsonString(content)
       const result = schemaTransformer.deserializeJson(jsonContent)
@@ -75,7 +76,7 @@ function transformContent(content: string, mode: DiffDisplayMode): string {
       }
       return content
     }
-    
+
     case 'ast': {
       const jsonContent = ensureJsonString(content)
       const result = schemaTransformer.convertToAST(jsonContent)
@@ -84,7 +85,7 @@ function transformContent(content: string, mode: DiffDisplayMode): string {
       }
       return content
     }
-    
+
     default:
       return content
   }
@@ -104,7 +105,7 @@ function computeInlineDiffs(
   const diffs = diffChars(leftContent, rightContent)
   const segments: InlineDiffSegment[] = []
   let position = 0
-  
+
   for (const part of diffs) {
     if (side === 'left') {
       // 左侧：只关心 removed 部分
@@ -112,7 +113,7 @@ function computeInlineDiffs(
         segments.push({
           from: position,
           to: position + part.value.length,
-          type: 'removed'
+          type: 'removed',
         })
         position += part.value.length
       } else if (!part.added) {
@@ -126,7 +127,7 @@ function computeInlineDiffs(
         segments.push({
           from: position,
           to: position + part.value.length,
-          type: 'added'
+          type: 'added',
         })
         position += part.value.length
       } else if (!part.removed) {
@@ -136,7 +137,7 @@ function computeInlineDiffs(
       // removed 部分在右侧不显示
     }
   }
-  
+
   return segments
 }
 
@@ -146,16 +147,16 @@ function computeInlineDiffs(
 function convertToLeftDiffLines(rows: DiffRow[]): DiffLineInfo[] {
   const result: DiffLineInfo[] = []
   let editorLine = 0
-  
+
   for (const row of rows) {
     const leftSide = row.left
-    
+
     if (leftSide.type === 'placeholder') {
       // 占位行：在当前位置插入 widget
       result.push({
         editorLine,
         type: 'unchanged',
-        isPlaceholder: true
+        isPlaceholder: true,
       })
     } else {
       // 计算行内差异（仅对 modified 行）
@@ -163,22 +164,26 @@ function convertToLeftDiffLines(rows: DiffRow[]): DiffLineInfo[] {
       if (leftSide.type === 'modified' && leftSide.pairContent !== undefined) {
         inlineDiffs = computeInlineDiffs(leftSide.content, leftSide.pairContent, 'left')
       }
-      
+
       // 正常行：根据类型设置背景
       result.push({
         editorLine,
-        type: leftSide.type === 'modified' ? 'modified' 
-            : leftSide.type === 'removed' ? 'removed'
-            : leftSide.type === 'added' ? 'added'
-            : 'unchanged',
+        type:
+          leftSide.type === 'modified'
+            ? 'modified'
+            : leftSide.type === 'removed'
+              ? 'removed'
+              : leftSide.type === 'added'
+                ? 'added'
+                : 'unchanged',
         isPlaceholder: false,
-        inlineDiffs
+        inlineDiffs,
       })
       editorLine++
     }
-    }
-    
-  return result.filter(line => !line.isPlaceholder || line.editorLine >= 0)
+  }
+
+  return result.filter((line) => !line.isPlaceholder || line.editorLine >= 0)
 }
 
 /**
@@ -187,37 +192,41 @@ function convertToLeftDiffLines(rows: DiffRow[]): DiffLineInfo[] {
 function convertToRightDiffLines(rows: DiffRow[]): DiffLineInfo[] {
   const result: DiffLineInfo[] = []
   let editorLine = 0
-  
+
   for (const row of rows) {
     const rightSide = row.right
-    
+
     if (rightSide.type === 'placeholder') {
       result.push({
         editorLine,
         type: 'unchanged',
-        isPlaceholder: true
+        isPlaceholder: true,
       })
-        } else {
+    } else {
       // 计算行内差异（仅对 modified 行）
       let inlineDiffs: InlineDiffSegment[] | undefined
       if (rightSide.type === 'modified' && rightSide.pairContent !== undefined) {
         inlineDiffs = computeInlineDiffs(rightSide.pairContent, rightSide.content, 'right')
       }
-      
+
       result.push({
         editorLine,
-        type: rightSide.type === 'modified' ? 'modified'
-            : rightSide.type === 'added' ? 'added'
-            : rightSide.type === 'removed' ? 'removed'
-            : 'unchanged',
+        type:
+          rightSide.type === 'modified'
+            ? 'modified'
+            : rightSide.type === 'added'
+              ? 'added'
+              : rightSide.type === 'removed'
+                ? 'removed'
+                : 'unchanged',
         isPlaceholder: false,
-        inlineDiffs
+        inlineDiffs,
       })
       editorLine++
     }
   }
-  
-  return result.filter(line => !line.isPlaceholder || line.editorLine >= 0)
+
+  return result.filter((line) => !line.isPlaceholder || line.editorLine >= 0)
 }
 
 /**
@@ -225,7 +234,7 @@ function convertToRightDiffLines(rows: DiffRow[]): DiffLineInfo[] {
  */
 export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
   const { snapshots, onBackToEditor } = props
-  
+
   // 版本选择状态
   const [leftVersionId, setLeftVersionId] = useState<number | null>(
     snapshots.length > 0 ? snapshots[0].id : null
@@ -233,126 +242,127 @@ export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
   const [rightVersionId, setRightVersionId] = useState<number | null>(
     snapshots.length > 1 ? snapshots[snapshots.length - 1].id : null
   )
-  
+
   // 显示模式
   const [displayMode, setDisplayMode] = useState<DiffDisplayMode>('raw')
-  
+
   // 编辑器引用
   const leftEditorRef = useRef<DiffEditorHandle>(null)
   const rightEditorRef = useRef<DiffEditorHandle>(null)
-  
+
   // 获取原始内容
   const leftRawContent = useMemo(() => {
-    const snapshot = snapshots.find(s => s.id === leftVersionId)
+    const snapshot = snapshots.find((s) => s.id === leftVersionId)
     return snapshot?.content || ''
   }, [snapshots, leftVersionId])
-  
+
   const rightRawContent = useMemo(() => {
-    const snapshot = snapshots.find(s => s.id === rightVersionId)
+    const snapshot = snapshots.find((s) => s.id === rightVersionId)
     return snapshot?.content || ''
   }, [snapshots, rightVersionId])
-  
+
   // 转换后的内容
   const leftTransformed = useMemo(() => {
     return transformContent(leftRawContent, displayMode)
   }, [leftRawContent, displayMode])
-  
+
   const rightTransformed = useMemo(() => {
     return transformContent(rightRawContent, displayMode)
   }, [rightRawContent, displayMode])
-  
+
   // Diff 同步
-  const {
-    setLeftContent,
-    setRightContent,
-    diffRows,
-    isComputing
-  } = useDiffSync({
+  const { setLeftContent, setRightContent, diffRows, isComputing } = useDiffSync({
     initialLeft: leftTransformed,
     initialRight: rightTransformed,
-    debounceMs: 200
+    debounceMs: 200,
   })
-  
+
   // 版本切换时更新内容
   useEffect(() => {
     setLeftContent(leftTransformed)
     leftEditorRef.current?.setValue(leftTransformed)
   }, [leftTransformed])
-  
+
   useEffect(() => {
     setRightContent(rightTransformed)
     rightEditorRef.current?.setValue(rightTransformed)
   }, [rightTransformed])
-  
+
   // 计算编辑器的 diff 行信息
   const leftDiffLines = useMemo(() => {
     return convertToLeftDiffLines(diffRows)
   }, [diffRows])
-  
+
   const rightDiffLines = useMemo(() => {
     return convertToRightDiffLines(diffRows)
   }, [diffRows])
-  
+
   // 更新编辑器装饰
   useEffect(() => {
     leftEditorRef.current?.updateDecorations(leftDiffLines)
     rightEditorRef.current?.updateDecorations(rightDiffLines)
   }, [leftDiffLines, rightDiffLines])
-  
+
   // 版本选项
   const versionOptions = useMemo(() => {
     return snapshots.map((snapshot, index) => ({
       value: snapshot.id,
-      label: `版本 ${index + 1} (${formatTimestamp(snapshot.timestamp)})`
+      label: `版本 ${index + 1} (${formatTimestamp(snapshot.timestamp)})`,
     }))
   }, [snapshots])
-  
+
   // 判断是否为简单对比模式（非录制模式，只有2个快照且 timestamp 为连续的 0 和 1）
   const isSimpleDiffMode = useMemo(() => {
     if (snapshots.length !== 2) return false
     // 检查是否是编辑模式下的对比（timestamp 为 0 和 1）
     return snapshots[0].timestamp === 0 && snapshots[1].timestamp === 1
   }, [snapshots])
-  
+
   // 版本信息显示
   const leftVersionInfo = useMemo(() => {
     if (isSimpleDiffMode) {
       return '原始数据'
     }
-    const snapshot = snapshots.find(s => s.id === leftVersionId)
-    const index = snapshots.findIndex(s => s.id === leftVersionId)
+    const snapshot = snapshots.find((s) => s.id === leftVersionId)
+    const index = snapshots.findIndex((s) => s.id === leftVersionId)
     if (!snapshot) return '请选择左侧版本'
     return `版本 ${index + 1} (${formatTimestamp(snapshot.timestamp)})`
   }, [snapshots, leftVersionId, isSimpleDiffMode])
-  
+
   const rightVersionInfo = useMemo(() => {
     if (isSimpleDiffMode) {
       return '当前编辑'
     }
-    const snapshot = snapshots.find(s => s.id === rightVersionId)
-    const index = snapshots.findIndex(s => s.id === rightVersionId)
+    const snapshot = snapshots.find((s) => s.id === rightVersionId)
+    const index = snapshots.findIndex((s) => s.id === rightVersionId)
     if (!snapshot) return '请选择右侧版本'
     return `版本 ${index + 1} (${formatTimestamp(snapshot.timestamp)})`
   }, [snapshots, rightVersionId, isSimpleDiffMode])
-  
+
   // 内容变化处理
-  const handleLeftChange = useCallback((value: string) => {
-    setLeftContent(value)
-  }, [setLeftContent])
-  
-  const handleRightChange = useCallback((value: string) => {
-    setRightContent(value)
-  }, [setRightContent])
-  
+  const handleLeftChange = useCallback(
+    (value: string) => {
+      setLeftContent(value)
+    },
+    [setLeftContent]
+  )
+
+  const handleRightChange = useCallback(
+    (value: string) => {
+      setRightContent(value)
+    },
+    [setRightContent]
+  )
+
   // 水平滚动同步
   const handleLeftHorizontalScroll = useCallback((scrollLeft: number) => {
     rightEditorRef.current?.setScrollLeft(scrollLeft)
   }, [])
-  
+
   const handleRightHorizontalScroll = useCallback((scrollLeft: number) => {
     leftEditorRef.current?.setScrollLeft(scrollLeft)
   }, [])
-  
+
   // 模式切换处理
   const handleModeChange = (value: string | number) => {
     setDisplayMode(value as DiffDisplayMode)
@@ -362,45 +372,41 @@ export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
     <DiffModeContainer>
       {/* Diff工具栏 */}
       <DiffToolbar>
-        <Button 
-          icon={<RollbackOutlined />} 
-          onClick={onBackToEditor}
-          size="small"
-        >
+        <Button icon={<RollbackOutlined />} onClick={onBackToEditor} size="small">
           返回编辑模式
         </Button>
-        
+
         {/* 非简单对比模式才显示版本选择器 */}
         {!isSimpleDiffMode && (
           <>
-        <VersionSelectorGroup>
-          <VersionSelectorLabel>左侧版本:</VersionSelectorLabel>
-          <Select
-            value={leftVersionId}
-            onChange={setLeftVersionId}
-            options={versionOptions}
-            style={{ width: 180 }}
-            size="small"
-            popupMatchSelectWidth={false}
-            getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
-          />
-        </VersionSelectorGroup>
-        
-        <VersionSelectorGroup>
-          <VersionSelectorLabel>右侧版本:</VersionSelectorLabel>
-          <Select
-            value={rightVersionId}
-            onChange={setRightVersionId}
-            options={versionOptions}
-            style={{ width: 180 }}
-            size="small"
-            popupMatchSelectWidth={false}
-            getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
-          />
-        </VersionSelectorGroup>
+            <VersionSelectorGroup>
+              <VersionSelectorLabel>左侧版本:</VersionSelectorLabel>
+              <Select
+                value={leftVersionId}
+                onChange={setLeftVersionId}
+                options={versionOptions}
+                style={{ width: 180 }}
+                size="small"
+                popupMatchSelectWidth={false}
+                getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
+              />
+            </VersionSelectorGroup>
+
+            <VersionSelectorGroup>
+              <VersionSelectorLabel>右侧版本:</VersionSelectorLabel>
+              <Select
+                value={rightVersionId}
+                onChange={setRightVersionId}
+                options={versionOptions}
+                style={{ width: 180 }}
+                size="small"
+                popupMatchSelectWidth={false}
+                getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
+              />
+            </VersionSelectorGroup>
           </>
         )}
-        
+
         <VersionSelectorGroup>
           <VersionSelectorLabel>对比模式:</VersionSelectorLabel>
           <Tooltip title="选择数据展示格式进行对比">
@@ -411,15 +417,13 @@ export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
               options={[
                 { label: '原始', value: 'raw' },
                 { label: '反序列化', value: 'deserialize' },
-                { label: 'AST', value: 'ast' }
+                { label: 'AST', value: 'ast' },
               ]}
             />
           </Tooltip>
         </VersionSelectorGroup>
-        
-        {isComputing && (
-          <span style={{ color: '#8b949e', fontSize: 12 }}>计算中...</span>
-        )}
+
+        {isComputing && <span style={{ color: '#8b949e', fontSize: 12 }}>计算中...</span>}
       </DiffToolbar>
 
       {/* 可编辑 Diff 内容区域 */}
@@ -429,7 +433,7 @@ export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
           <DiffEditorHeader $isLeft>{leftVersionInfo}</DiffEditorHeader>
           <DiffEditorHeader>{rightVersionInfo}</DiffEditorHeader>
         </DiffHeaderRow>
-          
+
         {/* 共享滚动容器 */}
         <SharedScrollContainer>
           <DiffEditorsRow>
@@ -444,7 +448,7 @@ export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
                 diffLines={leftDiffLines}
               />
             </DiffEditorPanel>
-                  
+
             {/* 右侧编辑器 */}
             <DiffEditorPanel>
               <DiffEditor

@@ -1,0 +1,7 @@
+# TypeScript 类型检查（使用增量编译）
+echo "🔍 Running TypeScript type check..."
+npx tsc --noEmit
+
+# ESLint 和 Prettier 检查
+echo "🔧 Running lint-staged..."
+npx lint-staged

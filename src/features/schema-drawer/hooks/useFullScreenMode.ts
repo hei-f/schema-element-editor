@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
-import { FULL_SCREEN_MODE, FullScreenMode } from '@/shared/constants/ui-modes'
+import type { FullScreenMode } from '@/shared/constants/ui-modes'
+import { FULL_SCREEN_MODE } from '@/shared/constants/ui-modes'
 
 /**
  * 全屏模式状态管理 Hook
@@ -19,4 +20,3 @@ export function useFullScreenMode(initialMode: FullScreenMode = FULL_SCREEN_MODE
     isNone: mode === FULL_SCREEN_MODE.NONE,
   }
 }
-

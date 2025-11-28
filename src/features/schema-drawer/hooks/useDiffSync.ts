@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { computeLineDiff, DiffResult, DiffRow } from '../utils/diff-algorithm'
+import type { DiffResult, DiffRow } from '../utils/diff-algorithm'
+import { computeLineDiff } from '../utils/diff-algorithm'
 
 /** diff 同步 hook 的返回值 */
 interface UseDiffSyncReturn {
@@ -44,26 +45,27 @@ interface UseDiffSyncOptions {
  * 管理左右内容状态、计算 diff、提供滚动同步
  */
 export function useDiffSync(options: UseDiffSyncOptions): UseDiffSyncReturn {
-  const {
-    initialLeft,
-    initialRight,
-    debounceMs = 300
-  } = options
+  const { initialLeft, initialRight, debounceMs = 300 } = options
 
   const [leftContent, setLeftContent] = useState(initialLeft)
   const [rightContent, setRightContent] = useState(initialRight)
-  const [diffResult, setDiffResult] = useState<DiffResult | null>(null)
+  // 使用 lazy initial state 避免在 effect 中同步调用 setState
+  const [diffResult, setDiffResult] = useState<DiffResult | null>(() =>
+    computeLineDiff(initialLeft, initialRight)
+  )
   const [isComputing, setIsComputing] = useState(false)
 
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // 计算 diff（带防抖）
   useEffect(() => {
-    setIsComputing(true)
-
+    // 清除之前的 timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current)
     }
+
+    // 标记开始计算 - 使用 setTimeout 0 避免同步 setState
+    const markComputingTimer = setTimeout(() => setIsComputing(true), 0)
 
     debounceTimerRef.current = setTimeout(() => {
       const result = computeLineDiff(leftContent, rightContent)
@@ -72,17 +74,12 @@ export function useDiffSync(options: UseDiffSyncOptions): UseDiffSyncReturn {
     }, debounceMs)
 
     return () => {
+      clearTimeout(markComputingTimer)
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current)
       }
     }
   }, [leftContent, rightContent, debounceMs])
-
-  // 初始计算（无防抖）
-  useEffect(() => {
-    const result = computeLineDiff(initialLeft, initialRight)
-    setDiffResult(result)
-  }, []) // 仅初始化时执行
 
   // diff 行数据
   const diffRows = useMemo(() => {
@@ -120,19 +117,25 @@ export function useDiffSync(options: UseDiffSyncOptions): UseDiffSyncReturn {
   }, [diffRows])
 
   // 左侧滚动处理：返回右侧应该滚动到的位置
-  const handleLeftScroll = useCallback((scrollTop: number): number => {
-    if (!diffResult) return scrollTop
-    
-    // 由于两侧的可视行是对齐的，直接返回相同的滚动位置
-    return scrollTop
-  }, [diffResult])
+  const handleLeftScroll = useCallback(
+    (scrollTop: number): number => {
+      if (!diffResult) return scrollTop
+
+      // 由于两侧的可视行是对齐的，直接返回相同的滚动位置
+      return scrollTop
+    },
+    [diffResult]
+  )
 
   // 右侧滚动处理：返回左侧应该滚动到的位置
-  const handleRightScroll = useCallback((scrollTop: number): number => {
-    if (!diffResult) return scrollTop
-    
-    return scrollTop
-  }, [diffResult])
+  const handleRightScroll = useCallback(
+    (scrollTop: number): number => {
+      if (!diffResult) return scrollTop
+
+      return scrollTop
+    },
+    [diffResult]
+  )
 
   return {
     leftContent,
@@ -145,7 +148,6 @@ export function useDiffSync(options: UseDiffSyncOptions): UseDiffSyncReturn {
     rightPlaceholders,
     handleLeftScroll,
     handleRightScroll,
-    isComputing
+    isComputing,
   }
 }
-

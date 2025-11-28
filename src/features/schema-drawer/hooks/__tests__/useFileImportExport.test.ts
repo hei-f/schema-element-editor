@@ -8,38 +8,38 @@ jest.mock('antd', () => ({
   message: {
     error: jest.fn(),
     success: jest.fn(),
-    warning: jest.fn()
+    warning: jest.fn(),
   },
   Modal: {
     confirm: jest.fn(),
-    destroyAll: jest.fn()
-  }
+    destroyAll: jest.fn(),
+  },
 }))
 
 jest.mock('@/shared/utils/logger', () => ({
   logger: {
     log: jest.fn(),
-    error: jest.fn()
-  }
+    error: jest.fn(),
+  },
 }))
 
 jest.mock('@/shared/utils/shadow-root-manager', () => ({
   shadowRootManager: {
-    getContainer: () => document.body
-  }
+    getContainer: () => document.body,
+  },
 }))
 
 // Mock chrome.runtime
 global.chrome = {
   runtime: {
-    getManifest: () => ({ version: '1.0.0' })
-  }
+    getManifest: () => ({ version: '1.0.0' }),
+  },
 } as any
 
 describe('useFileImportExport', () => {
   const mockOnImportSuccess = jest.fn()
   const mockShowLightNotification = jest.fn()
-  
+
   const defaultProps = {
     editorValue: '{"type": "card", "title": "test"}',
     paramsKey: 'param1,param2',
@@ -47,7 +47,7 @@ describe('useFileImportExport', () => {
     canParse: true,
     customFileName: false,
     onImportSuccess: mockOnImportSuccess,
-    showLightNotification: mockShowLightNotification
+    showLightNotification: mockShowLightNotification,
   }
 
   beforeEach(() => {
@@ -56,7 +56,7 @@ describe('useFileImportExport', () => {
     global.URL.createObjectURL = jest.fn(() => 'blob:mock-url')
     global.URL.revokeObjectURL = jest.fn()
   })
-  
+
   afterEach(() => {
     jest.restoreAllMocks()
   })
@@ -75,7 +75,7 @@ describe('useFileImportExport', () => {
         'Export successful:',
         expect.objectContaining({
           fileName: expect.stringContaining('content-param1_param2-'),
-          size: expect.any(Number)
+          size: expect.any(Number),
         })
       )
     })
@@ -84,7 +84,7 @@ describe('useFileImportExport', () => {
       const { result } = renderHook(() =>
         useFileImportExport({
           ...defaultProps,
-          canParse: false
+          canParse: false,
         })
       )
 
@@ -126,9 +126,9 @@ describe('useFileImportExport', () => {
               exportedAt: '2025-11-24T10:00:00.000Z',
               version: '1.0.0',
               wasStringData: false,
-              url: 'https://example.com'
-            }
-          })
+              url: 'https://example.com',
+            },
+          }),
         ],
         'test.json',
         { type: 'application/json' }
@@ -148,13 +148,13 @@ describe('useFileImportExport', () => {
                     exportedAt: '2025-11-24T10:00:00.000Z',
                     version: '1.0.0',
                     wasStringData: false,
-                    url: 'https://example.com'
-                  }
-                })
-              }
+                    url: 'https://example.com',
+                  },
+                }),
+              },
             })
           }, 0)
-        })
+        }),
       }
       global.FileReader = jest.fn(() => mockFileReader) as any
 
@@ -171,12 +171,10 @@ describe('useFileImportExport', () => {
         expect.stringContaining('"type": "card"'),
         expect.objectContaining({
           params: 'test',
-          wasStringData: false
+          wasStringData: false,
         })
       )
-      expect(mockShowLightNotification).toHaveBeenCalledWith(
-        expect.stringContaining('✅ 已导入')
-      )
+      expect(mockShowLightNotification).toHaveBeenCalledWith(expect.stringContaining('✅ 已导入'))
     })
 
     it('应该成功导入普通 JSON 文件', async () => {
@@ -187,19 +185,17 @@ describe('useFileImportExport', () => {
           setTimeout(() => {
             this.onload({
               target: {
-                result: JSON.stringify({ type: 'card', title: 'plain' })
-              }
+                result: JSON.stringify({ type: 'card', title: 'plain' }),
+              },
             })
           }, 0)
-        })
+        }),
       }
       global.FileReader = jest.fn(() => mockFileReader) as any
 
-      const mockFile = new File(
-        [JSON.stringify({ type: 'card', title: 'plain' })],
-        'test.json',
-        { type: 'application/json' }
-      )
+      const mockFile = new File([JSON.stringify({ type: 'card', title: 'plain' })], 'test.json', {
+        type: 'application/json',
+      })
 
       act(() => {
         result.current.handleImport(mockFile)
@@ -221,7 +217,7 @@ describe('useFileImportExport', () => {
 
       // 创建一个超过 10MB 的文件
       const largeFile = new File(['x'.repeat(11 * 1024 * 1024)], 'large.json', {
-        type: 'application/json'
+        type: 'application/json',
       })
 
       const returnValue = result.current.handleImport(largeFile)
@@ -238,15 +234,15 @@ describe('useFileImportExport', () => {
         readAsText: jest.fn(function (this: any) {
           setTimeout(() => {
             this.onload({
-              target: { result: 'invalid json' }
+              target: { result: 'invalid json' },
             })
           }, 0)
-        })
+        }),
       }
       global.FileReader = jest.fn(() => mockFileReader) as any
 
       const mockFile = new File(['invalid json'], 'test.json', {
-        type: 'application/json'
+        type: 'application/json',
       })
 
       act(() => {
@@ -269,12 +265,12 @@ describe('useFileImportExport', () => {
           setTimeout(() => {
             this.onerror()
           }, 0)
-        })
+        }),
       }
       global.FileReader = jest.fn(() => mockFileReader) as any
 
       const mockFile = new File(['test'], 'test.json', {
-        type: 'application/json'
+        type: 'application/json',
       })
 
       act(() => {
@@ -293,7 +289,7 @@ describe('useFileImportExport', () => {
       const { result } = renderHook(() => useFileImportExport(defaultProps))
 
       const mockFile = new File(['test'], 'test.json', {
-        type: 'application/json'
+        type: 'application/json',
       })
 
       const returnValue = result.current.handleImport(mockFile)
@@ -302,4 +298,3 @@ describe('useFileImportExport', () => {
     })
   })
 })
-

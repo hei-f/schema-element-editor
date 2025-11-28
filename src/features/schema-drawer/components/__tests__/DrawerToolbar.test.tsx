@@ -5,7 +5,7 @@ import { DrawerToolbar } from '../DrawerToolbar'
 
 describe('DrawerToolbar组件测试', () => {
   const mockAttributes = {
-    params: ['param1', 'param2', 'param3']
+    params: ['param1', 'param2', 'param3'],
   }
 
   const defaultToolbarButtons = {
@@ -14,7 +14,10 @@ describe('DrawerToolbar组件测试', () => {
     serialize: true,
     format: true,
     preview: true,
-    importExport: true
+    importExport: true,
+    draft: true,
+    favorites: true,
+    history: true,
   }
 
   const mockHandlers = {
@@ -22,7 +25,7 @@ describe('DrawerToolbar组件测试', () => {
     onSerialize: jest.fn(),
     onDeserialize: jest.fn(),
     onSegmentChange: jest.fn(),
-    onRenderPreview: jest.fn()
+    onRenderPreview: jest.fn(),
   }
 
   beforeEach(() => {
@@ -75,7 +78,10 @@ describe('DrawerToolbar组件测试', () => {
             serialize: false,
             format: true,
             preview: false,
-            importExport: true
+            importExport: true,
+            draft: true,
+            favorites: true,
+            history: true,
           }}
           {...mockHandlers}
         />
@@ -122,7 +128,7 @@ describe('DrawerToolbar组件测试', () => {
 
     it('应该调用onSegmentChange当切换类型时', async () => {
       const user = userEvent.setup()
-      
+
       render(
         <DrawerToolbar
           attributes={mockAttributes}
@@ -142,7 +148,7 @@ describe('DrawerToolbar组件测试', () => {
   describe('按钮交互', () => {
     it('应该调用onFormat当点击格式化按钮', async () => {
       const user = userEvent.setup()
-      
+
       render(
         <DrawerToolbar
           attributes={mockAttributes}
@@ -160,7 +166,7 @@ describe('DrawerToolbar组件测试', () => {
 
     it('应该调用onSerialize当点击序列化按钮', async () => {
       const user = userEvent.setup()
-      
+
       render(
         <DrawerToolbar
           attributes={mockAttributes}
@@ -178,7 +184,7 @@ describe('DrawerToolbar组件测试', () => {
 
     it('应该调用onDeserialize当点击反序列化按钮', async () => {
       const user = userEvent.setup()
-      
+
       render(
         <DrawerToolbar
           attributes={mockAttributes}
@@ -250,8 +256,8 @@ describe('DrawerToolbar组件测试', () => {
     })
 
     it('应该在没有提供onRenderPreview时不显示预览按钮', () => {
-      const { onRenderPreview, ...handlersWithoutPreview } = mockHandlers
-      
+      const { onRenderPreview: _onRenderPreview, ...handlersWithoutPreview } = mockHandlers
+
       render(
         <DrawerToolbar
           attributes={mockAttributes}
@@ -268,7 +274,7 @@ describe('DrawerToolbar组件测试', () => {
 
     it('应该调用onRenderPreview当点击更新预览按钮', async () => {
       const user = userEvent.setup()
-      
+
       render(
         <DrawerToolbar
           attributes={mockAttributes}
@@ -289,7 +295,7 @@ describe('DrawerToolbar组件测试', () => {
   describe('边界情况', () => {
     it('应该处理大量参数', () => {
       const manyParams = Array.from({ length: 50 }, (_, i) => `param${i + 1}`)
-      
+
       render(
         <DrawerToolbar
           attributes={{ params: manyParams }}
@@ -306,7 +312,7 @@ describe('DrawerToolbar组件测试', () => {
 
     it('应该处理非常长的参数值', () => {
       const longParam = 'a'.repeat(500)
-      
+
       render(
         <DrawerToolbar
           attributes={{ params: [longParam] }}
@@ -322,7 +328,7 @@ describe('DrawerToolbar组件测试', () => {
 
     it('应该处理特殊字符参数', () => {
       const specialParams = ['<script>alert("xss")</script>', '参数中文🎉', 'test@example.com']
-      
+
       render(
         <DrawerToolbar
           attributes={{ params: specialParams }}
@@ -351,7 +357,10 @@ describe('DrawerToolbar组件测试', () => {
             serialize: false,
             format: false,
             preview: false,
-            importExport: false
+            importExport: false,
+            draft: false,
+            favorites: false,
+            history: false,
           }}
           {...mockHandlers}
         />
@@ -432,10 +441,10 @@ describe('DrawerToolbar组件测试', () => {
       const writeTextMock = jest.fn().mockResolvedValue(undefined)
       Object.defineProperty(navigator, 'clipboard', {
         value: {
-          writeText: writeTextMock
+          writeText: writeTextMock,
         },
         writable: true,
-        configurable: true
+        configurable: true,
       })
     })
 
@@ -473,12 +482,11 @@ describe('DrawerToolbar组件测试', () => {
       // 验证params标签被包裹在wrapper中
       const params = screen.getAllByText(/param[123]/)
       expect(params).toHaveLength(3)
-      
-      params.forEach(param => {
+
+      params.forEach((param) => {
         // 每个param应该在一个包含复制功能的结构中
         expect(param.parentElement).toBeInTheDocument()
       })
     })
   })
 })
-

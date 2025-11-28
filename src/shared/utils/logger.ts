@@ -13,11 +13,11 @@ class Logger {
    */
   async init(): Promise<void> {
     if (this.initialized) return
-    
+
     try {
       this.enabled = await storage.getEnableDebugLog()
       this.initialized = true
-    } catch (error) {
+    } catch (_error) {
       // 初始化失败时默认不输出日志
       this.enabled = false
       this.initialized = true
@@ -63,4 +63,3 @@ export const logger = new Logger()
 
 // 自动初始化
 logger.init()
-

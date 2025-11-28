@@ -73,7 +73,7 @@ describe('useFullScreenMode Hook 测试', () => {
       const { result } = renderHook(() => useFullScreenMode())
 
       act(() => {
-        result.current.setMode(prevMode => {
+        result.current.setMode((prevMode) => {
           expect(prevMode).toBe(FULL_SCREEN_MODE.NONE)
           return FULL_SCREEN_MODE.PREVIEW
         })
@@ -191,4 +191,3 @@ describe('useFullScreenMode Hook 测试', () => {
     })
   })
 })
-

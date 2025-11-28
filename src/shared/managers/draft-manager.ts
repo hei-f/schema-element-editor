@@ -26,7 +26,7 @@ export class DraftManager {
   ): Promise<void> {
     const draft: Draft = {
       content,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     }
     await saveDraftToStorage(paramsKey, draft)
   }
@@ -65,13 +65,13 @@ export class DraftManager {
     draftsPrefix: string
   ): string[] {
     const expiredKeys: string[] = []
-    
+
     for (const [key, draft] of Object.entries(allDrafts)) {
       if (key.startsWith(draftsPrefix) && this.isDraftExpired(draft, retentionDays)) {
         expiredKeys.push(key)
       }
     }
-    
+
     return expiredKeys
   }
 
@@ -88,12 +88,12 @@ export class DraftManager {
     try {
       const allData = await getAllStorage()
       const expiredKeys = this.findExpiredDraftKeys(allData, retentionDays, draftsPrefix)
-      
+
       if (expiredKeys.length > 0) {
         await removeKeys(expiredKeys)
         logger.log(`已清理 ${expiredKeys.length} 个过期草稿`)
       }
-      
+
       return expiredKeys.length
     } catch (error) {
       logger.error('清理过期草稿失败:', error)
@@ -106,4 +106,3 @@ export class DraftManager {
  * 导出单例实例
  */
 export const draftManager = new DraftManager()
-

@@ -23,13 +23,13 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
   onEdit,
   onApply,
   onDelete,
-  onClose
+  onClose,
 }) => {
   /** 搜索关键词状态 */
   const [searchKeyword, setSearchKeyword] = useState('')
   /** 防抖后的搜索关键词 */
   const [debouncedSearchKeyword, setDebouncedSearchKeyword] = useState('')
-  
+
   /**
    * 搜索防抖逻辑（300ms）
    */
@@ -37,10 +37,10 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
     const timer = setTimeout(() => {
       setDebouncedSearchKeyword(searchKeyword)
     }, 300)
-    
+
     return () => clearTimeout(timer)
   }, [searchKeyword])
-  
+
   /**
    * 过滤收藏列表
    * 支持搜索名称和内容
@@ -49,7 +49,7 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
     if (!debouncedSearchKeyword.trim()) {
       return favoritesList
     }
-    
+
     const keyword = debouncedSearchKeyword.toLowerCase()
     return favoritesList.filter((favorite) => {
       const nameMatch = favorite.name.toLowerCase().includes(keyword)
@@ -64,14 +64,14 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
       dataIndex: 'name',
       key: 'name',
       width: 200,
-      ellipsis: true
+      ellipsis: true,
     },
     {
       title: '保存时间',
       dataIndex: 'timestamp',
       key: 'timestamp',
       width: 160,
-      render: (timestamp: number) => new Date(timestamp).toLocaleString('zh-CN')
+      render: (timestamp: number) => new Date(timestamp).toLocaleString('zh-CN'),
     },
     {
       title: '操作',
@@ -89,8 +89,8 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
             删除
           </Button>
         </Space>
-      )
-    }
+      ),
+    },
   ]
 
   return (
@@ -119,4 +119,3 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
     </Modal>
   )
 }
-

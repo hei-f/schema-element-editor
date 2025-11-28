@@ -43,7 +43,7 @@ export const AttributeTagWrapper = styled.span`
   position: relative;
   display: inline-block;
   max-width: 100%;
-  
+
   &:hover .copy-icon-wrapper {
     opacity: 1;
   }
@@ -99,14 +99,16 @@ export const CopyIconWrapper = styled.span`
   justify-content: center;
   height: 16px;
   opacity: 0;
-  transition: opacity 0.2s ease, background-color 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    background-color 0.2s ease;
   cursor: pointer;
   z-index: 1;
   padding: 0 3px;
   background-color: rgba(230, 247, 255, 0.95);
   border-radius: 3px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  
+
   &:hover {
     opacity: 1 !important;
     background-color: rgba(230, 247, 255, 1);
@@ -118,26 +120,28 @@ export const CopyIconWrapper = styled.span`
  */
 export const StyledCopyIcon = styled.span<{ $isSuccess?: boolean }>`
   font-size: 12px;
-  color: ${props => props.$isSuccess ? '#52c41a' : '#0050b3'};
+  color: ${(props) => (props.$isSuccess ? '#52c41a' : '#0050b3')};
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 16px;
   line-height: 1;
   vertical-align: middle;
-  transition: color 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
-  
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+
   &:hover {
-    color: ${props => props.$isSuccess ? '#52c41a' : '#003a8c'};
+    color: ${(props) => (props.$isSuccess ? '#52c41a' : '#003a8c')};
     transform: scale(1.1);
   }
-  
+
   &:active {
     transform: scale(0.95);
   }
-  
+
   svg {
     display: block;
   }
 `
-
