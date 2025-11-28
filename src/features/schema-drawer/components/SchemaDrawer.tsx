@@ -497,7 +497,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     const result = schemaTransformer.formatJson(editorValue)
 
     if (result.success && result.data) {
-      // 使用命令式 API 更新编辑器
       editorRef.current?.setValue(result.data)
       setEditorValue(result.data)
       showLightNotification('格式化成功')
@@ -507,32 +506,70 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   }
 
   /**
-   * 序列化JSON
+   * 转义JSON
+   * 将内容包装成字符串值，添加引号和转义
    */
-  const handleSerialize = () => {
-    const result = schemaTransformer.serializeJson(editorValue)
+  const handleEscape = () => {
+    const result = schemaTransformer.escapeJson(editorValue)
 
     if (result.success && result.data) {
-      // 使用命令式 API 更新编辑器
       editorRef.current?.setValue(result.data)
       setEditorValue(result.data)
       setIsModified(true)
-      showLightNotification('序列化成功')
+      showLightNotification('转义成功')
       const detectResult = detectContentType(result.data)
       updateContentType(detectResult)
     } else {
-      message.error(result.error || '序列化失败')
+      message.error(result.error || '转义失败')
     }
   }
 
   /**
-   * 反序列化JSON
+   * 去转义JSON
+   * 将字符串值还原，移除外层引号和转义
    */
-  const handleDeserialize = () => {
-    const result = schemaTransformer.deserializeJson(editorValue)
+  const handleUnescape = () => {
+    const result = schemaTransformer.unescapeJson(editorValue)
 
     if (result.success && result.data) {
-      // 使用命令式 API 更新编辑器
+      editorRef.current?.setValue(result.data)
+      setEditorValue(result.data)
+      setIsModified(true)
+      showLightNotification('去转义成功')
+      const detectResult = detectContentType(result.data)
+      updateContentType(detectResult)
+    } else {
+      message.error(result.error || '去转义失败')
+    }
+  }
+
+  /**
+   * 压缩JSON
+   * 将格式化的 JSON 压缩成一行
+   */
+  const handleCompact = () => {
+    const result = schemaTransformer.compactJson(editorValue)
+
+    if (result.success && result.data) {
+      editorRef.current?.setValue(result.data)
+      setEditorValue(result.data)
+      setIsModified(true)
+      showLightNotification('压缩成功')
+      const detectResult = detectContentType(result.data)
+      updateContentType(detectResult)
+    } else {
+      message.error(result.error || '压缩失败')
+    }
+  }
+
+  /**
+   * 解析嵌套JSON
+   * 处理多层嵌套/转义的 JSON 字符串
+   */
+  const handleParse = () => {
+    const result = schemaTransformer.parseNestedJson(editorValue)
+
+    if (result.success && result.data) {
       editorRef.current?.setValue(result.data)
       setEditorValue(result.data)
       setIsModified(true)
@@ -542,12 +579,12 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
       if (result.error) {
         message.warning(`${result.error}，已显示当前解析结果`)
       } else if (result.parseCount && result.parseCount > 0) {
-        showLightNotification(`反序列化成功（解析层数: ${result.parseCount}）`)
+        showLightNotification(`解析成功（解析层数: ${result.parseCount}）`)
       } else {
-        showLightNotification('反序列化成功')
+        showLightNotification('解析成功')
       }
     } else {
-      message.error(result.error || '反序列化失败')
+      message.error(result.error || '解析失败')
     }
   }
 
@@ -1114,8 +1151,10 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
                 previewEnabled={previewEnabled}
                 isRecording={isRecording}
                 onFormat={handleFormat}
-                onSerialize={handleSerialize}
-                onDeserialize={handleDeserialize}
+                onEscape={handleEscape}
+                onUnescape={handleUnescape}
+                onCompact={handleCompact}
+                onParse={handleParse}
                 onSegmentChange={handleSegmentChange}
                 onRenderPreview={handleRenderPreview}
               />
@@ -1152,8 +1191,10 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
                 previewEnabled={previewEnabled}
                 showDiffButton={true}
                 onFormat={handleFormat}
-                onSerialize={handleSerialize}
-                onDeserialize={handleDeserialize}
+                onEscape={handleEscape}
+                onUnescape={handleUnescape}
+                onCompact={handleCompact}
+                onParse={handleParse}
                 onSegmentChange={handleSegmentChange}
                 onRenderPreview={handleRenderPreview}
                 onEnterDiffMode={handleEnterDiffMode}
@@ -1209,8 +1250,10 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
                 previewEnabled={previewEnabled}
                 showDiffButton={true}
                 onFormat={handleFormat}
-                onSerialize={handleSerialize}
-                onDeserialize={handleDeserialize}
+                onEscape={handleEscape}
+                onUnescape={handleUnescape}
+                onCompact={handleCompact}
+                onParse={handleParse}
                 onSegmentChange={handleSegmentChange}
                 onRenderPreview={handleRenderPreview}
                 onEnterDiffMode={handleEnterDiffMode}

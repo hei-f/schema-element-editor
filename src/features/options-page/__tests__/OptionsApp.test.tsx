@@ -55,6 +55,7 @@ describe('OptionsApp组件测试', () => {
     enableDebugLog: false,
     toolbarButtons: {
       astRawStringToggle: true,
+      escape: true,
       deserialize: false,
       serialize: false,
       format: true,

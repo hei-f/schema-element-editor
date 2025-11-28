@@ -26,8 +26,10 @@ interface DrawerToolbarProps {
   /** 是否显示 diff 按钮 */
   showDiffButton?: boolean
   onFormat: () => void
-  onSerialize: () => void
-  onDeserialize: () => void
+  onEscape: () => void
+  onUnescape: () => void
+  onCompact: () => void
+  onParse: () => void
   onSegmentChange: (value: string | number) => void
   onRenderPreview?: () => void
   /** 进入 diff 模式 */
@@ -46,8 +48,10 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
   isRecording = false,
   showDiffButton = false,
   onFormat,
-  onSerialize,
-  onDeserialize,
+  onEscape,
+  onUnescape,
+  onCompact,
+  onParse,
   onSegmentChange,
   onRenderPreview,
   onEnterDiffMode,
@@ -131,17 +135,33 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
             />
           </Tooltip>
         )}
-        {toolbarButtons.deserialize && (
-          <Tooltip title={!canParse ? '当前内容不是有效的 JSON 格式' : ''}>
-            <Button size="small" onClick={onDeserialize} disabled={!canParse}>
-              反序列化
+        {toolbarButtons.escape && (
+          <>
+            <Tooltip title="将内容包装成字符串值，添加引号和转义">
+              <Button size="small" onClick={onEscape}>
+                转义
+              </Button>
+            </Tooltip>
+            <Tooltip title="将字符串值还原，移除外层引号和转义">
+              <Button size="small" onClick={onUnescape}>
+                去转义
+              </Button>
+            </Tooltip>
+          </>
+        )}
+        {toolbarButtons.serialize && (
+          <Tooltip title="将 JSON 压缩成一行">
+            <Button size="small" onClick={onCompact}>
+              压缩
             </Button>
           </Tooltip>
         )}
-        {toolbarButtons.serialize && (
-          <Button size="small" onClick={onSerialize}>
-            序列化
-          </Button>
+        {toolbarButtons.deserialize && (
+          <Tooltip title={!canParse ? '当前内容不是有效的 JSON 格式' : '解析多层嵌套/转义的 JSON'}>
+            <Button size="small" onClick={onParse} disabled={!canParse}>
+              解析
+            </Button>
+          </Tooltip>
         )}
         {toolbarButtons.format && (
           <Tooltip title={!canParse ? '当前内容不是有效的 JSON 格式' : ''}>

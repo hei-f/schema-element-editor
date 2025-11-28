@@ -1,4 +1,9 @@
-import { deserializeJson, serializeJson } from '@/shared/utils/schema/serializer'
+import {
+  compactJson,
+  escapeJson,
+  parseNestedJson,
+  unescapeJson,
+} from '@/shared/utils/schema/serializer'
 import {
   convertToASTString,
   convertToMarkdownString,
@@ -15,7 +20,7 @@ export interface TransformResult {
   success: boolean
   data?: string
   error?: string
-  /** 反序列化的解析层数 */
+  /** 解析的层数 */
   parseCount?: number
 }
 
@@ -32,25 +37,45 @@ export class SchemaTransformer {
   }
 
   /**
-   * 序列化数据
-   * 将编辑器内容转换为 JSON 字符串格式
+   * 转义JSON
+   * 将 JSON 内容包装成字符串值，添加引号和转义
+   * @example {"a":1} → "{\"a\":1}"
    */
-  serializeJson(value: string): TransformResult {
+  escapeJson(value: string): TransformResult {
+    return escapeJson(value)
+  }
+
+  /**
+   * 去转义JSON
+   * 将被包装成字符串值的 JSON 还原，移除外层引号和转义
+   * @example "{\"a\":1}" → {"a":1}
+   */
+  unescapeJson(value: string): TransformResult {
+    return unescapeJson(value)
+  }
+
+  /**
+   * 压缩JSON
+   * 将格式化的 JSON 压缩成一行
+   * @example { "a": 1 } → {"a":1}
+   */
+  compactJson(value: string): TransformResult {
     try {
-      // 尝试先解析，如果是有效 JSON 则序列化解析后的值
+      // 尝试先解析，如果是有效 JSON 则压缩解析后的值
       const parsed = JSON.parse(value)
-      return serializeJson(parsed)
+      return compactJson(parsed)
     } catch {
-      // 如果不是有效 JSON（如普通多行文本），直接序列化原始字符串
-      return serializeJson(value)
+      // 如果不是有效 JSON（如普通多行文本），直接压缩原始字符串
+      return compactJson(value)
     }
   }
 
   /**
-   * 反序列化JSON字符串
+   * 解析嵌套JSON
+   * 处理多层嵌套/转义的 JSON 字符串，递归解析并格式化显示
    */
-  deserializeJson(value: string): TransformResult {
-    return deserializeJson(value)
+  parseNestedJson(value: string): TransformResult {
+    return parseNestedJson(value)
   }
 
   /**

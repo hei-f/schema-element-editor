@@ -57,9 +57,11 @@ export const FORM_PATHS = {
   toolbarButtons: {
     /** AST/RawString切换按钮 */
     astRawStringToggle: ['toolbarButtons', 'astRawStringToggle'],
-    /** 反序列化按钮 */
+    /** 转义/去转义按钮 */
+    escape: ['toolbarButtons', 'escape'],
+    /** 解析按钮（原反序列化） */
     deserialize: ['toolbarButtons', 'deserialize'],
-    /** 序列化按钮 */
+    /** 压缩按钮（原序列化） */
     serialize: ['toolbarButtons', 'serialize'],
     /** 格式化按钮 */
     format: ['toolbarButtons', 'format'],

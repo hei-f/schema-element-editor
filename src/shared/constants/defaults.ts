@@ -20,6 +20,7 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
   enableDebugLog: false,
   toolbarButtons: {
     astRawStringToggle: true,
+    escape: true,
     deserialize: false,
     serialize: false,
     format: true,

@@ -31,6 +31,7 @@ export const FeatureToggleSection: React.FC<FeatureToggleSectionProps> = (props)
   const handleSimplifyMode = async () => {
     const simplifiedConfig = {
       astRawStringToggle: false,
+      escape: false,
       deserialize: false,
       serialize: false,
       format: false,
@@ -106,17 +107,33 @@ export const FeatureToggleSection: React.FC<FeatureToggleSectionProps> = (props)
         </InlineFormRow>
 
         <InlineFormRow align="center" gap={8}>
-          <FormLabel>反序列化:</FormLabel>
-          <ZeroMarginFormItem name={FORM_PATHS.toolbarButtons.deserialize} valuePropName="checked">
+          <FormLabel>转义/去转义:</FormLabel>
+          <ZeroMarginFormItem name={FORM_PATHS.toolbarButtons.escape} valuePropName="checked">
             <Switch />
           </ZeroMarginFormItem>
+          <Tooltip title="将内容包装成字符串值或还原">
+            <HelpTooltipIcon />
+          </Tooltip>
         </InlineFormRow>
 
         <InlineFormRow align="center" gap={8}>
-          <FormLabel>序列化:</FormLabel>
+          <FormLabel>解析:</FormLabel>
+          <ZeroMarginFormItem name={FORM_PATHS.toolbarButtons.deserialize} valuePropName="checked">
+            <Switch />
+          </ZeroMarginFormItem>
+          <Tooltip title="解析多层嵌套/转义的 JSON">
+            <HelpTooltipIcon />
+          </Tooltip>
+        </InlineFormRow>
+
+        <InlineFormRow align="center" gap={8}>
+          <FormLabel>压缩:</FormLabel>
           <ZeroMarginFormItem name={FORM_PATHS.toolbarButtons.serialize} valuePropName="checked">
             <Switch />
           </ZeroMarginFormItem>
+          <Tooltip title="将 JSON 压缩成一行">
+            <HelpTooltipIcon />
+          </Tooltip>
         </InlineFormRow>
 
         <InlineFormRow align="center" gap={8}>

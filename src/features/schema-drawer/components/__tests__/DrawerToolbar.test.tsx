@@ -10,6 +10,7 @@ describe('DrawerToolbar组件测试', () => {
 
   const defaultToolbarButtons = {
     astRawStringToggle: true,
+    escape: true,
     deserialize: true,
     serialize: true,
     format: true,
@@ -22,8 +23,10 @@ describe('DrawerToolbar组件测试', () => {
 
   const mockHandlers = {
     onFormat: jest.fn(),
-    onSerialize: jest.fn(),
-    onDeserialize: jest.fn(),
+    onEscape: jest.fn(),
+    onUnescape: jest.fn(),
+    onCompact: jest.fn(),
+    onParse: jest.fn(),
     onSegmentChange: jest.fn(),
     onRenderPreview: jest.fn(),
   }
@@ -74,6 +77,7 @@ describe('DrawerToolbar组件测试', () => {
           canParse={true}
           toolbarButtons={{
             astRawStringToggle: true,
+            escape: true,
             deserialize: true,
             serialize: false,
             format: true,
@@ -87,8 +91,8 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      expect(screen.getByText('反序列化')).toBeInTheDocument()
-      expect(screen.queryByText('序列化')).not.toBeInTheDocument()
+      expect(screen.getByText('解析')).toBeInTheDocument()
+      expect(screen.queryByText('压缩')).not.toBeInTheDocument()
       expect(screen.getByText('格式化')).toBeInTheDocument()
       expect(screen.queryByText('更新预览')).not.toBeInTheDocument()
     })
@@ -164,7 +168,7 @@ describe('DrawerToolbar组件测试', () => {
       expect(mockHandlers.onFormat).toHaveBeenCalledTimes(1)
     })
 
-    it('应该调用onSerialize当点击序列化按钮', async () => {
+    it('应该调用onCompact当点击压缩按钮', async () => {
       const user = userEvent.setup()
 
       render(
@@ -177,12 +181,12 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      await user.click(screen.getByText('序列化'))
+      await user.click(screen.getByText('压缩'))
 
-      expect(mockHandlers.onSerialize).toHaveBeenCalledTimes(1)
+      expect(mockHandlers.onCompact).toHaveBeenCalledTimes(1)
     })
 
-    it('应该调用onDeserialize当点击反序列化按钮', async () => {
+    it('应该调用onParse当点击解析按钮', async () => {
       const user = userEvent.setup()
 
       render(
@@ -195,9 +199,9 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      await user.click(screen.getByText('反序列化'))
+      await user.click(screen.getByText('解析'))
 
-      expect(mockHandlers.onDeserialize).toHaveBeenCalledTimes(1)
+      expect(mockHandlers.onParse).toHaveBeenCalledTimes(1)
     })
 
     it('应该在canParse为false时禁用需要解析的操作按钮', () => {
@@ -213,14 +217,14 @@ describe('DrawerToolbar组件测试', () => {
 
       // 对于Ant Design Button，需要查找父级button元素
       const formatButton = screen.getByText('格式化').closest('button')
-      const serializeButton = screen.getByText('序列化').closest('button')
-      const deserializeButton = screen.getByText('反序列化').closest('button')
+      const compactButton = screen.getByText('压缩').closest('button')
+      const parseButton = screen.getByText('解析').closest('button')
 
-      // 格式化和反序列化需要有效JSON，所以被禁用
+      // 格式化和解析需要有效JSON，所以被禁用
       expect(formatButton).toBeDisabled()
-      expect(deserializeButton).toBeDisabled()
-      // 序列化可以处理任何文本，不依赖canParse
-      expect(serializeButton).not.toBeDisabled()
+      expect(parseButton).toBeDisabled()
+      // 压缩可以处理任何文本，不依赖canParse
+      expect(compactButton).not.toBeDisabled()
     })
   })
 
@@ -353,6 +357,7 @@ describe('DrawerToolbar组件测试', () => {
           canParse={true}
           toolbarButtons={{
             astRawStringToggle: false,
+            escape: false,
             deserialize: false,
             serialize: false,
             format: false,
@@ -367,8 +372,8 @@ describe('DrawerToolbar组件测试', () => {
       )
 
       expect(screen.queryByText('格式化')).not.toBeInTheDocument()
-      expect(screen.queryByText('序列化')).not.toBeInTheDocument()
-      expect(screen.queryByText('反序列化')).not.toBeInTheDocument()
+      expect(screen.queryByText('压缩')).not.toBeInTheDocument()
+      expect(screen.queryByText('解析')).not.toBeInTheDocument()
       expect(screen.queryByText('AST')).not.toBeInTheDocument()
     })
 

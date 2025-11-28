@@ -206,11 +206,14 @@ class StorageManager {
 
   /**
    * 获取工具栏按钮配置
+   * 合并存储值和默认值，确保新增字段也能获取到默认值
    */
   async getToolbarButtons(): Promise<ToolbarButtonsConfig> {
     try {
       const result = await chrome.storage.local.get(this.STORAGE_KEYS.TOOLBAR_BUTTONS)
-      return result[this.STORAGE_KEYS.TOOLBAR_BUTTONS] ?? this.DEFAULT_VALUES.toolbarButtons
+      const storedConfig = result[this.STORAGE_KEYS.TOOLBAR_BUTTONS]
+      // 合并默认值，确保新增字段能获取到默认值
+      return { ...this.DEFAULT_VALUES.toolbarButtons, ...storedConfig }
     } catch (error) {
       console.error('获取工具栏按钮配置失败:', error)
       return this.DEFAULT_VALUES.toolbarButtons

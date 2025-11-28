@@ -66,7 +66,7 @@ function transformContent(content: string, mode: DiffDisplayMode): string {
 
     case 'deserialize': {
       const jsonContent = ensureJsonString(content)
-      const result = schemaTransformer.deserializeJson(jsonContent)
+      const result = schemaTransformer.parseNestedJson(jsonContent)
       if (result.success && result.data) {
         try {
           return JSON.stringify(JSON.parse(result.data), null, 2)

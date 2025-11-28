@@ -106,11 +106,15 @@ export const FIELD_GROUPS: Record<string, FieldGroup> = {
   toolbarButtons: {
     fieldPaths: [
       FORM_PATHS.toolbarButtons.astRawStringToggle,
+      FORM_PATHS.toolbarButtons.escape,
       FORM_PATHS.toolbarButtons.deserialize,
       FORM_PATHS.toolbarButtons.serialize,
       FORM_PATHS.toolbarButtons.format,
       FORM_PATHS.toolbarButtons.preview,
       FORM_PATHS.toolbarButtons.importExport,
+      FORM_PATHS.toolbarButtons.draft,
+      FORM_PATHS.toolbarButtons.favorites,
+      FORM_PATHS.toolbarButtons.history,
     ],
     save: async (allValues: any) => {
       await storage.setToolbarButtons(allValues.toolbarButtons)

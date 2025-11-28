@@ -72,9 +72,11 @@ export interface SearchConfig {
 export interface ToolbarButtonsConfig {
   /** AST/RawString切换按钮 */
   astRawStringToggle: boolean
-  /** 反序列化按钮 */
+  /** 转义/去转义按钮 */
+  escape: boolean
+  /** 解析按钮（原反序列化） */
   deserialize: boolean
-  /** 序列化按钮 */
+  /** 压缩按钮（原序列化） */
   serialize: boolean
   /** 格式化按钮 */
   format: boolean

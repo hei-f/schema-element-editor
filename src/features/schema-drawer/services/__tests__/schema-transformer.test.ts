@@ -2,8 +2,10 @@ import { schemaTransformer, SchemaTransformer } from '../schema-transformer'
 
 // Mock transformers
 jest.mock('@/shared/utils/schema/serializer', () => ({
-  serializeJson: jest.fn(),
-  deserializeJson: jest.fn(),
+  escapeJson: jest.fn(),
+  unescapeJson: jest.fn(),
+  compactJson: jest.fn(),
+  parseNestedJson: jest.fn(),
 }))
 
 jest.mock('@/shared/utils/schema/transformers', () => ({
@@ -15,7 +17,12 @@ jest.mock('@/shared/utils/schema/transformers', () => ({
   isStringData: jest.fn(),
 }))
 
-import { deserializeJson, serializeJson } from '@/shared/utils/schema/serializer'
+import {
+  compactJson,
+  escapeJson,
+  parseNestedJson,
+  unescapeJson,
+} from '@/shared/utils/schema/serializer'
 import {
   convertToASTString,
   convertToMarkdownString,
@@ -25,8 +32,10 @@ import {
   parserSchemaNodeToMarkdown,
 } from '@/shared/utils/schema/transformers'
 
-const mockSerializeJson = serializeJson as jest.MockedFunction<typeof serializeJson>
-const mockDeserializeJson = deserializeJson as jest.MockedFunction<typeof deserializeJson>
+const mockEscapeJson = escapeJson as jest.MockedFunction<typeof escapeJson>
+const mockUnescapeJson = unescapeJson as jest.MockedFunction<typeof unescapeJson>
+const mockCompactJson = compactJson as jest.MockedFunction<typeof compactJson>
+const mockParseNestedJson = parseNestedJson as jest.MockedFunction<typeof parseNestedJson>
 const mockFormatJsonString = formatJsonString as jest.MockedFunction<typeof formatJsonString>
 const mockConvertToASTString = convertToASTString as jest.MockedFunction<typeof convertToASTString>
 const mockConvertToMarkdownString = convertToMarkdownString as jest.MockedFunction<
@@ -61,38 +70,61 @@ describe('SchemaTransformer 测试', () => {
     })
   })
 
-  describe('serializeJson 序列化', () => {
-    it('应该成功序列化JSON', () => {
-      const mockResult = { success: true, data: 'serialized' }
-      mockSerializeJson.mockReturnValue(mockResult)
+  describe('escapeJson 转义', () => {
+    it('应该调用 escapeJson', () => {
+      const mockResult = { success: true, data: '"{\\"test\\":1}"' }
+      mockEscapeJson.mockReturnValue(mockResult)
 
-      const result = schemaTransformer.serializeJson('{"test": "data"}')
+      const result = schemaTransformer.escapeJson('{"test":1}')
 
-      expect(mockSerializeJson).toHaveBeenCalledWith({ test: 'data' })
+      expect(mockEscapeJson).toHaveBeenCalledWith('{"test":1}')
+      expect(result).toEqual(mockResult)
+    })
+  })
+
+  describe('unescapeJson 去转义', () => {
+    it('应该调用 unescapeJson', () => {
+      const mockResult = { success: true, data: '{"test":1}' }
+      mockUnescapeJson.mockReturnValue(mockResult)
+
+      const result = schemaTransformer.unescapeJson('"{\\"test\\":1}"')
+
+      expect(mockUnescapeJson).toHaveBeenCalledWith('"{\\"test\\":1}"')
+      expect(result).toEqual(mockResult)
+    })
+  })
+
+  describe('compactJson 压缩', () => {
+    it('应该成功压缩JSON', () => {
+      const mockResult = { success: true, data: '{"test":"data"}' }
+      mockCompactJson.mockReturnValue(mockResult)
+
+      const result = schemaTransformer.compactJson('{"test": "data"}')
+
+      expect(mockCompactJson).toHaveBeenCalledWith({ test: 'data' })
       expect(result).toEqual(mockResult)
     })
 
-    it('无效JSON应该直接序列化原始字符串', () => {
-      // 现在序列化逻辑改为：无效JSON直接序列化原始字符串
+    it('无效JSON应该直接压缩原始字符串', () => {
       const mockResult = { success: true, data: '"{invalid json}"' }
-      mockSerializeJson.mockReturnValue(mockResult)
+      mockCompactJson.mockReturnValue(mockResult)
 
-      const result = schemaTransformer.serializeJson('{invalid json}')
+      const result = schemaTransformer.compactJson('{invalid json}')
 
-      // 应该用原始字符串调用serializeJson（因为JSON.parse失败后回退）
-      expect(mockSerializeJson).toHaveBeenCalledWith('{invalid json}')
+      // 应该用原始字符串调用 compactJson（因为JSON.parse失败后回退）
+      expect(mockCompactJson).toHaveBeenCalledWith('{invalid json}')
       expect(result.success).toBe(true)
     })
   })
 
-  describe('deserializeJson 反序列化', () => {
-    it('应该调用 deserializeJson', () => {
-      const mockResult = { success: true, data: 'deserialized', parseCount: 2 }
-      mockDeserializeJson.mockReturnValue(mockResult)
+  describe('parseNestedJson 解析', () => {
+    it('应该调用 parseNestedJson', () => {
+      const mockResult = { success: true, data: '{"parsed": true}', parseCount: 2 }
+      mockParseNestedJson.mockReturnValue(mockResult)
 
-      const result = schemaTransformer.deserializeJson('test string')
+      const result = schemaTransformer.parseNestedJson('test string')
 
-      expect(mockDeserializeJson).toHaveBeenCalledWith('test string')
+      expect(mockParseNestedJson).toHaveBeenCalledWith('test string')
       expect(result).toEqual(mockResult)
     })
   })

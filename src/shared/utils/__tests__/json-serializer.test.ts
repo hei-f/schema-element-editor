@@ -1,45 +1,43 @@
-import { deserializeJson, serializeJson } from '@/shared/utils/schema/serializer'
+import { compactJson, parseNestedJson } from '@/shared/utils/schema/serializer'
 
-describe('JSON序列化工具测试', () => {
-  describe('serializeJson', () => {
-    it('应该正确序列化简单对象', () => {
+describe('JSON处理工具测试', () => {
+  describe('compactJson 压缩', () => {
+    it('应该正确压缩简单对象', () => {
       const input = { key: 'value' }
-      const result = serializeJson(input)
+      const result = compactJson(input)
 
       expect(result.success).toBe(true)
-      // 现在序列化输出格式化的JSON字符串
       expect(JSON.parse(result.data!)).toEqual({ key: 'value' })
     })
 
-    it('应该正确序列化数组', () => {
+    it('应该正确压缩数组', () => {
       const input = [1, 2, 3]
-      const result = serializeJson(input)
+      const result = compactJson(input)
 
       expect(result.success).toBe(true)
-      // 现在序列化输出格式化的JSON字符串
       expect(JSON.parse(result.data!)).toEqual([1, 2, 3])
     })
 
     it('应该处理null值', () => {
       const input = null
-      const result = serializeJson(input)
+      const result = compactJson(input)
 
       expect(result.success).toBe(true)
     })
   })
 
-  describe('deserializeJson', () => {
+  describe('parseNestedJson 解析', () => {
     it('应该正确解析标准JSON', () => {
       const input = '[{"key":"value"}]'
-      const result = deserializeJson(input)
+      const result = parseNestedJson(input)
 
       expect(result.success).toBe(true)
       expect(JSON.parse(result.data!)).toEqual([{ key: 'value' }])
     })
 
-    it('应该处理单层序列化字符串', () => {
+    it('应该处理单层嵌套字符串', () => {
       const input = '"[{\\"key\\":\\"value\\"}]"'
-      const result = deserializeJson(input)
+      const result = parseNestedJson(input)
 
       expect(result.success).toBe(true)
       // parseCount可能是1或2，取决于修复策略
@@ -49,19 +47,19 @@ describe('JSON序列化工具测试', () => {
 
     it('应该处理文本形式的转义符', () => {
       const input = '[{\\"key\\":\\"value\\"}]'
-      const result = deserializeJson(input)
+      const result = parseNestedJson(input)
 
       expect(result.success).toBe(true)
       expect(JSON.parse(result.data!)).toEqual([{ key: 'value' }])
     })
 
-    it('应该处理多层序列化', () => {
-      // 创建2层序列化，最终结果是对象而不是字符串
+    it('应该处理多层嵌套', () => {
+      // 创建2层嵌套，最终结果是对象而不是字符串
       const obj = { key: 'value' }
       const once = JSON.stringify(obj) // "{"key":"value"}"
       const twice = JSON.stringify(once) // "\"{\"key\":\"value\"}\""
 
-      const result = deserializeJson(twice)
+      const result = parseNestedJson(twice)
 
       expect(result.success).toBe(true)
       expect(result.parseCount).toBeGreaterThanOrEqual(2)
@@ -70,7 +68,7 @@ describe('JSON序列化工具测试', () => {
     })
 
     it('应该拒绝空输入', () => {
-      const result = deserializeJson('')
+      const result = parseNestedJson('')
 
       expect(result.success).toBe(false)
       expect(result.error).toBe('输入内容为空')
@@ -78,20 +76,20 @@ describe('JSON序列化工具测试', () => {
 
     it('应该拒绝无效JSON', () => {
       const input = '{invalid json}'
-      const result = deserializeJson(input)
+      const result = parseNestedJson(input)
 
       expect(result.success).toBe(false)
       expect(result.error).toContain('无法解析')
     })
 
-    it('应该检测过度序列化', () => {
-      // 创建12层序列化，超过10层限制
+    it('应该检测过度嵌套', () => {
+      // 创建12层嵌套，超过10层限制
       let input: any = { key: 'value' }
       for (let i = 0; i < 12; i++) {
         input = JSON.stringify(input)
       }
 
-      const result = deserializeJson(input)
+      const result = parseNestedJson(input)
 
       // 可能成功也可能失败，取决于递归能否完成
       // 但如果成功，应该有警告
@@ -105,20 +103,20 @@ describe('JSON序列化工具测试', () => {
     })
   })
 
-  describe('序列化-反序列化往返测试', () => {
+  describe('压缩-解析往返测试', () => {
     it('应该正确处理简单数据的往返操作', () => {
       const originalData = { key: 'value', nested: { prop: 'test' } }
 
-      // 序列化
-      const serializeResult = serializeJson(originalData)
-      expect(serializeResult.success).toBe(true)
+      // 压缩
+      const compactResult = compactJson(originalData)
+      expect(compactResult.success).toBe(true)
 
-      // 反序列化
-      const deserializeResult = deserializeJson(serializeResult.data!)
-      expect(deserializeResult.success).toBe(true)
+      // 解析
+      const parseResult = parseNestedJson(compactResult.data!)
+      expect(parseResult.success).toBe(true)
 
       // 验证往返一致性
-      const finalData = JSON.parse(deserializeResult.data!)
+      const finalData = JSON.parse(parseResult.data!)
       expect(finalData).toEqual(originalData)
     })
 
@@ -167,16 +165,16 @@ describe('JSON序列化工具测试', () => {
         },
       ]
 
-      // 序列化
-      const serializeResult = serializeJson(complexData)
-      expect(serializeResult.success).toBe(true)
+      // 压缩
+      const compactResult = compactJson(complexData)
+      expect(compactResult.success).toBe(true)
 
-      // 反序列化
-      const deserializeResult = deserializeJson(serializeResult.data!)
-      expect(deserializeResult.success).toBe(true)
+      // 解析
+      const parseResult = parseNestedJson(compactResult.data!)
+      expect(parseResult.success).toBe(true)
 
       // 验证往返一致性
-      const finalData = JSON.parse(deserializeResult.data!)
+      const finalData = JSON.parse(parseResult.data!)
       expect(finalData).toEqual(complexData)
     })
 
@@ -186,16 +184,16 @@ describe('JSON序列化工具测试', () => {
         { id: 2, name: 'item2' },
       ]
 
-      // 序列化
-      const serializeResult = serializeJson(arrayData)
-      expect(serializeResult.success).toBe(true)
+      // 压缩
+      const compactResult = compactJson(arrayData)
+      expect(compactResult.success).toBe(true)
 
-      // 反序列化
-      const deserializeResult = deserializeJson(serializeResult.data!)
-      expect(deserializeResult.success).toBe(true)
+      // 解析
+      const parseResult = parseNestedJson(compactResult.data!)
+      expect(parseResult.success).toBe(true)
 
       // 验证往返一致性
-      const finalData = JSON.parse(deserializeResult.data!)
+      const finalData = JSON.parse(parseResult.data!)
       expect(finalData).toEqual(arrayData)
     })
   })
