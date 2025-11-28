@@ -1,7 +1,7 @@
 import type { ElementAttributes, ToolbarButtonsConfig } from '@/shared/types'
 import { ContentType } from '@/shared/types'
 import { Button, Segmented, Tooltip } from 'antd'
-import { CopyOutlined, CheckOutlined } from '@ant-design/icons'
+import { CopyOutlined, CheckOutlined, DiffOutlined } from '@ant-design/icons'
 import React, { useState } from 'react'
 import { 
   AttributeTag, 
@@ -23,11 +23,15 @@ interface DrawerToolbarProps {
   previewEnabled?: boolean
   /** 是否正在录制（录制中禁用部分功能） */
   isRecording?: boolean
+  /** 是否显示 diff 按钮 */
+  showDiffButton?: boolean
   onFormat: () => void
   onSerialize: () => void
   onDeserialize: () => void
   onSegmentChange: (value: string | number) => void
   onRenderPreview?: () => void
+  /** 进入 diff 模式 */
+  onEnterDiffMode?: () => void
 }
 
 /**
@@ -40,11 +44,13 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
   toolbarButtons,
   previewEnabled = false,
   isRecording = false,
+  showDiffButton = false,
   onFormat,
   onSerialize,
   onDeserialize,
   onSegmentChange,
-  onRenderPreview
+  onRenderPreview,
+  onEnterDiffMode
 }) => {
   // 复制状态管理: { [index: number]: 'idle' | 'copied' }
   const [copyStatus, setCopyStatus] = useState<Record<number, 'idle' | 'copied'>>({})
@@ -160,6 +166,17 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
               disabled={!canParse}
             >
               格式化
+            </Button>
+          </Tooltip>
+        )}
+        {showDiffButton && onEnterDiffMode && (
+          <Tooltip title="对比模式：对比两段内容的差异">
+            <Button 
+              size="small" 
+              icon={<DiffOutlined />}
+              onClick={onEnterDiffMode}
+            >
+              对比
             </Button>
           </Tooltip>
         )}

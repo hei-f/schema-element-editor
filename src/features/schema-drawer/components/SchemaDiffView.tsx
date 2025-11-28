@@ -1,35 +1,24 @@
 import type { SchemaSnapshot } from '@/shared/types'
 import { RollbackOutlined } from '@ant-design/icons'
 import { Button, Select, Segmented, Tooltip } from 'antd'
-import React, { useMemo, useState, useRef } from 'react'
+import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react'
 import { diffChars } from 'diff'
 import {
-  DiffContentArea,
   DiffModeContainer,
   DiffToolbar,
-  EmptyState,
   VersionSelectorGroup,
   VersionSelectorLabel,
-  DiffTableContainer,
-  DiffTableHeader,
-  DiffTableHeaderCell,
-  DiffTableBody,
-  DiffTableRow,
-  DiffCell,
-  DiffCellLineNumber,
-  DiffCellContent,
-  DiffInlineAdd,
-  DiffInlineRemove,
-  SyntaxKeyword,
-  SyntaxString,
-  SyntaxNumber,
-  SyntaxBoolean,
-  SyntaxNull,
-  SyntaxPunctuation,
-  SyntaxSquareBracket,
-  SyntaxBrace
+  EditableDiffContainer,
+  DiffHeaderRow,
+  DiffEditorHeader,
+  SharedScrollContainer,
+  DiffEditorsRow,
+  DiffEditorPanel
 } from '../styles/recording.styles'
 import { schemaTransformer } from '../services/schema-transformer'
+import { DiffEditor, DiffEditorHandle, DiffLineInfo, InlineDiffSegment } from './DiffEditor'
+import { useDiffSync } from '../hooks/useDiffSync'
+import type { DiffRow } from '../utils/diff-algorithm'
 
 /** 对比模式类型 */
 type DiffDisplayMode = 'raw' | 'deserialize' | 'ast'
@@ -41,21 +30,6 @@ interface SchemaDiffViewProps {
   onBackToEditor: () => void
 }
 
-interface DiffLineInfo {
-  content: string
-  type: 'added' | 'removed' | 'unchanged' | 'empty'
-  lineNumber: number | null
-}
-
-interface DiffResultLine {
-  left: DiffLineInfo
-  right: DiffLineInfo
-}
-
-interface DiffResult {
-  lines: DiffResultLine[]
-}
-
 /**
  * 格式化时间戳（毫秒）
  */
@@ -65,53 +39,6 @@ function formatTimestamp(ms: number): string {
   }
   const seconds = (ms / 1000).toFixed(1)
   return `${seconds}s`
-}
-
-/**
- * 行对齐的diff算法
- */
-function computeDiff(leftContent: string, rightContent: string): DiffResult {
-  const leftLines = leftContent.split('\n')
-  const rightLines = rightContent.split('\n')
-  
-  const result: DiffResult = { lines: [] }
-  
-  let leftIdx = 0
-  let rightIdx = 0
-  let leftLineNum = 1
-  let rightLineNum = 1
-  
-  while (leftIdx < leftLines.length || rightIdx < rightLines.length) {
-    if (leftIdx >= leftLines.length) {
-      result.lines.push({
-        left: { content: '', type: 'empty', lineNumber: null },
-        right: { content: rightLines[rightIdx], type: 'added', lineNumber: rightLineNum++ }
-      })
-      rightIdx++
-    } else if (rightIdx >= rightLines.length) {
-      result.lines.push({
-        left: { content: leftLines[leftIdx], type: 'removed', lineNumber: leftLineNum++ },
-        right: { content: '', type: 'empty', lineNumber: null }
-      })
-      leftIdx++
-    } else if (leftLines[leftIdx] === rightLines[rightIdx]) {
-      result.lines.push({
-        left: { content: leftLines[leftIdx], type: 'unchanged', lineNumber: leftLineNum++ },
-        right: { content: rightLines[rightIdx], type: 'unchanged', lineNumber: rightLineNum++ }
-      })
-      leftIdx++
-      rightIdx++
-    } else {
-      result.lines.push({
-        left: { content: leftLines[leftIdx], type: 'removed', lineNumber: leftLineNum++ },
-        right: { content: rightLines[rightIdx], type: 'added', lineNumber: rightLineNum++ }
-      })
-      leftIdx++
-      rightIdx++
-    }
-  }
-  
-  return result
 }
 
 /**
@@ -164,108 +91,142 @@ function transformContent(content: string, mode: DiffDisplayMode): string {
 }
 
 /**
- * JSON 语法高亮渲染
- * 参考 schemaEditorDark 主题配色
+ * 计算行内差异片段
+ * @param leftContent 左侧行内容
+ * @param rightContent 右侧行内容
+ * @param side 当前处理的是哪一侧
  */
-const SyntaxHighlight: React.FC<{ content: string }> = ({ content }) => {
-  const parts = useMemo(() => {
-    const result: React.ReactNode[] = []
-    // 匹配 JSON 语法元素（区分不同类型的括号）
-    // 1: 键名（带冒号）, 2: 字符串值, 3: 数字, 4: 布尔值, 5: null, 6: 花括号, 7: 方括号, 8: 逗号冒号
-    const regex = /("(?:[^"\\]|\\.)*")\s*:|("(?:[^"\\]|\\.)*")|(-?\d+\.?\d*(?:[eE][+-]?\d+)?)|(\btrue\b|\bfalse\b)|(\bnull\b)|([{}])|([\[\]])|([,:])/g
-    
-    let lastIndex = 0
-    let match: RegExpExecArray | null
-    
-    while ((match = regex.exec(content)) !== null) {
-      // 添加匹配前的普通文本（空白字符等）
-      if (match.index > lastIndex) {
-        result.push(<span key={`text-${lastIndex}`}>{content.slice(lastIndex, match.index)}</span>)
-      }
-      
-      if (match[1]) {
-        // 键名（属性名）- 红色
-        result.push(<SyntaxKeyword key={`key-${match.index}`}>{match[1]}</SyntaxKeyword>)
-      } else if (match[2]) {
-        // 字符串值 - 绿色
-        result.push(<SyntaxString key={`str-${match.index}`}>{match[2]}</SyntaxString>)
-      } else if (match[3]) {
-        // 数字 - 橙色
-        result.push(<SyntaxNumber key={`num-${match.index}`}>{match[3]}</SyntaxNumber>)
-      } else if (match[4]) {
-        // 布尔值 - 橙色加粗
-        result.push(<SyntaxBoolean key={`bool-${match.index}`}>{match[4]}</SyntaxBoolean>)
-      } else if (match[5]) {
-        // null - 橙色加粗
-        result.push(<SyntaxNull key={`null-${match.index}`}>{match[5]}</SyntaxNull>)
-      } else if (match[6]) {
-        // 花括号 {} - 绿色
-        result.push(<SyntaxBrace key={`brace-${match.index}`}>{match[6]}</SyntaxBrace>)
-      } else if (match[7]) {
-        // 方括号 [] - 黄色
-        result.push(<SyntaxSquareBracket key={`bracket-${match.index}`}>{match[7]}</SyntaxSquareBracket>)
-      } else if (match[8]) {
-        // 逗号、冒号 - 浅灰色
-        result.push(<SyntaxPunctuation key={`punct-${match.index}`}>{match[8]}</SyntaxPunctuation>)
-      }
-      
-      lastIndex = match.index + match[0].length
-    }
-    
-    // 添加剩余文本
-    if (lastIndex < content.length) {
-      result.push(<span key={`text-end`}>{content.slice(lastIndex)}</span>)
-    }
-    
-    return result.length > 0 ? result : [<span key="empty">{content}</span>]
-  }, [content])
-
-  return <>{parts}</>
-}
-
-/**
- * 渲染行内差异高亮（带语法高亮）
- */
-interface InlineDiffProps {
-  leftContent: string
-  rightContent: string
+function computeInlineDiffs(
+  leftContent: string,
+  rightContent: string,
   side: 'left' | 'right'
-}
-
-const InlineDiffContent: React.FC<InlineDiffProps> = ({ leftContent, rightContent, side }) => {
-  const diffs = useMemo(() => {
-    return diffChars(leftContent, rightContent)
-  }, [leftContent, rightContent])
-
-  return (
-    <>
-      {diffs.map((part, index) => {
-        if (side === 'left') {
-          if (part.removed) {
-            return <DiffInlineRemove key={index}>{part.value}</DiffInlineRemove>
-          } else if (!part.added) {
-            return <span key={index}>{part.value}</span>
-          }
-          return null
-        } else {
-          if (part.added) {
-            return <DiffInlineAdd key={index}>{part.value}</DiffInlineAdd>
-          } else if (!part.removed) {
-            return <span key={index}>{part.value}</span>
-          }
-          return null
-        }
-      })}
-    </>
-  )
+): InlineDiffSegment[] {
+  const diffs = diffChars(leftContent, rightContent)
+  const segments: InlineDiffSegment[] = []
+  let position = 0
+  
+  for (const part of diffs) {
+    if (side === 'left') {
+      // 左侧：只关心 removed 部分
+      if (part.removed) {
+        segments.push({
+          from: position,
+          to: position + part.value.length,
+          type: 'removed'
+        })
+        position += part.value.length
+      } else if (!part.added) {
+        // 未变化的部分
+        position += part.value.length
+      }
+      // added 部分在左侧不显示
+    } else {
+      // 右侧：只关心 added 部分
+      if (part.added) {
+        segments.push({
+          from: position,
+          to: position + part.value.length,
+          type: 'added'
+        })
+        position += part.value.length
+      } else if (!part.removed) {
+        // 未变化的部分
+        position += part.value.length
+      }
+      // removed 部分在右侧不显示
+    }
+  }
+  
+  return segments
 }
 
 /**
- * Schema Diff视图组件
+ * 将 DiffRow 转换为左侧编辑器的 DiffLineInfo
+ */
+function convertToLeftDiffLines(rows: DiffRow[]): DiffLineInfo[] {
+  const result: DiffLineInfo[] = []
+  let editorLine = 0
+  
+  for (const row of rows) {
+    const leftSide = row.left
+    
+    if (leftSide.type === 'placeholder') {
+      // 占位行：在当前位置插入 widget
+      result.push({
+        editorLine,
+        type: 'unchanged',
+        isPlaceholder: true
+      })
+    } else {
+      // 计算行内差异（仅对 modified 行）
+      let inlineDiffs: InlineDiffSegment[] | undefined
+      if (leftSide.type === 'modified' && leftSide.pairContent !== undefined) {
+        inlineDiffs = computeInlineDiffs(leftSide.content, leftSide.pairContent, 'left')
+      }
+      
+      // 正常行：根据类型设置背景
+      result.push({
+        editorLine,
+        type: leftSide.type === 'modified' ? 'modified' 
+            : leftSide.type === 'removed' ? 'removed'
+            : leftSide.type === 'added' ? 'added'
+            : 'unchanged',
+        isPlaceholder: false,
+        inlineDiffs
+      })
+      editorLine++
+    }
+    }
+    
+  return result.filter(line => !line.isPlaceholder || line.editorLine >= 0)
+}
+
+/**
+ * 将 DiffRow 转换为右侧编辑器的 DiffLineInfo
+ */
+function convertToRightDiffLines(rows: DiffRow[]): DiffLineInfo[] {
+  const result: DiffLineInfo[] = []
+  let editorLine = 0
+  
+  for (const row of rows) {
+    const rightSide = row.right
+    
+    if (rightSide.type === 'placeholder') {
+      result.push({
+        editorLine,
+        type: 'unchanged',
+        isPlaceholder: true
+      })
+        } else {
+      // 计算行内差异（仅对 modified 行）
+      let inlineDiffs: InlineDiffSegment[] | undefined
+      if (rightSide.type === 'modified' && rightSide.pairContent !== undefined) {
+        inlineDiffs = computeInlineDiffs(rightSide.pairContent, rightSide.content, 'right')
+      }
+      
+      result.push({
+        editorLine,
+        type: rightSide.type === 'modified' ? 'modified'
+            : rightSide.type === 'added' ? 'added'
+            : rightSide.type === 'removed' ? 'removed'
+            : 'unchanged',
+        isPlaceholder: false,
+        inlineDiffs
+      })
+      editorLine++
+    }
+  }
+  
+  return result.filter(line => !line.isPlaceholder || line.editorLine >= 0)
+}
+
+/**
+ * Schema Diff 视图组件（可编辑版）
  */
 export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
   const { snapshots, onBackToEditor } = props
   
+  // 版本选择状态
   const [leftVersionId, setLeftVersionId] = useState<number | null>(
     snapshots.length > 0 ? snapshots[0].id : null
   )
@@ -273,15 +234,14 @@ export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
     snapshots.length > 1 ? snapshots[snapshots.length - 1].id : null
   )
   
+  // 显示模式
   const [displayMode, setDisplayMode] = useState<DiffDisplayMode>('raw')
   
-  const versionOptions = useMemo(() => {
-    return snapshots.map((snapshot, index) => ({
-      value: snapshot.id,
-      label: `版本 ${index + 1} (${formatTimestamp(snapshot.timestamp)})`
-    }))
-  }, [snapshots])
+  // 编辑器引用
+  const leftEditorRef = useRef<DiffEditorHandle>(null)
+  const rightEditorRef = useRef<DiffEditorHandle>(null)
   
+  // 获取原始内容
   const leftRawContent = useMemo(() => {
     const snapshot = snapshots.find(s => s.id === leftVersionId)
     return snapshot?.content || ''
@@ -292,67 +252,110 @@ export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
     return snapshot?.content || ''
   }, [snapshots, rightVersionId])
   
-  const leftContent = useMemo(() => {
+  // 转换后的内容
+  const leftTransformed = useMemo(() => {
     return transformContent(leftRawContent, displayMode)
   }, [leftRawContent, displayMode])
   
-  const rightContent = useMemo(() => {
+  const rightTransformed = useMemo(() => {
     return transformContent(rightRawContent, displayMode)
   }, [rightRawContent, displayMode])
   
+  // Diff 同步
+  const {
+    setLeftContent,
+    setRightContent,
+    diffRows,
+    isComputing
+  } = useDiffSync({
+    initialLeft: leftTransformed,
+    initialRight: rightTransformed,
+    debounceMs: 200
+  })
+  
+  // 版本切换时更新内容
+  useEffect(() => {
+    setLeftContent(leftTransformed)
+    leftEditorRef.current?.setValue(leftTransformed)
+  }, [leftTransformed])
+  
+  useEffect(() => {
+    setRightContent(rightTransformed)
+    rightEditorRef.current?.setValue(rightTransformed)
+  }, [rightTransformed])
+  
+  // 计算编辑器的 diff 行信息
+  const leftDiffLines = useMemo(() => {
+    return convertToLeftDiffLines(diffRows)
+  }, [diffRows])
+  
+  const rightDiffLines = useMemo(() => {
+    return convertToRightDiffLines(diffRows)
+  }, [diffRows])
+  
+  // 更新编辑器装饰
+  useEffect(() => {
+    leftEditorRef.current?.updateDecorations(leftDiffLines)
+    rightEditorRef.current?.updateDecorations(rightDiffLines)
+  }, [leftDiffLines, rightDiffLines])
+  
+  // 版本选项
+  const versionOptions = useMemo(() => {
+    return snapshots.map((snapshot, index) => ({
+      value: snapshot.id,
+      label: `版本 ${index + 1} (${formatTimestamp(snapshot.timestamp)})`
+    }))
+  }, [snapshots])
+  
+  // 判断是否为简单对比模式（非录制模式，只有2个快照且 timestamp 为连续的 0 和 1）
+  const isSimpleDiffMode = useMemo(() => {
+    if (snapshots.length !== 2) return false
+    // 检查是否是编辑模式下的对比（timestamp 为 0 和 1）
+    return snapshots[0].timestamp === 0 && snapshots[1].timestamp === 1
+  }, [snapshots])
+  
+  // 版本信息显示
   const leftVersionInfo = useMemo(() => {
+    if (isSimpleDiffMode) {
+      return '原始数据'
+    }
     const snapshot = snapshots.find(s => s.id === leftVersionId)
     const index = snapshots.findIndex(s => s.id === leftVersionId)
-    if (!snapshot) return null
+    if (!snapshot) return '请选择左侧版本'
     return `版本 ${index + 1} (${formatTimestamp(snapshot.timestamp)})`
-  }, [snapshots, leftVersionId])
+  }, [snapshots, leftVersionId, isSimpleDiffMode])
   
   const rightVersionInfo = useMemo(() => {
+    if (isSimpleDiffMode) {
+      return '当前编辑'
+    }
     const snapshot = snapshots.find(s => s.id === rightVersionId)
     const index = snapshots.findIndex(s => s.id === rightVersionId)
-    if (!snapshot) return null
+    if (!snapshot) return '请选择右侧版本'
     return `版本 ${index + 1} (${formatTimestamp(snapshot.timestamp)})`
-  }, [snapshots, rightVersionId])
+  }, [snapshots, rightVersionId, isSimpleDiffMode])
   
-  const diffResult = useMemo(() => {
-    if (!leftContent || !rightContent) {
-      return null
-    }
-    return computeDiff(leftContent, rightContent)
-  }, [leftContent, rightContent])
+  // 内容变化处理
+  const handleLeftChange = useCallback((value: string) => {
+    setLeftContent(value)
+  }, [setLeftContent])
   
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const handleRightChange = useCallback((value: string) => {
+    setRightContent(value)
+  }, [setRightContent])
   
+  // 水平滚动同步
+  const handleLeftHorizontalScroll = useCallback((scrollLeft: number) => {
+    rightEditorRef.current?.setScrollLeft(scrollLeft)
+  }, [])
+  
+  const handleRightHorizontalScroll = useCallback((scrollLeft: number) => {
+    leftEditorRef.current?.setScrollLeft(scrollLeft)
+  }, [])
+  
+  // 模式切换处理
   const handleModeChange = (value: string | number) => {
     setDisplayMode(value as DiffDisplayMode)
-  }
-
-  /**
-   * 渲染单元格内容
-   */
-  const renderCellContent = (line: DiffResultLine, side: 'left' | 'right') => {
-    const info = side === 'left' ? line.left : line.right
-    
-    if (info.type === 'empty') {
-      return <span>&nbsp;</span>
-    }
-    
-    // 如果两边都有修改，使用行内差异高亮
-    if (
-      (side === 'left' && line.left.type === 'removed' && line.right.type === 'added') ||
-      (side === 'right' && line.right.type === 'added' && line.left.type === 'removed')
-    ) {
-      return (
-        <InlineDiffContent
-          leftContent={line.left.content}
-          rightContent={line.right.content}
-          side={side}
-        />
-      )
-    }
-    
-    // 对于相同行或单侧变化，使用语法高亮
-    return <SyntaxHighlight content={info.content || ''} />
   }
 
   return (
@@ -367,6 +370,9 @@ export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
           返回编辑模式
         </Button>
         
+        {/* 非简单对比模式才显示版本选择器 */}
+        {!isSimpleDiffMode && (
+          <>
         <VersionSelectorGroup>
           <VersionSelectorLabel>左侧版本:</VersionSelectorLabel>
           <Select
@@ -392,6 +398,8 @@ export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
             getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
           />
         </VersionSelectorGroup>
+          </>
+        )}
         
         <VersionSelectorGroup>
           <VersionSelectorLabel>对比模式:</VersionSelectorLabel>
@@ -408,64 +416,49 @@ export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
             />
           </Tooltip>
         </VersionSelectorGroup>
+        
+        {isComputing && (
+          <span style={{ color: '#8b949e', fontSize: 12 }}>计算中...</span>
+        )}
       </DiffToolbar>
 
-      {/* Diff内容区域 - 使用表格结构确保行对齐 */}
-      <DiffContentArea 
-        ref={scrollContainerRef}
-        onScroll={(e) => e.stopPropagation()}
-        onWheel={(e) => e.stopPropagation()}
-      >
-        <DiffTableContainer>
-          {/* 表头 */}
-          <DiffTableHeader>
-            <DiffTableHeaderCell $isLeft>
-              {leftVersionInfo || '请选择左侧版本'}
-            </DiffTableHeaderCell>
-            <DiffTableHeaderCell>
-              {rightVersionInfo || '请选择右侧版本'}
-            </DiffTableHeaderCell>
-          </DiffTableHeader>
+      {/* 可编辑 Diff 内容区域 */}
+      <EditableDiffContainer>
+        {/* 头部行 */}
+        <DiffHeaderRow>
+          <DiffEditorHeader $isLeft>{leftVersionInfo}</DiffEditorHeader>
+          <DiffEditorHeader>{rightVersionInfo}</DiffEditorHeader>
+        </DiffHeaderRow>
           
-          {/* 内容 */}
-          <DiffTableBody>
-            {diffResult ? (
-              diffResult.lines.map((line, idx) => (
-                <DiffTableRow key={idx}>
-                  {/* 左侧单元格 */}
-                  <DiffCell $type={line.left.type} $isLeft>
-                    <DiffCellLineNumber $type={line.left.type}>
-                      {line.left.lineNumber ?? ''}
-                    </DiffCellLineNumber>
-                    <DiffCellContent $type={line.left.type}>
-                      {renderCellContent(line, 'left')}
-                    </DiffCellContent>
-                  </DiffCell>
+        {/* 共享滚动容器 */}
+        <SharedScrollContainer>
+          <DiffEditorsRow>
+            {/* 左侧编辑器 */}
+            <DiffEditorPanel $isLeft>
+              <DiffEditor
+                ref={leftEditorRef}
+                defaultValue={leftTransformed}
+                onChange={handleLeftChange}
+                onHorizontalScroll={handleLeftHorizontalScroll}
+                isDark={true}
+                diffLines={leftDiffLines}
+              />
+            </DiffEditorPanel>
                   
-                  {/* 右侧单元格 */}
-                  <DiffCell $type={line.right.type}>
-                    <DiffCellLineNumber $type={line.right.type}>
-                      {line.right.lineNumber ?? ''}
-                    </DiffCellLineNumber>
-                    <DiffCellContent $type={line.right.type}>
-                      {renderCellContent(line, 'right')}
-                    </DiffCellContent>
-                  </DiffCell>
-                </DiffTableRow>
-              ))
-            ) : (
-              <DiffTableRow>
-                <DiffCell $type="empty" $isLeft>
-                  <EmptyState>请选择要对比的版本</EmptyState>
-                </DiffCell>
-                <DiffCell $type="empty">
-                  <EmptyState>请选择要对比的版本</EmptyState>
-                </DiffCell>
-              </DiffTableRow>
-            )}
-          </DiffTableBody>
-        </DiffTableContainer>
-      </DiffContentArea>
+            {/* 右侧编辑器 */}
+            <DiffEditorPanel>
+              <DiffEditor
+                ref={rightEditorRef}
+                defaultValue={rightTransformed}
+                onChange={handleRightChange}
+                onHorizontalScroll={handleRightHorizontalScroll}
+                isDark={true}
+                diffLines={rightDiffLines}
+              />
+            </DiffEditorPanel>
+          </DiffEditorsRow>
+        </SharedScrollContainer>
+      </EditableDiffContainer>
     </DiffModeContainer>
   )
 }

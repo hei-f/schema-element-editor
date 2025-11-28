@@ -548,6 +548,164 @@ export const EmptyState = styled.div`
 `
 
 /**
+ * 可编辑 Diff 视图容器
+ */
+export const EditableDiffContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+`
+
+/**
+ * Diff 头部行（包含两个面板头部）
+ */
+export const DiffHeaderRow = styled.div`
+  display: flex;
+  flex-shrink: 0;
+`
+
+/**
+ * 编辑器面板头部
+ */
+export const DiffEditorHeader = styled.div<{ $isLeft?: boolean }>`
+  flex: 1;
+  padding: 8px 16px;
+  background: #282c34;
+  border-bottom: 1px solid #b0b0b0;
+  font-size: 12px;
+  color: #abb2bf;
+  font-weight: 500;
+  ${props => props.$isLeft && `border-right: 1px solid #b0b0b0;`}
+`
+
+/**
+ * 共享滚动容器（核心：统一滚动）
+ */
+export const SharedScrollContainer = styled.div`
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  
+  &::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #1a1a2e;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #4a5568;
+    border-radius: 6px;
+    border: 3px solid #1a1a2e;
+    
+    &:hover {
+      background: #5a6878;
+    }
+  }
+`
+
+/**
+ * 编辑器内容行（两个编辑器并排）
+ */
+export const DiffEditorsRow = styled.div`
+  display: flex;
+  min-height: 100%;
+`
+
+/**
+ * 单侧编辑器面板（无滚动）
+ */
+export const DiffEditorPanel = styled.div<{ $isLeft?: boolean }>`
+  flex: 1;
+  min-width: 0;
+  ${props => props.$isLeft && `border-right: 1px solid #b0b0b0;`}
+`
+
+/**
+ * 编辑器包装容器（禁用垂直滚动，启用水平滚动）
+ */
+export const DiffEditorWrapper = styled.div`
+  position: relative;
+  
+  /* CodeMirror 编辑器：禁用垂直滚动，让外部容器统一滚动 */
+  .cm-editor {
+    height: auto !important;
+  }
+  
+  .cm-scroller {
+    overflow-y: visible !important;
+    overflow-x: auto !important;  /* 允许水平滚动 */
+  }
+  
+  .cm-content {
+    min-height: auto !important;
+  }
+  
+  /* 隐藏水平滚动条，使用共享滚动 */
+  .cm-scroller::-webkit-scrollbar {
+    height: 0;
+  }
+`
+
+/**
+ * 斜条纹占位行样式
+ * 灰色斜条纹背景，不占行号
+ */
+export const PlaceholderLineStyle = styled.div`
+  height: 19.2px; /* 与编辑器行高一致 (12px * 1.6) */
+  background: repeating-linear-gradient(
+    -45deg,
+    #e8e8e8,
+    #e8e8e8 4px,
+    #f5f5f5 4px,
+    #f5f5f5 8px
+  );
+  border-bottom: 1px solid #e0e0e0;
+  box-sizing: border-box;
+`
+
+/**
+ * 深色主题斜条纹占位行
+ */
+export const PlaceholderLineStyleDark = styled.div`
+  height: 19.2px;
+  background: repeating-linear-gradient(
+    -45deg,
+    #2d3748,
+    #2d3748 4px,
+    #1a202c 4px,
+    #1a202c 8px
+  );
+  border-bottom: 1px solid #4a5568;
+  box-sizing: border-box;
+`
+
+/**
+ * 行高亮背景 - 新增行
+ */
+export const AddedLineBackground = `
+  background: rgba(152, 195, 121, 0.15);
+`
+
+/**
+ * 行高亮背景 - 删除行
+ */
+export const RemovedLineBackground = `
+  background: rgba(224, 108, 117, 0.15);
+`
+
+/**
+ * 行高亮背景 - 修改行
+ */
+export const ModifiedLineBackground = `
+  background: rgba(229, 192, 123, 0.15);
+`
+
+/**
  * 停止按钮样式（显眼）
  */
 export const StopRecordingButton = styled.button`
