@@ -3,7 +3,15 @@
  * 模拟 jsonrepair 的基本修复功能
  */
 
+// 用于测试的特殊标记，当输入包含此标记时抛出错误
+const FORCE_FAIL_MARKER = '__FORCE_REPAIR_FAIL__'
+
 export function jsonrepair(input: string): string {
+  // 特殊测试场景：强制失败
+  if (input.includes(FORCE_FAIL_MARKER)) {
+    throw new Error('无法修复此 JSON')
+  }
+
   let result = input
 
   // 修复单引号为双引号

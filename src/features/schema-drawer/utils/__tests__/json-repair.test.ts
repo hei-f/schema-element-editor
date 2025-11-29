@@ -287,4 +287,96 @@ describe('json-repair 工具函数', () => {
       expect(result.isValid).toBe(true)
     })
   })
+
+  describe('repairJson 失败场景', () => {
+    it('当 jsonrepair 抛出错误时应该返回失败', () => {
+      // 使用特殊标记触发 mock 抛出错误
+      const result = repairJson('{"test": "__FORCE_REPAIR_FAIL__"}')
+
+      expect(result.success).toBe(false)
+      expect(result.repaired).toBeNull()
+      expect(result.error).toBeDefined()
+      expect(result.error).toContain('无法修复')
+    })
+  })
+
+  describe('错误信息解析的备用格式', () => {
+    it('当错误消息使用备用格式时仍应解析行列号', () => {
+      // 使用特殊标记触发备用格式
+      const input = '{"__ALT_FORMAT__": invalid}'
+      const error = getJsonError(input)
+
+      expect(error).not.toBeNull()
+      expect(error!.line).toBeGreaterThan(0)
+      expect(error!.column).toBeGreaterThan(0)
+    })
+
+    it('当没有提供 codeFrame 时应该自动生成', () => {
+      // 使用特殊标记触发无 codeFrame 情况
+      const input = '{"__NO_CODE_FRAME__": invalid}'
+      const error = getJsonError(input)
+
+      expect(error).not.toBeNull()
+      expect(error!.codeFrame).toBeTruthy()
+      expect(error!.codeFrame).toContain('|')
+      expect(error!.codeFrame).toContain('^')
+    })
+  })
+
+  describe('generateCodeFrame 边界情况', () => {
+    it('应该处理单行 JSON 的错误', () => {
+      const input = '{"invalid}'
+      const error = getJsonError(input)
+
+      expect(error).not.toBeNull()
+      expect(error!.codeFrame).toBeTruthy()
+    })
+
+    it('应该处理多行 JSON 并显示上下文', () => {
+      const input = `{
+  "line1": "value1",
+  "line2": "value2",
+  "line3" "value3",
+  "line4": "value4",
+  "line5": "value5"
+}`
+      const error = getJsonError(input)
+
+      expect(error).not.toBeNull()
+      expect(error!.codeFrame).toBeTruthy()
+      // codeFrame 应该包含错误行的标记
+      expect(error!.codeFrame).toContain('>')
+    })
+
+    it('应该处理第一行就有错误的情况', () => {
+      const input = '{invalid: "value"}'
+      const error = getJsonError(input)
+
+      expect(error).not.toBeNull()
+      expect(error!.line).toBe(1)
+    })
+
+    it('应该处理最后一行有错误的情况', () => {
+      const input = `{
+  "name": "Alice"
+  "age": 25
+}`
+      const error = getJsonError(input)
+
+      expect(error).not.toBeNull()
+      expect(error!.codeFrame).toBeTruthy()
+    })
+  })
+
+  describe('analyzeJson 修复失败场景', () => {
+    it('当修复失败时 repairSuccess 应该为 false', () => {
+      // 使用无效 JSON 并包含特殊标记触发修复失败
+      const input = '{test __FORCE_REPAIR_FAIL__}'
+      const result = analyzeJson(input)
+
+      expect(result.isValid).toBe(false)
+      expect(result.repairSuccess).toBe(false)
+      expect(result.repaired).toBeNull()
+    })
+  })
 })

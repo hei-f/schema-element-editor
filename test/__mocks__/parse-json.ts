@@ -3,6 +3,10 @@
  * 模拟 parse-json 的行为，提供详细的错误信息
  */
 
+// 用于测试的特殊标记
+const NO_CODE_FRAME_MARKER = '__NO_CODE_FRAME__'
+const ALT_FORMAT_MARKER = '__ALT_FORMAT__'
+
 class JSONParseError extends Error {
   rawCodeFrame?: string
 
@@ -40,6 +44,18 @@ function parseJson(input: string): unknown {
     const lines = input.split('\n')
     const errorLine = lines[line - 1] || ''
     const codeFrame = `> ${line} | ${errorLine}\n    | ${' '.repeat(column - 1)}^`
+
+    // 特殊测试场景：使用备用错误格式（不包含标准 (line X column Y) 格式）
+    if (input.includes(ALT_FORMAT_MARKER)) {
+      const altMessage = `Syntax error at line ${line}, column ${column}`
+      throw new JSONParseError(altMessage, codeFrame)
+    }
+
+    // 特殊测试场景：不提供 codeFrame
+    if (input.includes(NO_CODE_FRAME_MARKER)) {
+      const detailedMessage = `${errorMessage} (line ${line} column ${column})`
+      throw new JSONParseError(detailedMessage, undefined)
+    }
 
     const detailedMessage = `${errorMessage} (line ${line} column ${column})\n\n${codeFrame}`
 
