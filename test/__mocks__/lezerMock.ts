@@ -9,7 +9,7 @@ export const HighlightStyle = {
 }
 
 // 添加 styleTags 函数
-export const styleTags = (_tags: any) => mockExtension()
+export const styleTags = (_tags: any) => mockExtension
 
 // 创建一个可以作为值或函数调用的 tag
 const createTag = (name: string) => {
