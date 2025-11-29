@@ -6,8 +6,8 @@ import styled from 'styled-components'
 export const EditorToolbar = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  padding: 16px 24px;
+  align-items: center;
+  padding: 16px 24px 16px 16px;
   border-bottom: 1px solid #f0f0f0;
   background: #fafafa;
   gap: 12px;
