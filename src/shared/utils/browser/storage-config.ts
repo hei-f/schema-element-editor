@@ -15,8 +15,6 @@ interface StorageFieldConfig<T> {
   key: string
   /** 默认值 */
   defaultValue: T
-  /** 可选的值转换函数（用于get时） */
-  transformer?: (value: any) => T
   /** 可选的值验证函数 */
   validator?: (value: any) => value is T
 }
@@ -39,13 +37,7 @@ export const SIMPLE_STORAGE_FIELDS = {
   drawerWidth: {
     key: STORAGE_KEYS.DRAWER_WIDTH,
     defaultValue: DEFAULT_VALUES.drawerWidth,
-    transformer: (value: string | number) => {
-      if (typeof value === 'number') {
-        return `${value}px` as string | number
-      }
-      return value
-    },
-  } as StorageFieldConfig<string | number>,
+  } as StorageFieldConfig<string>,
 
   getFunctionName: {
     key: STORAGE_KEYS.GET_FUNCTION_NAME,
@@ -173,34 +165,6 @@ export const SIMPLE_STORAGE_FIELDS = {
         value.requestTimeout >= 1 &&
         value.requestTimeout <= 30
       )
-    },
-    transformer: (value: any): ApiConfig => {
-      // 兼容旧版数据，补充新增字段的默认值
-      return {
-        communicationMode: value.communicationMode ?? DEFAULT_VALUES.apiConfig.communicationMode,
-        requestTimeout: value.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout,
-        sourceConfig: {
-          contentSource:
-            value.sourceConfig?.contentSource ??
-            DEFAULT_VALUES.apiConfig.sourceConfig.contentSource,
-          hostSource:
-            value.sourceConfig?.hostSource ?? DEFAULT_VALUES.apiConfig.sourceConfig.hostSource,
-        },
-        messageTypes: {
-          getSchema:
-            value.messageTypes?.getSchema ?? DEFAULT_VALUES.apiConfig.messageTypes.getSchema,
-          updateSchema:
-            value.messageTypes?.updateSchema ?? DEFAULT_VALUES.apiConfig.messageTypes.updateSchema,
-          checkPreview:
-            value.messageTypes?.checkPreview ?? DEFAULT_VALUES.apiConfig.messageTypes.checkPreview,
-          renderPreview:
-            value.messageTypes?.renderPreview ??
-            DEFAULT_VALUES.apiConfig.messageTypes.renderPreview,
-          cleanupPreview:
-            value.messageTypes?.cleanupPreview ??
-            DEFAULT_VALUES.apiConfig.messageTypes.cleanupPreview,
-        },
-      }
     },
   } as StorageFieldConfig<ApiConfig>,
 }

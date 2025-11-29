@@ -32,14 +32,10 @@ class StorageManager {
     const config = SIMPLE_STORAGE_FIELDS[fieldName]
     try {
       const result = await chrome.storage.local.get(config.key)
-      let value = result[config.key] ?? config.defaultValue
+      const value = result[config.key] ?? config.defaultValue
 
       if (config.validator && !config.validator(value)) {
         return config.defaultValue as T
-      }
-
-      if (config.transformer) {
-        value = config.transformer(value)
       }
 
       return value as T
@@ -90,14 +86,14 @@ class StorageManager {
   /**
    * 获取抽屉宽度
    */
-  async getDrawerWidth(): Promise<string | number> {
-    return this.getSimple<string | number>('drawerWidth')
+  async getDrawerWidth(): Promise<string> {
+    return this.getSimple<string>('drawerWidth')
   }
 
   /**
    * 设置抽屉宽度
    */
-  async setDrawerWidth(width: string | number): Promise<void> {
+  async setDrawerWidth(width: string): Promise<void> {
     return this.setSimple('drawerWidth', width)
   }
 
@@ -117,11 +113,13 @@ class StorageManager {
 
   /**
    * 获取搜索配置
+   * 合并存储值和默认值，确保新增字段也能获取到默认值
    */
   async getSearchConfig(): Promise<SearchConfig> {
     try {
       const result = await chrome.storage.local.get(this.STORAGE_KEYS.SEARCH_CONFIG)
-      return result[this.STORAGE_KEYS.SEARCH_CONFIG] ?? this.DEFAULT_VALUES.searchConfig
+      const storedConfig = result[this.STORAGE_KEYS.SEARCH_CONFIG]
+      return { ...this.DEFAULT_VALUES.searchConfig, ...storedConfig }
     } catch (error) {
       console.error('获取搜索配置失败:', error)
       return this.DEFAULT_VALUES.searchConfig
@@ -386,9 +384,27 @@ class StorageManager {
 
   /**
    * 获取预览配置
+   * 合并存储值和默认值，确保新增字段也能获取到默认值
    */
   async getPreviewConfig(): Promise<PreviewConfig> {
-    return this.getSimple<PreviewConfig>('previewConfig')
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.PREVIEW_CONFIG)
+      const storedConfig = result[this.STORAGE_KEYS.PREVIEW_CONFIG]
+      if (!storedConfig) {
+        return this.DEFAULT_VALUES.previewConfig
+      }
+      return {
+        ...this.DEFAULT_VALUES.previewConfig,
+        ...storedConfig,
+        zIndex: {
+          ...this.DEFAULT_VALUES.previewConfig.zIndex,
+          ...storedConfig.zIndex,
+        },
+      }
+    } catch (error) {
+      console.error('获取预览配置失败:', error)
+      return this.DEFAULT_VALUES.previewConfig
+    }
   }
 
   /**
@@ -582,9 +598,17 @@ class StorageManager {
 
   /**
    * 获取高亮所有元素配置
+   * 合并存储值和默认值，确保新增字段也能获取到默认值
    */
   async getHighlightAllConfig(): Promise<HighlightAllConfig> {
-    return this.getSimple<HighlightAllConfig>('highlightAllConfig')
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.HIGHLIGHT_ALL_CONFIG)
+      const storedConfig = result[this.STORAGE_KEYS.HIGHLIGHT_ALL_CONFIG]
+      return { ...this.DEFAULT_VALUES.highlightAllConfig, ...storedConfig }
+    } catch (error) {
+      console.error('获取高亮所有元素配置失败:', error)
+      return this.DEFAULT_VALUES.highlightAllConfig
+    }
   }
 
   /**
@@ -596,9 +620,17 @@ class StorageManager {
 
   /**
    * 获取录制模式配置
+   * 合并存储值和默认值，确保新增字段也能获取到默认值
    */
   async getRecordingModeConfig(): Promise<RecordingModeConfig> {
-    return this.getSimple<RecordingModeConfig>('recordingModeConfig')
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.RECORDING_MODE_CONFIG)
+      const storedConfig = result[this.STORAGE_KEYS.RECORDING_MODE_CONFIG]
+      return { ...this.DEFAULT_VALUES.recordingModeConfig, ...storedConfig }
+    } catch (error) {
+      console.error('获取录制模式配置失败:', error)
+      return this.DEFAULT_VALUES.recordingModeConfig
+    }
   }
 
   /**
@@ -624,11 +656,13 @@ class StorageManager {
 
   /**
    * 获取导出配置
+   * 合并存储值和默认值，确保新增字段也能获取到默认值
    */
   async getExportConfig(): Promise<ExportConfig> {
     try {
       const result = await chrome.storage.local.get(this.STORAGE_KEYS.EXPORT_CONFIG)
-      return result[this.STORAGE_KEYS.EXPORT_CONFIG] ?? this.DEFAULT_VALUES.exportConfig
+      const storedConfig = result[this.STORAGE_KEYS.EXPORT_CONFIG]
+      return { ...this.DEFAULT_VALUES.exportConfig, ...storedConfig }
     } catch (error) {
       console.error('获取导出配置失败:', error)
       return this.DEFAULT_VALUES.exportConfig
@@ -681,9 +715,31 @@ class StorageManager {
 
   /**
    * 获取 API 配置
+   * 合并存储值和默认值，确保新增字段也能获取到默认值
    */
   async getApiConfig(): Promise<ApiConfig> {
-    return this.getSimple<ApiConfig>('apiConfig')
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.API_CONFIG)
+      const storedConfig = result[this.STORAGE_KEYS.API_CONFIG]
+      if (!storedConfig) {
+        return this.DEFAULT_VALUES.apiConfig
+      }
+      return {
+        ...this.DEFAULT_VALUES.apiConfig,
+        ...storedConfig,
+        sourceConfig: {
+          ...this.DEFAULT_VALUES.apiConfig.sourceConfig,
+          ...storedConfig.sourceConfig,
+        },
+        messageTypes: {
+          ...this.DEFAULT_VALUES.apiConfig.messageTypes,
+          ...storedConfig.messageTypes,
+        },
+      }
+    } catch (error) {
+      console.error('获取API配置失败:', error)
+      return this.DEFAULT_VALUES.apiConfig
+    }
   }
 
   /**

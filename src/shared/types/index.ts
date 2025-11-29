@@ -250,7 +250,7 @@ export interface StorageData {
   /** 插件是否激活 */
   isActive: boolean
   /** 抽屉宽度（支持px和%单位） */
-  drawerWidth: string | number
+  drawerWidth: string
   /** 配置的属性名 */
   attributeName: string
   /** 搜索配置 */
