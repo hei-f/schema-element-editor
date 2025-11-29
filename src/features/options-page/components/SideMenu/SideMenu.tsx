@@ -1,12 +1,10 @@
-import { LeftOutlined, RightOutlined } from '@ant-design/icons'
+import { RightOutlined } from '@ant-design/icons'
 import React, { useCallback, useEffect, useState } from 'react'
 import { MENU_BREAKPOINT, MENU_CONFIG, type MenuItemConfig } from '../../config/menu-config'
 import {
   CollapseButton,
   ExpandArrow,
-  ExtraGlowLayer,
   GlassLayer,
-  GradientBackground,
   MenuContainer,
   MenuContent,
   MenuHeader,
@@ -15,7 +13,6 @@ import {
   MenuItemText,
   MenuList,
   MenuTitle,
-  NeonGlowLayer,
   SubMenuContainer,
   SubMenuItem,
   SubMenuItemText,
@@ -115,14 +112,7 @@ export const SideMenu: React.FC<SideMenuProps> = (props) => {
 
   return (
     <MenuContainer $collapsed={collapsed}>
-      {/* 动态渐变背景 */}
-      <GradientBackground />
-
-      {/* 霓虹光晕效果 */}
-      <NeonGlowLayer />
-      <ExtraGlowLayer />
-
-      {/* 毛玻璃层 */}
+      {/* 毛玻璃层 - 透视背景光晕 */}
       <GlassLayer />
 
       {/* 菜单内容 */}
@@ -131,7 +121,7 @@ export const SideMenu: React.FC<SideMenuProps> = (props) => {
         <MenuHeader $collapsed={collapsed}>
           <MenuTitle $collapsed={collapsed}>配置导航</MenuTitle>
           <CollapseButton $collapsed={collapsed} onClick={() => onCollapsedChange(!collapsed)}>
-            {collapsed ? <RightOutlined /> : <LeftOutlined />}
+            <RightOutlined />
           </CollapseButton>
         </MenuHeader>
 

@@ -1,6 +1,14 @@
 import { MENU_COLLAPSED_WIDTH, MENU_EXPANDED_WIDTH } from '../../config/menu-config'
 import styled, { css, keyframes } from 'styled-components'
 
+/** 主题色常量 */
+const THEME_COLORS = {
+  primary: '#39C5BB',
+  skyBlue: '#7EC8E3',
+  coral: '#F78DA7',
+  lavender: '#B8A9F3',
+} as const
+
 /** 渐变流动动画 */
 const gradientFlow = keyframes`
   0% {
@@ -14,15 +22,79 @@ const gradientFlow = keyframes`
   }
 `
 
-/** 光晕脉动动画 */
+/** 光晕脉动动画 - 缓慢呼吸感 */
 const glowPulse = keyframes`
   0%, 100% {
-    opacity: 0.6;
-    filter: blur(60px);
+    opacity: 0.5;
+    transform: scale(1);
   }
   50% {
-    opacity: 0.9;
-    filter: blur(80px);
+    opacity: 0.85;
+    transform: scale(1.12);
+  }
+`
+
+/** 光晕漂移动画1 - 20秒周期 */
+const glowDrift1 = keyframes`
+  0%, 100% {
+    translate: 0 0;
+  }
+  25% {
+    translate: 25px 100px;
+  }
+  50% {
+    translate: -15px 200px;
+  }
+  75% {
+    translate: 35px 80px;
+  }
+`
+
+/** 光晕漂移动画2 - 25秒周期 */
+const glowDrift2 = keyframes`
+  0%, 100% {
+    translate: 0 0;
+  }
+  30% {
+    translate: -30px 120px;
+  }
+  60% {
+    translate: 20px 220px;
+  }
+  80% {
+    translate: -12px 60px;
+  }
+`
+
+/** 光晕漂移动画3 - 18秒周期 */
+const glowDrift3 = keyframes`
+  0%, 100% {
+    translate: 0 0;
+  }
+  20% {
+    translate: 40px 50px;
+  }
+  45% {
+    translate: -8px 150px;
+  }
+  70% {
+    translate: 25px 250px;
+  }
+`
+
+/** 光晕漂移动画4 - 22秒周期 */
+const glowDrift4 = keyframes`
+  0%, 100% {
+    translate: 0 0;
+  }
+  35% {
+    translate: -35px 110px;
+  }
+  65% {
+    translate: 30px 190px;
+  }
+  85% {
+    translate: -18px 40px;
   }
 `
 
@@ -38,28 +110,31 @@ export const MenuContainer = styled.div<{ $collapsed: boolean }>`
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-shadow:
+    4px 0 24px rgba(57, 197, 187, 0.12),
+    2px 0 8px rgba(0, 0, 0, 0.04);
 `
 
-/** 动态渐变背景层 */
+/** 动态渐变背景层 - 青绿色系 */
 export const GradientBackground = styled.div`
   position: absolute;
   inset: -50%;
   background: linear-gradient(
     -45deg,
-    #e8d5eb,
-    #d5e5f7,
-    #e0d5f7,
-    #f7d5e8,
+    #e0f7f5,
     #d5f0f7,
-    #e8d5f7,
-    #f7e5d5
+    #e8f8f5,
+    #f5f7e8,
+    #d5f5f0,
+    #e5f7f2,
+    #f0f8e8
   );
   background-size: 400% 400%;
-  animation: ${gradientFlow} 15s ease infinite;
+  animation: ${gradientFlow} 18s ease infinite;
   z-index: -2;
 `
 
-/** 霓虹光晕效果层 */
+/** 霓虹光晕效果层 - 主题青绿色系 */
 export const NeonGlowLayer = styled.div`
   position: absolute;
   inset: 0;
@@ -72,29 +147,44 @@ export const NeonGlowLayer = styled.div`
     content: '';
     position: absolute;
     border-radius: 50%;
-    animation: ${glowPulse} 4s ease-in-out infinite;
+    filter: blur(20px);
   }
 
   &::before {
-    width: 200px;
-    height: 200px;
-    top: -50px;
-    left: -50px;
-    background: radial-gradient(circle, rgba(180, 130, 220, 0.6) 0%, transparent 70%);
-    animation-delay: 0s;
+    width: 120px;
+    height: 120px;
+    top: -30px;
+    left: -20px;
+    background: radial-gradient(
+      circle,
+      ${THEME_COLORS.primary}cc 0%,
+      ${THEME_COLORS.primary}55 40%,
+      transparent 70%
+    );
+    animation:
+      ${glowPulse} 5s ease-in-out infinite,
+      ${glowDrift1} 20s ease-in-out infinite;
   }
 
   &::after {
-    width: 180px;
-    height: 180px;
-    bottom: 50px;
-    right: -40px;
-    background: radial-gradient(circle, rgba(130, 180, 240, 0.6) 0%, transparent 70%);
+    width: 105px;
+    height: 105px;
+    top: 40%;
+    right: -25px;
+    background: radial-gradient(
+      circle,
+      ${THEME_COLORS.skyBlue}bb 0%,
+      ${THEME_COLORS.skyBlue}50 40%,
+      transparent 70%
+    );
+    animation:
+      ${glowPulse} 6s ease-in-out infinite,
+      ${glowDrift2} 25s ease-in-out infinite;
     animation-delay: 2s;
   }
 `
 
-/** 额外光晕层 */
+/** 额外光晕层 - 多光源 */
 export const ExtraGlowLayer = styled.div`
   position: absolute;
   inset: 0;
@@ -102,28 +192,57 @@ export const ExtraGlowLayer = styled.div`
   overflow: hidden;
   pointer-events: none;
 
-  &::before {
+  &::before,
+  &::after {
     content: '';
     position: absolute;
-    width: 160px;
-    height: 160px;
-    top: 40%;
-    left: 20%;
-    background: radial-gradient(circle, rgba(240, 150, 180, 0.5) 0%, transparent 70%);
     border-radius: 50%;
-    animation: ${glowPulse} 5s ease-in-out infinite;
+    filter: blur(18px);
+  }
+
+  &::before {
+    width: 130px;
+    height: 130px;
+    top: 10%;
+    left: 20%;
+    background: radial-gradient(
+      circle,
+      ${THEME_COLORS.coral}cc 0%,
+      ${THEME_COLORS.coral}60 40%,
+      transparent 70%
+    );
+    animation:
+      ${glowPulse} 4.5s ease-in-out infinite,
+      ${glowDrift3} 18s ease-in-out infinite;
     animation-delay: 1s;
+  }
+
+  &::after {
+    width: 115px;
+    height: 115px;
+    top: 50%;
+    left: -5%;
+    background: radial-gradient(
+      circle,
+      ${THEME_COLORS.lavender}bb 0%,
+      ${THEME_COLORS.lavender}55 40%,
+      transparent 70%
+    );
+    animation:
+      ${glowPulse} 5.5s ease-in-out infinite,
+      ${glowDrift4} 22s ease-in-out infinite;
+    animation-delay: 3s;
   }
 `
 
-/** 毛玻璃层 */
+/** 毛玻璃层 - 透视背景光晕 */
 export const GlassLayer = styled.div`
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-right: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border-right: 1px solid rgba(255, 255, 255, 0.35);
   z-index: 0;
 `
 
@@ -178,7 +297,7 @@ export const CollapseButton = styled.button<{ $collapsed: boolean }>`
 
   &:hover {
     background: rgba(255, 255, 255, 0.9);
-    color: #1677ff;
+    color: #39c5bb;
     transform: scale(1.05);
   }
 
@@ -188,7 +307,7 @@ export const CollapseButton = styled.button<{ $collapsed: boolean }>`
 
   svg {
     transition: transform 0.3s ease;
-    transform: ${(props) => (props.$collapsed ? 'rotate(180deg)' : 'rotate(0deg)')};
+    transform: ${(props) => (props.$collapsed ? 'rotate(0deg)' : 'rotate(180deg)')};
   }
 `
 
@@ -234,7 +353,7 @@ const menuItemBase = css`
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4));
+    background: linear-gradient(135deg, rgba(57, 197, 187, 0.15), rgba(57, 197, 187, 0.08));
     opacity: 0;
     transition: opacity 0.2s ease;
     border-radius: inherit;
@@ -254,7 +373,7 @@ export const MenuItem = styled.div<{ $active?: boolean; $collapsed: boolean }>`
   ${(props) =>
     props.$active &&
     css`
-      background: linear-gradient(135deg, rgba(22, 119, 255, 0.15), rgba(22, 119, 255, 0.08));
+      background: linear-gradient(135deg, rgba(57, 197, 187, 0.15), rgba(57, 197, 187, 0.08));
 
       &::after {
         content: '';
@@ -264,7 +383,7 @@ export const MenuItem = styled.div<{ $active?: boolean; $collapsed: boolean }>`
         transform: translateY(-50%);
         width: 3px;
         height: 20px;
-        background: linear-gradient(180deg, #1677ff, #4096ff);
+        background: linear-gradient(180deg, #39c5bb, #5fd4cb);
         border-radius: 0 2px 2px 0;
       }
     `}
@@ -282,7 +401,7 @@ export const MenuItemIcon = styled.span<{ $active?: boolean }>`
   width: 20px;
   height: 20px;
   font-size: 16px;
-  color: ${(props) => (props.$active ? '#1677ff' : '#666')};
+  color: ${(props) => (props.$active ? '#39c5bb' : '#666')};
   transition: color 0.2s ease;
   position: relative;
   z-index: 1;
@@ -291,10 +410,10 @@ export const MenuItemIcon = styled.span<{ $active?: boolean }>`
 
 /** 菜单项文字 */
 export const MenuItemText = styled.span<{ $collapsed: boolean; $active?: boolean }>`
-  margin-left: 12px;
+  margin-left: ${(props) => (props.$collapsed ? 0 : '12px')};
   font-size: 13px;
   font-weight: ${(props) => (props.$active ? 500 : 400)};
-  color: ${(props) => (props.$active ? '#1677ff' : '#333')};
+  color: ${(props) => (props.$active ? '#39c5bb' : '#333')};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -308,7 +427,7 @@ export const MenuItemText = styled.span<{ $collapsed: boolean; $active?: boolean
 /** 展开箭头 */
 export const ExpandArrow = styled.span<{ $expanded: boolean; $collapsed: boolean }>`
   margin-left: auto;
-  display: flex;
+  display: ${(props) => (props.$collapsed ? 'none' : 'flex')};
   align-items: center;
   color: #999;
   font-size: 10px;
@@ -341,8 +460,8 @@ export const SubMenuItem = styled.div<{ $active?: boolean }>`
   border-radius: 8px;
   cursor: pointer;
   font-size: 12px;
-  color: ${(props) => (props.$active ? '#1677ff' : '#666')};
-  background: ${(props) => (props.$active ? 'rgba(22, 119, 255, 0.08)' : 'transparent')};
+  color: ${(props) => (props.$active ? '#39c5bb' : '#666')};
+  background: ${(props) => (props.$active ? 'rgba(57, 197, 187, 0.08)' : 'transparent')};
   transition: all 0.2s ease;
   position: relative;
 
@@ -355,16 +474,16 @@ export const SubMenuItem = styled.div<{ $active?: boolean }>`
     width: 4px;
     height: 4px;
     border-radius: 50%;
-    background: ${(props) => (props.$active ? '#1677ff' : '#ccc')};
+    background: ${(props) => (props.$active ? '#39c5bb' : '#ccc')};
     transition: all 0.2s ease;
   }
 
   &:hover {
-    color: #1677ff;
-    background: rgba(22, 119, 255, 0.06);
+    color: #39c5bb;
+    background: rgba(57, 197, 187, 0.06);
 
     &::before {
-      background: #1677ff;
+      background: #39c5bb;
       transform: translateY(-50%) scale(1.2);
     }
   }

@@ -1,28 +1,365 @@
 import { InfoCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 import { Alert, Card, Collapse, Flex, Form, Input, InputNumber, Typography } from 'antd'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import { MENU_BREAKPOINT, MENU_COLLAPSED_WIDTH, MENU_EXPANDED_WIDTH } from '../config/menu-config'
 
 const { Text, Title, Paragraph } = Typography
 
-/** 页面根容器 */
-export const PageRoot = styled.div`
-  min-height: 100vh;
-  background: #f5f7fa;
+/** 主题色常量 */
+const THEME_COLORS = {
+  primary: '#39C5BB',
+  skyBlue: '#7EC8E3',
+  lavender: '#B8A9F3',
+  coral: '#F78DA7',
+  mint: '#7FDBCA',
+} as const
+
+/** 背景渐变流动动画 */
+const bgGradientFlow = keyframes`
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 `
 
-/** 内容容器 - 支持菜单折叠时自适应 */
+/** 背景光晕漂移动画1 - 极慢速大范围 */
+const bgGlowDrift1 = keyframes`
+  0%, 100% {
+    translate: 0 0;
+  }
+  25% {
+    translate: 200px 300px;
+  }
+  50% {
+    translate: -100px 500px;
+  }
+  75% {
+    translate: 150px 200px;
+  }
+`
+
+/** 背景光晕漂移动画2 - 极慢速大范围 */
+const bgGlowDrift2 = keyframes`
+  0%, 100% {
+    translate: 0 0;
+  }
+  30% {
+    translate: -200px 150px;
+  }
+  60% {
+    translate: 100px -200px;
+  }
+  80% {
+    translate: -100px 100px;
+  }
+`
+
+/** 背景光晕漂移动画3 - 极慢速大范围 */
+const bgGlowDrift3 = keyframes`
+  0%, 100% {
+    translate: 0 0;
+  }
+  20% {
+    translate: 250px -100px;
+  }
+  50% {
+    translate: -150px 300px;
+  }
+  75% {
+    translate: 100px -150px;
+  }
+`
+
+/** 背景光晕漂移动画4 - 极慢速大范围 */
+const bgGlowDrift4 = keyframes`
+  0%, 100% {
+    translate: 0 0;
+  }
+  35% {
+    translate: -180px -120px;
+  }
+  65% {
+    translate: 120px 180px;
+  }
+  85% {
+    translate: -80px -80px;
+  }
+`
+
+/** 背景光晕脉动 - 缓慢 */
+const bgGlowPulse = keyframes`
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.08);
+  }
+`
+
+/** 页面根容器 - 带动态渐变背景和超大光晕 */
+export const PageRoot = styled.div`
+  min-height: 100vh;
+  background: linear-gradient(
+    -45deg,
+    rgba(57, 197, 187, 0.1),
+    rgba(126, 200, 227, 0.08),
+    rgba(184, 169, 243, 0.06),
+    rgba(247, 141, 167, 0.05),
+    rgba(57, 197, 187, 0.08),
+    rgba(126, 200, 227, 0.06)
+  );
+  background-size: 400% 400%;
+  animation: ${bgGradientFlow} 30s ease infinite;
+  position: relative;
+  overflow: hidden;
+
+  --glow-delay-1: 0s;
+  --glow-delay-2: 0s;
+
+  /* 超大背景光晕1 - 左上角 */
+  &::before {
+    content: '';
+    position: fixed;
+    width: 900px;
+    height: 900px;
+    top: -10%;
+    left: 5%;
+    background: radial-gradient(
+      circle,
+      ${THEME_COLORS.primary}50 0%,
+      ${THEME_COLORS.primary}25 45%,
+      transparent 70%
+    );
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(35px);
+    animation:
+      ${bgGlowPulse} 6.4s ease-in-out infinite,
+      ${bgGlowDrift1} 28s ease-in-out infinite;
+    animation-delay: var(--glow-delay-1), var(--glow-delay-1);
+  }
+
+  /* 超大背景光晕2 - 右侧 */
+  &::after {
+    content: '';
+    position: fixed;
+    width: 1100px;
+    height: 1100px;
+    top: 10%;
+    right: -5%;
+    background: radial-gradient(
+      circle,
+      ${THEME_COLORS.skyBlue}50 0%,
+      ${THEME_COLORS.skyBlue}25 45%,
+      transparent 70%
+    );
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(40px);
+    animation:
+      ${bgGlowPulse} 8s ease-in-out infinite,
+      ${bgGlowDrift2} 32s ease-in-out infinite;
+    animation-delay: var(--glow-delay-2), var(--glow-delay-2);
+  }
+`
+
+/** 背景光晕层1 - 主要光晕 */
+export const BackgroundGlowLayer = styled.div`
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+  --glow-delay-1: 0s;
+  --glow-delay-2: 0s;
+
+  /* 粉色光晕 - 中央偏右 */
+  &::before {
+    content: '';
+    position: absolute;
+    width: 900px;
+    height: 900px;
+    top: 25%;
+    right: 20%;
+    background: radial-gradient(
+      circle,
+      ${THEME_COLORS.coral}55 0%,
+      ${THEME_COLORS.coral}28 45%,
+      transparent 70%
+    );
+    border-radius: 50%;
+    filter: blur(30px);
+    animation:
+      ${bgGlowPulse} 7.2s ease-in-out infinite,
+      ${bgGlowDrift3} 26s ease-in-out infinite;
+    animation-delay: var(--glow-delay-1), var(--glow-delay-1);
+  }
+
+  /* 淡紫色光晕 - 底部偏左 */
+  &::after {
+    content: '';
+    position: absolute;
+    width: 850px;
+    height: 850px;
+    bottom: -5%;
+    left: 20%;
+    background: radial-gradient(
+      circle,
+      ${THEME_COLORS.lavender}50 0%,
+      ${THEME_COLORS.lavender}25 45%,
+      transparent 70%
+    );
+    border-radius: 50%;
+    filter: blur(28px);
+    animation:
+      ${bgGlowPulse} 9s ease-in-out infinite,
+      ${bgGlowDrift4} 30s ease-in-out infinite;
+    animation-delay: var(--glow-delay-2), var(--glow-delay-2);
+  }
+`
+
+/** 背景光晕层2 - 边缘光晕 */
+export const EdgeGlowLayer = styled.div`
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+  --glow-delay-1: 0s;
+  --glow-delay-2: 0s;
+
+  /* 青色光晕 - 左下角 */
+  &::before {
+    content: '';
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    bottom: 10%;
+    left: -5%;
+    background: radial-gradient(
+      circle,
+      ${THEME_COLORS.primary}45 0%,
+      ${THEME_COLORS.primary}22 45%,
+      transparent 70%
+    );
+    border-radius: 50%;
+    filter: blur(25px);
+    animation:
+      ${bgGlowPulse} 5.6s ease-in-out infinite,
+      ${bgGlowDrift1} 22s ease-in-out infinite;
+    animation-delay: var(--glow-delay-1), var(--glow-delay-1);
+  }
+
+  /* 蓝色光晕 - 右边缘中间 */
+  &::after {
+    content: '';
+    position: absolute;
+    width: 900px;
+    height: 900px;
+    top: 20%;
+    right: -10%;
+    background: radial-gradient(
+      circle,
+      ${THEME_COLORS.skyBlue}52 0%,
+      ${THEME_COLORS.skyBlue}28 45%,
+      transparent 70%
+    );
+    border-radius: 50%;
+    filter: blur(32px);
+    animation:
+      ${bgGlowPulse} 6.4s ease-in-out infinite,
+      ${bgGlowDrift2} 24s ease-in-out infinite;
+    animation-delay: var(--glow-delay-2), var(--glow-delay-2);
+  }
+`
+
+/** 背景光晕层3 - 右侧光晕 */
+export const RightGlowLayer = styled.div`
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+  --glow-delay-1: 0s;
+  --glow-delay-2: 0s;
+
+  /* 淡蓝光晕 - 右下角 */
+  &::before {
+    content: '';
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    bottom: 5%;
+    right: -5%;
+    background: radial-gradient(
+      circle,
+      ${THEME_COLORS.skyBlue}45 0%,
+      ${THEME_COLORS.skyBlue}22 45%,
+      transparent 70%
+    );
+    border-radius: 50%;
+    filter: blur(30px);
+    animation:
+      ${bgGlowPulse} 7.2s ease-in-out infinite,
+      ${bgGlowDrift3} 27s ease-in-out infinite;
+    animation-delay: var(--glow-delay-1), var(--glow-delay-1);
+  }
+
+  /* 淡紫色光晕 - 右侧中部 */
+  &::after {
+    content: '';
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    top: 40%;
+    right: 8%;
+    background: radial-gradient(
+      circle,
+      ${THEME_COLORS.lavender}40 0%,
+      ${THEME_COLORS.lavender}20 45%,
+      transparent 70%
+    );
+    border-radius: 50%;
+    filter: blur(28px);
+    animation:
+      ${bgGlowPulse} 8s ease-in-out infinite,
+      ${bgGlowDrift4} 29s ease-in-out infinite;
+    animation-delay: var(--glow-delay-2), var(--glow-delay-2);
+  }
+`
+
+/** 内容容器 - 轻透明毛玻璃效果 */
 export const Container = styled.div<{ $menuCollapsed?: boolean }>`
   max-width: 1000px;
-  margin: 0 auto;
-  padding: 24px 20px 40px;
-  background: #fff;
-  min-height: 100vh;
-  margin-left: ${(props) => (props.$menuCollapsed ? MENU_COLLAPSED_WIDTH : MENU_EXPANDED_WIDTH)}px;
+  margin: 20px auto 20px;
+  padding: 24px 28px 40px;
+  background: rgba(255, 255, 255, 0);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  min-height: calc(100vh - 40px);
+  margin-left: ${(props) =>
+    (props.$menuCollapsed ? MENU_COLLAPSED_WIDTH : MENU_EXPANDED_WIDTH) + 20}px;
+  margin-right: 20px;
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+  border-radius: 24px;
+  box-shadow:
+    0 4px 24px rgba(57, 197, 187, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.35);
 
   @media (max-width: ${MENU_BREAKPOINT}px) {
-    margin-left: ${MENU_COLLAPSED_WIDTH}px;
+    margin-left: ${MENU_COLLAPSED_WIDTH + 20}px;
   }
 `
 
@@ -126,7 +463,14 @@ export const PanelTitle = styled(Typography.Text)`
 export const PanelActions = styled(Flex)``
 
 /** SectionCard 操作按钮 */
-export const PanelActionButton = styled.button<{ $variant?: 'default' | 'primary' }>`
+interface PanelActionButtonProps {
+  $variant?: 'default' | 'primary'
+  $colorPrimary?: string
+  $colorPrimaryHover?: string
+  $colorPrimaryActive?: string
+}
+
+export const PanelActionButton = styled.button<PanelActionButtonProps>`
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -161,13 +505,13 @@ export const PanelActionButton = styled.button<{ $variant?: 'default' | 'primary
     border: 1px solid #d9d9d9;
     
     &:hover {
-      color: #1890ff;
-      border-color: #1890ff;
+      color: ${props.$colorPrimaryHover || props.$colorPrimary || '#39c5bb'};
+      border-color: ${props.$colorPrimaryHover || props.$colorPrimary || '#39c5bb'};
     }
     
     &:active {
-      color: #096dd9;
-      border-color: #096dd9;
+      color: ${props.$colorPrimaryActive || '#2ba89f'};
+      border-color: ${props.$colorPrimaryActive || '#2ba89f'};
     }
   `}
 `
