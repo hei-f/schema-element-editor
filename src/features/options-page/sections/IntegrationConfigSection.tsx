@@ -52,6 +52,7 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
         label="通信模式"
         name={FORM_PATHS.apiConfig.communicationMode}
         extra="选择扩展与页面的通信方式"
+        id="field-communication-mode"
       >
         <Radio.Group>
           <Space direction="vertical">
@@ -72,7 +73,7 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
       </Form.Item>
 
       {/* 通用配置：属性名 */}
-      <FormSectionLabel>元素标记配置</FormSectionLabel>
+      <FormSectionLabel id="field-attribute-name">元素标记配置</FormSectionLabel>
 
       <Form.Item
         label="属性名称"
@@ -92,7 +93,7 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
       {/* postMessage 模式配置 */}
       {communicationMode === 'postMessage' && (
         <>
-          <FormSectionLabel>postMessage 配置</FormSectionLabel>
+          <FormSectionLabel id="field-request-timeout">postMessage 配置</FormSectionLabel>
 
           <Form.Item
             label="请求超时时间"
@@ -106,7 +107,7 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
             <InputNumber min={1} max={30} style={{ width: 120 }} addonAfter="秒" />
           </Form.Item>
 
-          <FormSectionLabel>消息标识配置</FormSectionLabel>
+          <FormSectionLabel id="field-source-config">消息标识配置</FormSectionLabel>
 
           <Form.Item
             label="插件端 source"
@@ -144,7 +145,7 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
             />
           </Form.Item>
 
-          <FormSectionLabel>消息类型配置</FormSectionLabel>
+          <FormSectionLabel id="field-message-types">消息类型配置</FormSectionLabel>
 
           <Form.Item
             label="获取 Schema"

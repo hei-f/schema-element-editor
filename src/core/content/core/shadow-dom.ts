@@ -1,5 +1,51 @@
+import { DEFAULT_VALUES } from '@/shared/constants/defaults'
 import { logger } from '@/shared/utils/logger'
 import ReactDOM from 'react-dom/client'
+
+/** Shadow DOM 容器 ID */
+export const SHADOW_DOM_CONTAINER_ID = 'schema-editor-root'
+
+/**
+ * Shadow DOM 容器管理器
+ * 用于控制 Shadow DOM 容器的 z-index
+ */
+class ShadowDomContainerManager {
+  private container: HTMLDivElement | null = null
+  private defaultZIndex: number = DEFAULT_VALUES.previewConfig.zIndex.default
+
+  /**
+   * 设置容器引用
+   */
+  setContainer(container: HTMLDivElement): void {
+    this.container = container
+  }
+
+  /**
+   * 设置 z-index
+   */
+  setZIndex(zIndex: number): void {
+    if (this.container) {
+      this.container.style.zIndex = String(zIndex)
+    }
+  }
+
+  /**
+   * 重置为默认 z-index
+   */
+  resetZIndex(): void {
+    this.setZIndex(this.defaultZIndex)
+  }
+
+  /**
+   * 更新默认 z-index 配置
+   */
+  setDefaultZIndex(zIndex: number): void {
+    this.defaultZIndex = zIndex
+  }
+}
+
+/** Shadow DOM 容器管理器单例 */
+export const shadowDomContainerManager = new ShadowDomContainerManager()
 
 /**
  * 转换CSS中的资源路径为绝对路径
@@ -172,9 +218,11 @@ export const createShadowRoot = async (): Promise<{
   root: ReactDOM.Root
   shadowRoot: ShadowRoot
 }> => {
+  const defaultZIndex = DEFAULT_VALUES.previewConfig.zIndex.default
+
   // 创建容器
   const container = document.createElement('div')
-  container.id = 'schema-editor-root'
+  container.id = SHADOW_DOM_CONTAINER_ID
   container.setAttribute('data-schema-editor-ui', 'true')
   container.style.cssText = `
     position: fixed;
@@ -182,10 +230,14 @@ export const createShadowRoot = async (): Promise<{
     right: 0;
     bottom: 0;
     left: 0;
-    z-index: 2147483646;
+    z-index: ${defaultZIndex};
     pointer-events: none;
   `
   document.body.appendChild(container)
+
+  // 注册到管理器
+  shadowDomContainerManager.setContainer(container)
+  shadowDomContainerManager.setDefaultZIndex(defaultZIndex)
 
   // 创建Shadow DOM
   const shadowRoot = container.attachShadow({ mode: 'open' })

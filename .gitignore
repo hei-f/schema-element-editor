@@ -18,9 +18,9 @@ releases/
 .vscode/
 .idea/
 .cursor/*
-!.cursor/rules/
-.cursor/rules/*
-!.cursor/rules/publish.mdc
+!.cursor/commands/
+.cursor/commands/*
+!.cursor/commands/publish.md
 *.swp
 *.swo
 *~
@@ -48,7 +48,8 @@ pnpm-debug.log*
 # 测试覆盖率报告
 coverage/
 
-# 文档文件（除了 README）
+# 文档文件（除了 README 和 cursor commands）
 *.md
 !README.md
+!.cursor/commands/publish.md
 docs/*.md

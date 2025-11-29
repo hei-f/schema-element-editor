@@ -91,6 +91,13 @@ export const FORM_PATHS = {
     updateDelay: ['previewConfig', 'updateDelay'],
     /** 自动更新预览 */
     autoUpdate: ['previewConfig', 'autoUpdate'],
+    /** z-index 配置 */
+    zIndex: {
+      /** 默认状态 z-index */
+      default: ['previewConfig', 'zIndex', 'default'],
+      /** 预览模式 z-index */
+      preview: ['previewConfig', 'zIndex', 'preview'],
+    },
   },
 
   /** 最大历史记录数量 */

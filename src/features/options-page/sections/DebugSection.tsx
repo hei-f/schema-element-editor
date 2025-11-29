@@ -27,6 +27,7 @@ export const DebugSection: React.FC<DebugSectionProps> = (props) => {
         name={FORM_PATHS.enableDebugLog}
         valuePropName="checked"
         extra="在浏览器控制台显示插件的调试日志信息"
+        id="field-debug-log"
       >
         <Switch />
       </Form.Item>

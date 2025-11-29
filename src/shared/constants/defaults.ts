@@ -40,6 +40,10 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     previewWidth: 40,
     updateDelay: 500,
     autoUpdate: false,
+    zIndex: {
+      default: 2147483646,
+      preview: 999,
+    },
   },
   maxHistoryCount: 50,
   highlightAllConfig: {

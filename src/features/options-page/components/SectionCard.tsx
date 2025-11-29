@@ -1,4 +1,4 @@
-import { Collapse } from 'antd'
+import { Collapse, theme } from 'antd'
 import React from 'react'
 import {
   CardSubtitle,
@@ -47,6 +47,8 @@ export const SectionCard: React.FC<SectionCardProps> = (props) => {
     extraActions,
   } = props
 
+  const { token } = theme.useToken()
+
   const handleResetClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     onResetDefault?.()
@@ -68,13 +70,23 @@ export const SectionCard: React.FC<SectionCardProps> = (props) => {
             <PanelActionButton
               key={index}
               $variant={action.variant}
+              $colorPrimary={token.colorPrimary}
+              $colorPrimaryHover={token.colorPrimaryHover}
+              $colorPrimaryActive={token.colorPrimaryActive}
               onClick={(e) => handleActionClick(e, action.onClick)}
             >
               {action.label}
             </PanelActionButton>
           ))}
           {onResetDefault && (
-            <PanelActionButton onClick={handleResetClick}>恢复默认</PanelActionButton>
+            <PanelActionButton
+              $colorPrimary={token.colorPrimary}
+              $colorPrimaryHover={token.colorPrimaryHover}
+              $colorPrimaryActive={token.colorPrimaryActive}
+              onClick={handleResetClick}
+            >
+              恢复默认
+            </PanelActionButton>
           )}
         </PanelActions>
       )}

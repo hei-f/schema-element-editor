@@ -134,6 +134,99 @@ describe('useResizer Hook 测试', () => {
       addEventListenerSpy.mockRestore()
     })
 
+    it('mousemove 事件更新宽度', () => {
+      const { result } = renderHook(() =>
+        useResizer({ initialWidth: 40, minWidth: 20, maxWidth: 80 })
+      )
+
+      // 模拟 containerRef
+      const mockContainer = {
+        getBoundingClientRect: () => ({
+          left: 0,
+          width: 1000,
+        }),
+      }
+      Object.defineProperty(result.current.containerRef, 'current', {
+        value: mockContainer,
+        writable: true,
+      })
+
+      const mockEvent = {
+        preventDefault: jest.fn(),
+      } as unknown as React.MouseEvent
+
+      act(() => {
+        result.current.handleResizeStart(mockEvent)
+      })
+
+      // 触发 mousemove 事件，模拟移动到 500px 位置（50%）
+      act(() => {
+        document.dispatchEvent(new MouseEvent('mousemove', { clientX: 500 }))
+      })
+
+      expect(result.current.width).toBe(50)
+    })
+
+    it('mousemove 事件限制宽度在 minWidth 和 maxWidth 之间', () => {
+      const { result } = renderHook(() =>
+        useResizer({ initialWidth: 40, minWidth: 30, maxWidth: 70 })
+      )
+
+      const mockContainer = {
+        getBoundingClientRect: () => ({
+          left: 0,
+          width: 1000,
+        }),
+      }
+      Object.defineProperty(result.current.containerRef, 'current', {
+        value: mockContainer,
+        writable: true,
+      })
+
+      const mockEvent = {
+        preventDefault: jest.fn(),
+      } as unknown as React.MouseEvent
+
+      act(() => {
+        result.current.handleResizeStart(mockEvent)
+      })
+
+      // 移动到 10% 位置，应该被限制到 minWidth (30%)
+      act(() => {
+        document.dispatchEvent(new MouseEvent('mousemove', { clientX: 100 }))
+      })
+
+      expect(result.current.width).toBe(30)
+
+      // 移动到 90% 位置，应该被限制到 maxWidth (70%)
+      act(() => {
+        document.dispatchEvent(new MouseEvent('mousemove', { clientX: 900 }))
+      })
+
+      expect(result.current.width).toBe(70)
+    })
+
+    it('containerRef 为 null 时 mousemove 不更新宽度', () => {
+      const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
+
+      const mockEvent = {
+        preventDefault: jest.fn(),
+      } as unknown as React.MouseEvent
+
+      act(() => {
+        result.current.handleResizeStart(mockEvent)
+      })
+
+      const initialWidth = result.current.width
+
+      // containerRef 为 null，mousemove 不应该改变宽度
+      act(() => {
+        document.dispatchEvent(new MouseEvent('mousemove', { clientX: 500 }))
+      })
+
+      expect(result.current.width).toBe(initialWidth)
+    })
+
     it('mouseup 事件结束拖拽状态', async () => {
       const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
 

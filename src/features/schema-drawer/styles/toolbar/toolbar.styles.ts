@@ -84,7 +84,7 @@ export const ParamsContainer = styled.div`
 export const ParamItem = styled.div`
   display: flex;
   align-items: center;
-  max-width: 100px;
+  max-width: 200px;
   min-width: 0;
   flex-shrink: 0;
 `

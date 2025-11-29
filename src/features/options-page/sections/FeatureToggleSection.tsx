@@ -61,7 +61,9 @@ export const FeatureToggleSection: React.FC<FeatureToggleSectionProps> = (props)
       onResetDefault={onResetDefault}
       extraActions={[{ label: '一键精简', onClick: handleSimplifyMode, variant: 'primary' }]}
     >
-      <FormSectionLabel $noMarginTop>功能模块</FormSectionLabel>
+      <FormSectionLabel $noMarginTop id="field-feature-modules">
+        功能模块
+      </FormSectionLabel>
       <FormRowContainer>
         <InlineFormRow align="center" gap={8}>
           <FormLabel>草稿功能:</FormLabel>
@@ -94,7 +96,7 @@ export const FeatureToggleSection: React.FC<FeatureToggleSectionProps> = (props)
         </InlineFormRow>
       </FormRowContainer>
 
-      <FormSectionLabel>工具栏按钮</FormSectionLabel>
+      <FormSectionLabel id="field-toolbar-buttons">工具栏按钮</FormSectionLabel>
       <FormRowContainer>
         <InlineFormRow align="center" gap={8}>
           <FormLabel>AST/RawString切换:</FormLabel>

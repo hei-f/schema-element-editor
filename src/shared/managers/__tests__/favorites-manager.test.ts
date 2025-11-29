@@ -104,6 +104,43 @@ describe('FavoritesManager 测试', () => {
     })
   })
 
+  describe('updateFavorite 更新收藏', () => {
+    it('应该更新指定收藏的名称和内容', async () => {
+      const beforeUpdate = Date.now()
+      const favorites = [createMockFavorite('target'), createMockFavorite('other')]
+      const mockGetter = jest.fn().mockResolvedValue(favorites)
+      const mockSaver = jest.fn().mockResolvedValue(undefined)
+
+      await manager.updateFavorite(
+        'target',
+        'Updated Name',
+        'Updated Content',
+        mockGetter,
+        mockSaver
+      )
+
+      expect(mockSaver).toHaveBeenCalled()
+      const savedFavorites = mockSaver.mock.calls[0][0] as Favorite[]
+      const updated = savedFavorites.find((f) => f.id === 'target')
+
+      expect(updated!.name).toBe('Updated Name')
+      expect(updated!.content).toBe('Updated Content')
+      expect(updated!.lastUsedTime).toBeGreaterThanOrEqual(beforeUpdate)
+    })
+
+    it('收藏不存在时应该抛出错误', async () => {
+      const favorites = [createMockFavorite('1')]
+      const mockGetter = jest.fn().mockResolvedValue(favorites)
+      const mockSaver = jest.fn().mockResolvedValue(undefined)
+
+      await expect(
+        manager.updateFavorite('non-existent', 'Name', 'Content', mockGetter, mockSaver)
+      ).rejects.toThrow('收藏不存在')
+
+      expect(mockSaver).not.toHaveBeenCalled()
+    })
+  })
+
   describe('deleteFavorite 删除收藏', () => {
     it('应该删除指定ID的收藏', async () => {
       const favorites = [createMockFavorite('1'), createMockFavorite('2'), createMockFavorite('3')]

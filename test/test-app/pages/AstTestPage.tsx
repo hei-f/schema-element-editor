@@ -78,7 +78,11 @@ interface TransformResult {
   error?: string
 }
 
-export const AstTestPage: React.FC = () => {
+interface AstTestPageProps {
+  siderCollapsed?: boolean
+}
+
+export const AstTestPage: React.FC<AstTestPageProps> = () => {
   const [input, setInput] = useState(DEFAULT_INPUT)
   const [results, setResults] = useState<TransformResult[]>([])
 

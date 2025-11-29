@@ -30,11 +30,11 @@ export const shadowDomTheme: ThemeConfig = {
     // 🎨 颜色系统（必须设置）
     // 最容易被外部页面自定义的 token，必须显式设置以防污染
     // ============================================
-    colorPrimary: '#1890ff', // 主色调
+    colorPrimary: '#39c5bb', // 主色调（主题绿）
     colorSuccess: '#52c41a', // 成功色
     colorWarning: '#faad14', // 警告色
     colorError: '#ff4d4f', // 错误色
-    colorInfo: '#1890ff', // 信息色
+    colorInfo: '#39c5bb', // 信息色（与主色调一致）
 
     // 派生颜色（如 colorPrimaryHover）无需设置，会自动从 colorPrimary 计算
 
@@ -105,9 +105,9 @@ export const shadowDomTheme: ThemeConfig = {
     // 🔗 交互颜色（推荐设置）
     // 链接等交互元素的颜色
     // ============================================
-    colorLink: '#1890ff', // 链接色
-    colorLinkHover: '#40a9ff', // 链接悬浮色
-    colorLinkActive: '#096dd9', // 链接激活色
+    colorLink: '#39c5bb', // 链接色（主题绿）
+    colorLinkHover: '#5fd4cb', // 链接悬浮色
+    colorLinkActive: '#2ba89f', // 链接激活色
 
     // ============================================
     // 📊 层级系统（推荐设置）

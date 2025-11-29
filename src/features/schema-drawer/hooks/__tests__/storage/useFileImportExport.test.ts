@@ -110,6 +110,196 @@ describe('useFileImportExport', () => {
       expect(global.URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url')
       jest.useRealTimers()
     })
+
+    it('当 JSON 解析失败时应该提示数据处理错误', () => {
+      const { result } = renderHook(() =>
+        useFileImportExport({
+          ...defaultProps,
+          editorValue: 'invalid json content',
+        })
+      )
+
+      act(() => {
+        result.current.handleExport()
+      })
+
+      expect(message.error).toHaveBeenCalledWith('导出失败：数据处理错误')
+      expect(logger.error).toHaveBeenCalledWith('Export failed:', expect.any(Error))
+    })
+
+    it('启用自定义文件名时应该弹出 Modal', () => {
+      const { Modal } = require('antd')
+      const { result } = renderHook(() =>
+        useFileImportExport({
+          ...defaultProps,
+          customFileName: true,
+        })
+      )
+
+      act(() => {
+        result.current.handleExport()
+      })
+
+      expect(Modal.confirm).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: '导出文件',
+          okText: '导出',
+          cancelText: '取消',
+        })
+      )
+    })
+
+    it('自定义文件名时点击确定应该导出文件', () => {
+      const { Modal } = require('antd')
+      let onOkCallback: () => void
+
+      Modal.confirm.mockImplementation((config: any) => {
+        onOkCallback = config.onOk
+      })
+
+      const { result } = renderHook(() =>
+        useFileImportExport({
+          ...defaultProps,
+          customFileName: true,
+        })
+      )
+
+      act(() => {
+        result.current.handleExport()
+      })
+
+      // 模拟用户点击确定
+      act(() => {
+        onOkCallback()
+      })
+
+      expect(mockShowLightNotification).toHaveBeenCalledWith('✅ 已导出到文件')
+    })
+
+    it('自定义文件名为空时 onOk 应该提示警告并返回 reject', async () => {
+      const { Modal } = require('antd')
+      let capturedConfig: any
+
+      Modal.confirm.mockImplementation((config: any) => {
+        capturedConfig = config
+        // 模拟触发 input 的 onChange 将值清空
+        const inputElement = { target: { value: '' } }
+        // 从 content 中获取 input 并触发 onChange
+        const inputProps = config.content.props.children[1].props
+        inputProps.onChange(inputElement)
+      })
+
+      const { result } = renderHook(() =>
+        useFileImportExport({
+          ...defaultProps,
+          customFileName: true,
+        })
+      )
+
+      act(() => {
+        result.current.handleExport()
+      })
+
+      // 调用 onOk 时文件名为空
+      const onOkResult = capturedConfig.onOk()
+
+      expect(message.warning).toHaveBeenCalledWith('文件名不能为空')
+      await expect(onOkResult).rejects.toBeUndefined()
+    })
+
+    it('自定义文件名时按 Enter 键应该触发导出', () => {
+      const { Modal } = require('antd')
+      let capturedConfig: any
+
+      Modal.confirm.mockImplementation((config: any) => {
+        capturedConfig = config
+      })
+
+      const { result } = renderHook(() =>
+        useFileImportExport({
+          ...defaultProps,
+          customFileName: true,
+        })
+      )
+
+      act(() => {
+        result.current.handleExport()
+      })
+
+      // 获取 input 组件的 props
+      const inputProps = capturedConfig.content.props.children[1].props
+
+      // 模拟按 Enter 键（使用默认文件名）
+      act(() => {
+        inputProps.onKeyDown({ key: 'Enter' })
+      })
+
+      expect(Modal.destroyAll).toHaveBeenCalled()
+      expect(mockShowLightNotification).toHaveBeenCalledWith('✅ 已导出到文件')
+    })
+
+    it('自定义文件名为空时按 Enter 键应该提示警告', () => {
+      const { Modal } = require('antd')
+      let capturedConfig: any
+
+      Modal.confirm.mockImplementation((config: any) => {
+        capturedConfig = config
+      })
+
+      const { result } = renderHook(() =>
+        useFileImportExport({
+          ...defaultProps,
+          customFileName: true,
+        })
+      )
+
+      act(() => {
+        result.current.handleExport()
+      })
+
+      // 获取 input 组件的 props
+      const inputProps = capturedConfig.content.props.children[1].props
+
+      // 先清空文件名
+      inputProps.onChange({ target: { value: '' } })
+
+      // 模拟按 Enter 键
+      act(() => {
+        inputProps.onKeyDown({ key: 'Enter' })
+      })
+
+      expect(message.warning).toHaveBeenCalledWith('文件名不能为空')
+      expect(Modal.destroyAll).not.toHaveBeenCalled()
+    })
+
+    it('自定义文件名时按其他键不应该触发导出', () => {
+      const { Modal } = require('antd')
+      let capturedConfig: any
+
+      Modal.confirm.mockImplementation((config: any) => {
+        capturedConfig = config
+      })
+
+      const { result } = renderHook(() =>
+        useFileImportExport({
+          ...defaultProps,
+          customFileName: true,
+        })
+      )
+
+      act(() => {
+        result.current.handleExport()
+      })
+
+      const inputProps = capturedConfig.content.props.children[1].props
+
+      // 模拟按其他键
+      act(() => {
+        inputProps.onKeyDown({ key: 'a' })
+      })
+
+      expect(Modal.destroyAll).not.toHaveBeenCalled()
+    })
   })
 
   describe('handleImport', () => {
@@ -255,6 +445,48 @@ describe('useFileImportExport', () => {
 
       expect(message.error).toHaveBeenCalledWith('导入失败：文件格式错误或非法 JSON')
       expect(logger.error).toHaveBeenCalled()
+    })
+
+    it('当导入的文件内容为空时应该提示错误', async () => {
+      const { result } = renderHook(() => useFileImportExport(defaultProps))
+
+      const mockFileReader = {
+        readAsText: jest.fn(function (this: any) {
+          setTimeout(() => {
+            this.onload({
+              target: {
+                result: JSON.stringify({
+                  __SCHEMA_EDITOR_EXPORT__: true,
+                  content: null,
+                  metadata: {
+                    params: 'test',
+                    exportedAt: '2025-11-24T10:00:00.000Z',
+                    version: '1.0.0',
+                    wasStringData: false,
+                    url: 'https://example.com',
+                  },
+                }),
+              },
+            })
+          }, 0)
+        }),
+      }
+      global.FileReader = jest.fn(() => mockFileReader) as any
+
+      const mockFile = new File(['test'], 'test.json', {
+        type: 'application/json',
+      })
+
+      act(() => {
+        result.current.handleImport(mockFile)
+      })
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      })
+
+      expect(message.error).toHaveBeenCalledWith('导入失败：文件内容为空')
+      expect(mockOnImportSuccess).not.toHaveBeenCalled()
     })
 
     it('当文件读取失败时应该处理错误', async () => {

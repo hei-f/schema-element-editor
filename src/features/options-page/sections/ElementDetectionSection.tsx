@@ -35,6 +35,7 @@ export const ElementDetectionSection: React.FC<ElementDetectionSectionProps> = (
         label="节流间隔 (毫秒)"
         name={FORM_PATHS.searchConfig.throttleInterval}
         extra="控制鼠标移动检测频率，16ms约为60fps，建议范围 8-100ms"
+        id="field-throttle-interval"
       >
         <FixedWidthInputNumber min={8} $width={120} />
       </Form.Item>
@@ -44,6 +45,7 @@ export const ElementDetectionSection: React.FC<ElementDetectionSectionProps> = (
         name={FORM_PATHS.searchConfig.limitUpwardSearch}
         valuePropName="checked"
         extra="关闭时向上搜索到根元素，开启时只搜索指定层数"
+        id="field-search-depth"
       >
         <Switch />
       </Form.Item>
@@ -73,11 +75,12 @@ export const ElementDetectionSection: React.FC<ElementDetectionSectionProps> = (
         label="高亮框颜色"
         name={FORM_PATHS.highlightColor}
         extra="设置鼠标悬停时元素高亮框的颜色"
+        id="field-highlight-color"
       >
         <ColorPickerField />
       </Form.Item>
 
-      <FormSectionLabel>快捷键高亮所有元素</FormSectionLabel>
+      <FormSectionLabel id="field-highlight-all">快捷键高亮所有元素</FormSectionLabel>
 
       <Form.Item
         label="启用功能"
@@ -130,7 +133,7 @@ export const ElementDetectionSection: React.FC<ElementDetectionSectionProps> = (
         $marginTop={16}
       />
 
-      <FormSectionLabel>Schema录制模式</FormSectionLabel>
+      <FormSectionLabel id="field-recording-mode">Schema录制模式</FormSectionLabel>
 
       <Form.Item
         label="启用功能"

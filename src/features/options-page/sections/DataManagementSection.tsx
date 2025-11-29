@@ -32,7 +32,9 @@ export const DataManagementSection: React.FC<DataManagementSectionProps> = (prop
       panelKey="data-management"
       onResetDefault={onResetDefault}
     >
-      <FormSectionLabel $noMarginTop>草稿配置</FormSectionLabel>
+      <FormSectionLabel $noMarginTop id="field-draft-config">
+        草稿配置
+      </FormSectionLabel>
 
       <Form.Item
         label="草稿自动保存"
@@ -43,7 +45,7 @@ export const DataManagementSection: React.FC<DataManagementSectionProps> = (prop
         <Switch />
       </Form.Item>
 
-      <FormSectionLabel>收藏配置</FormSectionLabel>
+      <FormSectionLabel id="field-favorites-config">收藏配置</FormSectionLabel>
 
       <Form.Item
         label="最大收藏数量"
@@ -57,7 +59,7 @@ export const DataManagementSection: React.FC<DataManagementSectionProps> = (prop
         <FixedWidthInputNumber min={10} max={200} step={10} placeholder="50" $width={120} />
       </Form.Item>
 
-      <FormSectionLabel>历史记录配置</FormSectionLabel>
+      <FormSectionLabel id="field-history-config">历史记录配置</FormSectionLabel>
 
       <Form.Item
         label="历史记录上限"
@@ -79,7 +81,7 @@ export const DataManagementSection: React.FC<DataManagementSectionProps> = (prop
         $marginBottom={24}
       />
 
-      <FormSectionLabel>导出配置</FormSectionLabel>
+      <FormSectionLabel id="field-export-config">导出配置</FormSectionLabel>
 
       <InlineFormRow align="center" gap={8}>
         <FormLabel>导出时自定义文件名:</FormLabel>

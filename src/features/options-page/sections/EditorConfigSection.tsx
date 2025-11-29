@@ -31,6 +31,7 @@ export const EditorConfigSection: React.FC<EditorConfigSectionProps> = (props) =
           { pattern: /^\d+(%|px)$/, message: '宽度格式必须为数字+px或%' },
         ]}
         extra="设置编辑器抽屉的宽度"
+        id="field-drawer-width"
       >
         <Input placeholder={`例如: ${DEFAULT_VALUES.drawerWidth}`} />
       </Form.Item>
@@ -47,6 +48,7 @@ export const EditorConfigSection: React.FC<EditorConfigSectionProps> = (props) =
         name={FORM_PATHS.autoParseString}
         valuePropName="checked"
         extra="自动将字符串类型的Schema数据解析为Markdown Elements结构"
+        id="field-auto-parse"
       >
         <Switch />
       </Form.Item>
@@ -56,6 +58,7 @@ export const EditorConfigSection: React.FC<EditorConfigSectionProps> = (props) =
         name={FORM_PATHS.enableAstTypeHints}
         valuePropName="checked"
         extra="编辑 AST (Elements[]) 类型数据时，提供字段名和类型的智能补全"
+        id="field-ast-hints"
       >
         <Switch />
       </Form.Item>

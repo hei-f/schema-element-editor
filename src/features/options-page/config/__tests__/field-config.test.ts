@@ -4,6 +4,21 @@ import {
   findFieldGroup,
   isDebounceField,
 } from '../field-config'
+import { storage } from '@/shared/utils/browser/storage'
+
+// Mock storage
+jest.mock('@/shared/utils/browser/storage', () => ({
+  storage: {
+    setApiConfig: jest.fn().mockResolvedValue(undefined),
+    setSearchConfig: jest.fn().mockResolvedValue(undefined),
+    setFunctionNames: jest.fn().mockResolvedValue(undefined),
+    setToolbarButtons: jest.fn().mockResolvedValue(undefined),
+    setPreviewConfig: jest.fn().mockResolvedValue(undefined),
+    setHighlightAllConfig: jest.fn().mockResolvedValue(undefined),
+    setRecordingModeConfig: jest.fn().mockResolvedValue(undefined),
+    setExportConfig: jest.fn().mockResolvedValue(undefined),
+  },
+}))
 
 describe('field-config测试', () => {
   describe('FIELD_PATH_STORAGE_MAP', () => {
@@ -166,6 +181,124 @@ describe('field-config测试', () => {
         expect(group.save).toBeDefined()
         expect(typeof group.save).toBe('function')
       })
+    })
+  })
+
+  describe('FIELD_GROUPS save方法', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
+    it('apiConfig.save 应该调用 storage.setApiConfig', async () => {
+      const mockValues = {
+        apiConfig: {
+          communicationMode: 'postMessage',
+          requestTimeout: 5000,
+        },
+      }
+
+      await FIELD_GROUPS.apiConfig.save(mockValues)
+
+      expect(storage.setApiConfig).toHaveBeenCalledWith(mockValues.apiConfig)
+    })
+
+    it('searchConfig.save 应该调用 storage.setSearchConfig', async () => {
+      const mockValues = {
+        searchConfig: {
+          limitUpwardSearch: true,
+          searchDepthUp: 10,
+          throttleInterval: 100,
+        },
+      }
+
+      await FIELD_GROUPS.searchConfig.save(mockValues)
+
+      expect(storage.setSearchConfig).toHaveBeenCalledWith(mockValues.searchConfig)
+    })
+
+    it('functionNames.save 应该调用 storage.setFunctionNames', async () => {
+      const mockValues = {
+        getFunctionName: 'getSchema',
+        updateFunctionName: 'updateSchema',
+        previewFunctionName: 'previewSchema',
+      }
+
+      await FIELD_GROUPS.functionNames.save(mockValues)
+
+      expect(storage.setFunctionNames).toHaveBeenCalledWith(
+        mockValues.getFunctionName,
+        mockValues.updateFunctionName,
+        mockValues.previewFunctionName
+      )
+    })
+
+    it('toolbarButtons.save 应该调用 storage.setToolbarButtons', async () => {
+      const mockValues = {
+        toolbarButtons: {
+          format: true,
+          escape: true,
+          preview: false,
+        },
+      }
+
+      await FIELD_GROUPS.toolbarButtons.save(mockValues)
+
+      expect(storage.setToolbarButtons).toHaveBeenCalledWith(mockValues.toolbarButtons)
+    })
+
+    it('previewConfig.save 应该调用 storage.setPreviewConfig', async () => {
+      const mockValues = {
+        previewConfig: {
+          previewWidth: 400,
+          updateDelay: 500,
+          autoUpdate: true,
+        },
+      }
+
+      await FIELD_GROUPS.previewConfig.save(mockValues)
+
+      expect(storage.setPreviewConfig).toHaveBeenCalledWith(mockValues.previewConfig)
+    })
+
+    it('highlightAllConfig.save 应该调用 storage.setHighlightAllConfig', async () => {
+      const mockValues = {
+        highlightAllConfig: {
+          enabled: true,
+          keyBinding: 'Ctrl+Shift+H',
+          maxHighlightCount: 100,
+        },
+      }
+
+      await FIELD_GROUPS.highlightAllConfig.save(mockValues)
+
+      expect(storage.setHighlightAllConfig).toHaveBeenCalledWith(mockValues.highlightAllConfig)
+    })
+
+    it('recordingModeConfig.save 应该调用 storage.setRecordingModeConfig', async () => {
+      const mockValues = {
+        recordingModeConfig: {
+          enabled: true,
+          keyBinding: 'Ctrl+Shift+R',
+          highlightColor: '#ff0000',
+          pollingInterval: 1000,
+        },
+      }
+
+      await FIELD_GROUPS.recordingModeConfig.save(mockValues)
+
+      expect(storage.setRecordingModeConfig).toHaveBeenCalledWith(mockValues.recordingModeConfig)
+    })
+
+    it('exportConfig.save 应该调用 storage.setExportConfig', async () => {
+      const mockValues = {
+        exportConfig: {
+          customFileName: 'my-export',
+        },
+      }
+
+      await FIELD_GROUPS.exportConfig.save(mockValues)
+
+      expect(storage.setExportConfig).toHaveBeenCalledWith(mockValues.exportConfig)
     })
   })
 })

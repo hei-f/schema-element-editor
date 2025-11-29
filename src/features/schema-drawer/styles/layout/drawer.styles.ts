@@ -36,12 +36,15 @@ const fadeIn = keyframes`
   }
 `
 
+/** 主题色常量 */
+const THEME_PRIMARY = '#39c5bb'
+
 /**
  * 草稿通知提示（3秒后消失）
  */
 export const DraftNotification = styled.span`
   font-size: 12px;
-  color: #1890ff;
+  color: ${THEME_PRIMARY};
   opacity: 0.8;
   animation: ${fadeIn} 0.3s ease-in-out;
 `
@@ -139,7 +142,7 @@ export const DrawerTitleActions = styled.div`
 export const PreviewResizer = styled.div<{ $isDragging?: boolean }>`
   width: 8px;
   height: 100%;
-  background: ${(props) => (props.$isDragging ? '#1890ff' : '#d9d9d9')};
+  background: ${(props) => (props.$isDragging ? THEME_PRIMARY : '#d9d9d9')};
   cursor: col-resize;
   flex-shrink: 0;
   position: relative;
@@ -150,7 +153,7 @@ export const PreviewResizer = styled.div<{ $isDragging?: boolean }>`
   z-index: 10;
 
   &:hover {
-    background: #1890ff;
+    background: ${THEME_PRIMARY};
   }
 
   &::before {
@@ -217,17 +220,17 @@ export const DragOverlay = styled.div<{ $width: number }>`
   box-sizing: border-box;
 
   /* 虚线边框 */
-  border: 2px dashed rgba(24, 144, 255, 0.6);
+  border: 2px dashed rgba(57, 197, 187, 0.6);
 
   /* 静止条纹效果 */
   background-image: linear-gradient(
     45deg,
-    rgba(24, 144, 255, 0.12) 25%,
-    rgba(24, 144, 255, 0.04) 25%,
-    rgba(24, 144, 255, 0.04) 50%,
-    rgba(24, 144, 255, 0.12) 50%,
-    rgba(24, 144, 255, 0.12) 75%,
-    rgba(24, 144, 255, 0.04) 75%
+    rgba(57, 197, 187, 0.12) 25%,
+    rgba(57, 197, 187, 0.04) 25%,
+    rgba(57, 197, 187, 0.04) 50%,
+    rgba(57, 197, 187, 0.12) 50%,
+    rgba(57, 197, 187, 0.12) 75%,
+    rgba(57, 197, 187, 0.04) 75%
   );
   background-size: 40px 40px;
 `
@@ -238,7 +241,7 @@ export const DragOverlay = styled.div<{ $width: number }>`
 export const DragWidthIndicator = styled.div`
   font-size: 32px;
   font-weight: 600;
-  color: #1890ff;
+  color: ${THEME_PRIMARY};
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 8px;
 `

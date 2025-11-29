@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import ReactDOM from 'react-dom/client'
 import {
   Card,
   Button,
@@ -12,19 +13,84 @@ import {
   message,
   Radio,
   Alert,
+  Menu,
+  Modal,
+  Drawer,
 } from 'antd'
 import {
   PlayCircleOutlined,
   PauseCircleOutlined,
   SafetyCertificateOutlined,
   SwapOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  DownOutlined,
+  UpOutlined,
 } from '@ant-design/icons'
 import styled from 'styled-components'
+import { SIDER_WIDTH, SIDER_COLLAPSED_WIDTH } from '../App'
 
 const { Title, Text, Paragraph } = Typography
 
 /** 通信模式类型 */
 type CommunicationMode = 'postMessage' | 'windowFunction'
+
+/** 分类导航侧边栏宽度 */
+const NAV_SIDER_WIDTH = 180
+
+/** 控制台宽度 */
+const CONSOLE_WIDTH = 400
+
+interface SchemaTestPageProps {
+  /** App 侧边栏是否折叠 */
+  siderCollapsed?: boolean
+}
+
+const LayoutContainer = styled.div`
+  display: flex;
+  min-height: 100%;
+`
+
+const NavSider = styled.div<{ $collapsed: boolean; $appSiderCollapsed: boolean }>`
+  position: fixed;
+  left: ${(props) => (props.$appSiderCollapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH)}px;
+  top: 64px;
+  bottom: 0;
+  width: ${(props) => (props.$collapsed ? 0 : NAV_SIDER_WIDTH)}px;
+  background: #fafafa;
+  border-right: 1px solid #f0f0f0;
+  transition:
+    width 0.2s ease,
+    left 0.2s ease;
+  overflow: hidden;
+  overflow-y: auto;
+  z-index: 98;
+`
+
+const NavExpandButton = styled(Button)<{ $appSiderCollapsed: boolean }>`
+  position: fixed;
+  left: ${(props) => (props.$appSiderCollapsed ? SIDER_COLLAPSED_WIDTH + 8 : SIDER_WIDTH + 8)}px;
+  top: 72px;
+  z-index: 99;
+  transition: left 0.2s ease;
+`
+
+const NavSiderHeader = styled.div`
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+`
+
+const MainContent = styled.div<{ $navSiderCollapsed: boolean }>`
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 60px;
+  margin-left: ${(props) => (props.$navSiderCollapsed ? 0 : NAV_SIDER_WIDTH)}px;
+  transition: margin-left 0.2s ease;
+`
 
 const PageContainer = styled.div`
   max-width: 1400px;
@@ -48,21 +114,35 @@ const TestCard = styled(Card)<{ $isValid?: boolean }>`
   }
 `
 
-const ConsolePanel = styled(Card)`
+const ConsolePanel = styled(Card)<{ $collapsed: boolean; $appSiderCollapsed: boolean }>`
   position: fixed;
   bottom: 0;
-  right: 0;
-  width: 500px;
-  max-height: 300px;
+  left: ${(props) => (props.$appSiderCollapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH)}px;
+  width: ${CONSOLE_WIDTH}px;
+  max-height: ${(props) => (props.$collapsed ? '40px' : '300px')};
   margin: 0;
-  border-radius: 8px 0 0 0;
+  border-radius: 0 8px 0 0;
   z-index: 1000;
-  box-shadow: -2px -2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px -2px 8px rgba(0, 0, 0, 0.1);
+  transition:
+    max-height 0.2s ease,
+    left 0.2s ease;
+
+  .ant-card-head {
+    min-height: 40px;
+    padding: 0 12px;
+    cursor: pointer;
+  }
+
+  .ant-card-head-title {
+    padding: 8px 0;
+  }
 
   .ant-card-body {
     max-height: 240px;
     overflow-y: auto;
     padding: 12px;
+    display: ${(props) => (props.$collapsed ? 'none' : 'block')};
   }
 `
 
@@ -122,6 +202,10 @@ const AttrInfo = styled.div`
   color: #595959;
 `
 
+const SectionAnchor = styled.div`
+  scroll-margin-top: 80px;
+`
+
 interface LogEntry {
   type: 'info' | 'success' | 'warn' | 'error'
   message: string
@@ -138,6 +222,74 @@ interface TestElement {
   badge: 'success' | 'error'
   badgeText: string
   typeTag: string | null
+}
+
+/**
+ * 预览组件 - 用于 React 渲染方式的预览
+ * 包含打开 Modal/Drawer 的按钮，用于测试 z-index 配置
+ */
+interface PreviewComponentProps {
+  schema: any
+}
+
+const PreviewComponent: React.FC<PreviewComponentProps> = ({ schema }) => {
+  const [modalVisible, setModalVisible] = useState(false)
+  const [drawerVisible, setDrawerVisible] = useState(false)
+
+  return (
+    <div style={{ padding: 16, height: '100%', overflow: 'auto' }}>
+      <Space direction="vertical" style={{ width: '100%' }} size="middle">
+        <Card size="small" title="📊 Schema 数据">
+          <pre
+            style={{
+              margin: 0,
+              fontSize: 12,
+              maxHeight: 200,
+              overflow: 'auto',
+              background: '#fafafa',
+              padding: 8,
+              borderRadius: 4,
+            }}
+          >
+            {JSON.stringify(schema, null, 2)}
+          </pre>
+        </Card>
+
+        <Card size="small" title="🧪 z-index 测试">
+          <Paragraph type="secondary" style={{ fontSize: 12, marginBottom: 12 }}>
+            点击下方按钮测试弹窗是否能正常显示。如果预览模式的 z-index
+            配置正确，弹窗应该能正常显示在最顶层。
+          </Paragraph>
+          <Space>
+            <Button type="primary" onClick={() => setModalVisible(true)}>
+              打开 Modal
+            </Button>
+            <Button onClick={() => setDrawerVisible(true)}>打开 Drawer</Button>
+          </Space>
+        </Card>
+      </Space>
+
+      <Modal
+        title="测试 Modal"
+        open={modalVisible}
+        onOk={() => setModalVisible(false)}
+        onCancel={() => setModalVisible(false)}
+      >
+        <p>如果你能看到这个弹窗，说明 z-index 配置正确！</p>
+        <p>预览模式下插件的 z-index 应该低于 antd 弹窗的默认值 1000。</p>
+      </Modal>
+
+      <Drawer
+        title="测试 Drawer"
+        placement="right"
+        open={drawerVisible}
+        onClose={() => setDrawerVisible(false)}
+      >
+        <p>如果你能看到这个抽屉，说明 z-index 配置正确！</p>
+        <p>预览模式下插件的 z-index 应该低于 antd 抽屉的默认值 1000。</p>
+      </Drawer>
+    </div>
+  )
 }
 
 /** Schema 数据存储 */
@@ -179,6 +331,10 @@ const initialSchemaStore: Record<string, any> = {
       message: '这是一个用于测试 Params 滚动效果的示例数据',
       description: '工具栏中应该显示多个长参数，并支持水平滚动',
     },
+  'zindex-test': {
+    title: 'z-index 配置测试',
+    description: '用于验证预览模式下弹窗能否正常显示',
+  },
 }
 
 const testElements: TestElement[] = [
@@ -388,6 +544,16 @@ const testElements: TestElement[] = [
     typeTag: 'UI',
   },
   {
+    id: 'zindex-test',
+    title: '🔢 z-index 弹窗测试',
+    description: '开启预览后，点击预览区域的按钮测试 Modal/Drawer 能否正常显示',
+    attrs: { 'data-id': 'zindex-test' },
+    schemaKey: 'zindex-test',
+    badge: 'success',
+    badgeText: '有效',
+    typeTag: 'UI',
+  },
+  {
     id: 'invalid-null',
     title: '无效元素测试',
     description: '不包含任何data-id属性，应显示"非法目标"',
@@ -399,14 +565,29 @@ const testElements: TestElement[] = [
   },
 ]
 
-export const SchemaTestPage: React.FC = () => {
+/** 分组配置 */
+const GROUP_CONFIG = {
+  'string-number': { key: 'string-number', label: 'String / Number', icon: '📝' },
+  'object-array': { key: 'object-array', label: 'Object / Array', icon: '📦' },
+  boolean: { key: 'boolean', label: 'Boolean', icon: '✓' },
+  recording: { key: 'recording', label: 'Recording', icon: '🎬' },
+  'json-repair': { key: 'json-repair', label: 'JSON 修复', icon: '🔧' },
+  ui: { key: 'ui', label: 'UI 测试', icon: '🎨' },
+  invalid: { key: 'invalid', label: '无效元素', icon: '⚠️' },
+} as const
+
+export const SchemaTestPage: React.FC<SchemaTestPageProps> = (props) => {
+  const { siderCollapsed: appSiderCollapsed = false } = props
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [schemaData, setSchemaData] = useState<Record<string, any>>({})
   const [isRecording, setIsRecording] = useState(false)
   const [communicationMode, setCommunicationMode] = useState<CommunicationMode>('postMessage')
+  const [navSiderCollapsed, setNavSiderCollapsed] = useState(false)
+  const [consoleCollapsed, setConsoleCollapsed] = useState(true)
   const schemaStoreRef = useRef({ ...initialSchemaStore })
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null)
   const recordingCountRef = useRef(0)
+  const previewRootRef = useRef<ReactDOM.Root | null>(null)
 
   const addLog = useCallback((type: LogEntry['type'], logMessage: string, data?: any) => {
     const log: LogEntry = {
@@ -417,6 +598,44 @@ export const SchemaTestPage: React.FC = () => {
     }
     setLogs((prev) => [...prev.slice(-30), log])
   }, [])
+
+  /**
+   * 渲染 React 预览组件
+   */
+  const renderPreviewComponent = useCallback(
+    (containerId: string, schema: any) => {
+      const container = document.getElementById(containerId)
+      if (!container) {
+        addLog('error', '❌ 预览容器不存在', { containerId })
+        return false
+      }
+
+      // 清理之前的 React Root
+      if (previewRootRef.current) {
+        previewRootRef.current.unmount()
+        previewRootRef.current = null
+      }
+
+      // 创建新的 React Root 并渲染
+      previewRootRef.current = ReactDOM.createRoot(container)
+      previewRootRef.current.render(<PreviewComponent schema={schema} />)
+
+      addLog('success', '✅ React 预览渲染完成')
+      return true
+    },
+    [addLog]
+  )
+
+  /**
+   * 清理预览组件
+   */
+  const cleanupPreviewComponent = useCallback(() => {
+    if (previewRootRef.current) {
+      previewRootRef.current.unmount()
+      previewRootRef.current = null
+      addLog('info', '🧹 预览组件已清理')
+    }
+  }, [addLog])
 
   /**
    * 处理 Schema 请求的核心逻辑（两种模式共用）
@@ -479,20 +698,14 @@ export const SchemaTestPage: React.FC = () => {
           const { schema, containerId } = payload
           addLog('info', '🎨 收到 RENDER_PREVIEW 请求', { schema, containerId })
 
-          const container = document.getElementById(containerId)
-          if (container) {
-            container.innerHTML = `<pre style="padding: 16px; margin: 0; font-size: 12px; background: #f5f5f5; border-radius: 4px; overflow: auto; height: 100%;">${JSON.stringify(schema, null, 2)}</pre>`
-            addLog('success', '✅ 预览渲染完成')
-            result = { success: true }
-          } else {
-            addLog('error', '❌ 预览容器不存在', { containerId })
-            result = { success: false, error: '预览容器不存在' }
-          }
+          const success = renderPreviewComponent(containerId, schema)
+          result = { success }
           break
         }
 
         case 'CLEANUP_PREVIEW': {
           addLog('info', '🧹 收到 CLEANUP_PREVIEW 请求')
+          cleanupPreviewComponent()
           result = { success: true }
           break
         }
@@ -504,7 +717,7 @@ export const SchemaTestPage: React.FC = () => {
 
       return result
     },
-    [addLog]
+    [addLog, renderPreviewComponent, cleanupPreviewComponent]
   )
 
   /**
@@ -587,17 +800,10 @@ export const SchemaTestPage: React.FC = () => {
     }
     ;(window as any).__getContentPreview = (data: any, containerId: string) => {
       addLog('info', '🎨 调用 __getContentPreview', { data, containerId })
-      const container = document.getElementById(containerId)
-      if (container) {
-        container.innerHTML = `<pre style="padding: 16px; margin: 0; font-size: 12px;">${JSON.stringify(data, null, 2)}</pre>`
-      }
-      addLog('success', '✅ 预览渲染完成')
+      renderPreviewComponent(containerId, data)
       return () => {
         addLog('info', '🧹 预览清理函数被调用')
-        const el = document.getElementById(containerId)
-        if (el) {
-          el.innerHTML = ''
-        }
+        cleanupPreviewComponent()
       }
     }
 
@@ -610,7 +816,7 @@ export const SchemaTestPage: React.FC = () => {
       delete (window as any).__updateContentById
       delete (window as any).__getContentPreview
     }
-  }, [communicationMode, addLog])
+  }, [communicationMode, addLog, renderPreviewComponent, cleanupPreviewComponent])
 
   /**
    * 切换通信模式
@@ -724,156 +930,219 @@ export const SchemaTestPage: React.FC = () => {
       case 'JsonRepair':
         return 'volcano'
       case 'UI':
-        return 'purple'
+        return 'magenta'
       default:
         return 'default'
     }
   }
 
   const groupedElements = {
-    'String / Number': testElements.filter((e) => ['String', 'Number'].includes(e.typeTag || '')),
-    'Object / Array': testElements.filter((e) => ['Object', 'Array'].includes(e.typeTag || '')),
-    Boolean: testElements.filter((e) => e.typeTag === 'Boolean'),
-    Recording: testElements.filter((e) => e.typeTag === 'Recording'),
-    'JSON 修复': testElements.filter((e) => e.typeTag === 'JsonRepair'),
-    'UI 测试': testElements.filter((e) => e.typeTag === 'UI'),
-    无效元素: testElements.filter((e) => !e.typeTag),
+    'string-number': testElements.filter((e) => ['String', 'Number'].includes(e.typeTag || '')),
+    'object-array': testElements.filter((e) => ['Object', 'Array'].includes(e.typeTag || '')),
+    boolean: testElements.filter((e) => e.typeTag === 'Boolean'),
+    recording: testElements.filter((e) => e.typeTag === 'Recording'),
+    'json-repair': testElements.filter((e) => e.typeTag === 'JsonRepair'),
+    ui: testElements.filter((e) => e.typeTag === 'UI'),
+    invalid: testElements.filter((e) => !e.typeTag),
   }
 
+  const scrollToSection = (key: string) => {
+    const element = document.getElementById(`section-${key}`)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
+  const menuItems = Object.entries(GROUP_CONFIG).map(([key, config]) => ({
+    key,
+    label: `${config.icon} ${config.label}`,
+    onClick: () => scrollToSection(key),
+  }))
+
   return (
-    <PageContainer>
-      <HeaderCard>
-        <Row justify="space-between" align="middle">
-          <Col>
-            <Title level={3} style={{ color: '#0958d9', margin: 0 }}>
-              🔧 Schema Editor 功能测试
-            </Title>
-          </Col>
-          <Col>
-            <Space>
-              <SwapOutlined style={{ color: '#1677ff' }} />
-              <Text strong style={{ color: '#1677ff' }}>
-                通信模式：
-              </Text>
-              <Radio.Group
-                value={communicationMode}
-                onChange={(e) => handleModeChange(e.target.value)}
-                optionType="button"
-                buttonStyle="solid"
-              >
-                <Radio.Button value="postMessage">postMessage 直连</Radio.Button>
-                <Radio.Button value="windowFunction">Window 函数</Radio.Button>
-              </Radio.Group>
-            </Space>
-          </Col>
-        </Row>
-
-        <Alert
-          style={{ marginTop: 16 }}
-          type={communicationMode === 'postMessage' ? 'info' : 'warning'}
-          showIcon
-          message={
-            communicationMode === 'postMessage'
-              ? '📡 postMessage 直连模式（推荐）'
-              : '⚠️ Window 函数模式（已废弃）'
-          }
-          description={
-            communicationMode === 'postMessage'
-              ? '监听 source: schema-editor-content → 响应 source: schema-editor-host'
-              : '暴露 __getContentById / __updateContentById / __getContentPreview'
-          }
+    <LayoutContainer>
+      {/* 分类导航侧边栏 */}
+      <NavSider $collapsed={navSiderCollapsed} $appSiderCollapsed={appSiderCollapsed}>
+        <NavSiderHeader>
+          <Text strong>测试分类</Text>
+          <Button
+            size="small"
+            icon={<MenuFoldOutlined />}
+            onClick={() => setNavSiderCollapsed(true)}
+          />
+        </NavSiderHeader>
+        <Menu
+          mode="inline"
+          items={menuItems}
+          style={{ border: 'none', background: 'transparent' }}
         />
+      </NavSider>
 
-        <Space style={{ marginTop: 16 }}>
-          <Button icon={<SafetyCertificateOutlined />} onClick={verifyAttributes}>
-            验证元素属性
-          </Button>
-        </Space>
-        <Paragraph style={{ color: '#595959', margin: '16px 0 0 0', fontSize: 13 }}>
-          💡 使用说明：按住 <Text keyboard>Alt/Option</Text>{' '}
-          并将鼠标悬停在测试元素上，观察高亮效果；按住 <Text keyboard>Alt/Option</Text>{' '}
-          并点击有效元素打开抽屉
-        </Paragraph>
-      </HeaderCard>
+      {/* 分类展开按钮 - 固定定位 */}
+      {navSiderCollapsed && (
+        <NavExpandButton
+          $appSiderCollapsed={appSiderCollapsed}
+          icon={<MenuUnfoldOutlined />}
+          onClick={() => setNavSiderCollapsed(false)}
+        >
+          显示分类
+        </NavExpandButton>
+      )}
 
-      <Collapse
-        defaultActiveKey={[
-          'String / Number',
-          'Object / Array',
-          'Recording',
-          'JSON 修复',
-          'UI 测试',
-        ]}
-        items={Object.entries(groupedElements).map(([group, elements]) => ({
-          key: group,
-          label: <Text strong>{group} 类型测试</Text>,
-          children: (
-            <Row gutter={[16, 16]}>
-              {elements.map((elem) => (
-                <Col span={elem.typeTag === 'Recording' ? 24 : 12} key={elem.id}>
-                  <TestCard
-                    id={elem.id}
-                    $isValid={elem.badge === 'success'}
-                    size="small"
-                    {...(elem.attrs['data-id'] ? { 'data-id': elem.attrs['data-id'] } : {})}
-                    {...(elem.attrs['data-schema-params']
-                      ? { 'data-schema-params': elem.attrs['data-schema-params'] }
-                      : {})}
+      {/* 主内容区 */}
+      <MainContent $navSiderCollapsed={navSiderCollapsed}>
+        <PageContainer>
+          <HeaderCard>
+            <Row justify="space-between" align="middle">
+              <Col>
+                <Title level={3} style={{ color: '#0958d9', margin: 0 }}>
+                  🔧 Schema Editor 功能测试
+                </Title>
+              </Col>
+              <Col>
+                <Space>
+                  <SwapOutlined style={{ color: '#1677ff' }} />
+                  <Text strong style={{ color: '#1677ff' }}>
+                    通信模式：
+                  </Text>
+                  <Radio.Group
+                    value={communicationMode}
+                    onChange={(e) => handleModeChange(e.target.value)}
+                    optionType="button"
+                    buttonStyle="solid"
                   >
-                    <Space style={{ marginBottom: 8 }}>
-                      <Badge
-                        status={elem.badge === 'success' ? 'success' : 'error'}
-                        text={elem.badgeText}
-                      />
-                      <Text strong>{elem.title}</Text>
-                      {elem.typeTag && <Tag color={getTypeColor(elem.typeTag)}>{elem.typeTag}</Tag>}
-                    </Space>
-                    <Paragraph type="secondary" style={{ margin: '4px 0 0 0', fontSize: 13 }}>
-                      {elem.description}
-                    </Paragraph>
-
-                    {elem.typeTag === 'Recording' && (
-                      <Space style={{ marginTop: 12 }}>
-                        <Button
-                          type="primary"
-                          danger
-                          icon={<PlayCircleOutlined />}
-                          onClick={startRecordingTest}
-                          disabled={isRecording}
-                        >
-                          开始测试
-                        </Button>
-                        <Button
-                          icon={<PauseCircleOutlined />}
-                          onClick={stopRecordingTest}
-                          disabled={!isRecording}
-                        >
-                          停止测试
-                        </Button>
-                        {isRecording && <Tag color="processing">录制中...</Tag>}
-                      </Space>
-                    )}
-
-                    {Object.keys(elem.attrs).length > 0 && (
-                      <AttrInfo>data-id: "{elem.attrs['data-id']}"</AttrInfo>
-                    )}
-
-                    {elem.schemaKey && schemaData[elem.schemaKey] !== undefined && (
-                      <SchemaDisplay>
-                        {typeof schemaData[elem.schemaKey] === 'string'
-                          ? schemaData[elem.schemaKey]
-                          : JSON.stringify(schemaData[elem.schemaKey], null, 2)}
-                      </SchemaDisplay>
-                    )}
-                  </TestCard>
-                </Col>
-              ))}
+                    <Radio.Button value="postMessage">postMessage 直连</Radio.Button>
+                    <Radio.Button value="windowFunction">Window 函数</Radio.Button>
+                  </Radio.Group>
+                </Space>
+              </Col>
             </Row>
-          ),
-        }))}
-      />
 
-      <ConsolePanel title="📋 控制台输出" size="small" extra={<Tag>{logs.length} 条日志</Tag>}>
+            <Alert
+              style={{ marginTop: 16 }}
+              type={communicationMode === 'postMessage' ? 'info' : 'warning'}
+              showIcon
+              message={
+                communicationMode === 'postMessage'
+                  ? '📡 postMessage 直连模式（推荐）'
+                  : '⚠️ Window 函数模式（已废弃）'
+              }
+              description={
+                communicationMode === 'postMessage'
+                  ? '监听 source: schema-editor-content → 响应 source: schema-editor-host'
+                  : '暴露 __getContentById / __updateContentById / __getContentPreview'
+              }
+            />
+
+            <Space style={{ marginTop: 16 }}>
+              <Button icon={<SafetyCertificateOutlined />} onClick={verifyAttributes}>
+                验证元素属性
+              </Button>
+            </Space>
+            <Paragraph style={{ color: '#595959', margin: '16px 0 0 0', fontSize: 13 }}>
+              💡 使用说明：按住 <Text keyboard>Alt/Option</Text>{' '}
+              并将鼠标悬停在测试元素上，观察高亮效果；按住 <Text keyboard>Alt/Option</Text>{' '}
+              并点击有效元素打开抽屉
+            </Paragraph>
+          </HeaderCard>
+
+          <Collapse
+            defaultActiveKey={Object.keys(GROUP_CONFIG)}
+            items={Object.entries(groupedElements).map(([groupKey, elements]) => {
+              const config = GROUP_CONFIG[groupKey as keyof typeof GROUP_CONFIG]
+              return {
+                key: groupKey,
+                label: (
+                  <SectionAnchor id={`section-${groupKey}`}>
+                    <Text strong>
+                      {config.icon} {config.label} 类型测试
+                    </Text>
+                  </SectionAnchor>
+                ),
+                children: (
+                  <Row gutter={[16, 16]}>
+                    {elements.map((elem) => (
+                      <Col span={elem.typeTag === 'Recording' ? 24 : 12} key={elem.id}>
+                        <TestCard
+                          id={elem.id}
+                          $isValid={elem.badge === 'success'}
+                          size="small"
+                          {...(elem.attrs['data-id'] ? { 'data-id': elem.attrs['data-id'] } : {})}
+                          {...(elem.attrs['data-schema-params']
+                            ? { 'data-schema-params': elem.attrs['data-schema-params'] }
+                            : {})}
+                        >
+                          <Space style={{ marginBottom: 8 }}>
+                            <Badge
+                              status={elem.badge === 'success' ? 'success' : 'error'}
+                              text={elem.badgeText}
+                            />
+                            <Text strong>{elem.title}</Text>
+                            {elem.typeTag && (
+                              <Tag color={getTypeColor(elem.typeTag)}>{elem.typeTag}</Tag>
+                            )}
+                          </Space>
+                          <Paragraph type="secondary" style={{ margin: '4px 0 0 0', fontSize: 13 }}>
+                            {elem.description}
+                          </Paragraph>
+
+                          {elem.typeTag === 'Recording' && (
+                            <Space style={{ marginTop: 12 }}>
+                              <Button
+                                type="primary"
+                                danger
+                                icon={<PlayCircleOutlined />}
+                                onClick={startRecordingTest}
+                                disabled={isRecording}
+                              >
+                                开始测试
+                              </Button>
+                              <Button
+                                icon={<PauseCircleOutlined />}
+                                onClick={stopRecordingTest}
+                                disabled={!isRecording}
+                              >
+                                停止测试
+                              </Button>
+                              {isRecording && <Tag color="processing">录制中...</Tag>}
+                            </Space>
+                          )}
+
+                          {Object.keys(elem.attrs).length > 0 && (
+                            <AttrInfo>data-id: "{elem.attrs['data-id']}"</AttrInfo>
+                          )}
+
+                          {elem.schemaKey && schemaData[elem.schemaKey] !== undefined && (
+                            <SchemaDisplay>
+                              {typeof schemaData[elem.schemaKey] === 'string'
+                                ? schemaData[elem.schemaKey]
+                                : JSON.stringify(schemaData[elem.schemaKey], null, 2)}
+                            </SchemaDisplay>
+                          )}
+                        </TestCard>
+                      </Col>
+                    ))}
+                  </Row>
+                ),
+              }
+            })}
+          />
+        </PageContainer>
+      </MainContent>
+
+      {/* 控制台 - 左下角 */}
+      <ConsolePanel
+        $collapsed={consoleCollapsed}
+        $appSiderCollapsed={appSiderCollapsed}
+        title={
+          <Space onClick={() => setConsoleCollapsed(!consoleCollapsed)}>
+            {consoleCollapsed ? <UpOutlined /> : <DownOutlined />}
+            <span>📋 控制台输出</span>
+          </Space>
+        }
+        size="small"
+        extra={<Tag>{logs.length} 条日志</Tag>}
+      >
         {logs.length === 0 ? (
           <Text type="secondary">等待插件操作...</Text>
         ) : (
@@ -889,6 +1158,6 @@ export const SchemaTestPage: React.FC = () => {
           ))
         )}
       </ConsolePanel>
-    </PageContainer>
+    </LayoutContainer>
   )
 }

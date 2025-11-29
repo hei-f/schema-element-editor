@@ -1,7 +1,3 @@
----
-alwaysApply: false
----
-
 # Chrome插件发布流程
 
 这是一个chrome插件项目，其代码托管在github上。
@@ -24,12 +20,14 @@ alwaysApply: false
 ## 发布流程步骤
 
 ### 1. 前置检查
+
 - 检查git工作区状态（`git status`）
 - 确认是否有未提交的改动，如有则在步骤2中进行原子化提交
 
 ### 2. 分析并原子化提交功能改动
 
 **2.1 分析工作区改动**
+
 - 使用 `git status` 查看所有未提交的文件
 - 使用 `git diff` 逐文件分析具体改动内容：
   - 识别每个文件中的改动块（hunks）和具体行号
@@ -40,6 +38,7 @@ alwaysApply: false
 
 **2.2 原子化分组**
 将所有改动按照**原子化提交原则**进行分组：
+
 - **原子化标准**：每组改动应聚焦于单一具体功能或改动点
   - 一个功能点的所有相关文件和行归为一组
   - 一个bug修复的所有相关文件和行归为一组
@@ -81,58 +80,58 @@ alwaysApply: false
      - 示例：`fix: 修复用户登录验证逻辑` 而非 `update code`
 
 3. **执行部分暂存提交**：
-   
+
    **情况A：该组包含完整文件的所有改动**
    - 直接使用：`git add {文件路径1} {文件路径2} ...`
    - 然后执行：`git commit -m "{message}"`
-   
+
    **情况B：该组仅包含文件的部分改动（行级别提交）**
-   
+
    通过构造临时patch文件实现精确的行级别暂存（AI自动化操作）：
-   
+
    a. **生成完整diff**：
-      - 执行：`git diff -- {文件路径} > .git/temp_commit.patch`
-      - 获取该文件的所有改动内容
-   
+   - 执行：`git diff -- {文件路径} > .git/temp_commit.patch`
+   - 获取该文件的所有改动内容
+
    b. **读取并分析diff内容**：
-      - 读取 `.git/temp_commit.patch` 文件
-      - 解析diff格式，识别所有的hunks（改动块）
-      - 每个hunk的格式为：`@@ -旧文件起始行,行数 +新文件起始行,行数 @@`
-   
+   - 读取 `.git/temp_commit.patch` 文件
+   - 解析diff格式，识别所有的hunks（改动块）
+   - 每个hunk的格式为：`@@ -旧文件起始行,行数 +新文件起始行,行数 @@`
+
    c. **构造部分patch**：
-      - 根据本组需要提交的行号范围，提取对应的hunks
-      - 创建新的patch文件 `.git/partial_commit.patch`，只包含：
-        - diff文件头信息（`diff --git`, `index`, `---`, `+++` 等）
-        - 需要提交的hunks（保持完整的hunk格式）
-      - **重要**：必须保持patch文件的格式完整性和上下文行
-   
+   - 根据本组需要提交的行号范围，提取对应的hunks
+   - 创建新的patch文件 `.git/partial_commit.patch`，只包含：
+     - diff文件头信息（`diff --git`, `index`, `---`, `+++` 等）
+     - 需要提交的hunks（保持完整的hunk格式）
+   - **重要**：必须保持patch文件的格式完整性和上下文行
+
    d. **应用部分改动到暂存区**：
-      - 执行：`git apply --cached --unidiff-zero .git/partial_commit.patch`
-      - 如果失败，尝试：`git apply --cached .git/partial_commit.patch`（允许上下文行）
-   
+   - 执行：`git apply --cached --unidiff-zero .git/partial_commit.patch`
+   - 如果失败，尝试：`git apply --cached .git/partial_commit.patch`（允许上下文行）
+
    e. **提交并清理**：
-      - 执行：`git commit -m "{message}"`
-      - 清理临时文件：`rm .git/temp_commit.patch .git/partial_commit.patch`
-   
+   - 执行：`git commit -m "{message}"`
+   - 清理临时文件：`rm .git/temp_commit.patch .git/partial_commit.patch`
+
    f. **验证**：
-      - 使用 `git show HEAD` 确认提交内容正确
-      - 使用 `git diff` 确认未提交的改动仍在工作区
-   
+   - 使用 `git show HEAD` 确认提交内容正确
+   - 使用 `git diff` 确认未提交的改动仍在工作区
+
    **情况C：同时处理多个文件的部分改动**
-   
+
    合并多个文件的部分改动到一个patch（AI自动化操作）：
-   
+
    a. **逐个文件生成diff并提取目标hunks**：
-      - 对每个文件执行情况B的步骤a-c
-      - 将每个文件的部分patch内容追加到同一个 `.git/combined_commit.patch` 文件
-   
+   - 对每个文件执行情况B的步骤a-c
+   - 将每个文件的部分patch内容追加到同一个 `.git/combined_commit.patch` 文件
+
    b. **应用合并的patch**：
-      - 执行：`git apply --cached --unidiff-zero .git/combined_commit.patch`
-      - 如果失败，尝试调整参数或拆分应用
-   
+   - 执行：`git apply --cached --unidiff-zero .git/combined_commit.patch`
+   - 如果失败，尝试调整参数或拆分应用
+
    c. **提交并清理**：
-      - 执行：`git commit -m "{message}"`
-      - 清理所有临时patch文件
+   - 执行：`git commit -m "{message}"`
+   - 清理所有临时patch文件
 
 4. **验证提交结果**：
    - 使用 `git show HEAD` 查看刚才的提交内容
@@ -141,12 +140,14 @@ alwaysApply: false
 
 **2.4 工作区检查**
 提交完功能改动后，检查工作区状态：
+
 - 如果工作区已干净（除了可能的版本号文件），继续下一步
 - 如果仍有未提交的功能文件，提示用户确认是否继续
 
 ### 3. 测试验证与质量检查
 
 **3.1 TypeScript 类型检查**
+
 - 执行类型检查命令：`npx tsc --noEmit`
 - **强制要求**：类型检查必须100%通过，不允许有任何类型错误
 - **重要说明**：此检查必须在打包前完成，因为项目的 pre-push 钩子会执行 tsc 检测，如果在打包后才发现类型错误，会导致需要重新打包
@@ -156,6 +157,7 @@ alwaysApply: false
   - 修复所有类型错误
   - 修复完成后，必须重新从步骤1开始执行发布流程
 - **输出格式**：
+
 ```
 TypeScript 类型检查结果：
 - 错误数：0 ✓
@@ -163,6 +165,7 @@ TypeScript 类型检查结果：
 ```
 
 **3.2 运行完整测试套件并验证通过率**
+
 - 执行完整测试命令：`npm test` 或 `jest`
 - **强制要求**：所有测试必须100%通过，不允许有任何失败或错误的测试用例
 - 如果发现测试失败：
@@ -172,6 +175,7 @@ TypeScript 类型检查结果：
   - 修复所有失败的测试
   - 修复完成后，必须重新从步骤1开始执行发布流程
 - **输出格式**：
+
 ```
 测试执行结果：
 - 总测试数：X
@@ -182,10 +186,12 @@ TypeScript 类型检查结果：
 ```
 
 **3.3 运行测试覆盖率分析**
+
 - 执行测试覆盖率命令：`npm run test:coverage` 或 `jest --coverage`
 - 等待测试运行完成，获取覆盖率报告
 
 **3.4 分析本次改动的测试覆盖情况**
+
 - 识别步骤2中已提交的所有功能改动文件
 - 在覆盖率报告中查找这些文件的覆盖率数据
 - 重点关注以下指标：
@@ -196,12 +202,14 @@ TypeScript 类型检查结果：
 
 **3.5 识别测试缺失的代码**
 对于每个改动文件，检查：
+
 - 覆盖率是否达标（建议：关键业务逻辑≥80%，普通代码≥70%）
 - 新增的函数/方法是否有测试用例
 - 修复的bug是否有回归测试
 - 边界情况和异常处理是否有测试覆盖
 
 **输出格式**：
+
 ```
 文件：src/components/Example.tsx
 - 当前覆盖率：45%（不达标）
@@ -237,6 +245,7 @@ TypeScript 类型检查结果：
    - 如果仍有不足，重复步骤2-4
 
 **3.7 特殊情况处理**
+
 - **纯UI组件或样式调整**：可以适当放宽覆盖率要求，但关键交互逻辑仍需测试
 - **文档或配置文件改动**：无需测试，但仍需执行步骤 3.1 和 3.2 以确认现有测试不受影响
 - **测试框架或测试工具本身的改动**：需要特别谨慎，确保不影响现有测试的正确性
@@ -262,6 +271,7 @@ TypeScript 类型检查结果：
 ### 4. 版本更新确认与分析
 
 **4.1 分析上次版本tag以来的commit历史**
+
 - 获取当前版本号：从 `package.json` 中读取当前版本
 - 查找上一个版本tag：执行 `git tag -l "v*" --sort=-v:refname | head -1`
 - 分析commit历史：执行 `git log <上次版本tag>..HEAD --oneline`（如果是首次发布或找不到tag，则使用 `git log --oneline`）
@@ -271,6 +281,7 @@ TypeScript 类型检查结果：
 根据**语义化版本规范（Semantic Versioning）**分析commit内容：
 
 **版本更新判断规则**：
+
 - **major（主版本）**：如果存在以下情况，建议更新主版本号
   - commit message包含 `BREAKING CHANGE` 或 `!`（如 `feat!:`, `fix!:`）
   - 重大架构调整或API变更
@@ -293,6 +304,7 @@ TypeScript 类型检查结果：
   - `chore:` 构建配置、依赖更新等（不包括release提交）
 
 **4.3 向用户展示分析结果并确认**
+
 - 列出自上次版本以来的所有commit（用列表形式展示）
 - 标注每个commit的类型和重要程度
 - **明确给出版本更新建议**：
@@ -305,12 +317,15 @@ TypeScript 类型检查结果：
   - **不更新版本**：跳过版本相关步骤，直接进入构建流程
 
 **4.4 特殊情况处理**
+
 - 如果无法确定版本更新级别（如commit message不规范），明确提示用户并提供commit列表供手动判断
 - 如果检测到混合类型的commit（如既有feat又有BREAKING CHANGE），按最高级别推荐
 - 如果没有新的commit（仅步骤2提交的内容），基于步骤2的提交进行分析
 
 ### 5. 更新版本号（如需要）
+
 同时更新以下文件中的版本号：
+
 - `package.json` 中的 `version` 字段
 - `src/manifest.json` 中的 `version` 字段
 - `src/features/options-page/OptionsApp.tsx` 中的版本号显示（搜索 `<VersionTag>v` 并更新版本号）
@@ -318,7 +333,9 @@ TypeScript 类型检查结果：
 - 版本号格式：`major.minor.patch`（如 `1.2.3`）
 
 ### 6. 检查README文档更新
+
 根据本次提交的改动内容，判断是否需要更新README文档：
+
 - **需要更新的情况**：
   - 新增功能或移除功能
   - 修改了用户使用方式或配置方法
@@ -336,33 +353,42 @@ TypeScript 类型检查结果：
   - 注：README更新会在步骤9中作为独立的 `docs:` 类型提交
 
 ### 7. 构建打包并生成压缩包
+
 执行打包命令：`tnpm run package`
+
 - 该命令会自动清理旧的dist目录、重新构建并生成zip包
 - 打包失败则终止流程，提示用户检查错误
 
 ### 8. 验证产物
+
 检查生成的zip包是否存在且大小合理
 
 ### 9. 提交版本号和文档改动
 
 **9.1 提交版本号更新（如有版本更新）**
+
 - `git add package.json src/manifest.json src/options/OptionsApp.tsx`
 - `git commit -m "chore: release v{版本号}"`
 
 **9.2 提交README更新（如有README改动）**
+
 - `git add README.md`
 - `git commit -m "docs: 更新README文档"`
 
 ### 10. 推送到远程
+
 所有提交完成后，执行：`git push`
 
 ### 11. 创建并推送Tag（仅版本更新时）
+
 - Tag命名格式：`v{版本号}`（如 `v1.2.3`）
 - 创建tag：`git tag v{版本号}`
 - 推送tag：`git push origin v{版本号}`
 
 ### 12. 生成Release内容（仅版本更新时）
+
 生成适用于GitHub Release的内容：
+
 - **Title格式**：`v{版本号}`
 - **Description要求**：
   - 使用代码块包裹的Markdown格式
@@ -372,14 +398,18 @@ TypeScript 类型检查结果：
   - 避免冗余描述和技术细节
 
 ### 13. 发布总结
+
 向用户展示：
+
 - 本次发布的版本号（如有）
 - 改动摘要
 - 生成的产物路径
 - 下一步操作建议（如：手动上传zip到Chrome Web Store）
 
 ## 错误处理
+
 任何步骤失败时：
+
 1. 立即停止后续流程
 2. 清晰告知失败的步骤和原因
 3. 提供可能的解决建议

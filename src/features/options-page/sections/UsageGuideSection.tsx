@@ -17,7 +17,9 @@ export const UsageGuideSection: React.FC<UsageGuideSectionProps> = (props) => {
 
   return (
     <SectionCard title="使用指南" subtitle="快速上手和参考信息" panelKey="usage-guide">
-      <Typography.Title level={5}>使用说明</Typography.Title>
+      <Typography.Title level={5} id="field-usage-instructions">
+        使用说明
+      </Typography.Title>
       <Typography.Paragraph>
         <ol>
           <li>
@@ -33,7 +35,9 @@ export const UsageGuideSection: React.FC<UsageGuideSectionProps> = (props) => {
         </ol>
       </Typography.Paragraph>
 
-      <SectionTitle level={5}>Schema类型支持</SectionTitle>
+      <SectionTitle level={5} id="field-schema-types">
+        Schema类型支持
+      </SectionTitle>
       <Typography.Paragraph>
         Schema编辑器支持字符串、数字、对象、数组、布尔值等数据类型
       </Typography.Paragraph>

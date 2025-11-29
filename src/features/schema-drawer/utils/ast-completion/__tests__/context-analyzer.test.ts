@@ -284,6 +284,121 @@ describe('context-analyzer', () => {
 
         expect(result.type).toBe(ContextType.PropertyName)
       })
+
+      it('应该识别空文档', () => {
+        const content = ''
+        const state = createState(content)
+        const pos = 0
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.Unknown)
+      })
+
+      it('应该识别左方括号后（数组元素）', () => {
+        const content = '['
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyName)
+        expect(result.isInElementsArray).toBe(true)
+      })
+
+      it('应该识别数组内逗号后的位置', () => {
+        const content = '[{"type": "paragraph"},'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.ArrayElement)
+        expect(result.isInElementsArray).toBe(true)
+      })
+
+      it('应该识别嵌套对象内逗号后的位置', () => {
+        const content = '[{"type": "paragraph", "props": {"key": "value",'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyName)
+      })
+
+      it('应该识别冒号后带空格的位置', () => {
+        const content = '{"name": '
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyValue)
+        expect(result.propertyNameForValue).toBe('name')
+      })
+
+      it('应该识别属性名引号内的位置', () => {
+        const content = '[{"ty'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyName)
+      })
+
+      it('应该识别冒号后直接输入（无引号）', () => {
+        const content = '{"type": para'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        // 在无引号的情况下，文本分析可能识别为 PropertyName
+        // 因为缺少引号，无法确定是否在属性值位置
+        expect([ContextType.PropertyValue, ContextType.PropertyName]).toContain(result.type)
+      })
+
+      it('应该识别正在输入的属性名', () => {
+        const content = '[{"type": "paragraph", chil'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyName)
+      })
+
+      it('应该识别 ": 模式', () => {
+        const content = '{"type": "'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyValue)
+      })
+
+      it('应该处理复杂的嵌套括号', () => {
+        const content = '[{"children": [{"text": "hello"}],'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyName)
+      })
+
+      it('应该处理不以 [ 开头的非数组文档', () => {
+        const content = '{"key": "value"}'
+        const state = createState(content)
+        const pos = content.indexOf('value')
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.isInElementsArray).toBe(false)
+      })
     })
   })
 })

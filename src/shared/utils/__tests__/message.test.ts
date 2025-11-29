@@ -5,6 +5,9 @@ import {
   postMessageToPage,
   sendMessageToBackground,
   sendMessageToContent,
+  sendRequestToHost,
+  initHostMessageListener,
+  MESSAGE_SOURCE,
 } from '../browser/message'
 
 describe('Message工具测试', () => {
@@ -264,6 +267,22 @@ describe('Message工具测试', () => {
       expect(handler).toHaveBeenCalledWith(message, sender, sendResponse)
       expect(result).toBe(true) // 异步消息应该返回true保持通道开启
     })
+
+    it('应该处理返回 true 的 handler（需要异步响应）', () => {
+      const handler = jest.fn().mockReturnValue(true)
+      const message = { type: MessageType.GET_SCHEMA, payload: {} }
+      const sender = {} as chrome.runtime.MessageSender
+
+      listenChromeMessages(handler)
+
+      const listener = (chrome.runtime.onMessage.addListener as jest.Mock).mock.calls[0][0]
+      const sendResponse = jest.fn()
+
+      const result = listener(message, sender, sendResponse)
+
+      expect(handler).toHaveBeenCalledWith(message, sender, sendResponse)
+      expect(result).toBe(true) // 返回true保持通道开启
+    })
   })
 
   describe('listenPageMessages', () => {
@@ -349,6 +368,156 @@ describe('Message工具测试', () => {
       window.dispatchEvent(event)
 
       expect(handler).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('sendRequestToHost', () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+    })
+
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it('应该发送请求并等待响应', async () => {
+      const type = 'GET_DATA'
+      const payload = { key: 'value' }
+
+      const requestPromise = sendRequestToHost(type, payload, 5)
+
+      // 验证 postMessage 被调用
+      expect(window.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source: MESSAGE_SOURCE.FROM_CONTENT,
+          type,
+          payload,
+          requestId: expect.stringMatching(/^req-\d+-\d+$/),
+        }),
+        '*'
+      )
+
+      // 获取 requestId
+      const callArgs = (window.postMessage as jest.Mock).mock.calls[0][0]
+      const requestId = callArgs.requestId
+
+      // 模拟宿主响应
+      const cleanup = initHostMessageListener()
+      const responseEvent = new MessageEvent('message', {
+        data: {
+          source: MESSAGE_SOURCE.FROM_HOST,
+          requestId,
+          data: { result: 'success' },
+        },
+        source: window,
+      })
+      window.dispatchEvent(responseEvent)
+
+      const result = await requestPromise
+      expect(result.data).toEqual({ result: 'success' })
+
+      cleanup()
+    })
+
+    it('请求超时时应该 reject', async () => {
+      const type = 'GET_DATA'
+      const payload = { key: 'value' }
+
+      const requestPromise = sendRequestToHost(type, payload, 1)
+
+      // 快进超过超时时间
+      jest.advanceTimersByTime(1100)
+
+      await expect(requestPromise).rejects.toThrow('请求超时（1秒）')
+    })
+
+    it('应该支持自定义 source 配置', () => {
+      const type = 'GET_DATA'
+      const payload = { key: 'value' }
+      const sourceConfig = {
+        contentSource: 'custom-content-source',
+        hostSource: 'custom-host-source',
+      }
+
+      sendRequestToHost(type, payload, 5, sourceConfig)
+
+      expect(window.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source: 'custom-content-source',
+        }),
+        '*'
+      )
+    })
+  })
+
+  describe('initHostMessageListener', () => {
+    it('应该监听宿主响应消息', () => {
+      const addEventListenerSpy = jest.spyOn(window, 'addEventListener')
+
+      const cleanup = initHostMessageListener()
+
+      // 验证 addEventListener 被调用
+      expect(addEventListenerSpy).toHaveBeenCalledWith('message', expect.any(Function))
+
+      cleanup()
+      addEventListenerSpy.mockRestore()
+    })
+
+    it('应该支持自定义 hostSource 配置', () => {
+      const sourceConfig = {
+        contentSource: 'custom-content',
+        hostSource: 'custom-host',
+      }
+
+      const cleanup = initHostMessageListener(sourceConfig)
+
+      cleanup()
+    })
+
+    it('应该忽略非当前窗口的消息', () => {
+      const cleanup = initHostMessageListener()
+
+      const event = new MessageEvent('message', {
+        data: {
+          source: MESSAGE_SOURCE.FROM_HOST,
+          requestId: 'test-id',
+        },
+        source: {} as Window,
+      })
+
+      window.dispatchEvent(event)
+
+      cleanup()
+    })
+
+    it('应该忽略非宿主来源的消息', () => {
+      const cleanup = initHostMessageListener()
+
+      const event = new MessageEvent('message', {
+        data: {
+          source: 'other-source',
+          requestId: 'test-id',
+        },
+        source: window,
+      })
+
+      window.dispatchEvent(event)
+
+      cleanup()
+    })
+
+    it('cleanup 应该清理待处理请求', () => {
+      jest.useFakeTimers()
+
+      const cleanup = initHostMessageListener()
+
+      // 发送一个请求
+      sendRequestToHost('TEST', {}, 5)
+
+      // 调用 cleanup
+      cleanup()
+
+      jest.useRealTimers()
     })
   })
 

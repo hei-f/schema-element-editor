@@ -2,6 +2,7 @@ import {
   PREVIEW_CONTAINER_ID,
   previewContainerManager,
 } from '@/core/content/core/preview-container'
+import { shadowDomContainerManager } from '@/core/content/core/shadow-dom'
 import { DEFAULT_VALUES } from '@/shared/constants/defaults'
 import { FULL_SCREEN_MODE, type FullScreenMode } from '@/shared/constants/ui-modes'
 import { FavoritesManager } from '@/features/favorites/components/FavoritesManager'
@@ -717,20 +718,26 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
 
   /**
    * 切换全屏模式
-   * 自动处理模式切换时的清理逻辑
+   * 自动处理模式切换时的清理逻辑和 z-index 调整
    */
   const switchFullScreenMode = useCallback(
     (newMode: FullScreenMode) => {
       setFullScreenMode((prevMode) => {
-        // 退出预览模式时清理预览容器
+        // 退出预览模式时清理预览容器并恢复 z-index
         if (prevMode === FULL_SCREEN_MODE.PREVIEW && newMode !== FULL_SCREEN_MODE.PREVIEW) {
           cleanupPreviewContainer()
+          shadowDomContainerManager.resetZIndex()
         }
-        // 未来可扩展：其他模式的清理逻辑
+
+        // 进入预览模式时降低 z-index
+        if (newMode === FULL_SCREEN_MODE.PREVIEW && prevMode !== FULL_SCREEN_MODE.PREVIEW) {
+          shadowDomContainerManager.setZIndex(previewConfig.zIndex.preview)
+        }
+
         return newMode
       })
     },
-    [cleanupPreviewContainer]
+    [cleanupPreviewContainer, previewConfig.zIndex.preview]
   )
 
   /**

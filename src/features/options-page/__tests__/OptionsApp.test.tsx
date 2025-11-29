@@ -74,6 +74,10 @@ describe('OptionsApp组件测试', () => {
       previewWidth: 40,
       rememberState: false,
       updateDelay: 500,
+      zIndex: {
+        default: 2147483646,
+        preview: 999,
+      },
     },
     maxHistoryCount: 50,
   }
@@ -195,7 +199,10 @@ describe('OptionsApp组件测试', () => {
 
       await waitFor(
         () => {
-          expect(screen.getByText('集成配置')).toBeInTheDocument()
+          // UI重构后，侧边菜单和卡片标题都显示"集成配置"，使用getAllByText
+          const elements = screen.getAllByText('集成配置')
+          expect(elements.length).toBeGreaterThan(0)
+          expect(elements[0]).toBeInTheDocument()
         },
         { timeout: 5000 }
       )
