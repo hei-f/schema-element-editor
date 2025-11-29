@@ -33,9 +33,6 @@ interface AppProps {
  * Schema Editor主应用
  */
 export const App: React.FC<AppProps> = ({ shadowRoot }) => {
-  // 初始化 shadowRoot 全局管理器
-  shadowRootManager.init(shadowRoot)
-
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [schemaData, setSchemaData] = useState<any>(null)
   const [currentAttributes, setCurrentAttributes] = useState<ElementAttributes>({ params: [] })
@@ -46,6 +43,13 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
   const [drawerConfig, setDrawerConfig] = useState<SchemaDrawerConfig | null>(null)
 
   const configSyncedRef = useRef(false)
+
+  /**
+   * 初始化 shadowRoot 全局管理器（只在挂载时执行一次）
+   */
+  useEffect(() => {
+    shadowRootManager.init(shadowRoot)
+  }, [shadowRoot])
 
   /** 通信模式 */
   const { isPostMessageMode, isWindowFunctionMode } = getCommunicationMode(drawerConfig?.apiConfig)
