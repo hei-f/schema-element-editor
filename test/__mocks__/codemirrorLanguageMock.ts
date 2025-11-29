@@ -138,3 +138,18 @@ export const Language = {
 export const language = () => ({})
 export const syntaxHighlighting = () => ({})
 export const defaultHighlightStyle = {}
+
+/**
+ * Mock HighlightStyle
+ */
+export const HighlightStyle = {
+  define: (_specs: any[]) => ({}),
+}
+
+/**
+ * Mock 其他常用导出
+ */
+export const bracketMatching = () => ({})
+export const foldGutter = () => ({})
+export const foldKeymap = []
+export const indentOnInput = () => ({})
