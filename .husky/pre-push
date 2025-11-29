@@ -1,0 +1,4 @@
+# TypeScript 类型检查
+echo "🔍 Running TypeScript type check..."
+npx tsc --noEmit
+
