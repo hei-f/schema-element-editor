@@ -2,7 +2,7 @@ import { HistoryEntryType } from '@/shared/types'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { HistoryDropdown } from '../HistoryDropdown'
+import { HistoryDropdown } from '../../toolbar/HistoryDropdown'
 
 describe('HistoryDropdown组件测试', () => {
   // 增加整个测试套件的超时时间，因为Popover组件渲染较慢

@@ -92,7 +92,38 @@ export const DrawerTitleLeft = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
+`
+
+/**
+ * 抽屉标题中间 params 区域
+ */
+export const DrawerTitleParams = styled.div`
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 50%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 12px;
+  margin: 0 8px;
+
+  /* 隐藏滚动条但保留滚动功能 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 滚动时显示渐变遮罩 */
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black 8px,
+    black calc(100% - 8px),
+    transparent 100%
+  );
 `
 
 /**

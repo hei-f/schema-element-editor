@@ -2,7 +2,7 @@ import { storage } from '@/shared/utils/browser/storage'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { Modal } from 'antd'
-import { useDraftManagement } from '../useDraftManagement'
+import { useDraftManagement } from '../../storage/useDraftManagement'
 
 // Mock dependencies
 jest.mock('@/shared/utils/browser/storage')

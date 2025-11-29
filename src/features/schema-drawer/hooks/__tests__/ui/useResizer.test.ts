@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { useResizer, PREVIEW_WIDTH_LIMITS } from '../useResizer'
+import { useResizer, PREVIEW_WIDTH_LIMITS } from '../../ui/useResizer'
 
 // Mock previewContainerManager
 jest.mock('@/core/content/core/preview-container', () => ({

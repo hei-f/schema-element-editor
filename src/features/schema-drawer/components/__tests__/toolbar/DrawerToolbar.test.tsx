@@ -1,7 +1,7 @@
 import { ContentType } from '@/shared/types'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { DrawerToolbar } from '../DrawerToolbar'
+import { DrawerToolbar } from '../../toolbar/DrawerToolbar'
 
 describe('DrawerToolbar组件测试', () => {
   const mockAttributes = {

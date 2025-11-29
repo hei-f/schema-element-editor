@@ -16,11 +16,14 @@ import { Decoration, EditorView, keymap, lineNumbers, WidgetType } from '@codemi
 import { DEFAULT_EDITOR_THEME, EDITOR_THEMES } from '@/shared/constants/editor-themes'
 import type { EditorTheme } from '@/shared/types'
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
-import { jsonDarkHighlight, jsonLightHighlight } from '../styles/codemirror.styles'
-import { getEditorThemeVars } from '../styles/editor-theme-vars'
-import { DiffEditorWrapper } from '../styles/recording.styles'
-import { schemaEditorDark, schemaEditorDarkHighlighting } from '../styles/schema-editor-dark-theme'
-import { simpleDark } from '../styles/simple-dark-theme'
+import { jsonDarkHighlight, jsonLightHighlight } from '../../styles/editor/codemirror.styles'
+import { getEditorThemeVars } from '../../styles/editor/editor-theme-vars'
+import { DiffEditorWrapper } from '../../styles/recording/recording.styles'
+import {
+  schemaEditorDark,
+  schemaEditorDarkHighlighting,
+} from '../../styles/editor/schema-editor-dark-theme'
+import { simpleDark } from '../../styles/editor/simple-dark-theme'
 
 /** 占位行 Widget */
 class PlaceholderWidget extends WidgetType {

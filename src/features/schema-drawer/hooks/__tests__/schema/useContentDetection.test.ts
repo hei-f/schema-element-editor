@@ -1,6 +1,6 @@
 import { ContentType } from '@/shared/types'
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { useContentDetection } from '../useContentDetection'
+import { useContentDetection } from '../../schema/useContentDetection'
 
 // Mock transformers
 jest.mock('@/shared/utils/schema/transformers', () => ({

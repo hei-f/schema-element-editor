@@ -4,27 +4,27 @@
  */
 
 // 导出主组件
-export { CodeMirrorEditor } from './components/CodeMirrorEditor'
-export { DrawerToolbar } from './components/DrawerToolbar'
+export { CodeMirrorEditor } from './components/editor/CodeMirrorEditor'
+export { DrawerToolbar } from './components/toolbar/DrawerToolbar'
 export { SchemaDrawer } from './components/SchemaDrawer'
-export { RecordingPanel } from './components/RecordingPanel'
-export { SchemaDiffView } from './components/SchemaDiffView'
+export { RecordingPanel } from './components/recording/RecordingPanel'
+export { SchemaDiffView } from './components/editor/SchemaDiffView'
 
 // 导出Hooks
-export { useContentDetection } from './hooks/useContentDetection'
-export { useDraftManagement } from './hooks/useDraftManagement'
-export { useFavoritesManagement } from './hooks/useFavoritesManagement'
-export { useLightNotifications } from './hooks/useLightNotifications'
-export { useSchemaSave } from './hooks/useSchemaSave'
-export { useSchemaRecording } from './hooks/useSchemaRecording'
+export { useContentDetection } from './hooks/schema/useContentDetection'
+export { useDraftManagement } from './hooks/storage/useDraftManagement'
+export { useFavoritesManagement } from './hooks/storage/useFavoritesManagement'
+export { useLightNotifications } from './hooks/ui/useLightNotifications'
+export { useSchemaSave } from './hooks/schema/useSchemaSave'
+export { useSchemaRecording } from './hooks/schema/useSchemaRecording'
 
 // 导出服务
 export { schemaTransformer } from './services/schema-transformer'
 export type { TransformResult } from './services/schema-transformer'
 
 // 导出样式（如果需要在外部使用）
-export * from './styles/drawer.styles'
-export * from './styles/editor.styles'
-export * from './styles/notifications.styles'
-export * from './styles/toolbar.styles'
-export * from './styles/recording.styles'
+export * from './styles/layout/drawer.styles'
+export * from './styles/editor/editor.styles'
+export * from './styles/notifications/notifications.styles'
+export * from './styles/toolbar/toolbar.styles'
+export * from './styles/recording/recording.styles'

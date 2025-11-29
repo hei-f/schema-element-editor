@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { DiffResult, DiffRow } from '../utils/diff-algorithm'
-import { computeLineDiff } from '../utils/diff-algorithm'
+import type { DiffResult, DiffRow } from '../../utils/diff-algorithm'
+import { computeLineDiff } from '../../utils/diff-algorithm'
 
 /** diff 同步 hook 的返回值 */
 interface UseDiffSyncReturn {

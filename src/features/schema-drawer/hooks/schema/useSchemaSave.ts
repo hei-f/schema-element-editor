@@ -1,6 +1,6 @@
 import { storage } from '@/shared/utils/browser/storage'
 import { useState } from 'react'
-import { schemaTransformer } from '../services/schema-transformer'
+import { schemaTransformer } from '../../services/schema-transformer'
 
 interface UseSchemaSaveProps {
   /** 编辑器当前值 */

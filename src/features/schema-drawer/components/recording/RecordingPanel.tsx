@@ -20,7 +20,7 @@ import {
   VersionListContainer,
   VersionNumber,
   VersionTimestamp,
-} from '../styles/recording.styles'
+} from '../../styles/recording/recording.styles'
 
 interface RecordingPanelProps {
   /** 是否正在录制 */

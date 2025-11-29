@@ -1,5 +1,5 @@
 import styled, { css, keyframes } from 'styled-components'
-import type { EditorThemeVars } from './editor-theme-vars'
+import type { EditorThemeVars } from '../editor/editor-theme-vars'
 
 /** 扩展 styled-components 的 DefaultTheme，添加编辑器主题变量 */
 declare module 'styled-components' {
@@ -236,6 +236,7 @@ export const DiffModeContainer = styled.div`
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  background: ${(props) => props.theme.panelBackground};
 `
 
 /**
@@ -573,6 +574,7 @@ export const EditableDiffContainer = styled.div`
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  background: ${(props) => props.theme.panelBackground};
 `
 
 /**
@@ -604,6 +606,7 @@ export const SharedScrollContainer = styled.div`
   flex: 1;
   min-height: 0;
   overflow: auto;
+  background: ${(props) => props.theme.panelBackground};
 
   &::-webkit-scrollbar {
     width: 12px;

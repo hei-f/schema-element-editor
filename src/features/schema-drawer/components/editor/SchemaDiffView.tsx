@@ -14,12 +14,12 @@ import {
   SharedScrollContainer,
   DiffEditorsRow,
   DiffEditorPanel,
-} from '../styles/recording.styles'
-import { schemaTransformer } from '../services/schema-transformer'
+} from '../../styles/recording/recording.styles'
+import { schemaTransformer } from '../../services/schema-transformer'
 import type { DiffEditorHandle, DiffLineInfo, InlineDiffSegment } from './DiffEditor'
 import { DiffEditor } from './DiffEditor'
-import { useDiffSync } from '../hooks/useDiffSync'
-import type { DiffRow } from '../utils/diff-algorithm'
+import { useDiffSync } from '../../hooks/diff/useDiffSync'
+import type { DiffRow } from '../../utils/diff-algorithm'
 
 /** 对比模式类型 */
 export type DiffDisplayMode = 'raw' | 'deserialize' | 'unescape' | 'ast'

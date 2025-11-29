@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react'
 import { message } from 'antd'
-import { useFileImportExport } from '../useFileImportExport'
+import { useFileImportExport } from '../../storage/useFileImportExport'
 import { logger } from '@/shared/utils/logger'
 
 // Mock dependencies

@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { useLightNotifications } from '../useLightNotifications'
+import { useLightNotifications } from '../../ui/useLightNotifications'
 
 describe('useLightNotifications Hook 测试', () => {
   beforeEach(() => {

@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react'
-import { useFullScreenMode } from '../useFullScreenMode'
+import { useFullScreenMode } from '../../ui/useFullScreenMode'
 import { FULL_SCREEN_MODE } from '@/shared/constants/ui-modes'
 
 describe('useFullScreenMode Hook 测试', () => {

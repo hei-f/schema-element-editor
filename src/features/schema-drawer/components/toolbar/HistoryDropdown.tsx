@@ -15,7 +15,7 @@ import {
   HistoryDropdownList,
   HistoryDropdownMenuItemContent,
   HistoryDropdownTime,
-} from '../styles/history-dropdown.styles'
+} from '../../styles/toolbar/history-dropdown.styles'
 
 interface HistoryDropdownProps {
   history: HistoryEntry[]

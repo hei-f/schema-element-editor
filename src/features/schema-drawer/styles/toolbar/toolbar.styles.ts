@@ -15,15 +15,67 @@ export const EditorToolbar = styled.div`
 `
 
 /**
+ * 参数容器外层包装器
+ * 用于实现动态渐变遮罩效果，透明度根据滚动偏移量平滑变化
+ */
+export const ParamsContainerWrapper = styled.div<{
+  $leftMaskOpacity: number
+  $rightMaskOpacity: number
+}>`
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  max-width: calc(100% - 500px);
+
+  /* 左侧渐变遮罩 */
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.95), transparent);
+    pointer-events: none;
+    z-index: 1;
+    opacity: ${(props) => props.$leftMaskOpacity};
+  }
+
+  /* 右侧渐变遮罩 */
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    background: linear-gradient(to left, rgba(255, 255, 255, 0.95), transparent);
+    pointer-events: none;
+    z-index: 1;
+    opacity: ${(props) => props.$rightMaskOpacity};
+  }
+`
+
+/**
  * 参数容器
+ * 支持水平滚动，隐藏滚动条
  */
 export const ParamsContainer = styled.div`
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
   align-items: center;
-  flex: 1;
-  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 0;
+  scroll-behavior: smooth;
+
+  /* 隐藏滚动条 */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `
 
 /**
@@ -32,8 +84,9 @@ export const ParamsContainer = styled.div`
 export const ParamItem = styled.div`
   display: flex;
   align-items: center;
-  max-width: 300px;
+  max-width: 100px;
   min-width: 0;
+  flex-shrink: 0;
 `
 
 /**
@@ -41,8 +94,10 @@ export const ParamItem = styled.div`
  */
 export const AttributeTagWrapper = styled.span`
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   max-width: 100%;
+  overflow: hidden;
 
   &:hover .copy-icon-wrapper {
     opacity: 1;
@@ -54,7 +109,10 @@ export const AttributeTagWrapper = styled.span`
  */
 export const ButtonGroup = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+  flex-shrink: 0;
+  justify-content: flex-end;
 `
 
 /**

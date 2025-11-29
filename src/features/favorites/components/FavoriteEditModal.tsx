@@ -1,5 +1,5 @@
-import type { CodeMirrorEditorHandle } from '@/features/schema-drawer/components/CodeMirrorEditor'
-import { CodeMirrorEditor } from '@/features/schema-drawer/components/CodeMirrorEditor'
+import type { CodeMirrorEditorHandle } from '@/features/schema-drawer/components/editor/CodeMirrorEditor'
+import { CodeMirrorEditor } from '@/features/schema-drawer/components/editor/CodeMirrorEditor'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { Button, Modal } from 'antd'
 import React, { useCallback, useEffect, useRef, useState } from 'react'

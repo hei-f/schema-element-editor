@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { storage } from '@/shared/utils/browser/storage'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { Modal } from 'antd'
-import { useFavoritesManagement } from '../useFavoritesManagement'
+import { useFavoritesManagement } from '../../storage/useFavoritesManagement'
 import type { Favorite } from '@/shared/types'
 
 // Mock dependencies
