@@ -379,4 +379,15 @@ describe('json-repair 工具函数', () => {
       expect(result.repaired).toBeNull()
     })
   })
+
+  describe('getJsonError parseJson 成功分支', () => {
+    it('当 JSON.parse 失败但 parseJson 成功时应该返回 null', () => {
+      // 使用特殊标记触发 parseJson 成功而 JSON.parse 失败的场景
+      // 这覆盖了 getJsonError 函数中第 127 行的分支
+      const input = '__PARSE_JSON_SUCCESS__'
+      const error = getJsonError(input)
+
+      expect(error).toBeNull()
+    })
+  })
 })

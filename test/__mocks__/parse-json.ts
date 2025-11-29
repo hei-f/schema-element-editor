@@ -6,6 +6,8 @@
 // 用于测试的特殊标记
 const NO_CODE_FRAME_MARKER = '__NO_CODE_FRAME__'
 const ALT_FORMAT_MARKER = '__ALT_FORMAT__'
+// 模拟 parseJson 成功但 JSON.parse 失败的场景（用于覆盖 getJsonError 第 127 行）
+const PARSE_JSON_SUCCESS_MARKER = '__PARSE_JSON_SUCCESS__'
 
 class JSONParseError extends Error {
   rawCodeFrame?: string
@@ -18,6 +20,12 @@ class JSONParseError extends Error {
 }
 
 function parseJson(input: string): unknown {
+  // 特殊测试场景：parseJson 成功但 JSON.parse 失败
+  // 用于测试 getJsonError 中 parseJson 成功的分支
+  if (input.includes(PARSE_JSON_SUCCESS_MARKER)) {
+    return { mockSuccess: true }
+  }
+
   try {
     return JSON.parse(input)
   } catch (originalError) {
