@@ -60,3 +60,36 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: jest.fn(),
   })),
 })
+
+// Mock IntersectionObserver (used by ScrollableParams)
+class MockIntersectionObserver implements IntersectionObserver {
+  readonly root: Element | Document | null = null
+  readonly rootMargin: string = ''
+  readonly thresholds: ReadonlyArray<number> = []
+
+  constructor(callback: IntersectionObserverCallback) {
+    // 立即调用回调以模拟初始状态
+    setTimeout(() => {
+      callback([], this)
+    }, 0)
+  }
+
+  observe(): void {}
+  unobserve(): void {}
+  disconnect(): void {}
+  takeRecords(): IntersectionObserverEntry[] {
+    return []
+  }
+}
+
+global.IntersectionObserver = MockIntersectionObserver
+
+// Mock ResizeObserver (used by ScrollableParams)
+class MockResizeObserver implements ResizeObserver {
+  constructor(_callback: ResizeObserverCallback) {}
+  observe(): void {}
+  unobserve(): void {}
+  disconnect(): void {}
+}
+
+global.ResizeObserver = MockResizeObserver
