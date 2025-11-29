@@ -310,7 +310,7 @@ export const OptionsApp: React.FC = () => {
           <PageDescription type="secondary">配置插件的行为参数</PageDescription>
         </HeaderContent>
         <HeaderActions align="center" gap={12}>
-          <VersionTag>v1.14.0</VersionTag>
+          <VersionTag>v1.15.0</VersionTag>
           <Button onClick={openReleasePage}>检查更新</Button>
         </HeaderActions>
       </HeaderSection>
