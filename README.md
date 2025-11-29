@@ -149,7 +149,9 @@ window.addEventListener('message', (event) => {
       result = { success: true }
       break
     case 'CLEANUP_PREVIEW':
-      cleanupPreview()
+      // 可选：预览容器 DOM 已被插件移除，此消息用于通知宿主清理额外资源（如定时器、全局状态等）
+      // 如果宿主无需额外清理，可以忽略此消息或返回空响应
+      cleanupPreview?.()
       result = { success: true }
       break
   }
