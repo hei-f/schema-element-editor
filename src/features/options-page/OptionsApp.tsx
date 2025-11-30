@@ -66,6 +66,8 @@ export const OptionsApp: React.FC = () => {
   const [menuCollapsed, setMenuCollapsed] = useState(false)
   /** 当前激活的 Section（由用户点击更新，不再由滚动自动更新） */
   const [activeSection, setActiveSection] = useState<string>(MENU_CONFIG[0]?.sectionId ?? '')
+  /** 各 Section 的展开状态 */
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
 
   const timeoutMapRef = useRef<Map<string, NodeJS.Timeout>>(new Map())
 
@@ -112,16 +114,37 @@ export const OptionsApp: React.FC = () => {
   }, [])
 
   /**
-   * 滚动到指定 Section（快速平滑滚动）
+   * 切换 Section 的展开状态
+   */
+  const toggleSectionExpanded = useCallback((sectionId: string, expanded: boolean) => {
+    setExpandedSections((prev) => {
+      const next = new Set(prev)
+      if (expanded) {
+        next.add(sectionId)
+      } else {
+        next.delete(sectionId)
+      }
+      return next
+    })
+  }, [])
+
+  /**
+   * 滚动到指定 Section（快速平滑滚动）并展开该 Section
    */
   const scrollToSection = useCallback(
     (sectionId: string) => {
-      const element = document.getElementById(sectionId)
-      if (element) {
-        const targetPosition = element.getBoundingClientRect().top + window.scrollY - 20
-        smoothScrollTo(targetPosition, 150)
-        setActiveSection(sectionId)
-      }
+      // 先展开 section
+      setExpandedSections((prev) => new Set(prev).add(sectionId))
+      setActiveSection(sectionId)
+
+      // 延迟滚动，等待 section 展开动画
+      requestAnimationFrame(() => {
+        const element = document.getElementById(sectionId)
+        if (element) {
+          const targetPosition = element.getBoundingClientRect().top + window.scrollY - 20
+          smoothScrollTo(targetPosition, 150)
+        }
+      })
     },
     [smoothScrollTo]
   )
@@ -426,6 +449,7 @@ export const OptionsApp: React.FC = () => {
           collapsed={menuCollapsed}
           onCollapsedChange={setMenuCollapsed}
           activeSection={activeSection}
+          communicationMode={communicationMode}
           onMenuClick={scrollToSection}
           onSubMenuClick={scrollToAnchor}
         />
@@ -474,6 +498,10 @@ export const OptionsApp: React.FC = () => {
                 updateFunctionName={updateFunctionName}
                 previewFunctionName={previewFunctionName}
                 apiConfig={apiConfig}
+                isActive={expandedSections.has('section-integration-config')}
+                onActiveChange={(active) =>
+                  toggleSectionExpanded('section-integration-config', active)
+                }
                 onResetDefault={() => resetSectionToDefault(SECTION_KEYS.INTEGRATION_CONFIG)}
               />
             </div>
@@ -482,6 +510,10 @@ export const OptionsApp: React.FC = () => {
             <div id="section-element-detection">
               <ElementDetectionSection
                 attributeName={attributeName}
+                isActive={expandedSections.has('section-element-detection')}
+                onActiveChange={(active) =>
+                  toggleSectionExpanded('section-element-detection', active)
+                }
                 onResetDefault={() => resetSectionToDefault(SECTION_KEYS.ELEMENT_DETECTION)}
               />
             </div>
@@ -489,6 +521,8 @@ export const OptionsApp: React.FC = () => {
             {/* 卡片3: 编辑器配置 - 抽屉宽度、字符串解析、AST提示、主题 */}
             <div id="section-editor-config">
               <EditorConfigSection
+                isActive={expandedSections.has('section-editor-config')}
+                onActiveChange={(active) => toggleSectionExpanded('section-editor-config', active)}
                 onResetDefault={() => resetSectionToDefault(SECTION_KEYS.EDITOR_CONFIG)}
               />
             </div>
@@ -496,6 +530,8 @@ export const OptionsApp: React.FC = () => {
             {/* 卡片4: 功能开关 - 工具栏按钮显示/隐藏 */}
             <div id="section-feature-toggle">
               <FeatureToggleSection
+                isActive={expandedSections.has('section-feature-toggle')}
+                onActiveChange={(active) => toggleSectionExpanded('section-feature-toggle', active)}
                 onResetDefault={() => resetSectionToDefault(SECTION_KEYS.FEATURE_TOGGLE)}
               />
             </div>
@@ -503,6 +539,8 @@ export const OptionsApp: React.FC = () => {
             {/* 卡片5: 实时预览配置 - 自动更新、防抖延迟、预览宽度 */}
             <div id="section-preview-config">
               <PreviewConfigSection
+                isActive={expandedSections.has('section-preview-config')}
+                onActiveChange={(active) => toggleSectionExpanded('section-preview-config', active)}
                 onResetDefault={() => resetSectionToDefault(SECTION_KEYS.PREVIEW_CONFIG)}
               />
             </div>
@@ -510,19 +548,31 @@ export const OptionsApp: React.FC = () => {
             {/* 卡片6: 数据管理配置 - 草稿、收藏、历史记录、导出 */}
             <div id="section-data-management">
               <DataManagementSection
+                isActive={expandedSections.has('section-data-management')}
+                onActiveChange={(active) =>
+                  toggleSectionExpanded('section-data-management', active)
+                }
                 onResetDefault={() => resetSectionToDefault(SECTION_KEYS.DATA_MANAGEMENT)}
               />
             </div>
 
             {/* 卡片7: 开发调试 - 调试日志等开发者选项 */}
             <div id="section-debug">
-              <DebugSection onResetDefault={() => resetSectionToDefault(SECTION_KEYS.DEBUG)} />
+              <DebugSection
+                isActive={expandedSections.has('section-debug')}
+                onActiveChange={(active) => toggleSectionExpanded('section-debug', active)}
+                onResetDefault={() => resetSectionToDefault(SECTION_KEYS.DEBUG)}
+              />
             </div>
           </Form>
 
           {/* 卡片8: 使用指南 */}
           <div id="section-usage-guide">
-            <UsageGuideSection attributeName={attributeName} />
+            <UsageGuideSection
+              attributeName={attributeName}
+              isActive={expandedSections.has('section-usage-guide')}
+              onActiveChange={(active) => toggleSectionExpanded('section-usage-guide', active)}
+            />
           </div>
         </Container>
       </PageRoot>

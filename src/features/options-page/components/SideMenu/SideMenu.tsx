@@ -1,6 +1,12 @@
+import type { CommunicationMode } from '@/shared/types'
 import { RightOutlined } from '@ant-design/icons'
-import React, { useCallback, useEffect, useState } from 'react'
-import { MENU_BREAKPOINT, MENU_CONFIG, type MenuItemConfig } from '../../config/menu-config'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  getIntegrationChildren,
+  MENU_BREAKPOINT,
+  MENU_CONFIG,
+  type MenuItemConfig,
+} from '../../config/menu-config'
 import {
   CollapseButton,
   ExpandArrow,
@@ -25,6 +31,8 @@ interface SideMenuProps {
   onCollapsedChange: (collapsed: boolean) => void
   /** 当前激活的 Section */
   activeSection?: string
+  /** 当前通信模式（用于动态切换集成配置子项） */
+  communicationMode: CommunicationMode
   /** 点击菜单项回调 */
   onMenuClick?: (sectionId: string) => void
   /** 点击子菜单项回调 */
@@ -36,10 +44,33 @@ interface SideMenuProps {
  * 支持折叠/展开、子菜单、滚动定位
  */
 export const SideMenu: React.FC<SideMenuProps> = (props) => {
-  const { collapsed, onCollapsedChange, activeSection, onMenuClick, onSubMenuClick } = props
+  const {
+    collapsed,
+    onCollapsedChange,
+    activeSection,
+    communicationMode,
+    onMenuClick,
+    onSubMenuClick,
+  } = props
 
   /** 展开的菜单项 */
   const [expandedKeys, setExpandedKeys] = useState<string[]>([])
+
+  /**
+   * 根据通信模式动态生成菜单配置
+   * 集成配置的子项根据 communicationMode 动态获取
+   */
+  const menuConfig = useMemo(() => {
+    return MENU_CONFIG.map((item) => {
+      if (item.key === 'integration-config') {
+        return {
+          ...item,
+          children: getIntegrationChildren(communicationMode),
+        }
+      }
+      return item
+    })
+  }, [communicationMode])
 
   /**
    * 响应式处理：窗口宽度小于断点时自动折叠
@@ -62,7 +93,7 @@ export const SideMenu: React.FC<SideMenuProps> = (props) => {
    */
   useEffect(() => {
     if (activeSection) {
-      const menuItem = MENU_CONFIG.find((item) => item.sectionId === activeSection)
+      const menuItem = menuConfig.find((item) => item.sectionId === activeSection)
       if (menuItem) {
         // 使用 requestAnimationFrame 避免在 effect 中直接调用 setState
         requestAnimationFrame(() => {
@@ -70,7 +101,7 @@ export const SideMenu: React.FC<SideMenuProps> = (props) => {
         })
       }
     }
-  }, [activeSection])
+  }, [activeSection, menuConfig])
 
   /**
    * 切换菜单项展开/折叠
@@ -127,7 +158,7 @@ export const SideMenu: React.FC<SideMenuProps> = (props) => {
 
         {/* 菜单列表 */}
         <MenuList>
-          {MENU_CONFIG.map((item) => {
+          {menuConfig.map((item) => {
             const isActive = activeSection === item.sectionId
             const isExpanded = expandedKeys.includes(item.key)
             const Icon = item.icon
