@@ -3,6 +3,9 @@
   "version": "1.16.2",
   "description": "DOM元素Schema查看和编辑工具",
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc --project tsconfig.build.json && vite build",
@@ -12,12 +15,14 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:e2e": "playwright test",
-    "test:app": "vite --config test/test-app/vite.config.ts",
-    "lint": "eslint src test --ext .ts,.tsx",
-    "lint:fix": "eslint src test --ext .ts,.tsx --fix",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"test/**/*.{ts,tsx}\"",
+    "demo": "vite --config demo/vite.config.ts",
+    "lint": "eslint src test demo packages --ext .ts,.tsx",
+    "lint:fix": "eslint src test demo packages --ext .ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"test/**/*.{ts,tsx}\" \"demo/**/*.{ts,tsx}\" \"packages/**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build:sdk": "npm run build -w @schema-editor/host-sdk",
+    "publish:sdk": "npm publish -w @schema-editor/host-sdk --access public"
   },
   "dependencies": {
     "@ant-design/agentic-ui": "^2.22.0",
@@ -44,6 +49,7 @@
     "@crxjs/vite-plugin": "^2.0.0-beta.21",
     "@eslint/js": "^9.39.1",
     "@playwright/test": "^1.40.0",
+    "@schema-editor/host-sdk": "^1.0.0",
     "@testing-library/jest-dom": "^6.1.0",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.5.0",
