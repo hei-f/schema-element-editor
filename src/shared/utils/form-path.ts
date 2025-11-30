@@ -22,16 +22,29 @@ export function pathEqual(a: string[], b: string[]): boolean {
 
 /**
  * 从嵌套的 changedValues 对象中提取变更字段的完整路径
+ * @param changedValues 变更的值对象
+ * @param prefix 当前路径前缀
+ * @param knownPaths 已知的字段路径集合，用于判断何时停止递归
  * @example
  * getChangedFieldPath({ searchConfig: { searchDepthDown: 5 } })
  * => ['searchConfig', 'searchDepthDown']
  */
-export function getChangedFieldPath(changedValues: any, prefix: string[] = []): string[] {
+export function getChangedFieldPath(
+  changedValues: any,
+  prefix: string[] = [],
+  knownPaths?: Set<string>
+): string[] {
   const keys = Object.keys(changedValues)
   if (keys.length === 0) return prefix
 
   const key = keys[0]
+  const currentPath = [...prefix, key]
   const value = changedValues[key]
+
+  // 如果当前路径已是已知的字段路径，停止递归
+  if (knownPaths?.has(pathToString(currentPath))) {
+    return currentPath
+  }
 
   // 如果值是普通对象（非数组、非null），继续递归
   if (
@@ -40,11 +53,11 @@ export function getChangedFieldPath(changedValues: any, prefix: string[] = []): 
     !Array.isArray(value) &&
     Object.keys(value).length > 0
   ) {
-    return getChangedFieldPath(value, [...prefix, key])
+    return getChangedFieldPath(value, currentPath, knownPaths)
   }
 
   // 否则返回当前路径
-  return [...prefix, key]
+  return currentPath
 }
 
 /**
