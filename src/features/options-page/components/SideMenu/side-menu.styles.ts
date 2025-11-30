@@ -316,6 +316,7 @@ export const MenuList = styled.div`
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
   padding: 0 8px;
 
   /* 自定义滚动条 */
