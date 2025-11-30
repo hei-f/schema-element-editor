@@ -13,6 +13,10 @@ import {
 interface ElementDetectionSectionProps {
   /** 当前属性名（用于Alert提示） */
   attributeName: string
+  /** 是否展开 */
+  isActive?: boolean
+  /** 展开状态变化回调 */
+  onActiveChange?: (active: boolean) => void
   /** 恢复默认回调 */
   onResetDefault?: () => void
 }
@@ -22,13 +26,15 @@ interface ElementDetectionSectionProps {
  * 包含搜索配置、高亮颜色、快捷键高亮等
  */
 export const ElementDetectionSection: React.FC<ElementDetectionSectionProps> = (props) => {
-  const { attributeName, onResetDefault } = props
+  const { attributeName, isActive, onActiveChange, onResetDefault } = props
 
   return (
     <SectionCard
       title="元素检测与高亮"
       subtitle="配置鼠标交互和元素识别行为"
       panelKey="element-detection"
+      isActive={isActive}
+      onActiveChange={onActiveChange}
       onResetDefault={onResetDefault}
     >
       <Form.Item

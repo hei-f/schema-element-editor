@@ -6,6 +6,10 @@ import { SchemaNote, SectionTitle } from '../styles/layout.styles'
 interface UsageGuideSectionProps {
   /** 当前属性名（用于使用说明） */
   attributeName: string
+  /** 是否展开 */
+  isActive?: boolean
+  /** 展开状态变化回调 */
+  onActiveChange?: (active: boolean) => void
 }
 
 /**
@@ -13,10 +17,16 @@ interface UsageGuideSectionProps {
  * 合并原有的使用说明和Schema类型支持
  */
 export const UsageGuideSection: React.FC<UsageGuideSectionProps> = (props) => {
-  const { attributeName } = props
+  const { attributeName, isActive, onActiveChange } = props
 
   return (
-    <SectionCard title="使用指南" subtitle="快速上手和参考信息" panelKey="usage-guide">
+    <SectionCard
+      title="使用指南"
+      subtitle="快速上手和参考信息"
+      panelKey="usage-guide"
+      isActive={isActive}
+      onActiveChange={onActiveChange}
+    >
       <Typography.Title level={5} id="field-usage-instructions">
         使用说明
       </Typography.Title>

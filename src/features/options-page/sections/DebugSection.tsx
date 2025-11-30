@@ -4,6 +4,10 @@ import React from 'react'
 import { SectionCard } from '../components/SectionCard'
 
 interface DebugSectionProps {
+  /** 是否展开 */
+  isActive?: boolean
+  /** 展开状态变化回调 */
+  onActiveChange?: (active: boolean) => void
   /** 恢复默认回调 */
   onResetDefault?: () => void
 }
@@ -13,13 +17,15 @@ interface DebugSectionProps {
  * 包含调试日志等开发者选项
  */
 export const DebugSection: React.FC<DebugSectionProps> = (props) => {
-  const { onResetDefault } = props
+  const { isActive, onActiveChange, onResetDefault } = props
 
   return (
     <SectionCard
       title="开发调试"
       subtitle="开发者选项和诊断工具"
       panelKey="debug"
+      isActive={isActive}
+      onActiveChange={onActiveChange}
       onResetDefault={onResetDefault}
     >
       <Form.Item

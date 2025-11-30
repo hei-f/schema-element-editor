@@ -14,6 +14,10 @@ import {
 } from '../styles/layout.styles'
 
 interface DataManagementSectionProps {
+  /** 是否展开 */
+  isActive?: boolean
+  /** 展开状态变化回调 */
+  onActiveChange?: (active: boolean) => void
   /** 恢复默认回调 */
   onResetDefault?: () => void
 }
@@ -23,13 +27,15 @@ interface DataManagementSectionProps {
  * 包含草稿、收藏、历史记录、导出等配置
  */
 export const DataManagementSection: React.FC<DataManagementSectionProps> = (props) => {
-  const { onResetDefault } = props
+  const { isActive, onActiveChange, onResetDefault } = props
 
   return (
     <SectionCard
       title="数据管理配置"
       subtitle="管理草稿、收藏和历史记录"
       panelKey="data-management"
+      isActive={isActive}
+      onActiveChange={onActiveChange}
       onResetDefault={onResetDefault}
     >
       <FormSectionLabel $noMarginTop id="field-draft-config">

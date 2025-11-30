@@ -13,6 +13,10 @@ import {
 } from '../styles/layout.styles'
 
 interface FeatureToggleSectionProps {
+  /** 是否展开 */
+  isActive?: boolean
+  /** 展开状态变化回调 */
+  onActiveChange?: (active: boolean) => void
   /** 恢复默认回调 */
   onResetDefault?: () => void
 }
@@ -22,7 +26,7 @@ interface FeatureToggleSectionProps {
  * 控制编辑器功能模块的启用/禁用
  */
 export const FeatureToggleSection: React.FC<FeatureToggleSectionProps> = (props) => {
-  const { onResetDefault } = props
+  const { isActive, onActiveChange, onResetDefault } = props
   const form = Form.useFormInstance()
 
   /**
@@ -58,6 +62,8 @@ export const FeatureToggleSection: React.FC<FeatureToggleSectionProps> = (props)
       title="功能开关"
       subtitle="控制编辑器功能模块的启用/禁用"
       panelKey="feature-toggle"
+      isActive={isActive}
+      onActiveChange={onActiveChange}
       onResetDefault={onResetDefault}
       extraActions={[{ label: '一键精简', onClick: handleSimplifyMode, variant: 'primary' }]}
     >

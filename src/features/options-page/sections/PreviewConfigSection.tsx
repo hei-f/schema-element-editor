@@ -5,6 +5,10 @@ import { SectionCard } from '../components/SectionCard'
 import { FixedWidthInputNumber } from '../styles/layout.styles'
 
 interface PreviewConfigSectionProps {
+  /** 是否展开 */
+  isActive?: boolean
+  /** 展开状态变化回调 */
+  onActiveChange?: (active: boolean) => void
   /** 恢复默认回调 */
   onResetDefault?: () => void
 }
@@ -14,13 +18,15 @@ interface PreviewConfigSectionProps {
  * 包含预览功能的所有配置项
  */
 export const PreviewConfigSection: React.FC<PreviewConfigSectionProps> = (props) => {
-  const { onResetDefault } = props
+  const { isActive, onActiveChange, onResetDefault } = props
 
   return (
     <SectionCard
       title="实时预览配置"
       subtitle="控制预览区域的行为和显示"
       panelKey="preview-config"
+      isActive={isActive}
+      onActiveChange={onActiveChange}
       onResetDefault={onResetDefault}
     >
       <Form.Item
