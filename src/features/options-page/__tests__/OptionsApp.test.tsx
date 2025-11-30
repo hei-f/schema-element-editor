@@ -19,6 +19,13 @@ jest.mock('@/shared/utils/browser/storage', () => ({
     getAutoSaveDraft: jest.fn(),
     getPreviewConfig: jest.fn(),
     getMaxHistoryCount: jest.fn(),
+    getHighlightAllConfig: jest.fn(),
+    getRecordingModeConfig: jest.fn(),
+    getEnableAstTypeHints: jest.fn(),
+    getExportConfig: jest.fn(),
+    getEditorTheme: jest.fn(),
+    getPreviewFunctionName: jest.fn(),
+    getApiConfig: jest.fn(),
     setAttributeName: jest.fn(),
     setSearchConfig: jest.fn(),
     setFunctionNames: jest.fn(),
@@ -31,6 +38,12 @@ jest.mock('@/shared/utils/browser/storage', () => ({
     setAutoSaveDraft: jest.fn(),
     setPreviewConfig: jest.fn(),
     setMaxHistoryCount: jest.fn(),
+    setHighlightAllConfig: jest.fn(),
+    setRecordingModeConfig: jest.fn(),
+    setEnableAstTypeHints: jest.fn(),
+    setExportConfig: jest.fn(),
+    setEditorTheme: jest.fn(),
+    setApiConfig: jest.fn(),
   },
 }))
 
@@ -51,6 +64,7 @@ describe('OptionsApp组件测试', () => {
     searchConfig: { limitUpwardSearch: false, searchDepthUp: 3, throttleInterval: 200 },
     getFunctionName: '__getContentById',
     updateFunctionName: '__updateContentById',
+    previewFunctionName: '__getContentPreview',
     autoParseString: true,
     enableDebugLog: false,
     toolbarButtons: {
@@ -80,6 +94,37 @@ describe('OptionsApp组件测试', () => {
       },
     },
     maxHistoryCount: 50,
+    highlightAllConfig: {
+      enabled: true,
+      keyBinding: 'a',
+      maxHighlightCount: 500,
+    },
+    recordingModeConfig: {
+      enabled: true,
+      keyBinding: 'r',
+      highlightColor: '#FF4D4F',
+      pollingInterval: 100,
+    },
+    enableAstTypeHints: true,
+    exportConfig: {
+      customFileName: false,
+    },
+    editorTheme: 'vs-dark',
+    apiConfig: {
+      communicationMode: 'postMessage',
+      requestTimeout: 5,
+      sourceConfig: {
+        contentSource: 'schema-editor-content',
+        hostSource: 'schema-editor-host',
+      },
+      messageTypes: {
+        getSchema: 'GET_SCHEMA',
+        updateSchema: 'UPDATE_SCHEMA',
+        checkPreview: 'CHECK_PREVIEW',
+        renderPreview: 'RENDER_PREVIEW',
+        cleanupPreview: 'CLEANUP_PREVIEW',
+      },
+    },
   }
 
   beforeEach(() => {
@@ -100,6 +145,13 @@ describe('OptionsApp组件测试', () => {
     mockStorage.getAutoSaveDraft.mockResolvedValue(defaultMockValues.autoSaveDraft)
     mockStorage.getPreviewConfig.mockResolvedValue(defaultMockValues.previewConfig)
     mockStorage.getMaxHistoryCount.mockResolvedValue(defaultMockValues.maxHistoryCount)
+    mockStorage.getHighlightAllConfig.mockResolvedValue(defaultMockValues.highlightAllConfig)
+    mockStorage.getRecordingModeConfig.mockResolvedValue(defaultMockValues.recordingModeConfig)
+    mockStorage.getEnableAstTypeHints.mockResolvedValue(defaultMockValues.enableAstTypeHints)
+    mockStorage.getExportConfig.mockResolvedValue(defaultMockValues.exportConfig)
+    mockStorage.getEditorTheme.mockResolvedValue(defaultMockValues.editorTheme)
+    mockStorage.getPreviewFunctionName.mockResolvedValue(defaultMockValues.previewFunctionName)
+    mockStorage.getApiConfig.mockResolvedValue(defaultMockValues.apiConfig)
   })
 
   afterEach(() => {
@@ -280,9 +332,24 @@ describe('OptionsApp组件测试', () => {
   })
 
   describe('提示信息', () => {
-    it('应该显示表单元素', async () => {
+    it('应该在展开 Section 后显示表单元素', async () => {
+      const user = userEvent.setup({ delay: null })
       const { container } = render(<OptionsApp />)
 
+      // 等待组件加载完成
+      await waitFor(() => {
+        expect(container.querySelector('.ant-collapse')).toBeInTheDocument()
+      })
+
+      // 点击第一个折叠面板头部来展开
+      const collapseHeader = container.querySelector('.ant-collapse-header')
+      expect(collapseHeader).toBeInTheDocument()
+
+      if (collapseHeader) {
+        await user.click(collapseHeader)
+      }
+
+      // 验证展开后能看到表单元素
       await waitFor(() => {
         const formItems = container.querySelectorAll('.ant-form-item')
         expect(formItems.length).toBeGreaterThan(0)
