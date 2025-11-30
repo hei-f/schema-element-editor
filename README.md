@@ -41,15 +41,28 @@ npm run build
 
 # 打包
 npm run package
+
+# 启动演示应用
+npm run demo
 ```
 
 加载到Chrome：访问 `chrome://extensions/`，开启开发者模式，选择 `dist` 目录。
 
+### SDK 开发
+
+```bash
+# 构建 SDK
+npm run build:sdk
+
+# 发布 SDK
+npm run publish:sdk
+```
+
 ## 测试
 
 ```bash
-# 启动测试应用
-npm run test:app
+# 启动演示应用
+npm run demo
 ```
 
 访问 http://localhost:3001
@@ -78,15 +91,18 @@ npm run test:app
 无论使用哪种通信模式，获取和更新 Schema 的类型定义一致：
 
 ```typescript
+/** Schema 数据类型（对象、数组或字符串，不能为 null） */
+type SchemaValue = Record<string, unknown> | unknown[] | string
+
 /** 获取 Schema 函数 */
-type GetSchemaFunc<T> = (params: string) => NonNullable<T>
+type GetSchemaFunc<T extends SchemaValue = SchemaValue> = (params: string) => T
 
 /** 更新 Schema 函数 */
-type UpdateSchemaFunc<T> = (schema: NonNullable<T>, params: string) => boolean
+type UpdateSchemaFunc<T extends SchemaValue = SchemaValue> = (schema: T, params: string) => boolean
 ```
 
 - `params`: 参数字符串，格式为 `'param1'` 或 `'param1,param2'`
-- `schema`: Schema 数据对象，不能为 `null` 或 `undefined`
+- `schema`: Schema 数据，必须是对象、数组或字符串，不能为 `null`/`undefined`
 
 ### 预览 API 类型定义
 
@@ -95,11 +111,14 @@ type UpdateSchemaFunc<T> = (schema: NonNullable<T>, params: string) => boolean
 ```typescript
 /**
  * 预览函数类型（两种模式统一）
- * @param schema - 当前编辑的 Schema 数据
+ * @param schema - 当前编辑的 Schema 数据（对象、数组或字符串）
  * @param containerId - 预览容器 ID，通过 document.getElementById() 获取
  * @returns 可选的清理函数，插件关闭预览时自动调用
  */
-type PreviewFunc<T> = (schema: NonNullable<T>, containerId: string) => (() => void) | void
+type PreviewFunc<T extends SchemaValue = SchemaValue> = (
+  schema: T,
+  containerId: string
+) => (() => void) | void
 ```
 
 ### 通信模式对比
@@ -117,7 +136,75 @@ type PreviewFunc<T> = (schema: NonNullable<T>, containerId: string) => (() => vo
 
 ### postMessage 模式
 
-使用 postMessage 实现双向通信，不污染 window 对象，方法不会暴露给外部：
+使用 postMessage 实现双向通信，不污染 window 对象，方法不会暴露给外部。
+
+#### 使用官方 SDK（推荐）
+
+安装 SDK：
+
+```bash
+npm install @schema-editor/host-sdk
+```
+
+**React 项目：**
+
+```typescript
+import { useSchemaEditor } from '@schema-editor/host-sdk'
+
+function App() {
+  useSchemaEditor({
+    getSchema: (params) => dataStore[params],
+    updateSchema: (schema, params) => {
+      dataStore[params] = schema
+      return true
+    },
+    // 可选：预览功能
+    renderPreview: (schema, containerId) => {
+      const container = document.getElementById(containerId)
+      const root = ReactDOM.createRoot(container)
+      root.render(<Preview data={schema} />)
+      return () => root.unmount() // 返回清理函数
+    },
+  })
+
+  return <div>...</div>
+}
+```
+
+**Vue 项目：**
+
+```typescript
+import { useSchemaEditor } from '@schema-editor/host-sdk/vue'
+
+useSchemaEditor({
+  getSchema: (params) => dataStore.value[params],
+  updateSchema: (schema, params) => {
+    dataStore.value[params] = schema
+    return true
+  },
+})
+```
+
+**纯 JS / 其他框架：**
+
+```typescript
+import { createSchemaEditorBridge } from '@schema-editor/host-sdk/core'
+
+const cleanup = createSchemaEditorBridge({
+  getSchema: (params) => dataStore[params],
+  updateSchema: (schema, params) => {
+    dataStore[params] = schema
+    return true
+  },
+})
+
+// 需要清理时调用
+cleanup()
+```
+
+#### 手动实现 postMessage 监听
+
+如果不使用 SDK，也可以手动实现 postMessage 监听：
 
 ```typescript
 // 监听扩展请求
@@ -272,8 +359,11 @@ window.__getContentById = (params: string) => {
 ## 项目结构
 
 ```
-src/
-├── core/          # 核心功能（background、content script）
-├── features/      # 功能模块（schema-drawer、favorites、options-page）
-└── shared/        # 共享资源（components、managers、types、utils）
+├── src/                    # 插件源码
+│   ├── core/               # 核心功能（background、content script）
+│   ├── features/           # 功能模块（schema-drawer、favorites、options-page）
+│   └── shared/             # 共享资源（components、managers、types、utils）
+├── packages/
+│   └── host-sdk/           # 宿主接入 SDK（@schema-editor/host-sdk）
+└── demo/                   # 演示应用
 ```
