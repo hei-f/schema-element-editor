@@ -10,6 +10,7 @@ import { SideMenu } from './components/SideMenu'
 import {
   FIELD_PATH_STORAGE_MAP,
   findFieldGroup,
+  KNOWN_FIELD_PATHS,
   SECTION_DEFAULT_KEYS,
   SECTION_KEYS,
   type SectionKey,
@@ -21,6 +22,7 @@ import { EditorConfigSection } from './sections/EditorConfigSection'
 import { ElementDetectionSection } from './sections/ElementDetectionSection'
 import { FeatureToggleSection } from './sections/FeatureToggleSection'
 import { IntegrationConfigSection } from './sections/IntegrationConfigSection'
+import { KeyboardShortcutsSection } from './sections/KeyboardShortcutsSection'
 import { PreviewConfigSection } from './sections/PreviewConfigSection'
 import { UsageGuideSection } from './sections/UsageGuideSection'
 import {
@@ -192,6 +194,7 @@ export const OptionsApp: React.FC = () => {
       const editorTheme = await storage.getEditorTheme()
       const previewFunctionName = await storage.getPreviewFunctionName()
       const apiConfig = await storage.getApiConfig()
+      const drawerShortcuts = await storage.getDrawerShortcuts()
 
       setAttributeName(attributeName)
       setGetFunctionName(getFunctionName)
@@ -221,6 +224,7 @@ export const OptionsApp: React.FC = () => {
         editorTheme,
         previewFunctionName,
         apiConfig,
+        drawerShortcuts,
       })
     } catch (error) {
       console.error('加载配置失败:', error)
@@ -326,7 +330,8 @@ export const OptionsApp: React.FC = () => {
   }, [])
 
   const handleValuesChange = (changedValues: any, allValues: any) => {
-    const fieldPath = getChangedFieldPath(changedValues)
+    // 传入已知字段路径集合，避免递归进入嵌套对象（如 ShortcutKey）
+    const fieldPath = getChangedFieldPath(changedValues, [], KNOWN_FIELD_PATHS)
 
     if (isDebounceField(fieldPath)) {
       debouncedSave(fieldPath, allValues)
@@ -426,6 +431,11 @@ export const OptionsApp: React.FC = () => {
           colorLinkActive: '#2ba89f',
         },
         components: {
+          Alert: {
+            colorInfo: '#39c5bb',
+            colorInfoBg: '#e6fffb',
+            colorInfoBorder: '#87e8de',
+          },
           Button: {
             colorLink: '#39c5bb',
             colorLinkHover: '#5fd4cb',
@@ -556,7 +566,18 @@ export const OptionsApp: React.FC = () => {
               />
             </div>
 
-            {/* 卡片7: 开发调试 - 调试日志等开发者选项 */}
+            {/* 卡片7: 快捷键配置 */}
+            <div id="section-keyboard-shortcuts">
+              <KeyboardShortcutsSection
+                isActive={expandedSections.has('section-keyboard-shortcuts')}
+                onActiveChange={(active) =>
+                  toggleSectionExpanded('section-keyboard-shortcuts', active)
+                }
+                onResetDefault={() => resetSectionToDefault(SECTION_KEYS.KEYBOARD_SHORTCUTS)}
+              />
+            </div>
+
+            {/* 卡片9: 开发调试 - 调试日志等开发者选项 */}
             <div id="section-debug">
               <DebugSection
                 isActive={expandedSections.has('section-debug')}
@@ -566,7 +587,7 @@ export const OptionsApp: React.FC = () => {
             </div>
           </Form>
 
-          {/* 卡片8: 使用指南 */}
+          {/* 卡片10: 使用指南 */}
           <div id="section-usage-guide">
             <UsageGuideSection
               attributeName={attributeName}
