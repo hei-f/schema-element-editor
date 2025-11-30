@@ -203,7 +203,7 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
    */
   const handleSchemaResponse = useCallback(
     (payload: SchemaResponsePayload) => {
-      if (payload.success && payload.data !== undefined) {
+      if (payload.success && payload.data != null) {
         setSchemaData(payload.data)
         setDrawerOpen(true)
         checkPreviewFunction()

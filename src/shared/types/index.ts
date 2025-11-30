@@ -477,16 +477,25 @@ export interface PreviewFunctionResultPayload {
 }
 
 /**
- * 获取Schema的函数类型
- * @template T Schema数据类型，不能是 null 或 undefined
+ * Schema 数据类型
+ * Schema 必须是对象、数组或字符串，不能为 null/undefined
  */
-export type GetSchemaFunction<T = unknown> = (params: string) => NonNullable<T>
+export type SchemaValue = Record<string, unknown> | unknown[] | string
+
+/**
+ * 获取Schema的函数类型
+ * @template T Schema数据类型，必须是对象、数组或字符串
+ */
+export type GetSchemaFunction<T extends SchemaValue = SchemaValue> = (params: string) => T
 
 /**
  * 更新Schema的函数类型
- * @template T Schema数据类型，不能是 null 或 undefined
+ * @template T Schema数据类型，必须是对象、数组或字符串
  */
-export type UpdateSchemaFunction<T = unknown> = (schema: NonNullable<T>, params: string) => boolean
+export type UpdateSchemaFunction<T extends SchemaValue = SchemaValue> = (
+  schema: T,
+  params: string
+) => boolean
 
 /**
  * 预览函数类型
