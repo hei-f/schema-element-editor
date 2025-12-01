@@ -475,7 +475,7 @@ export const OptionsApp: React.FC = () => {
               <PageDescription type="secondary">配置插件的行为参数</PageDescription>
             </HeaderContent>
             <HeaderActions align="center" gap={12}>
-              <VersionTag>v1.19.1</VersionTag>
+              <VersionTag>v1.19.2</VersionTag>
               <Button onClick={openReleasePage}>检查更新</Button>
             </HeaderActions>
           </HeaderSection>
