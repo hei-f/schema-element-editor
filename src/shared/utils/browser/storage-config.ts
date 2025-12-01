@@ -4,6 +4,7 @@ import type {
   DrawerShortcutsConfig,
   EditorTheme,
   HighlightAllConfig,
+  IframeConfig,
   PreviewConfig,
   RecordingModeConfig,
 } from '@/shared/types'
@@ -136,6 +137,18 @@ export const SIMPLE_STORAGE_FIELDS = {
       )
     },
   } as StorageFieldConfig<RecordingModeConfig>,
+
+  iframeConfig: {
+    key: STORAGE_KEYS.IFRAME_CONFIG,
+    defaultValue: DEFAULT_VALUES.iframeConfig,
+    validator: (value: any): value is IframeConfig => {
+      return (
+        value &&
+        typeof value.enabled === 'boolean' &&
+        ['iframe', 'topFrame'].includes(value.schemaTarget)
+      )
+    },
+  } as StorageFieldConfig<IframeConfig>,
 
   enableAstTypeHints: {
     key: STORAGE_KEYS.ENABLE_AST_TYPE_HINTS,

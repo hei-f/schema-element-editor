@@ -9,6 +9,7 @@ import type {
   ExportConfig,
   Favorite,
   HighlightAllConfig,
+  IframeConfig,
   PreviewConfig,
   RecordingModeConfig,
   SearchConfig,
@@ -271,6 +272,7 @@ class StorageManager {
       maxHistoryCount,
       highlightAllConfig,
       recordingModeConfig,
+      iframeConfig,
       enableAstTypeHints,
       editorTheme,
       previewFunctionName,
@@ -295,6 +297,7 @@ class StorageManager {
       this.getMaxHistoryCount(),
       this.getHighlightAllConfig(),
       this.getRecordingModeConfig(),
+      this.getIframeConfig(),
       this.getEnableAstTypeHints(),
       this.getEditorTheme(),
       this.getPreviewFunctionName(),
@@ -321,6 +324,7 @@ class StorageManager {
       maxHistoryCount,
       highlightAllConfig,
       recordingModeConfig,
+      iframeConfig,
       enableAstTypeHints,
       exportConfig,
       editorTheme,
@@ -642,6 +646,28 @@ class StorageManager {
    */
   async setRecordingModeConfig(config: RecordingModeConfig): Promise<void> {
     return this.setSimple('recordingModeConfig', config)
+  }
+
+  /**
+   * 获取 iframe 配置
+   * 合并存储值和默认值，确保新增字段也能获取到默认值
+   */
+  async getIframeConfig(): Promise<IframeConfig> {
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.IFRAME_CONFIG)
+      const storedConfig = result[this.STORAGE_KEYS.IFRAME_CONFIG]
+      return { ...this.DEFAULT_VALUES.iframeConfig, ...storedConfig }
+    } catch (error) {
+      console.error('获取 iframe 配置失败:', error)
+      return this.DEFAULT_VALUES.iframeConfig
+    }
+  }
+
+  /**
+   * 设置 iframe 配置
+   */
+  async setIframeConfig(config: IframeConfig): Promise<void> {
+    return this.setSimple('iframeConfig', config)
   }
 
   /**
