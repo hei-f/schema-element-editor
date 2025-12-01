@@ -20,12 +20,38 @@ import { logger } from '@/shared/utils/logger'
 import { SIMPLE_STORAGE_FIELDS, type StorageFieldName } from './storage-config'
 
 /**
+ * 存储键到值类型的映射
+ */
+type StorageValueMap = {
+  [STORAGE_KEYS.SEARCH_CONFIG]: Partial<SearchConfig>
+  [STORAGE_KEYS.TOOLBAR_BUTTONS]: Partial<ToolbarButtonsConfig>
+  [STORAGE_KEYS.PREVIEW_CONFIG]: Partial<PreviewConfig>
+  [STORAGE_KEYS.FAVORITES]: Favorite[]
+  [STORAGE_KEYS.HIGHLIGHT_ALL_CONFIG]: Partial<HighlightAllConfig>
+  [STORAGE_KEYS.RECORDING_MODE_CONFIG]: Partial<RecordingModeConfig>
+  [STORAGE_KEYS.IFRAME_CONFIG]: Partial<IframeConfig>
+  [STORAGE_KEYS.EXPORT_CONFIG]: Partial<ExportConfig>
+  [STORAGE_KEYS.API_CONFIG]: Partial<ApiConfig>
+  [STORAGE_KEYS.DRAWER_SHORTCUTS]: Partial<DrawerShortcutsConfig> & { togglePreview?: unknown }
+}
+
+/**
  * 存储管理器类
  * 封装Chrome Storage API，提供类型安全的存储操作
  */
 class StorageManager {
   private readonly STORAGE_KEYS = STORAGE_KEYS
   private readonly DEFAULT_VALUES = DEFAULT_VALUES
+
+  /**
+   * 类型安全的存储值获取方法
+   */
+  private async getStorageValue<K extends keyof StorageValueMap>(
+    key: K
+  ): Promise<StorageValueMap[K] | undefined> {
+    const result = await chrome.storage.local.get<{ [P in K]: StorageValueMap[P] }>(key)
+    return result[key]
+  }
 
   /**
    * 通用的获取方法
@@ -119,8 +145,7 @@ class StorageManager {
    */
   async getSearchConfig(): Promise<SearchConfig> {
     try {
-      const result = await chrome.storage.local.get(this.STORAGE_KEYS.SEARCH_CONFIG)
-      const storedConfig = result[this.STORAGE_KEYS.SEARCH_CONFIG]
+      const storedConfig = await this.getStorageValue(this.STORAGE_KEYS.SEARCH_CONFIG)
       return { ...this.DEFAULT_VALUES.searchConfig, ...storedConfig }
     } catch (error) {
       console.error('获取搜索配置失败:', error)
@@ -210,8 +235,7 @@ class StorageManager {
    */
   async getToolbarButtons(): Promise<ToolbarButtonsConfig> {
     try {
-      const result = await chrome.storage.local.get(this.STORAGE_KEYS.TOOLBAR_BUTTONS)
-      const storedConfig = result[this.STORAGE_KEYS.TOOLBAR_BUTTONS]
+      const storedConfig = await this.getStorageValue(this.STORAGE_KEYS.TOOLBAR_BUTTONS)
       // 合并默认值，确保新增字段能获取到默认值
       return { ...this.DEFAULT_VALUES.toolbarButtons, ...storedConfig }
     } catch (error) {
@@ -396,8 +420,7 @@ class StorageManager {
    */
   async getPreviewConfig(): Promise<PreviewConfig> {
     try {
-      const result = await chrome.storage.local.get(this.STORAGE_KEYS.PREVIEW_CONFIG)
-      const storedConfig = result[this.STORAGE_KEYS.PREVIEW_CONFIG]
+      const storedConfig = await this.getStorageValue(this.STORAGE_KEYS.PREVIEW_CONFIG)
       if (!storedConfig) {
         return this.DEFAULT_VALUES.previewConfig
       }
@@ -428,7 +451,7 @@ class StorageManager {
   async getDraft(paramsKey: string): Promise<Draft | null> {
     try {
       const key = this.STORAGE_KEYS.DRAFTS_PREFIX + paramsKey
-      const result = await chrome.storage.local.get(key)
+      const result = await chrome.storage.local.get<Record<string, Draft>>(key)
       return result[key] ?? null
     } catch (error) {
       console.error('获取草稿失败:', error)
@@ -484,8 +507,8 @@ class StorageManager {
    */
   async getFavorites(): Promise<Favorite[]> {
     try {
-      const result = await chrome.storage.local.get(this.STORAGE_KEYS.FAVORITES)
-      return result[this.STORAGE_KEYS.FAVORITES] ?? []
+      const storedValue = await this.getStorageValue(this.STORAGE_KEYS.FAVORITES)
+      return storedValue ?? []
     } catch (error) {
       console.error('获取收藏列表失败:', error)
       return []
@@ -610,8 +633,7 @@ class StorageManager {
    */
   async getHighlightAllConfig(): Promise<HighlightAllConfig> {
     try {
-      const result = await chrome.storage.local.get(this.STORAGE_KEYS.HIGHLIGHT_ALL_CONFIG)
-      const storedConfig = result[this.STORAGE_KEYS.HIGHLIGHT_ALL_CONFIG]
+      const storedConfig = await this.getStorageValue(this.STORAGE_KEYS.HIGHLIGHT_ALL_CONFIG)
       return { ...this.DEFAULT_VALUES.highlightAllConfig, ...storedConfig }
     } catch (error) {
       console.error('获取高亮所有元素配置失败:', error)
@@ -632,8 +654,7 @@ class StorageManager {
    */
   async getRecordingModeConfig(): Promise<RecordingModeConfig> {
     try {
-      const result = await chrome.storage.local.get(this.STORAGE_KEYS.RECORDING_MODE_CONFIG)
-      const storedConfig = result[this.STORAGE_KEYS.RECORDING_MODE_CONFIG]
+      const storedConfig = await this.getStorageValue(this.STORAGE_KEYS.RECORDING_MODE_CONFIG)
       return { ...this.DEFAULT_VALUES.recordingModeConfig, ...storedConfig }
     } catch (error) {
       console.error('获取录制模式配置失败:', error)
@@ -654,8 +675,7 @@ class StorageManager {
    */
   async getIframeConfig(): Promise<IframeConfig> {
     try {
-      const result = await chrome.storage.local.get(this.STORAGE_KEYS.IFRAME_CONFIG)
-      const storedConfig = result[this.STORAGE_KEYS.IFRAME_CONFIG]
+      const storedConfig = await this.getStorageValue(this.STORAGE_KEYS.IFRAME_CONFIG)
       return { ...this.DEFAULT_VALUES.iframeConfig, ...storedConfig }
     } catch (error) {
       console.error('获取 iframe 配置失败:', error)
@@ -690,8 +710,7 @@ class StorageManager {
    */
   async getExportConfig(): Promise<ExportConfig> {
     try {
-      const result = await chrome.storage.local.get(this.STORAGE_KEYS.EXPORT_CONFIG)
-      const storedConfig = result[this.STORAGE_KEYS.EXPORT_CONFIG]
+      const storedConfig = await this.getStorageValue(this.STORAGE_KEYS.EXPORT_CONFIG)
       return { ...this.DEFAULT_VALUES.exportConfig, ...storedConfig }
     } catch (error) {
       console.error('获取导出配置失败:', error)
@@ -749,8 +768,7 @@ class StorageManager {
    */
   async getApiConfig(): Promise<ApiConfig> {
     try {
-      const result = await chrome.storage.local.get(this.STORAGE_KEYS.API_CONFIG)
-      const storedConfig = result[this.STORAGE_KEYS.API_CONFIG]
+      const storedConfig = await this.getStorageValue(this.STORAGE_KEYS.API_CONFIG)
       if (!storedConfig) {
         return this.DEFAULT_VALUES.apiConfig
       }
@@ -784,8 +802,7 @@ class StorageManager {
    */
   async getDrawerShortcuts(): Promise<DrawerShortcutsConfig> {
     try {
-      const result = await chrome.storage.local.get(this.STORAGE_KEYS.DRAWER_SHORTCUTS)
-      const storedConfig = result[this.STORAGE_KEYS.DRAWER_SHORTCUTS]
+      const storedConfig = await this.getStorageValue(this.STORAGE_KEYS.DRAWER_SHORTCUTS)
       if (!storedConfig) {
         return this.DEFAULT_VALUES.drawerShortcuts
       }
