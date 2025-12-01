@@ -3,7 +3,10 @@ import { DEFAULT_VALUES } from '@/shared/constants/defaults'
 import { shadowDomTheme } from '@/shared/constants/theme'
 import { getCommunicationMode } from '@/shared/utils/communication-mode'
 import type {
+  DrawerShortcutsConfig,
   ElementAttributes,
+  IframeConfig,
+  IframeElementClickPayload,
   Message,
   PreviewFunctionResultPayload,
   SchemaDrawerConfig,
@@ -24,6 +27,7 @@ import { App as AntdApp, ConfigProvider, message as antdMessage } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { StyleSheetManager } from 'styled-components'
+import { IframeHighlightOverlay } from './IframeHighlightOverlay'
 
 interface AppProps {
   shadowRoot: ShadowRoot
@@ -41,6 +45,14 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
 
   /** SchemaDrawer 配置 */
   const [drawerConfig, setDrawerConfig] = useState<SchemaDrawerConfig | null>(null)
+  /** 抽屉快捷键配置 */
+  const [drawerShortcuts, setDrawerShortcuts] = useState<DrawerShortcutsConfig | null>(null)
+  /** iframe 配置 */
+  const [iframeConfig, setIframeConfig] = useState<IframeConfig | null>(null)
+  /** 当前是否为 iframe 元素（用于决定 postMessage 发送目标） */
+  const [isFromIframe, setIsFromIframe] = useState(false)
+  /** iframe 元素来源的 origin */
+  const iframeOriginRef = useRef<string>('')
 
   const configSyncedRef = useRef(false)
 
@@ -96,6 +108,8 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
         editorTheme,
         recordingModeConfig,
         autoParseString,
+        shortcuts,
+        iframeConfigData,
       ] = await Promise.all([
         storage.getDrawerWidth(),
         storage.getApiConfig(),
@@ -108,6 +122,8 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
         storage.getEditorTheme(),
         storage.getRecordingModeConfig(),
         storage.getAutoParseString(),
+        storage.getDrawerShortcuts(),
+        storage.getIframeConfig(),
       ])
       setDrawerConfig({
         width,
@@ -122,6 +138,8 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
         recordingModeConfig,
         autoParseString,
       })
+      setDrawerShortcuts(shortcuts)
+      setIframeConfig(iframeConfigData)
     }
     loadConfig()
     storage.cleanExpiredDrafts()
@@ -206,6 +224,8 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
       if (payload.success && payload.data !== undefined) {
         setSchemaData(payload.data)
         setDrawerOpen(true)
+        // 抽屉打开时暂停元素监听
+        window.dispatchEvent(new CustomEvent('schema-editor:pause-monitor'))
         checkPreviewFunction()
       } else {
         antdMessage.error(payload.error || '获取Schema失败')
@@ -239,10 +259,62 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
   }, [drawerConfig, isWindowFunctionMode, handleSchemaResponse, handleUpdateResult])
 
   /**
+   * 向 iframe 发送 postMessage 请求
+   */
+  const sendRequestToIframe = useCallback(
+    <T,>(iframeOrigin: string, type: string, payload: any, timeoutSeconds: number): Promise<T> => {
+      return new Promise((resolve, reject) => {
+        const requestId = `iframe-req-${Date.now()}-${Math.random().toString(36).slice(2)}`
+        const timeoutMs = timeoutSeconds * 1000
+
+        const timeoutId = setTimeout(() => {
+          window.removeEventListener('message', listener)
+          reject(new Error(`iframe 请求超时（${timeoutSeconds}秒）`))
+        }, timeoutMs)
+
+        const listener = (event: MessageEvent) => {
+          // 验证来源
+          if (event.origin !== iframeOrigin) return
+          if (!event.data || event.data.requestId !== requestId) return
+
+          clearTimeout(timeoutId)
+          window.removeEventListener('message', listener)
+          resolve(event.data as T)
+        }
+
+        window.addEventListener('message', listener)
+
+        // 向所有同源 iframe 发送请求
+        const iframes = document.querySelectorAll('iframe')
+        const sourceConfig = drawerConfig?.apiConfig.sourceConfig
+        iframes.forEach((iframe) => {
+          try {
+            iframe.contentWindow?.postMessage(
+              {
+                source: sourceConfig?.contentSource ?? 'schema-editor-content',
+                type,
+                payload,
+                requestId,
+              },
+              iframeOrigin
+            )
+          } catch {
+            // 跨域 iframe 会抛出异常，忽略
+          }
+        })
+      })
+    },
+    [drawerConfig]
+  )
+
+  /**
    * 请求获取 Schema
+   * @param attributes 元素属性
+   * @param fromIframe 是否来自 iframe
+   * @param iframeOrigin iframe 的 origin（仅当 fromIframe 为 true 时有效）
    */
   const requestSchema = useCallback(
-    async (attributes: ElementAttributes) => {
+    async (attributes: ElementAttributes, fromIframe: boolean = false, iframeOrigin?: string) => {
       if (!drawerConfig) return
 
       const params = attributes.params.join(',')
@@ -253,17 +325,38 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
         try {
           const messageType =
             apiConfig.messageTypes?.getSchema ?? DEFAULT_VALUES.apiConfig.messageTypes.getSchema
-          const response = await sendRequestToHost<SchemaResponsePayload>(
-            messageType,
-            { params },
-            apiConfig.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout,
-            apiConfig.sourceConfig
-          )
-          handleSchemaResponse({
-            success: response.success !== false,
-            data: response.data,
-            error: response.error,
-          })
+
+          // 判断请求发送目标
+          const shouldSendToIframe =
+            fromIframe && iframeConfig?.schemaTarget === 'iframe' && iframeOrigin
+
+          if (shouldSendToIframe) {
+            // 向 iframe 发送请求
+            const response = await sendRequestToIframe<SchemaResponsePayload>(
+              iframeOrigin,
+              messageType,
+              { params },
+              apiConfig.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout
+            )
+            handleSchemaResponse({
+              success: response.success !== false,
+              data: response.data,
+              error: response.error,
+            })
+          } else {
+            // 向 top frame 发送请求
+            const response = await sendRequestToHost<SchemaResponsePayload>(
+              messageType,
+              { params },
+              apiConfig.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout,
+              apiConfig.sourceConfig
+            )
+            handleSchemaResponse({
+              success: response.success !== false,
+              data: response.data,
+              error: response.error,
+            })
+          }
         } catch (error: any) {
           antdMessage.error(error.message || '获取Schema失败')
         }
@@ -275,11 +368,11 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
         })
       }
     },
-    [drawerConfig, isPostMessageMode, handleSchemaResponse]
+    [drawerConfig, isPostMessageMode, iframeConfig, handleSchemaResponse, sendRequestToIframe]
   )
 
   /**
-   * 监听来自 monitor 的元素点击事件
+   * 监听来自 monitor 的元素点击事件（主页面元素）
    */
   useEffect(() => {
     const handleElementClick = (event: Event) => {
@@ -288,13 +381,37 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
 
       setCurrentAttributes(attributes)
       setIsRecordingMode(recordingMode || false)
-      requestSchema(attributes)
+      setIsFromIframe(false)
+      iframeOriginRef.current = ''
+      requestSchema(attributes, false)
     }
 
     window.addEventListener('schema-editor:element-click', handleElementClick)
 
     return () => {
       window.removeEventListener('schema-editor:element-click', handleElementClick)
+    }
+  }, [requestSchema])
+
+  /**
+   * 监听来自 iframe 的元素点击事件
+   */
+  useEffect(() => {
+    const handleIframeElementClick = (event: Event) => {
+      const customEvent = event as CustomEvent<IframeElementClickPayload>
+      const { attrs, isRecordingMode: recordingMode, iframeOrigin } = customEvent.detail
+
+      setCurrentAttributes(attrs)
+      setIsRecordingMode(recordingMode || false)
+      setIsFromIframe(true)
+      iframeOriginRef.current = iframeOrigin
+      requestSchema(attrs, true, iframeOrigin)
+    }
+
+    window.addEventListener('schema-editor:iframe-element-click', handleIframeElementClick)
+
+    return () => {
+      window.removeEventListener('schema-editor:iframe-element-click', handleIframeElementClick)
     }
   }, [requestSchema])
 
@@ -312,15 +429,35 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
         // postMessage 直连模式
         const messageType =
           apiConfig.messageTypes?.updateSchema ?? DEFAULT_VALUES.apiConfig.messageTypes.updateSchema
-        const response = await sendRequestToHost<UpdateResultPayload>(
-          messageType,
-          { schema: data, params },
-          apiConfig.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout,
-          apiConfig.sourceConfig
-        )
 
-        if (response.success === false) {
-          throw new Error(response.error || '更新失败')
+        // 判断请求发送目标
+        const shouldSendToIframe =
+          isFromIframe && iframeConfig?.schemaTarget === 'iframe' && iframeOriginRef.current
+
+        if (shouldSendToIframe) {
+          // 向 iframe 发送请求
+          const response = await sendRequestToIframe<UpdateResultPayload>(
+            iframeOriginRef.current,
+            messageType,
+            { schema: data, params },
+            apiConfig.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout
+          )
+
+          if (response.success === false) {
+            throw new Error(response.error || '更新失败')
+          }
+        } else {
+          // 向 top frame 发送请求
+          const response = await sendRequestToHost<UpdateResultPayload>(
+            messageType,
+            { schema: data, params },
+            apiConfig.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout,
+            apiConfig.sourceConfig
+          )
+
+          if (response.success === false) {
+            throw new Error(response.error || '更新失败')
+          }
         }
       } else {
         // windowFunction 模式：通过 injected.js
@@ -349,7 +486,14 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
         })
       }
     },
-    [currentAttributes, drawerConfig, isPostMessageMode]
+    [
+      currentAttributes,
+      drawerConfig,
+      isPostMessageMode,
+      isFromIframe,
+      iframeConfig,
+      sendRequestToIframe,
+    ]
   )
 
   /**
@@ -360,8 +504,8 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
     setIsRecordingMode(false)
     setHasPreviewFunction(false)
 
-    // 抽屉关闭时，触发清除高亮的事件
-    window.dispatchEvent(new CustomEvent('schema-editor:clear-highlight'))
+    // 抽屉关闭时，恢复元素监听
+    window.dispatchEvent(new CustomEvent('schema-editor:resume-monitor'))
   }
 
   return (
@@ -372,7 +516,14 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
         getPopupContainer={() => shadowRoot as unknown as HTMLElement}
       >
         <AntdApp>
-          {drawerConfig && (
+          {/* iframe 元素高亮覆盖层 */}
+          {iframeConfig?.enabled && (
+            <IframeHighlightOverlay
+              recordingModeColor={drawerConfig?.recordingModeConfig?.highlightColor}
+            />
+          )}
+
+          {drawerConfig && drawerShortcuts && (
             <SchemaDrawer
               open={drawerOpen}
               schemaData={schemaData}
@@ -382,6 +533,7 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
               isRecordingMode={isRecordingMode}
               config={drawerConfig}
               hasPreviewFunction={hasPreviewFunction}
+              shortcuts={drawerShortcuts}
             />
           )}
         </AntdApp>

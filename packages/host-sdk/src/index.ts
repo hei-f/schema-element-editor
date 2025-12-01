@@ -18,6 +18,9 @@
 // 默认导出 React 版本（向后兼容）
 export { useSchemaEditor } from './react'
 
+// 导出纯 JS 版本
+export { createSchemaEditorBridge } from './core'
+
 // 重新导出类型
 export type {
   SchemaEditorConfig,

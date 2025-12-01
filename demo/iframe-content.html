@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>iframe 测试内容</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+      background: #fff;
+    }
+    .header {
+      background: linear-gradient(135deg, #e6fffb 0%, #87e8de 100%);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #5cdbd3;
+    }
+    .header h3 {
+      color: #006d75;
+      margin-bottom: 8px;
+    }
+    .header p {
+      color: #08979c;
+      font-size: 13px;
+    }
+    .test-element {
+      padding: 16px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #fff;
+    }
+    .test-element:hover {
+      border-color: #1677ff;
+      box-shadow: 0 2px 8px rgba(22, 119, 255, 0.2);
+    }
+    .test-element.valid {
+      border-left: 4px solid #52c41a;
+    }
+    .test-element.invalid {
+      border-left: 4px solid #ff4d4f;
+    }
+    .element-title {
+      font-weight: 600;
+      color: #262626;
+      margin-bottom: 4px;
+    }
+    .element-desc {
+      color: #8c8c8c;
+      font-size: 12px;
+    }
+    .element-attr {
+      font-family: 'Consolas', monospace;
+      background: #f5f5f5;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-top: 8px;
+      font-size: 11px;
+      color: #595959;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      margin-left: 8px;
+    }
+    .tag.success { background: #f6ffed; color: #389e0d; }
+    .tag.error { background: #fff2f0; color: #cf1322; }
+    .status {
+      margin-top: 16px;
+      padding: 12px;
+      background: #f6ffed;
+      border: 1px solid #b7eb8f;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #389e0d;
+    }
+    .status.error {
+      background: #fff2f0;
+      border-color: #ffccc7;
+      color: #cf1322;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h3>🖼️ 这是 iframe 内部</h3>
+    <p>按住 Alt/Option 键悬停在下方元素上，测试 iframe 内元素检测功能</p>
+  </div>
+
+  <div id="status" class="status">💡 按住 Alt/Option 键悬停测试</div>
+
+  <div class="test-element valid" data-id="iframe-element-1">
+    <div class="element-title">
+      iframe 元素 1
+      <span class="tag success">有效</span>
+    </div>
+    <div class="element-desc">这是 iframe 内部的第一个测试元素</div>
+    <div class="element-attr">data-id="iframe-element-1"</div>
+  </div>
+
+  <div class="test-element valid" data-id="iframe-element-2">
+    <div class="element-title">
+      iframe 元素 2
+      <span class="tag success">有效</span>
+    </div>
+    <div class="element-desc">这是 iframe 内部的第二个测试元素</div>
+    <div class="element-attr">data-id="iframe-element-2"</div>
+  </div>
+
+  <div class="test-element valid" data-id="iframe-nested-object">
+    <div class="element-title">
+      嵌套对象数据
+      <span class="tag success">有效</span>
+    </div>
+    <div class="element-desc">Schema 为嵌套对象，用于测试复杂数据</div>
+    <div class="element-attr">data-id="iframe-nested-object"</div>
+  </div>
+
+  <div class="test-element invalid">
+    <div class="element-title">
+      无效元素
+      <span class="tag error">非法</span>
+    </div>
+    <div class="element-desc">没有 data-id 属性，应显示"非法目标"</div>
+  </div>
+
+  <script>
+    // iframe 内部的 Schema 数据
+    const schemaStore = {
+      'iframe-element-1': {
+        title: 'iframe 元素 1 的 Schema',
+        description: '来自 iframe 内部',
+        value: 123
+      },
+      'iframe-element-2': ['apple', 'banana', 'cherry'],
+      'iframe-nested-object': {
+        user: { name: 'Alice', age: 25 },
+        settings: { theme: 'dark', lang: 'zh-CN' }
+      }
+    };
+
+    // 监听来自插件的 postMessage
+    window.addEventListener('message', (event) => {
+      // 只处理来自插件的请求
+      if (!event.data || event.data.source !== 'schema-editor-content') return;
+
+      const { type, payload, requestId } = event.data;
+      let result;
+
+      switch (type) {
+        case 'GET_SCHEMA': {
+          const schema = schemaStore[payload.params];
+          if (schema !== undefined) {
+            result = { success: true, data: schema };
+            console.log('[iframe] 返回 Schema:', payload.params, schema);
+          } else {
+            result = { success: true, data: { error: 'Schema not found in iframe', params: payload.params } };
+            console.log('[iframe] Schema 未找到:', payload.params);
+          }
+          break;
+        }
+
+        case 'UPDATE_SCHEMA': {
+          schemaStore[payload.params] = payload.schema;
+          result = { success: true };
+          console.log('[iframe] Schema 已更新:', payload.params, payload.schema);
+          break;
+        }
+
+        case 'CHECK_PREVIEW': {
+          result = { exists: false }; // iframe 内暂不支持预览
+          break;
+        }
+
+        default:
+          result = { success: false, error: 'Unknown type: ' + type };
+      }
+
+      // 发送响应给 top frame
+      window.parent.postMessage({
+        source: 'schema-editor-host',
+        requestId,
+        ...result
+      }, '*');
+    });
+
+    console.log('[iframe] postMessage 监听器已注册');
+  </script>
+</body>
+</html>
+

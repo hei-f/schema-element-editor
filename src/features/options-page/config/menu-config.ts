@@ -6,6 +6,7 @@ import {
   DatabaseOutlined,
   DesktopOutlined,
   EyeOutlined,
+  KeyOutlined,
   QuestionCircleOutlined,
   SearchOutlined,
 } from '@ant-design/icons'
@@ -86,6 +87,7 @@ export const MENU_CONFIG: MenuItemConfig[] = [
       { key: 'highlight-color', label: '高亮颜色', anchorId: 'field-highlight-color' },
       { key: 'highlight-all', label: '快捷键高亮', anchorId: 'field-highlight-all' },
       { key: 'recording-mode', label: '录制模式', anchorId: 'field-recording-mode' },
+      { key: 'iframe-config', label: 'iframe 支持', anchorId: 'field-iframe-config' },
     ],
   },
   {
@@ -131,6 +133,17 @@ export const MENU_CONFIG: MenuItemConfig[] = [
       { key: 'favorites-config', label: '收藏配置', anchorId: 'field-favorites-config' },
       { key: 'history-config', label: '历史记录', anchorId: 'field-history-config' },
       { key: 'export-config', label: '导出配置', anchorId: 'field-export-config' },
+    ],
+  },
+  {
+    key: 'keyboard-shortcuts',
+    label: '快捷键配置',
+    icon: KeyOutlined,
+    sectionId: 'section-keyboard-shortcuts',
+    children: [
+      { key: 'shortcut-save', label: '保存', anchorId: 'field-shortcut-save' },
+      { key: 'shortcut-format', label: '格式化', anchorId: 'field-shortcut-format' },
+      { key: 'shortcut-preview', label: '切换预览', anchorId: 'field-shortcut-preview' },
     ],
   },
   {

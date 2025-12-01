@@ -1,6 +1,6 @@
 import { FORM_PATHS } from '@/shared/constants/form-paths'
 import { storage } from '@/shared/utils/browser/storage'
-import { pathEqual } from '@/shared/utils/form-path'
+import { pathEqual, pathToString } from '@/shared/utils/form-path'
 
 /**
  * 配置区块标识常量
@@ -13,6 +13,7 @@ export const SECTION_KEYS = {
   FEATURE_TOGGLE: 'featureToggle',
   PREVIEW_CONFIG: 'previewConfig',
   DATA_MANAGEMENT: 'dataManagement',
+  KEYBOARD_SHORTCUTS: 'keyboardShortcuts',
   DEBUG: 'debug',
 } as const
 
@@ -36,6 +37,7 @@ export const SECTION_DEFAULT_KEYS: Record<SectionKey, readonly string[]> = {
     'highlightColor',
     'highlightAllConfig',
     'recordingModeConfig',
+    'iframeConfig',
   ],
   [SECTION_KEYS.EDITOR_CONFIG]: ['drawerWidth', 'enableAstTypeHints', 'editorTheme'],
   [SECTION_KEYS.FEATURE_TOGGLE]: ['toolbarButtons'],
@@ -46,6 +48,7 @@ export const SECTION_DEFAULT_KEYS: Record<SectionKey, readonly string[]> = {
     'maxHistoryCount',
     'exportConfig',
   ],
+  [SECTION_KEYS.KEYBOARD_SHORTCUTS]: ['drawerShortcuts'],
   [SECTION_KEYS.DEBUG]: ['enableDebugLog', 'autoParseString'],
 }
 
@@ -151,10 +154,27 @@ export const FIELD_GROUPS: Record<string, FieldGroup> = {
       await storage.setRecordingModeConfig(allValues.recordingModeConfig)
     },
   },
+  iframeConfig: {
+    fieldPaths: [FORM_PATHS.iframeConfig.enabled, FORM_PATHS.iframeConfig.schemaTarget],
+    save: async (allValues: any) => {
+      await storage.setIframeConfig(allValues.iframeConfig)
+    },
+  },
   exportConfig: {
     fieldPaths: [FORM_PATHS.exportConfig.customFileName],
     save: async (allValues: any) => {
       await storage.setExportConfig(allValues.exportConfig)
+    },
+  },
+  drawerShortcuts: {
+    fieldPaths: [
+      FORM_PATHS.drawerShortcuts.save,
+      FORM_PATHS.drawerShortcuts.format,
+      FORM_PATHS.drawerShortcuts.openOrUpdatePreview,
+      FORM_PATHS.drawerShortcuts.closePreview,
+    ],
+    save: async (allValues: any) => {
+      await storage.setDrawerShortcuts(allValues.drawerShortcuts)
     },
   },
 }
@@ -202,6 +222,15 @@ export const FIELD_PATH_STORAGE_MAP: Record<string, string> = {
   maxHistoryCount: 'setMaxHistoryCount',
   enableAstTypeHints: 'setEnableAstTypeHints',
 }
+
+/**
+ * 收集所有已知的字段路径（用于控制 getChangedFieldPath 的递归深度）
+ */
+export const KNOWN_FIELD_PATHS: Set<string> = new Set(
+  Object.values(FIELD_GROUPS).flatMap((group) =>
+    group.fieldPaths.map((p) => pathToString(p as string[]))
+  )
+)
 
 /**
  * 根据字段路径查找所属的字段组

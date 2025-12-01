@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Schema Editor",
-  "version": "1.17.2",
+  "version": "1.19.2",
   "description": "DOM元素Schema查看和编辑工具",
   "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": ["<all_urls>"],
@@ -13,7 +13,8 @@
     {
       "matches": ["<all_urls>"],
       "js": ["src/core/content/index.tsx"],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "all_frames": true
     }
   ],
   "action": {

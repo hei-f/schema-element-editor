@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Layout, Menu, Typography, Button } from 'antd'
 import {
   ExperimentOutlined,
@@ -7,10 +7,12 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   RobotOutlined,
+  BlockOutlined,
 } from '@ant-design/icons'
 import { AstTestPage } from './pages/AstTestPage'
 import { SchemaTestPage } from './pages/SchemaTestPage'
 import { AgenticDemoPage } from './pages/AgenticDemoPage'
+import { IframeTestPage } from './pages/IframeTestPage'
 import styled from 'styled-components'
 
 const { Header, Content, Sider } = Layout
@@ -84,11 +86,46 @@ const AppContent = styled(Content)<{ $siderCollapsed: boolean }>`
   transition: margin-left 0.2s ease;
 `
 
-type PageKey = 'ast-test' | 'schema-test' | 'agentic-demo'
+type PageKey = 'ast-test' | 'schema-test' | 'agentic-demo' | 'iframe-test'
+
+/** 默认页面 */
+const DEFAULT_PAGE: PageKey = 'schema-test'
+
+/**
+ * 从 URL hash 中获取当前页面
+ */
+const getPageFromHash = (): PageKey => {
+  const hash = window.location.hash.slice(1) // 移除 #
+  const validPages: PageKey[] = ['ast-test', 'schema-test', 'agentic-demo', 'iframe-test']
+  return validPages.includes(hash as PageKey) ? (hash as PageKey) : DEFAULT_PAGE
+}
+
+/**
+ * 更新 URL hash
+ */
+const setHashToUrl = (page: PageKey) => {
+  window.location.hash = page
+}
 
 export const TestApp: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<PageKey>('schema-test')
+  const [currentPage, setCurrentPage] = useState<PageKey>(getPageFromHash)
   const [siderCollapsed, setSiderCollapsed] = useState(false)
+
+  // 监听 hash 变化（浏览器前进/后退）
+  useEffect(() => {
+    const handleHashChange = () => {
+      setCurrentPage(getPageFromHash())
+    }
+
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [])
+
+  // 页面切换时更新 URL hash
+  const handlePageChange = useCallback((page: PageKey) => {
+    setCurrentPage(page)
+    setHashToUrl(page)
+  }, [])
 
   const menuItems = [
     {
@@ -106,6 +143,11 @@ export const TestApp: React.FC = () => {
       icon: <RobotOutlined />,
       label: 'Agentic UI Demo',
     },
+    {
+      key: 'iframe-test',
+      icon: <BlockOutlined />,
+      label: 'iframe 测试',
+    },
   ]
 
   const renderPage = () => {
@@ -116,6 +158,8 @@ export const TestApp: React.FC = () => {
         return <SchemaTestPage siderCollapsed={siderCollapsed} />
       case 'agentic-demo':
         return <AgenticDemoPage siderCollapsed={siderCollapsed} />
+      case 'iframe-test':
+        return <IframeTestPage siderCollapsed={siderCollapsed} />
       default:
         return <SchemaTestPage siderCollapsed={siderCollapsed} />
     }
@@ -151,7 +195,7 @@ export const TestApp: React.FC = () => {
             inlineCollapsed={siderCollapsed}
             selectedKeys={[currentPage]}
             items={menuItems}
-            onClick={({ key }) => setCurrentPage(key as PageKey)}
+            onClick={({ key }) => handlePageChange(key as PageKey)}
             style={{ height: '100%', paddingTop: 8 }}
           />
         </AppSider>

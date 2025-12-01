@@ -8,8 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       // SDK 别名 - 开发时直接引用源码（workspace 包）
-      // 注释以下行可测试发布的 npm 包
-      // '@schema-editor/host-sdk': path.resolve(__dirname, '../packages/host-sdk/src'),
+      '@schema-editor/host-sdk': path.resolve(__dirname, '../packages/host-sdk/src'),
       // 项目别名
       '@': path.resolve(__dirname, '../src'),
       '@shared': path.resolve(__dirname, '../src/shared'),

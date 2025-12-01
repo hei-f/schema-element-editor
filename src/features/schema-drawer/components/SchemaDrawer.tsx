@@ -7,13 +7,19 @@ import { DEFAULT_VALUES } from '@/shared/constants/defaults'
 import { FULL_SCREEN_MODE, type FullScreenMode } from '@/shared/constants/ui-modes'
 import { FavoritesManager } from '@/features/favorites/components/FavoritesManager'
 import { EDITOR_THEME_OPTIONS } from '@/shared/constants/editor-themes'
-import type { ElementAttributes, HistoryEntry, SchemaDrawerConfig } from '@/shared/types'
+import type {
+  DrawerShortcutsConfig,
+  ElementAttributes,
+  HistoryEntry,
+  SchemaDrawerConfig,
+} from '@/shared/types'
 import { ContentType, HistoryEntryType, MessageType } from '@/shared/types'
 import { postMessageToPage, sendRequestToHost } from '@/shared/utils/browser/message'
 import { storage } from '@/shared/utils/browser/storage'
 import { logger } from '@/shared/utils/logger'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { parseMarkdownString } from '@/shared/utils/schema/transformers'
+import { useDrawerShortcuts } from '../hooks/ui/useDrawerShortcuts'
 import { useFullScreenMode } from '../hooks/ui/useFullScreenMode'
 import { useResizer } from '../hooks/ui/useResizer'
 import { useSchemaRecording } from '../hooks/schema/useSchemaRecording'
@@ -84,6 +90,8 @@ interface SchemaDrawerProps {
   config: SchemaDrawerConfig
   /** 宿主环境是否存在预览函数 */
   hasPreviewFunction: boolean
+  /** 快捷键配置 */
+  shortcuts: DrawerShortcutsConfig
 }
 
 /**
@@ -98,6 +106,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   isRecordingMode: initialRecordingMode = false,
   config,
   hasPreviewFunction,
+  shortcuts,
 }) => {
   // 使用 App.useApp() 获取 message 实例，确保在 Shadow DOM 中正确显示
   const { message } = App.useApp()
@@ -218,6 +227,46 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   /** 轻量提示 */
   const { lightNotifications, showLightNotification } = useLightNotifications()
 
+  /**
+   * 清理预览容器（纯清理，不改变状态）
+   * 先立即清除 DOM（同步），再异步通知宿主
+   */
+  const cleanupPreviewContainer = useCallback(() => {
+    // 立即清除 DOM 容器（同步操作，无延迟）
+    previewContainerManager.clear()
+    logger.log('预览容器已清理')
+
+    // 异步通知宿主清理其内部状态
+    if (isPostMessageMode) {
+      const messageType =
+        apiConfig?.messageTypes?.cleanupPreview ??
+        DEFAULT_VALUES.apiConfig.messageTypes.cleanupPreview
+      sendRequestToHost(
+        messageType,
+        { containerId: PREVIEW_CONTAINER_ID },
+        2,
+        apiConfig?.sourceConfig
+      ).catch((error) => {
+        logger.warn('预览容器清理请求失败:', error)
+      })
+    } else {
+      postMessageToPage({
+        type: MessageType.CLEAR_PREVIEW,
+      })
+    }
+  }, [apiConfig, isPostMessageMode])
+
+  /**
+   * 处理抽屉关闭
+   * 在动画开始前立即清理预览容器，确保与抽屉关闭同步
+   */
+  const handleClose = useCallback(() => {
+    // 立即清理预览容器（与抽屉关闭同步）
+    cleanupPreviewContainer()
+    // 调用原始关闭回调
+    onClose()
+  }, [cleanupPreviewContainer, onClose])
+
   /** 保存逻辑 */
   const { isSaving, handleSave } = useSchemaSave({
     editorValue,
@@ -228,7 +277,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
       message.success('保存成功')
       // 记录保存版本
       recordSpecialVersion(HistoryEntryType.Save, '保存版本')
-      onClose()
+      handleClose()
     },
     onSave,
   })
@@ -359,35 +408,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   const getPortalContainer = shadowRootManager.getContainer
 
   /**
-   * 清理预览容器（纯清理，不改变状态）
-   * 先立即清除 DOM（同步），再异步通知宿主
-   */
-  const cleanupPreviewContainer = useCallback(() => {
-    // 立即清除 DOM 容器（同步操作，无延迟）
-    previewContainerManager.clear()
-    logger.log('预览容器已清理')
-
-    // 异步通知宿主清理其内部状态
-    if (isPostMessageMode) {
-      const messageType =
-        apiConfig?.messageTypes?.cleanupPreview ??
-        DEFAULT_VALUES.apiConfig.messageTypes.cleanupPreview
-      sendRequestToHost(
-        messageType,
-        { containerId: PREVIEW_CONTAINER_ID },
-        2,
-        apiConfig?.sourceConfig
-      ).catch((error) => {
-        logger.warn('预览容器清理请求失败:', error)
-      })
-    } else {
-      postMessageToPage({
-        type: MessageType.CLEAR_PREVIEW,
-      })
-    }
-  }, [apiConfig, isPostMessageMode])
-
-  /**
    * 抽屉打开/关闭回调 - 统一处理生命周期逻辑
    */
   const handleAfterOpenChange = useCallback(
@@ -431,17 +451,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
       clearSnapshots,
     ]
   )
-
-  /**
-   * 处理抽屉关闭
-   * 在动画开始前立即清理预览容器，确保与抽屉关闭同步
-   */
-  const handleClose = useCallback(() => {
-    // 立即清理预览容器（与抽屉关闭同步）
-    cleanupPreviewContainer()
-    // 调用原始关闭回调
-    onClose()
-  }, [cleanupPreviewContainer, onClose])
 
   /**
    * 格式化 Schema 数据，返回用于编辑器显示的内容
@@ -757,6 +766,18 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   }, [hasPreviewFunction, previewEnabled, switchFullScreenMode])
 
   /**
+   * 快捷键保存处理函数
+   */
+  const handleShortcutSave = useCallback(async () => {
+    if (!isModified || isSaving) return
+    try {
+      await handleSave()
+    } catch (error: any) {
+      message.error(error.message || '保存失败')
+    }
+  }, [isModified, isSaving, handleSave, message])
+
+  /**
    * 手动渲染预览
    * 预览数据与保存数据使用相同的转换逻辑，确保类型一致
    */
@@ -851,11 +872,15 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     ]
   )
 
+  /** 保存最新的 handleRenderPreview 引用，避免 effect 依赖变化 */
+  const handleRenderPreviewRef = useRef(handleRenderPreview)
+  handleRenderPreviewRef.current = handleRenderPreview
+
   /**
    * 当预览开启时，自动渲染第一次
    * 延迟 300ms 等待 Drawer 宽度动画完成
    */
-  useDeferredEffect(() => handleRenderPreview(), [handleRenderPreview], {
+  useDeferredEffect(() => handleRenderPreviewRef.current(), [previewEnabled], {
     delay: 300,
     enabled: previewEnabled && hasPreviewFunction,
   })
@@ -863,9 +888,52 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   /**
    * 自动更新预览（当开启自动更新时）
    */
-  useDeferredEffect(() => handleRenderPreview(true), [editorValue, handleRenderPreview], {
+  useDeferredEffect(() => handleRenderPreviewRef.current(true), [editorValue], {
     delay: previewConfig.updateDelay,
     enabled: previewEnabled && previewConfig.autoUpdate && hasPreviewFunction,
+  })
+
+  /**
+   * 打开或更新预览（快捷键专用）
+   * 预览关闭时：打开预览
+   * 预览打开时：更新预览内容
+   */
+  const handleOpenOrUpdatePreview = useCallback(() => {
+    if (!hasPreviewFunction) {
+      message.warning('页面未提供预览函数')
+      return
+    }
+
+    if (previewEnabled) {
+      // 预览已打开，触发更新
+      handleRenderPreview()
+    } else {
+      // 预览未打开，打开预览
+      switchFullScreenMode(FULL_SCREEN_MODE.PREVIEW)
+    }
+  }, [hasPreviewFunction, previewEnabled, switchFullScreenMode, handleRenderPreview])
+
+  /**
+   * 关闭预览（快捷键专用）
+   */
+  const handleClosePreview = useCallback(() => {
+    if (previewEnabled) {
+      switchFullScreenMode(FULL_SCREEN_MODE.NONE)
+    }
+  }, [previewEnabled, switchFullScreenMode])
+
+  /** 注册抽屉快捷键 */
+  useDrawerShortcuts({
+    shortcuts,
+    isOpen: open,
+    onSave: handleShortcutSave,
+    onFormat: handleFormat,
+    onOpenOrUpdatePreview: handleOpenOrUpdatePreview,
+    onClosePreview: handleClosePreview,
+    canSave: isModified && !isSaving,
+    canFormat: canParse,
+    isPreviewOpen: previewEnabled,
+    hasPreviewFunction,
   })
 
   /**

@@ -126,24 +126,30 @@ export function createSchemaEditorBridge(config: SchemaEditorConfig): () => void
 
   /**
    * 发送响应给插件
+   * 自动检测是否在 iframe 中，如果是则发送给 top frame
    */
   const sendResponse = (requestId: string, result: Record<string, unknown>) => {
-    window.postMessage(
-      {
-        source: mergedSourceConfig.hostSource,
-        requestId,
-        ...result,
-      },
-      '*'
-    )
+    const message = {
+      source: mergedSourceConfig.hostSource,
+      requestId,
+      ...result,
+    }
+
+    // 如果在 iframe 中，响应需要发给 top frame（插件运行在 top frame）
+    const isInIframe = window !== window.top
+    const targetWindow = isInIframe ? window.parent : window
+
+    targetWindow.postMessage(message, '*')
   }
 
   /**
    * 处理消息
    */
   const handleMessage = (event: MessageEvent<PostMessageRequest>) => {
-    // 只处理来自当前窗口的消息
-    if (event.source !== window) return
+    // 接受来自当前窗口或父窗口的消息（支持 iframe 场景）
+    const isFromSelf = event.source === window
+    const isFromParent = window !== window.top && event.source === window.parent
+    if (!isFromSelf && !isFromParent) return
 
     // 只处理来自插件的消息
     if (!event.data || event.data.source !== mergedSourceConfig.contentSource) return

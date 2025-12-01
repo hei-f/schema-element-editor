@@ -125,6 +125,14 @@ export const FORM_PATHS = {
     pollingInterval: ['recordingModeConfig', 'pollingInterval'],
   },
 
+  /** iframe 支持配置 */
+  iframeConfig: {
+    /** 是否启用 */
+    enabled: ['iframeConfig', 'enabled'],
+    /** Schema 数据来源 */
+    schemaTarget: ['iframeConfig', 'schemaTarget'],
+  },
+
   /** 启用 AST 类型提示 */
   enableAstTypeHints: ['enableAstTypeHints'],
 
@@ -160,6 +168,18 @@ export const FORM_PATHS = {
       /** 清理预览 */
       cleanupPreview: ['apiConfig', 'messageTypes', 'cleanupPreview'],
     },
+  },
+
+  /** 抽屉快捷键配置 */
+  drawerShortcuts: {
+    /** 保存快捷键 */
+    save: ['drawerShortcuts', 'save'],
+    /** 格式化快捷键 */
+    format: ['drawerShortcuts', 'format'],
+    /** 打开/更新预览快捷键 */
+    openOrUpdatePreview: ['drawerShortcuts', 'openOrUpdatePreview'],
+    /** 关闭预览快捷键 */
+    closePreview: ['drawerShortcuts', 'closePreview'],
   },
 }
 

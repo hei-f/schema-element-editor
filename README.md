@@ -2,12 +2,13 @@
 
 Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 
-![Version](https://img.shields.io/badge/version-1.17.2-blue)
+![Version](https://img.shields.io/badge/version-1.19.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 ## 功能
 
 - 🎯 **智能元素检测**: 按住 Alt/Option 键时自动检测和高亮目标元素
+- 🖼️ **iframe 支持**: 支持检测页面中同源 iframe 内的元素，高亮框统一渲染在主页面
 - 🔦 **批量高亮**: 支持快捷键（Alt+字母/数字）一键高亮页面所有可编辑元素，可配置快捷键和数量上限
 - 🔴 **录制模式**: 按 Alt+R 进入录制模式，轮询检测Schema变化并记录快照，支持多版本Diff对比
 - 📝 **Schema编辑器**: 内置CodeMirror编辑器，支持JSON格式化、压缩、转义/去转义等操作
@@ -81,6 +82,11 @@ npm run demo
   - 录制模式下会自动轮询检测Schema变化，记录每个不同的版本快照
   - 停止录制后，可选择任意两个版本进行Diff对比，支持原始/反序列化/AST三种对比模式
   - 可在配置页面自定义快捷键、高亮颜色和轮询间隔
+- **iframe 元素检测** (v1.19.0+): 支持检测页面中同源 iframe 内的元素
+  - 高亮框和 tooltip 统一渲染在主页面，不会被 iframe 边界裁剪
+  - 可配置 Schema 数据来源（iframe 内部或主页面）
+  - 仅支持同源 iframe，跨域 iframe 暂不支持
+  - 可在配置页面开启/关闭此功能
 
 ## 页面集成
 
