@@ -128,7 +128,7 @@ describe('Storage工具测试', () => {
         },
         highlightColor: '#39C5BB',
         iframeConfig: {
-          enabled: true,
+          enabled: false,
           schemaTarget: 'iframe',
         },
         maxFavoritesCount: 50,
@@ -230,7 +230,7 @@ describe('Storage工具测试', () => {
         },
         highlightColor: '#39C5BB',
         iframeConfig: {
-          enabled: true,
+          enabled: false,
           schemaTarget: 'iframe',
         },
         maxFavoritesCount: 50,
@@ -322,7 +322,7 @@ describe('Storage工具测试', () => {
         },
         highlightColor: '#39C5BB',
         iframeConfig: {
-          enabled: true,
+          enabled: false,
           schemaTarget: 'iframe',
         },
         maxFavoritesCount: 50,
@@ -594,7 +594,7 @@ describe('Storage工具测试', () => {
         },
         highlightColor: '#39C5BB',
         iframeConfig: {
-          enabled: true,
+          enabled: false,
           schemaTarget: 'iframe',
         },
         maxFavoritesCount: 50,
