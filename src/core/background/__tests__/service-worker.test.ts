@@ -499,7 +499,7 @@ describe('Background Service Worker', () => {
         let isActive = false
 
         try {
-          const result = await chrome.storage.local.get('isActive')
+          const result = await chrome.storage.local.get<{ isActive?: boolean }>('isActive')
           isActive = result.isActive ?? false
         } catch (error) {
           console.error('获取激活状态失败:', error)
