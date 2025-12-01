@@ -1,10 +1,23 @@
 import type {
   ElementAttributes,
   HighlightAllConfig,
+  IframeElementRect,
   RecordingModeConfig,
   SearchConfig,
 } from '@/shared/types'
 import { storage } from '@/shared/utils/browser/storage'
+import {
+  broadcastAltKeyState,
+  broadcastHighlightAllRequest,
+  convertMousePositionToTopFrame,
+  convertRectToTopFrame,
+  initIframeBridgeListener,
+  sendClearHighlightToTop,
+  sendElementClickToTop,
+  sendElementHoverToTop,
+  sendHighlightAllResponseToTop,
+  type AltKeySyncPayload,
+} from '@/shared/utils/iframe-bridge'
 import { logger } from '@/shared/utils/logger'
 import {
   findElementWithSchemaParams,
@@ -34,6 +47,9 @@ export class ElementMonitor {
   private searchConfig: SearchConfig | null = null
   private lastMouseX: number = 0
   private lastMouseY: number = 0
+
+  // iframe 广播节流相关
+  private lastIframeBroadcastTime: number = 0
 
   // 单元素高亮相关属性
   private highlightBox: HTMLElement | null = null
@@ -65,14 +81,25 @@ export class ElementMonitor {
   // 抽屉打开时暂停检测
   private isPaused: boolean = false
 
+  // iframe 模式相关
+  private isIframeMode: boolean = false
+  private iframeBridgeCleanup: (() => void) | null = null
+  private iframeEnabled: boolean = false
+
   /**
    * 启动监听
+   * @param isIframeMode 是否为 iframe 模式（在 iframe 内运行）
    */
-  async start(): Promise<void> {
-    if (this.isActive) return
+  async start(isIframeMode: boolean = false): Promise<void> {
+    if (this.isActive) {
+      console.log('[Monitor] 已经启动，跳过')
+      return
+    }
 
     this.isActive = true
-    logger.log('元素监听器已启动 (按住 Alt/Option 键启用检测)')
+    this.isIframeMode = isIframeMode
+    const modeInfo = isIframeMode ? '(iframe 模式)' : '(top frame)'
+    console.log(`[Monitor] 启动 ${modeInfo}`, { url: window.location.href })
 
     // 加载搜索配置
     this.searchConfig = await storage.getSearchConfig()
@@ -82,6 +109,12 @@ export class ElementMonitor {
 
     // 加载录制模式配置
     this.recordingModeConfig = await storage.getRecordingModeConfig()
+
+    // 加载 iframe 配置（仅 top frame 需要）
+    if (!isIframeMode) {
+      const iframeConfig = await storage.getIframeConfig()
+      this.iframeEnabled = iframeConfig.enabled
+    }
 
     // 添加事件监听
     document.addEventListener('mousemove', this.handleMouseMove, true)
@@ -93,8 +126,122 @@ export class ElementMonitor {
     window.addEventListener('schema-editor:pause-monitor', this.handlePauseMonitor)
     window.addEventListener('schema-editor:resume-monitor', this.handleResumeMonitor)
 
-    // 创建tooltip元素
-    this.createTooltip()
+    // 仅在 top frame 创建 tooltip 元素
+    if (!isIframeMode) {
+      this.createTooltip()
+    }
+
+    // 在 iframe 内监听来自 top frame 的高亮所有元素请求
+    if (isIframeMode) {
+      this.initIframeBridgeListener()
+    }
+  }
+
+  /**
+   * 初始化 iframe bridge 监听器（仅 iframe 内）
+   */
+  private initIframeBridgeListener(): void {
+    this.iframeBridgeCleanup = initIframeBridgeListener({
+      onHighlightAllRequest: () => {
+        // 收集 iframe 内所有合法元素并发送给 top frame
+        this.collectAndSendHighlightAllElements()
+      },
+      onAltKeySync: (payload: AltKeySyncPayload) => {
+        // 收到主页面的 Alt 键状态同步
+        console.log('[Monitor iframe] 收到 Alt 键状态同步:', payload)
+        this.handleAltKeySync(payload)
+      },
+    })
+  }
+
+  /**
+   * 节流广播 Alt 键状态给 iframe（仅主页面使用）
+   */
+  private throttledBroadcastToIframe(mouseX: number, mouseY: number): void {
+    // iframe 功能未启用时不广播
+    if (!this.iframeEnabled) return
+
+    const now = Date.now()
+    const throttleInterval = this.searchConfig?.throttleInterval ?? 16
+
+    if (now - this.lastIframeBroadcastTime >= throttleInterval) {
+      this.lastIframeBroadcastTime = now
+      broadcastAltKeyState(true, { x: mouseX, y: mouseY })
+    }
+  }
+
+  /**
+   * 处理从主页面同步的 Alt 键状态（仅 iframe 内）
+   */
+  private handleAltKeySync(payload: AltKeySyncPayload): void {
+    if (!this.isActive || this.isPaused) {
+      console.log('[Monitor iframe] 忽略 Alt 同步：未激活或已暂停')
+      return
+    }
+
+    const { isPressed, mousePosition } = payload
+    this.isControlPressed = isPressed
+
+    if (isPressed) {
+      // 更新鼠标位置（iframe 内坐标）
+      this.lastMouseX = mousePosition.x
+      this.lastMouseY = mousePosition.y
+
+      // 创建模拟的鼠标事件进行元素检测
+      const mockEvent = new MouseEvent('mousemove', {
+        clientX: mousePosition.x,
+        clientY: mousePosition.y,
+        bubbles: true,
+        cancelable: true,
+      })
+      this.performSearch(mockEvent)
+    } else {
+      this.clearHighlight()
+    }
+  }
+
+  /**
+   * 收集 iframe 内所有合法元素并发送给 top frame
+   */
+  private async collectAndSendHighlightAllElements(): Promise<void> {
+    const attributeName = await storage.getAttributeName()
+    const dataAttrName = `data-${attributeName}`
+
+    const allElements = document.querySelectorAll(`[${dataAttrName}]`)
+    const maxCount = this.highlightAllConfig?.maxHighlightCount ?? 500
+
+    const elementsToSend: Array<{ rect: IframeElementRect; params: string[] }> = []
+
+    Array.from(allElements)
+      .slice(0, maxCount)
+      .forEach((el) => {
+        const element = el as HTMLElement
+
+        // 跳过不可见元素
+        if (!isVisibleElement(element)) return
+
+        // 跳过插件自己的元素
+        if (element.closest(UI_ELEMENT_SELECTOR)) return
+
+        const attrValue = element.getAttribute(dataAttrName) || ''
+        if (!attrValue) return
+
+        const params = attrValue
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+        if (params.length === 0) return
+
+        // 转换坐标到 top frame
+        const rect = element.getBoundingClientRect()
+        const topFrameRect = convertRectToTopFrame(rect)
+        if (!topFrameRect) return
+
+        elementsToSend.push({ rect: topFrameRect, params })
+      })
+
+    // 发送给 top frame
+    sendHighlightAllResponseToTop(elementsToSend)
   }
 
   /**
@@ -112,10 +259,16 @@ export class ElementMonitor {
     document.removeEventListener('click', this.handleClick, true)
     document.removeEventListener('keydown', this.handleKeyDown, true)
     document.removeEventListener('keyup', this.handleKeyUp, true)
-    document.removeEventListener('scroll', this.handleScroll, true) // 移除滚动监听
+    document.removeEventListener('scroll', this.handleScroll, true)
     window.removeEventListener('schema-editor:clear-highlight', this.handleClearHighlight)
     window.removeEventListener('schema-editor:pause-monitor', this.handlePauseMonitor)
     window.removeEventListener('schema-editor:resume-monitor', this.handleResumeMonitor)
+
+    // 清理 iframe bridge 监听器
+    if (this.iframeBridgeCleanup) {
+      this.iframeBridgeCleanup()
+      this.iframeBridgeCleanup = null
+    }
 
     // 清理当前高亮
     this.clearHighlight()
@@ -147,6 +300,13 @@ export class ElementMonitor {
    */
   private handleResumeMonitor = (): void => {
     this.isPaused = false
+    // 重置 Alt 键状态，确保不会意外触发高亮
+    this.isControlPressed = false
+    this.clearHighlight()
+    // 通知 iframe 也重置状态（仅当 iframe 功能启用时）
+    if (!this.isIframeMode && this.iframeEnabled) {
+      broadcastAltKeyState(false, { x: 0, y: 0 })
+    }
     logger.log('元素监听器已恢复')
   }
 
@@ -212,10 +372,21 @@ export class ElementMonitor {
    * 处理键盘按下事件
    */
   private handleKeyDown = (event: KeyboardEvent): void => {
-    if (!this.isActive || this.isPaused) return
+    if (!this.isActive || this.isPaused) {
+      if (event.altKey) {
+        console.log('[Monitor] Alt 按下但未激活/已暂停', {
+          isActive: this.isActive,
+          isPaused: this.isPaused,
+          isIframeMode: this.isIframeMode,
+          url: window.location.href,
+        })
+      }
+      return
+    }
 
     // 检测 Alt 键（Mac 上是 Option 键）
     if (event.altKey) {
+      console.log('[Monitor] Alt 键按下', { isIframeMode: this.isIframeMode })
       // 使用 event.code 而不是 event.key，因为 Mac 上 Alt+A 会产生特殊字符 'å'
       const keyCode = event.code.toLowerCase()
 
@@ -335,7 +506,15 @@ export class ElementMonitor {
       if (this.isControlPressed) {
         this.isControlPressed = false
         // 清理当前高亮
-        this.clearHighlight()
+        if (this.isIframeMode) {
+          sendClearHighlightToTop()
+        } else {
+          this.clearHighlight()
+          // 主页面释放 Alt 时，通知 iframe 清除高亮（仅当 iframe 功能启用时）
+          if (this.iframeEnabled) {
+            broadcastAltKeyState(false, { x: 0, y: 0 })
+          }
+        }
       }
 
       // 清除高亮所有元素
@@ -409,12 +588,30 @@ export class ElementMonitor {
     }
 
     const target = event.target as HTMLElement
+    console.log('[Monitor] mousemove with Alt', {
+      isIframeMode: this.isIframeMode,
+      targetTag: target.tagName,
+      x: event.clientX,
+      y: event.clientY,
+    })
 
     // 忽略我们自己创建的元素
     if (
       target === this.tooltipElement ||
       (target.closest && target.closest('[data-schema-editor-ui]'))
     ) {
+      return
+    }
+
+    // 如果目标是 iframe 元素，广播 Alt 键状态给 iframe 并跳过
+    if (target.tagName === 'IFRAME') {
+      this.clearHighlight()
+      // 计算鼠标相对于 iframe 内部的坐标
+      const iframeRect = target.getBoundingClientRect()
+      const iframeMouseX = Math.round(event.clientX - iframeRect.left)
+      const iframeMouseY = Math.round(event.clientY - iframeRect.top)
+      // 节流：只在位置变化超过阈值时才广播
+      this.throttledBroadcastToIframe(iframeMouseX, iframeMouseY)
       return
     }
 
@@ -450,9 +647,15 @@ export class ElementMonitor {
     const { target } = await findElementWithSchemaParams(event.clientX, event.clientY)
 
     if (!target) {
-      // 没找到任何元素，清理高亮并显示"非法目标"
-      this.clearHighlight()
-      this.showTooltip({ params: [] }, false, event)
+      // 没找到任何元素
+      if (this.isIframeMode) {
+        // iframe 模式：通知 top frame 清除高亮
+        sendClearHighlightToTop()
+      } else {
+        // top frame 模式：直接清理高亮并显示"非法目标"
+        this.clearHighlight()
+        this.showTooltip({ params: [] }, false, event)
+      }
       return
     }
 
@@ -460,6 +663,20 @@ export class ElementMonitor {
     const attrs = await getElementAttributes(target)
     const isValid = hasValidAttributes(attrs)
 
+    // iframe 模式：发送元素信息给 top frame
+    if (this.isIframeMode) {
+      const rect = target.getBoundingClientRect()
+      const topFrameRect = convertRectToTopFrame(rect)
+      const topFrameMousePos = convertMousePositionToTopFrame(event.clientX, event.clientY)
+
+      if (topFrameRect && topFrameMousePos) {
+        sendElementHoverToTop(topFrameRect, attrs, isValid, topFrameMousePos, this.isRecordingMode)
+      }
+      this.currentElement = target
+      return
+    }
+
+    // top frame 模式：直接渲染高亮框
     // 条件卸载：检查是否是同一个元素
     if (target === this.currentHighlightedElement) {
       // 同一个元素，只更新 tooltip 位置，不重建高亮框
@@ -508,7 +725,17 @@ export class ElementMonitor {
       event.preventDefault()
       event.stopPropagation()
 
-      // 根据是否处于录制模式调用不同的回调
+      // iframe 模式：发送点击消息给 top frame
+      if (this.isIframeMode) {
+        sendElementClickToTop(attrs, this.isRecordingMode)
+        // 点击后退出录制模式
+        if (this.isRecordingMode) {
+          this.isRecordingMode = false
+        }
+        return
+      }
+
+      // top frame 模式：根据是否处于录制模式调用不同的回调
       if (this.isRecordingMode && this.onRecordingModeClickCallback) {
         this.onRecordingModeClickCallback(this.currentElement, attrs)
         // 点击后退出录制模式
@@ -656,6 +883,11 @@ export class ElementMonitor {
       this.addHighlightBox(element, params, highlightColor)
       this.highlightAllElements.push(element)
     })
+
+    // 如果是 top frame，向所有 iframe 广播高亮请求
+    if (!this.isIframeMode) {
+      broadcastHighlightAllRequest()
+    }
   }
 
   /**
