@@ -58,7 +58,7 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     pollingInterval: 100,
   },
   iframeConfig: {
-    enabled: true,
+    enabled: false,
     schemaTarget: 'iframe',
   },
   enableAstTypeHints: true,
