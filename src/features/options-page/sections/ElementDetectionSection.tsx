@@ -251,6 +251,9 @@ export const ElementDetectionSection: React.FC<ElementDetectionSectionProps> = (
         message="iframe 支持说明"
         description={
           <div>
+            <p>
+              <Text strong>💡 如果页面不包含需要检测的 iframe，建议关闭此功能以减少资源消耗</Text>
+            </p>
             <p>1. 仅支持同源 iframe，跨域 iframe 会显示"跨域 iframe 暂不支持"提示</p>
             <p>
               2. 默认向 iframe 内部发送 postMessage 获取 Schema，如果 iframe

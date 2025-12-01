@@ -340,7 +340,7 @@ describe('Host SDK - createSchemaEditorBridge', () => {
       Object.defineProperty(window, 'top', { value: mockTop, writable: true })
       Object.defineProperty(window, 'parent', { value: mockParent, writable: true })
 
-      const getSchema = jest.fn(() => ({ fromIframe: true }))
+      const getSchema = jest.fn((params: string) => ({ fromIframe: true, params }))
 
       // 创建接受 parent 消息的监听器
       const handleMessage = (event: MessageEvent) => {

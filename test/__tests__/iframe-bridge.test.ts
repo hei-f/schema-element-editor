@@ -196,7 +196,8 @@ describe('iframe-bridge', () => {
       if (isInIframe) {
         try {
           // 尝试访问 parent.location.href
-          const _href = (window.parent as any).location.href
+          // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+          ;(window.parent as Window & { location: { href: string } }).location.href
           isSameOrigin = true
         } catch {
           isSameOrigin = false
