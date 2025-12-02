@@ -5,7 +5,7 @@ import { storage } from '@/shared/utils/browser/storage'
 import { getChangedFieldPath, getValueByPath, pathToString } from '@/shared/utils/form-path'
 import { CheckCircleOutlined, UndoOutlined } from '@ant-design/icons'
 import { Button, ConfigProvider, Form, message, Popconfirm } from 'antd'
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { SideMenu } from './components/SideMenu'
 import {
   FIELD_PATH_STORAGE_MAP,
@@ -422,6 +422,17 @@ export const OptionsApp: React.FC = () => {
     message.success('已恢复全部默认配置')
   }, [form])
 
+  /** 当前插件版本 */
+  const currentVersion = 'v1.19.2'
+
+  /**
+   * 设置页面标题
+   * 注：React 19 Document Metadata 在 Chrome 扩展中可能不生效，使用传统方式
+   */
+  useEffect(() => {
+    document.title = `Schema Editor 设置 (${currentVersion})`
+  }, [currentVersion])
+
   return (
     <ConfigProvider
       theme={{
@@ -475,7 +486,7 @@ export const OptionsApp: React.FC = () => {
               <PageDescription type="secondary">配置插件的行为参数</PageDescription>
             </HeaderContent>
             <HeaderActions align="center" gap={12}>
-              <VersionTag>v1.19.2</VersionTag>
+              <VersionTag>{currentVersion}</VersionTag>
               <Button onClick={openReleasePage}>检查更新</Button>
             </HeaderActions>
           </HeaderSection>
