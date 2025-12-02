@@ -35,7 +35,6 @@ export default defineConfig({
         'src/core/content/index.tsx',
         'src/core/content/core/monitor.ts',
         'src/features/options-page/index.tsx',
-        'src/shared/utils/browser/monaco-loader.ts',
         'src/**/__tests__/**',
         // 排除样式文件
         'src/**/*.styles.ts',
