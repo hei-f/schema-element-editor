@@ -3,6 +3,7 @@ import { storage } from './browser/storage'
 /**
  * 日志工具类
  * 根据配置决定是否输出调试日志
+ * 发布模式下所有 console 会被 esbuild 移除
  */
 class Logger {
   private enabled: boolean = false
@@ -18,7 +19,7 @@ class Logger {
       this.enabled = await storage.getEnableDebugLog()
       this.initialized = true
     } catch (_error) {
-      // 初始化失败时默认不输出日志
+      /** 初始化失败时默认不输出日志 */
       this.enabled = false
       this.initialized = true
     }
@@ -61,5 +62,5 @@ class Logger {
 
 export const logger = new Logger()
 
-// 自动初始化
+/** 自动初始化 */
 logger.init()
