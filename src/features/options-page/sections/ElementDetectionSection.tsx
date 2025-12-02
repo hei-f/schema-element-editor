@@ -227,7 +227,7 @@ export const ElementDetectionSection: React.FC<ElementDetectionSectionProps> = (
               extra="配置 iframe 内元素的 Schema 数据由谁提供"
             >
               <Radio.Group disabled={!iframeEnabled}>
-                <Space direction="vertical">
+                <Space orientation="vertical">
                   <Radio value={'iframe' as IframeSchemaTarget}>
                     <Text strong>iframe 内部</Text>
                     <Text type="secondary" style={{ marginLeft: 8 }}>

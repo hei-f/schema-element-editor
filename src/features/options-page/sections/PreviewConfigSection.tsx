@@ -58,7 +58,7 @@ export const PreviewConfigSection: React.FC<PreviewConfigSectionProps> = (props)
       </Form.Item>
 
       <div id="field-z-index">
-        <Divider orientation="left" plain style={{ margin: '8px 0' }}>
+        <Divider titlePlacement="left" plain style={{ margin: '8px 0' }}>
           层级配置
         </Divider>
       </div>

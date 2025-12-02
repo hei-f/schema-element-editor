@@ -285,7 +285,7 @@ export const IframeTestPage: React.FC<IframeTestPageProps> = () => {
 
         <Col span={8}>
           <Card title="功能状态">
-            <Space direction="vertical" style={{ width: '100%' }}>
+            <Space orientation="vertical" style={{ width: '100%' }}>
               <div>
                 <Text type="secondary">iframe 检测：</Text>
                 <Tag icon={<CheckCircleOutlined />} color="success">

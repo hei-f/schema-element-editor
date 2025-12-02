@@ -238,7 +238,7 @@ const PreviewComponent: React.FC<PreviewComponentProps> = ({ schema }) => {
 
   return (
     <div style={{ padding: 16, height: '100%', overflow: 'auto' }}>
-      <Space direction="vertical" style={{ width: '100%' }} size="middle">
+      <Space orientation="vertical" style={{ width: '100%' }} size="middle">
         <Card size="small" title="📊 Schema 数据">
           <pre
             style={{

@@ -1,10 +1,16 @@
 import { DEFAULT_VALUES } from '@/shared/constants/defaults'
 import { FORM_PATHS } from '@/shared/constants/form-paths'
 import type { ApiConfig, CommunicationMode } from '@/shared/types'
-import { Alert, Form, Input, InputNumber, Radio, Space, Typography } from 'antd'
+import { Alert, Form, Input, Radio, Space, Typography } from 'antd'
 import React from 'react'
 import { SectionCard } from '../components/SectionCard'
-import { CodeBlock, ExampleLabel, ExampleSection, FormSectionLabel } from '../styles/layout.styles'
+import {
+  CodeBlock,
+  ExampleLabel,
+  ExampleSection,
+  FixedWidthInputNumber,
+  FormSectionLabel,
+} from '../styles/layout.styles'
 
 const { Text } = Typography
 
@@ -63,7 +69,7 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
         id="field-communication-mode"
       >
         <Radio.Group>
-          <Space direction="vertical">
+          <Space orientation="vertical">
             <Radio value="postMessage">
               <Text strong>postMessage 模式</Text>
               <Text type="secondary" style={{ marginLeft: 8 }}>
@@ -112,7 +118,7 @@ export const IntegrationConfigSection: React.FC<IntegrationConfigSectionProps> =
             ]}
             extra="发送请求后等待响应的最长时间"
           >
-            <InputNumber min={1} max={30} style={{ width: 120 }} addonAfter="秒" />
+            <FixedWidthInputNumber min={1} max={30} $width={120} suffix="秒" />
           </Form.Item>
 
           <FormSectionLabel id="field-source-config">消息标识配置</FormSectionLabel>
