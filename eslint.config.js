@@ -133,4 +133,18 @@ export default [
       '@typescript-eslint/no-require-imports': 'off',
     },
   },
+  // 测试文件专用规则 - 放宽类型检查（必须放在通用规则之后才能覆盖）
+  {
+    files: [
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      '**/__tests__/**/*.ts',
+      '**/__tests__/**/*.tsx',
+      'test/**/*.ts',
+    ],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+    },
+  },
 ]

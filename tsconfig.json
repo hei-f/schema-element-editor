@@ -5,7 +5,7 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker"],
     "module": "ESNext",
     "skipLibCheck": true,
-    "types": ["vite/client", "chrome", "jest", "@testing-library/jest-dom"],
+    "types": ["vite/client", "chrome", "vitest/globals", "@testing-library/jest-dom"],
 
     /* Bundler mode */
     "moduleResolution": "bundler",
