@@ -811,6 +811,7 @@ export const FixedWidthInput = styled(Input)<{ $width?: number }>`
 /**
  * 固定宽度数字输入框
  * 支持通过 $width 属性自定义宽度
+ * 支持 suffix 和 addonAfter 属性显示单位
  */
 export const FixedWidthInputNumber = styled(InputNumber)<{ $width?: number }>`
   width: ${(props) => props.$width || 100}px;
