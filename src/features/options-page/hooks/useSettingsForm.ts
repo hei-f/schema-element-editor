@@ -152,12 +152,11 @@ export const useSettingsForm = (props: UseSettingsFormProps): UseSettingsFormRet
 
         const pathKey = pathToString(fieldPath)
         const storageMethod = FIELD_PATH_STORAGE_MAP[pathKey]
+        const storageAny = storage as unknown as Record<string, (value: unknown) => Promise<void>>
 
-        if (storageMethod && (storage as Record<string, unknown>)[storageMethod]) {
+        if (storageMethod && storageAny[storageMethod]) {
           const fieldValue = getValueByPath(allValues, fieldPath)
-          await (storage as Record<string, (value: unknown) => Promise<void>>)[storageMethod](
-            fieldValue
-          )
+          await storageAny[storageMethod](fieldValue)
 
           if (pathKey === 'attributeName') {
             onAttributeNameChange(fieldValue as string)

@@ -19,18 +19,21 @@ describe('FavoritesListModal组件测试', () => {
       name: '收藏1',
       content: '{"type": "test1"}',
       timestamp: Date.now() - 1000 * 60 * 60, // 1小时前
+      lastUsedTime: Date.now() - 1000 * 60 * 30, // 30分钟前使用
     },
     {
       id: '2',
       name: '收藏2',
       content: '{"type": "test2"}',
       timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1天前
+      lastUsedTime: Date.now() - 1000 * 60 * 60 * 12, // 12小时前使用
     },
     {
       id: '3',
       name: '特殊收藏',
       content: '{"keyword": "搜索测试"}',
       timestamp: Date.now(),
+      lastUsedTime: Date.now(),
     },
   ]
 
@@ -287,6 +290,7 @@ describe('FavoritesListModal组件测试', () => {
         name: `收藏${i}`,
         content: `{"index": ${i}}`,
         timestamp: Date.now() - i * 1000,
+        lastUsedTime: Date.now() - i * 500,
       }))
 
       render(<FavoritesListModal {...defaultProps} favoritesList={manyFavorites} />)
@@ -326,6 +330,7 @@ describe('FavoritesListModal组件测试', () => {
           name: '收藏(测试)',
           content: '{"test": true}',
           timestamp: Date.now(),
+          lastUsedTime: Date.now(),
         },
       ]
 
@@ -357,6 +362,7 @@ describe('FavoritesListModal组件测试', () => {
           name: '新收藏',
           content: '{"new": true}',
           timestamp: Date.now(),
+          lastUsedTime: Date.now(),
         },
       ]
 

@@ -42,27 +42,27 @@ vi.mock('@/features/schema-drawer/components/editor/CodeMirrorEditor', () => ({
 /**
  * 获取 Modal footer 中的保存按钮
  */
-const getSaveButton = () => {
+const getSaveButton = (): HTMLButtonElement => {
   const footer = document.querySelector('.ant-modal-footer')
   if (footer) {
     const buttons = footer.querySelectorAll('button')
     // 保存按钮通常是最后一个（primary 按钮）
-    return buttons[buttons.length - 1]
+    return buttons[buttons.length - 1] as HTMLButtonElement
   }
-  return screen.getByText(/保.*存/).closest('button')
+  return screen.getByText(/保.*存/).closest('button') as HTMLButtonElement
 }
 
 /**
  * 获取 Modal footer 中的取消按钮
  */
-const getCancelButton = () => {
+const getCancelButton = (): HTMLButtonElement => {
   const footer = document.querySelector('.ant-modal-footer')
   if (footer) {
     const buttons = footer.querySelectorAll('button')
     // 取消按钮通常是第一个
-    return buttons[0]
+    return buttons[0] as HTMLButtonElement
   }
-  return screen.getByText(/取.*消/).closest('button')
+  return screen.getByText(/取.*消/).closest('button') as HTMLButtonElement
 }
 
 describe('FavoriteEditModal组件测试', () => {

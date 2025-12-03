@@ -57,8 +57,9 @@ export const useResetConfig = (props: UseResetConfigProps): UseResetConfigReturn
       for (const key of keys) {
         const value = (DEFAULT_VALUES as Record<string, unknown>)[key]
         const storageMethod = `set${key.charAt(0).toUpperCase()}${key.slice(1)}`
-        if ((storage as Record<string, (value: unknown) => Promise<void>>)[storageMethod]) {
-          await (storage as Record<string, (value: unknown) => Promise<void>>)[storageMethod](value)
+        const storageAny = storage as unknown as Record<string, (value: unknown) => Promise<void>>
+        if (storageAny[storageMethod]) {
+          await storageAny[storageMethod](value)
         }
       }
 
