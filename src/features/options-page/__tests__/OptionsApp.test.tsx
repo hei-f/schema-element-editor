@@ -357,4 +357,43 @@ describe('OptionsApp组件测试', () => {
       })
     })
   })
+
+  /**
+   * Document Metadata 测试
+   * React 19 升级：由于 Chrome 扩展限制，使用 useEffect 设置 document.title
+   */
+  describe('Document Metadata (React 19)', () => {
+    it('应该在组件挂载时设置 document.title', async () => {
+      render(<OptionsApp />)
+
+      await waitFor(() => {
+        // 验证 document.title 包含应用名称和版本号
+        expect(document.title).toMatch(/Schema Editor 设置/)
+        expect(document.title).toMatch(/v\d+\.\d+\.\d+/)
+      })
+    })
+
+    it('document.title 应该包含正确的格式', async () => {
+      render(<OptionsApp />)
+
+      await waitFor(() => {
+        // 验证格式为 "Schema Editor 设置 (vX.X.X)"
+        expect(document.title).toMatch(/^Schema Editor 设置 \(v\d+\.\d+\.\d+\)$/)
+      })
+    })
+
+    it('应该正确显示版本号', async () => {
+      render(<OptionsApp />)
+
+      await waitFor(() => {
+        // 从页面获取版本号并验证 document.title 中包含相同版本
+        const versionElement = screen.getByText(/v\d+\.\d+\.\d+/)
+        const versionText = versionElement.textContent
+
+        if (versionText) {
+          expect(document.title).toContain(versionText)
+        }
+      })
+    })
+  })
 })
