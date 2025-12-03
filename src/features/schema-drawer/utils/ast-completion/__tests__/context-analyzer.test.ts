@@ -399,6 +399,129 @@ describe('context-analyzer', () => {
 
         expect(result.isInElementsArray).toBe(false)
       })
+
+      it('应该处理只有空白字符的文档', () => {
+        const content = '   '
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.Unknown)
+      })
+
+      it('应该处理 ": " 后紧跟换行的情况', () => {
+        const content = '{"type": \n'
+        const state = createState(content)
+        const pos = content.indexOf(': ') + 2
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyValue)
+      })
+
+      it('应该处理多个连续逗号后的情况', () => {
+        const content = '[{,,'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyName)
+      })
+
+      it('应该处理空对象后逗号的情况', () => {
+        const content = '[{},'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.ArrayElement)
+      })
+
+      it('应该处理深层嵌套数组的情况', () => {
+        const content = '[[[[{'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyName)
+      })
+
+      it('应该处理属性值为数字的情况', () => {
+        const content = '{"level": 1,'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyName)
+      })
+
+      it('应该处理属性值为 true/false 的情况', () => {
+        const content = '{"enabled": true,'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyName)
+      })
+
+      it('应该处理属性值为 null 的情况', () => {
+        const content = '{"data": null,'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyName)
+      })
+
+      it('应该处理 "]" 后逗号的情况', () => {
+        const content = '[{"items": [1, 2]},'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.ArrayElement)
+      })
+
+      it('应该处理只有 "{ 的情况', () => {
+        const content = '{"'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyName)
+      })
+
+      it('应该处理多行 JSON 中间位置', () => {
+        const content = `{
+  "type": "paragraph",
+  "children": []
+}`
+        const state = createState(content)
+        const pos = content.indexOf('"children"') + 5
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyName)
+      })
+
+      it('应该处理含有转义字符的字符串', () => {
+        const content = '{"message": "hello\\"world",'
+        const state = createState(content)
+        const pos = content.length
+
+        const result = analyzeContext(state, pos)
+
+        expect(result.type).toBe(ContextType.PropertyName)
+      })
     })
   })
 })

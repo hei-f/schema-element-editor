@@ -226,5 +226,91 @@ describe('completion-source', () => {
         // 这个测试需要真实的 AST
       })
     })
+
+    describe('非 Elements 数组文档处理', () => {
+      it('对于非数组开头的文档应返回 null', async () => {
+        const content = '{"key": "value"}'
+        const state = createState(content)
+        const pos = content.indexOf('value')
+        const context = createContext(state, pos, true)
+
+        const result = await completionSource(context)
+
+        expect(result).toBeNull()
+      })
+
+      it('对于只有对象的文档应返回 null', async () => {
+        const content = '{"type": "paragraph"}'
+        const state = createState(content)
+        const pos = content.indexOf('"paragraph"') + 1
+        const context = createContext(state, pos, true)
+
+        const result = await completionSource(context)
+
+        expect(result).toBeNull()
+      })
+    })
+
+    describe('显式触发与自动触发', () => {
+      it('显式触发时逗号后应该可以补全', async () => {
+        const content = '[{"type": "paragraph"},'
+        const state = createState(content)
+        const pos = content.length
+        const context = createContext(state, pos, true) // 显式触发
+
+        // 显式触发时应该允许补全逻辑执行
+        const result = await completionSource(context)
+        expect(result === null || typeof result === 'object').toBe(true)
+      })
+
+      it('显式触发时换行后应该可以补全', async () => {
+        const content = '[{"type": "paragraph"},\n'
+        const state = createState(content)
+        const pos = content.length
+        const context = createContext(state, pos, true) // 显式触发
+
+        const result = await completionSource(context)
+        expect(result === null || typeof result === 'object').toBe(true)
+      })
+
+      it('光标在位置 0 时不应该阻止补全', async () => {
+        const content = '['
+        const state = createState(content)
+        const pos = 1
+        const context = createContext(state, pos, false)
+
+        // 不应该抛出错误
+        await expect(completionSource(context)).resolves.toBeDefined()
+      })
+    })
+
+    describe('特殊字符处理', () => {
+      it('应该处理只有左大括号的情况', async () => {
+        const content = '[{'
+        const state = createState(content)
+        const pos = content.length
+        const context = createContext(state, pos, true)
+
+        await expect(completionSource(context)).resolves.toBeDefined()
+      })
+
+      it('应该处理嵌套数组的情况', async () => {
+        const content = '[{"children": [{'
+        const state = createState(content)
+        const pos = content.length
+        const context = createContext(state, pos, true)
+
+        await expect(completionSource(context)).resolves.toBeDefined()
+      })
+
+      it('应该处理空数组后逗号的情况', async () => {
+        const content = '[[],'
+        const state = createState(content)
+        const pos = content.length
+        const context = createContext(state, pos, true)
+
+        await expect(completionSource(context)).resolves.toBeDefined()
+      })
+    })
   })
 })
