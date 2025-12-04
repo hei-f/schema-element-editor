@@ -36,7 +36,7 @@ import {
 } from './styles/layout.styles'
 
 /** 当前插件版本 */
-const CURRENT_VERSION = 'v1.20.3'
+const CURRENT_VERSION = 'v1.21.0'
 
 /**
  * 打开GitHub Releases页面检查更新
