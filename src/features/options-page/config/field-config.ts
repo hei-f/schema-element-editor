@@ -39,7 +39,7 @@ export const SECTION_DEFAULT_KEYS: Record<SectionKey, readonly string[]> = {
     'recordingModeConfig',
     'iframeConfig',
   ],
-  [SECTION_KEYS.EDITOR_CONFIG]: ['drawerWidth', 'enableAstTypeHints', 'editorTheme'],
+  [SECTION_KEYS.EDITOR_CONFIG]: ['drawerWidth', 'enableAstTypeHints', 'editorTheme', 'themeColor'],
   [SECTION_KEYS.FEATURE_TOGGLE]: ['toolbarButtons'],
   [SECTION_KEYS.PREVIEW_CONFIG]: ['previewConfig'],
   [SECTION_KEYS.DATA_MANAGEMENT]: [
@@ -221,6 +221,7 @@ export const FIELD_PATH_STORAGE_MAP: Record<string, string> = {
   autoSaveDraft: 'setAutoSaveDraft',
   maxHistoryCount: 'setMaxHistoryCount',
   enableAstTypeHints: 'setEnableAstTypeHints',
+  themeColor: 'setThemeColor',
 }
 
 /**

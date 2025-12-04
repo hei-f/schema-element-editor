@@ -1,5 +1,6 @@
 import type { CommunicationMode } from '@/shared/types'
 import { RightOutlined } from '@ant-design/icons'
+import { theme } from 'antd'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   getIntegrationChildren,
@@ -148,8 +149,10 @@ export const SideMenu: React.FC<SideMenuProps> = (props) => {
     [onMenuClick, onSubMenuClick]
   )
 
+  const { token } = theme.useToken()
+
   return (
-    <MenuContainer $collapsed={collapsed}>
+    <MenuContainer $collapsed={collapsed} $themeColor={token.colorPrimary}>
       {/* 毛玻璃层 - 透视背景光晕 */}
       <GlassLayer />
 

@@ -73,6 +73,7 @@ export const useSettingsForm = (props: UseSettingsFormProps): UseSettingsFormRet
       const previewFunctionName = await storage.getPreviewFunctionName()
       const apiConfig = await storage.getApiConfig()
       const drawerShortcuts = await storage.getDrawerShortcuts()
+      const themeColor = await storage.getThemeColor()
 
       onAttributeNameChange(attributeName)
       onGetFunctionNameChange(getFunctionName)
@@ -104,6 +105,7 @@ export const useSettingsForm = (props: UseSettingsFormProps): UseSettingsFormRet
         previewFunctionName,
         apiConfig,
         drawerShortcuts,
+        themeColor,
       })
     } catch (error) {
       console.error('加载配置失败:', error)
@@ -194,6 +196,7 @@ export const useSettingsForm = (props: UseSettingsFormProps): UseSettingsFormRet
       'maxFavoritesCount',
       'highlightColor',
       'maxHistoryCount',
+      'themeColor',
     ]
     const apiConfigDebounceFields = ['requestTimeout', 'sourceConfig', 'messageTypes']
 

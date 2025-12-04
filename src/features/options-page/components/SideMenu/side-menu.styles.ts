@@ -99,7 +99,17 @@ const glowDrift4 = keyframes`
 `
 
 /** 菜单容器 - 固定定位 */
-export const MenuContainer = styled.div<{ $collapsed: boolean }>`
+export const MenuContainer = styled.div<{ $collapsed: boolean; $themeColor?: string }>`
+  /* 设置主题色 CSS 变量，供子组件使用 */
+  --menu-theme-color: ${(props) => props.$themeColor || '#39c5bb'};
+  --menu-theme-color-rgb: ${(props) => {
+    const hex = props.$themeColor || '#39c5bb'
+    const r = parseInt(hex.slice(1, 3), 16)
+    const g = parseInt(hex.slice(3, 5), 16)
+    const b = parseInt(hex.slice(5, 7), 16)
+    return `${r}, ${g}, ${b}`
+  }};
+
   position: fixed;
   left: 0;
   top: 0;
@@ -111,7 +121,7 @@ export const MenuContainer = styled.div<{ $collapsed: boolean }>`
   flex-direction: column;
   overflow: hidden;
   box-shadow:
-    4px 0 24px rgba(57, 197, 187, 0.12),
+    4px 0 24px rgba(var(--menu-theme-color-rgb), 0.12),
     2px 0 8px rgba(0, 0, 0, 0.04);
 `
 
@@ -297,7 +307,7 @@ export const CollapseButton = styled.button<{ $collapsed: boolean }>`
 
   &:hover {
     background: rgba(255, 255, 255, 0.9);
-    color: #39c5bb;
+    color: var(--menu-theme-color);
     transform: scale(1.05);
   }
 
@@ -354,7 +364,11 @@ const menuItemBase = css`
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(57, 197, 187, 0.15), rgba(57, 197, 187, 0.08));
+    background: linear-gradient(
+      135deg,
+      rgba(var(--menu-theme-color-rgb), 0.15),
+      rgba(var(--menu-theme-color-rgb), 0.08)
+    );
     opacity: 0;
     transition: opacity 0.2s ease;
     border-radius: inherit;
@@ -374,7 +388,11 @@ export const MenuItem = styled.div<{ $active?: boolean; $collapsed: boolean }>`
   ${(props) =>
     props.$active &&
     css`
-      background: linear-gradient(135deg, rgba(57, 197, 187, 0.15), rgba(57, 197, 187, 0.08));
+      background: linear-gradient(
+        135deg,
+        rgba(var(--menu-theme-color-rgb), 0.15),
+        rgba(var(--menu-theme-color-rgb), 0.08)
+      );
 
       &::after {
         content: '';
@@ -384,7 +402,11 @@ export const MenuItem = styled.div<{ $active?: boolean; $collapsed: boolean }>`
         transform: translateY(-50%);
         width: 3px;
         height: 20px;
-        background: linear-gradient(180deg, #39c5bb, #5fd4cb);
+        background: linear-gradient(
+          180deg,
+          var(--menu-theme-color),
+          color-mix(in srgb, var(--menu-theme-color) 70%, white)
+        );
         border-radius: 0 2px 2px 0;
       }
     `}
@@ -402,7 +424,7 @@ export const MenuItemIcon = styled.span<{ $active?: boolean }>`
   width: 20px;
   height: 20px;
   font-size: 16px;
-  color: ${(props) => (props.$active ? '#39c5bb' : '#666')};
+  color: ${(props) => (props.$active ? 'var(--menu-theme-color)' : '#666')};
   transition: color 0.2s ease;
   position: relative;
   z-index: 1;
@@ -414,7 +436,7 @@ export const MenuItemText = styled.span<{ $collapsed: boolean; $active?: boolean
   margin-left: ${(props) => (props.$collapsed ? 0 : '12px')};
   font-size: 13px;
   font-weight: ${(props) => (props.$active ? 500 : 400)};
-  color: ${(props) => (props.$active ? '#39c5bb' : '#333')};
+  color: ${(props) => (props.$active ? 'var(--menu-theme-color)' : '#333')};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -461,8 +483,9 @@ export const SubMenuItem = styled.div<{ $active?: boolean }>`
   border-radius: 8px;
   cursor: pointer;
   font-size: 12px;
-  color: ${(props) => (props.$active ? '#39c5bb' : '#666')};
-  background: ${(props) => (props.$active ? 'rgba(57, 197, 187, 0.08)' : 'transparent')};
+  color: ${(props) => (props.$active ? 'var(--menu-theme-color)' : '#666')};
+  background: ${(props) =>
+    props.$active ? 'rgba(var(--menu-theme-color-rgb), 0.08)' : 'transparent'};
   transition: all 0.2s ease;
   position: relative;
 
@@ -475,16 +498,16 @@ export const SubMenuItem = styled.div<{ $active?: boolean }>`
     width: 4px;
     height: 4px;
     border-radius: 50%;
-    background: ${(props) => (props.$active ? '#39c5bb' : '#ccc')};
+    background: ${(props) => (props.$active ? 'var(--menu-theme-color)' : '#ccc')};
     transition: all 0.2s ease;
   }
 
   &:hover {
-    color: #39c5bb;
-    background: rgba(57, 197, 187, 0.06);
+    color: var(--menu-theme-color);
+    background: rgba(var(--menu-theme-color-rgb), 0.06);
 
     &::before {
-      background: #39c5bb;
+      background: var(--menu-theme-color);
       transform: translateY(-50%) scale(1.2);
     }
   }

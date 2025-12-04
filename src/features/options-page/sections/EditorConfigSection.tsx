@@ -1,6 +1,5 @@
-import { DEFAULT_VALUES } from '@/shared/constants/defaults'
 import { FORM_PATHS } from '@/shared/constants/form-paths'
-import { Form, Input, Space, Switch, Tooltip } from 'antd'
+import { ColorPicker, Form, Space, Switch, Tooltip } from 'antd'
 import React from 'react'
 import { SectionCard } from '../components/SectionCard'
 import { HelpIcon } from '../styles/layout.styles'
@@ -30,19 +29,6 @@ export const EditorConfigSection: React.FC<EditorConfigSectionProps> = (props) =
       onResetDefault={onResetDefault}
     >
       <Form.Item
-        label="抽屉宽度"
-        name={FORM_PATHS.drawerWidth}
-        rules={[
-          { required: true, message: '请输入抽屉宽度' },
-          { pattern: /^\d+(%|px)$/, message: '宽度格式必须为数字+px或%' },
-        ]}
-        extra="设置编辑器抽屉的宽度"
-        id="field-drawer-width"
-      >
-        <Input placeholder={`例如: ${DEFAULT_VALUES.drawerWidth}`} />
-      </Form.Item>
-
-      <Form.Item
         label={
           <Space>
             字符串自动解析
@@ -67,6 +53,23 @@ export const EditorConfigSection: React.FC<EditorConfigSectionProps> = (props) =
         id="field-ast-hints"
       >
         <Switch />
+      </Form.Item>
+
+      <Form.Item
+        label={
+          <Space>
+            主题色
+            <Tooltip title="设置插件的主题色，用于配置页面和编辑器中的高亮颜色">
+              <HelpIcon />
+            </Tooltip>
+          </Space>
+        }
+        name={FORM_PATHS.themeColor}
+        getValueFromEvent={(color) => color.toHexString()}
+        extra="设置插件整体的主题色"
+        id="field-theme-color"
+      >
+        <ColorPicker format="hex" showText />
       </Form.Item>
     </SectionCard>
   )

@@ -1,5 +1,5 @@
 import { InfoCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { Alert, Card, Collapse, Flex, Form, Input, InputNumber, Typography } from 'antd'
+import { Alert, Button, Card, Collapse, Flex, Form, Input, InputNumber, Typography } from 'antd'
 import styled, { keyframes } from 'styled-components'
 import { MENU_COLLAPSED_WIDTH, MENU_EXPANDED_WIDTH } from '../config/menu-config'
 
@@ -520,13 +520,23 @@ export const AutoSaveHint = styled(Flex)`
   margin-bottom: 16px;
   font-size: 13px;
   color: #1e40af;
+`
 
-  .anticon {
-    font-size: 16px;
-    color: #3b82f6;
-  }
+/**
+ * AutoSaveHint 图标样式
+ */
+export const AutoSaveHintIcon = styled.span`
+  font-size: 16px;
+  color: #3b82f6;
+  display: inline-flex;
+  align-items: center;
+`
 
-  .ant-btn-link {
+/**
+ * AutoSaveHint 链接按钮样式
+ */
+export const AutoSaveHintLinkButton = styled(Button)`
+  &.ant-btn-link {
     margin-left: auto;
     padding: 0;
     height: auto;
@@ -610,7 +620,7 @@ export const StyledCollapseModern = styled(Collapse)`
     overflow: hidden;
     box-shadow:
       0 2px 8px rgba(0, 0, 0, 0.04),
-      0 4px 16px rgba(57, 197, 187, 0.06);
+      0 4px 16px rgba(var(--theme-color-rgb, 57, 197, 187), 0.06);
     transition: all 0.3s ease;
 
     /* 底部强调线 - 使用透明渐变 */
@@ -623,9 +633,9 @@ export const StyledCollapseModern = styled(Collapse)`
       height: 2px;
       background: linear-gradient(
         90deg,
-        rgba(57, 197, 187, 0.6) 0%,
-        rgba(57, 197, 187, 0.3) 30%,
-        rgba(57, 197, 187, 0.1) 60%,
+        rgba(var(--theme-color-rgb, 57, 197, 187), 0.6) 0%,
+        rgba(var(--theme-color-rgb, 57, 197, 187), 0.3) 30%,
+        rgba(var(--theme-color-rgb, 57, 197, 187), 0.1) 60%,
         transparent 100%
       );
       opacity: 0;
@@ -661,7 +671,7 @@ export const StyledCollapseModern = styled(Collapse)`
   .ant-collapse-item:hover {
     box-shadow:
       0 4px 12px rgba(0, 0, 0, 0.06),
-      0 8px 24px rgba(57, 197, 187, 0.1);
+      0 8px 24px rgba(var(--theme-color-rgb, 57, 197, 187), 0.1);
 
     &::after {
       opacity: 1;
@@ -673,14 +683,14 @@ export const StyledCollapseModern = styled(Collapse)`
     background: rgba(255, 255, 255, 0.45);
     box-shadow:
       0 4px 12px rgba(0, 0, 0, 0.05),
-      0 8px 24px rgba(57, 197, 187, 0.08);
+      0 8px 24px rgba(var(--theme-color-rgb, 57, 197, 187), 0.08);
 
     &::after {
       opacity: 1;
     }
 
     .ant-collapse-header .ant-collapse-expand-icon {
-      color: #39c5bb;
+      color: var(--theme-color, #39c5bb);
     }
   }
 `
