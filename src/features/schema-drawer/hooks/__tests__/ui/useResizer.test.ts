@@ -245,6 +245,13 @@ describe('useResizer Hook 测试', () => {
         document.dispatchEvent(new MouseEvent('mouseup'))
       })
 
+      // mouseup 后使用 setTimeout + requestAnimationFrame 延迟设置 isDragging
+      // 需要推进定时器并等待 requestAnimationFrame
+      await act(async () => {
+        vi.advanceTimersByTime(100)
+        await Promise.resolve()
+      })
+
       expect(result.current.isDragging).toBe(false)
     })
 
@@ -397,8 +404,10 @@ describe('useResizer Hook 测试', () => {
         document.dispatchEvent(new MouseEvent('mouseup'))
       })
 
-      act(() => {
+      // mouseup 后使用 setTimeout + requestAnimationFrame 延迟设置 isDragging
+      await act(async () => {
         vi.advanceTimersByTime(100)
+        await Promise.resolve()
       })
 
       expect(result.current.isDragging).toBe(false)

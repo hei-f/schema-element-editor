@@ -45,6 +45,8 @@ vi.mock('@/shared/utils/browser/storage', () => ({
     setExportConfig: vi.fn(),
     setEditorTheme: vi.fn(),
     setApiConfig: vi.fn(),
+    getThemeColor: vi.fn(),
+    setThemeColor: vi.fn(),
   },
 }))
 
@@ -52,9 +54,20 @@ vi.mock('@/shared/utils/browser/storage', () => ({
 const mockChromeTabs = {
   create: vi.fn(),
 }
+
+// Mock chrome.storage.onChanged API
+const mockStorageOnChanged = {
+  addListener: vi.fn(),
+  removeListener: vi.fn(),
+}
+
 ;(global as any).chrome = {
   ...(global as any).chrome,
   tabs: mockChromeTabs,
+  storage: {
+    ...(global as any).chrome?.storage,
+    onChanged: mockStorageOnChanged,
+  },
 }
 
 const mockStorage = storage as Mocked<typeof storage>
@@ -81,7 +94,8 @@ describe('OptionsApp组件测试', () => {
       history: true,
     },
     drawerWidth: '800px',
-    highlightColor: '#39C5BB',
+    highlightColor: '#1677FF',
+    themeColor: '#1677FF',
     maxFavoritesCount: 50,
     autoSaveDraft: false,
     previewConfig: {
@@ -153,6 +167,7 @@ describe('OptionsApp组件测试', () => {
     mockStorage.getEditorTheme.mockResolvedValue(defaultMockValues.editorTheme)
     mockStorage.getPreviewFunctionName.mockResolvedValue(defaultMockValues.previewFunctionName)
     mockStorage.getApiConfig.mockResolvedValue(defaultMockValues.apiConfig)
+    mockStorage.getThemeColor.mockResolvedValue(defaultMockValues.themeColor)
   })
 
   afterEach(() => {

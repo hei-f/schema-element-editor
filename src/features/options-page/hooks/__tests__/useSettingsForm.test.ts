@@ -29,6 +29,7 @@ vi.mock('@/shared/utils/browser/storage', () => ({
     getPreviewFunctionName: vi.fn(),
     getApiConfig: vi.fn(),
     getDrawerShortcuts: vi.fn(),
+    getThemeColor: vi.fn(),
     setAttributeName: vi.fn(),
   },
 }))
@@ -76,6 +77,7 @@ describe('useSettingsForm', () => {
     vi.mocked(storage.getPreviewFunctionName).mockResolvedValue(DEFAULT_VALUES.previewFunctionName)
     vi.mocked(storage.getApiConfig).mockResolvedValue(DEFAULT_VALUES.apiConfig)
     vi.mocked(storage.getDrawerShortcuts).mockResolvedValue(DEFAULT_VALUES.drawerShortcuts)
+    vi.mocked(storage.getThemeColor).mockResolvedValue(DEFAULT_VALUES.themeColor)
   })
 
   describe('loadSettings', () => {

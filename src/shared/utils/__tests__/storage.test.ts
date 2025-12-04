@@ -127,7 +127,7 @@ describe('Storage工具测试', () => {
         exportConfig: {
           customFileName: false,
         },
-        highlightColor: '#39C5BB',
+        highlightColor: '#1677FF',
         iframeConfig: {
           enabled: false,
           schemaTarget: 'iframe',
@@ -180,6 +180,7 @@ describe('Storage工具测试', () => {
           openOrUpdatePreview: { key: 'p', ctrlOrCmd: false, shift: false, alt: true },
           closePreview: { key: 'p', ctrlOrCmd: false, shift: true, alt: true },
         },
+        themeColor: '#1677FF',
       })
     })
 
@@ -229,7 +230,7 @@ describe('Storage工具测试', () => {
         exportConfig: {
           customFileName: false,
         },
-        highlightColor: '#39C5BB',
+        highlightColor: '#1677FF',
         iframeConfig: {
           enabled: false,
           schemaTarget: 'iframe',
@@ -282,6 +283,7 @@ describe('Storage工具测试', () => {
           openOrUpdatePreview: { key: 'p', ctrlOrCmd: false, shift: false, alt: true },
           closePreview: { key: 'p', ctrlOrCmd: false, shift: true, alt: true },
         },
+        themeColor: '#1677FF',
       })
     })
 
@@ -321,7 +323,7 @@ describe('Storage工具测试', () => {
         exportConfig: {
           customFileName: false,
         },
-        highlightColor: '#39C5BB',
+        highlightColor: '#1677FF',
         iframeConfig: {
           enabled: false,
           schemaTarget: 'iframe',
@@ -374,6 +376,7 @@ describe('Storage工具测试', () => {
           openOrUpdatePreview: { key: 'p', ctrlOrCmd: false, shift: false, alt: true },
           closePreview: { key: 'p', ctrlOrCmd: false, shift: true, alt: true },
         },
+        themeColor: '#1677FF',
       })
     })
   })
@@ -593,7 +596,7 @@ describe('Storage工具测试', () => {
         exportConfig: {
           customFileName: false,
         },
-        highlightColor: '#39C5BB',
+        highlightColor: '#1677FF',
         iframeConfig: {
           enabled: false,
           schemaTarget: 'iframe',
@@ -646,6 +649,7 @@ describe('Storage工具测试', () => {
           openOrUpdatePreview: { key: 'p', ctrlOrCmd: false, shift: false, alt: true },
           closePreview: { key: 'p', ctrlOrCmd: false, shift: true, alt: true },
         },
+        themeColor: '#1677FF',
       })
     })
   })
@@ -753,7 +757,7 @@ describe('Storage工具测试', () => {
   describe('高亮框颜色', () => {
     it('应该返回默认颜色', async () => {
       const result = await storage.getHighlightColor()
-      expect(result).toBe('#39C5BB')
+      expect(result).toBe('#1677FF')
     })
 
     it('应该返回存储的颜色', async () => {
@@ -1142,7 +1146,7 @@ describe('Storage工具测试', () => {
 
       const result = await storage.getHighlightColor()
       // 应该返回默认值
-      expect(result).toBe('#39C5BB')
+      expect(result).toBe('#1677FF')
     })
 
     it('setHighlightColor应该设置颜色', async () => {

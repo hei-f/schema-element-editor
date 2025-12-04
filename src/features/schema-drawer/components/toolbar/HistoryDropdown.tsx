@@ -133,7 +133,13 @@ export const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
       getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
     >
       <Tooltip title="编辑历史">
-        <DrawerTitleButton size="small" type="text" icon={<HistoryIcon />} disabled={disabled}>
+        <DrawerTitleButton
+          size="small"
+          type="text"
+          icon={<HistoryIcon />}
+          disabled={disabled}
+          aria-label="history"
+        >
           {showText && `历史${history.length > 0 ? ` (${history.length})` : ''}`}
         </DrawerTitleButton>
       </Tooltip>
