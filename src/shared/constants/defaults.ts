@@ -2,6 +2,11 @@ import type { StorageData } from '@/shared/types'
 import { DEFAULT_EDITOR_THEME } from './editor-themes'
 
 /**
+ * 录制模式左侧面板宽度（px）
+ */
+export const RECORDING_PANEL_WIDTH = 180
+
+/**
  * 默认配置值
  * 项目中所有默认值的单一数据源
  */
@@ -31,7 +36,7 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     favorites: true,
     history: true,
   },
-  highlightColor: '#39C5BB',
+  highlightColor: '#1677FF',
   maxFavoritesCount: 50,
   draftRetentionDays: 1,
   autoSaveDraft: false,
@@ -87,6 +92,7 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     openOrUpdatePreview: { key: 'p', ctrlOrCmd: false, shift: false, alt: true },
     closePreview: { key: 'p', ctrlOrCmd: false, shift: true, alt: true },
   },
+  themeColor: '#1677FF',
 } as const
 
 /**
@@ -120,4 +126,5 @@ export const STORAGE_KEYS = {
   PREVIEW_FUNCTION_NAME: 'previewFunctionName',
   API_CONFIG: 'apiConfig',
   DRAWER_SHORTCUTS: 'drawerShortcuts',
+  THEME_COLOR: 'themeColor',
 } as const

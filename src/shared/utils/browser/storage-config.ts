@@ -197,6 +197,14 @@ export const SIMPLE_STORAGE_FIELDS = {
       )
     },
   } as StorageFieldConfig<DrawerShortcutsConfig>,
+
+  themeColor: {
+    key: STORAGE_KEYS.THEME_COLOR,
+    defaultValue: DEFAULT_VALUES.themeColor,
+    validator: (value: any): value is string => {
+      return typeof value === 'string' && /^#[0-9A-Fa-f]{6}$/.test(value)
+    },
+  } as StorageFieldConfig<string>,
 }
 
 /**

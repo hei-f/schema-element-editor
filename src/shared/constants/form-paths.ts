@@ -181,6 +181,9 @@ export const FORM_PATHS = {
     /** 关闭预览快捷键 */
     closePreview: ['drawerShortcuts', 'closePreview'],
   },
+
+  /** 主题色 */
+  themeColor: ['themeColor'],
 }
 
 /**

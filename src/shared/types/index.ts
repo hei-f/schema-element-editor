@@ -264,8 +264,6 @@ export type EditorTheme = 'light' | 'dark' | 'schemaEditorDark'
  * 所有配置统一放在此对象中，由父组件加载后传入
  */
 export interface SchemaDrawerConfig {
-  /** 抽屉宽度 */
-  width: string | number
   /** API 配置 */
   apiConfig: ApiConfig
   /** 工具栏按钮配置 */
@@ -286,6 +284,8 @@ export interface SchemaDrawerConfig {
   recordingModeConfig: RecordingModeConfig
   /** 自动解析字符串开关 */
   autoParseString: boolean
+  /** 主题色 */
+  themeColor: string
 }
 
 /**
@@ -360,6 +360,8 @@ export interface StorageData {
   apiConfig: ApiConfig
   /** 抽屉快捷键配置 */
   drawerShortcuts: DrawerShortcutsConfig
+  /** 主题色 */
+  themeColor: string
 }
 
 /**

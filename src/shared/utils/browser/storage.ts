@@ -849,6 +849,20 @@ class StorageManager {
   async setDrawerShortcuts(config: DrawerShortcutsConfig): Promise<void> {
     return this.setSimple('drawerShortcuts', config)
   }
+
+  /**
+   * 获取主题色
+   */
+  async getThemeColor(): Promise<string> {
+    return this.getSimple<string>('themeColor')
+  }
+
+  /**
+   * 设置主题色
+   */
+  async setThemeColor(color: string): Promise<void> {
+    return this.setSimple('themeColor', color)
+  }
 }
 
 export const storage = new StorageManager()

@@ -1,6 +1,13 @@
 import type { ThemeConfig } from 'antd'
 
 /**
+ * Modal 组件的 z-index
+ * Modal 使用 getContainer 渲染到 Shadow DOM 后可能脱离 ConfigProvider 上下文
+ * 需要显式设置 zIndex 确保 Modal 始终在 Drawer (z-index: 1000) 之上
+ */
+export const MODAL_Z_INDEX = 1100
+
+/**
  * Shadow DOM 环境专用的 Ant Design 主题配置
  *
  * 目的：
@@ -114,7 +121,7 @@ export const shadowDomTheme: ThemeConfig = {
     // 控制弹层的 z-index，避免层级错乱
     // ============================================
     zIndexBase: 0, // 基础层级
-    zIndexPopupBase: 1000, // 弹层基础层级
+    zIndexPopupBase: 1000, // 弹层基础层级（Ant Design 默认值）
 
     // ============================================
     // 💡 说明
@@ -154,7 +161,7 @@ export const shadowDomTheme: ThemeConfig = {
 
     // Modal 组件配置
     Modal: {
-      // 使用默认配置
+      // Modal 的 z-index 需要在组件上直接设置，ComponentToken 不支持 zIndex 配置
     },
 
     // Tooltip 组件配置
