@@ -6,6 +6,8 @@ import React, { useMemo } from 'react'
 import {
   ButtonGroup,
   EditorToolbar as StyledEditorToolbar,
+  ToolbarButton,
+  ToolbarSegmented,
 } from '../../styles/toolbar/toolbar.styles'
 import { DIFF_DISPLAY_MODE_OPTIONS, type DiffDisplayMode } from '../editor/SchemaDiffView'
 import { ScrollableParams } from './ScrollableParams'
@@ -47,37 +49,41 @@ interface DrawerToolbarProps {
   onApplyRepair?: () => void
   /** 取消修复 */
   onCancelRepair?: () => void
+  /** 复制参数成功回调 */
+  onCopyParam?: (value: string, index: number) => void
 }
 
 /**
  * 抽屉工具栏组件
  */
-export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
-  attributes,
-  contentType,
-  canParse,
-  toolbarButtons,
-  previewEnabled = false,
-  isRecording = false,
-  showDiffButton = false,
-  isDiffMode = false,
-  diffDisplayMode = 'raw',
-  onDiffDisplayModeChange,
-  onFormat,
-  onEscape,
-  onUnescape,
-  onCompact,
-  onParse,
-  onSegmentChange,
-  onRenderPreview,
-  onEnterDiffMode,
-  onExitDiffMode,
-  onLocateError,
-  onRepairJson,
-  hasPendingRepair = false,
-  onApplyRepair,
-  onCancelRepair,
-}) => {
+export const DrawerToolbar: React.FC<DrawerToolbarProps> = (props) => {
+  const {
+    attributes,
+    contentType,
+    canParse,
+    toolbarButtons,
+    previewEnabled = false,
+    isRecording = false,
+    showDiffButton = false,
+    isDiffMode = false,
+    diffDisplayMode = 'raw',
+    onDiffDisplayModeChange,
+    onFormat,
+    onEscape,
+    onUnescape,
+    onCompact,
+    onParse,
+    onSegmentChange,
+    onRenderPreview,
+    onEnterDiffMode,
+    onExitDiffMode,
+    onLocateError,
+    onRepairJson,
+    hasPendingRepair = false,
+    onApplyRepair,
+    onCancelRepair,
+    onCopyParam,
+  } = props
   /**
    * 预览模式下的 Tooltip 容器获取函数
    * 挂载到 document.body，避免被预览容器的 overflow 裁剪
@@ -128,12 +134,12 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
 
   return (
     <StyledEditorToolbar>
-      <ScrollableParams params={attributes.params || []} previewEnabled={previewEnabled} />
+      <ScrollableParams params={attributes.params || []} onCopyParam={onCopyParam} />
       <ButtonGroup>
         {previewEnabled && onRenderPreview && (
-          <Button size="small" type="primary" onClick={onRenderPreview}>
+          <ToolbarButton size="small" type="primary" onClick={onRenderPreview}>
             更新预览
-          </Button>
+          </ToolbarButton>
         )}
         {toolbarButtons.astRawStringToggle && (
           <Tooltip
@@ -146,9 +152,7 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
             }
             getPopupContainer={tooltipContainer}
           >
-            <Segmented
-              size="small"
-              shape="round"
+            <ToolbarSegmented
               options={[
                 { label: 'AST', value: ContentType.Ast },
                 { label: 'RawString', value: ContentType.RawString },
@@ -165,25 +169,25 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
               title="将内容包装成字符串值，添加引号和转义"
               getPopupContainer={tooltipContainer}
             >
-              <Button size="small" onClick={onEscape}>
+              <ToolbarButton size="small" onClick={onEscape}>
                 转义
-              </Button>
+              </ToolbarButton>
             </Tooltip>
             <Tooltip
               title="将字符串值还原，移除外层引号和转义"
               getPopupContainer={tooltipContainer}
             >
-              <Button size="small" onClick={onUnescape}>
+              <ToolbarButton size="small" onClick={onUnescape}>
                 去转义
-              </Button>
+              </ToolbarButton>
             </Tooltip>
           </>
         )}
         {toolbarButtons.serialize && (
           <Tooltip title="将 JSON 压缩成一行" getPopupContainer={tooltipContainer}>
-            <Button size="small" onClick={onCompact}>
+            <ToolbarButton size="small" onClick={onCompact}>
               压缩
-            </Button>
+            </ToolbarButton>
           </Tooltip>
         )}
         {toolbarButtons.deserialize && (
@@ -191,9 +195,9 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
             title={!canParse ? '当前内容不是有效的 JSON 格式' : '解析多层嵌套/转义的 JSON'}
             getPopupContainer={tooltipContainer}
           >
-            <Button size="small" onClick={onParse} disabled={!canParse}>
+            <ToolbarButton size="small" onClick={onParse} disabled={!canParse}>
               解析
-            </Button>
+            </ToolbarButton>
           </Tooltip>
         )}
         {toolbarButtons.format && (
@@ -201,9 +205,9 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
             title={!canParse ? '当前内容不是有效的 JSON 格式' : ''}
             getPopupContainer={tooltipContainer}
           >
-            <Button size="small" onClick={onFormat} disabled={!canParse}>
+            <ToolbarButton size="small" onClick={onFormat} disabled={!canParse}>
               格式化
-            </Button>
+            </ToolbarButton>
           </Tooltip>
         )}
         {/* JSON 错误诊断按钮（始终可用，点击时智能判断） */}
@@ -212,9 +216,9 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
             title="定位 JSON 语法错误位置（支持检测字符串内部的 JSON）"
             getPopupContainer={tooltipContainer}
           >
-            <Button size="small" onClick={onLocateError}>
+            <ToolbarButton size="small" onClick={onLocateError}>
               定位错误
-            </Button>
+            </ToolbarButton>
           </Tooltip>
         )}
         {onRepairJson && (
@@ -222,16 +226,16 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = ({
             title="尝试自动修复 JSON 语法错误（支持修复字符串内部的 JSON）"
             getPopupContainer={tooltipContainer}
           >
-            <Button size="small" onClick={onRepairJson}>
+            <ToolbarButton size="small" onClick={onRepairJson}>
               修复JSON
-            </Button>
+            </ToolbarButton>
           </Tooltip>
         )}
         {showDiffButton && onEnterDiffMode && (
           <Tooltip title="对比模式：对比两段内容的差异" getPopupContainer={tooltipContainer}>
-            <Button size="small" onClick={onEnterDiffMode}>
+            <ToolbarButton size="small" onClick={onEnterDiffMode}>
               Diff
-            </Button>
+            </ToolbarButton>
           </Tooltip>
         )}
       </ButtonGroup>

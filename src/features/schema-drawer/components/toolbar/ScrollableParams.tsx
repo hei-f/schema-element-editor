@@ -4,8 +4,8 @@ import { ParamTag } from './ParamTag'
 
 interface ScrollableParamsProps {
   params: string[]
-  /** 是否处于预览模式 */
-  previewEnabled?: boolean
+  /** 复制参数成功回调 */
+  onCopyParam?: (value: string, index: number) => void
 }
 
 /** 遮罩渐变的阈值距离（px） */
@@ -15,10 +15,8 @@ const FADE_THRESHOLD = 20
  * 可滚动的参数列表组件
  * 使用哨兵元素 + IntersectionObserver 实现平滑的遮罩透明度变化
  */
-export const ScrollableParams: React.FC<ScrollableParamsProps> = ({
-  params,
-  previewEnabled = false,
-}) => {
+export const ScrollableParams: React.FC<ScrollableParamsProps> = (props) => {
+  const { params, onCopyParam } = props
   const containerRef = useRef<HTMLDivElement>(null)
   const leftSentinelRef = useRef<HTMLDivElement>(null)
   const rightSentinelRef = useRef<HTMLDivElement>(null)
@@ -100,7 +98,12 @@ export const ScrollableParams: React.FC<ScrollableParamsProps> = ({
         {/* 左侧哨兵元素 */}
         <div ref={leftSentinelRef} style={sentinelStyle} />
         {params.map((param: string, index: number) => (
-          <ParamTag key={index} value={param} index={index} previewEnabled={previewEnabled} />
+          <ParamTag
+            key={index}
+            value={param}
+            index={index}
+            onCopy={() => onCopyParam?.(param, index)}
+          />
         ))}
         {/* 右侧哨兵元素 */}
         <div ref={rightSentinelRef} style={sentinelStyle} />

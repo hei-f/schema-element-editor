@@ -1,7 +1,9 @@
+import { HistoryIcon } from '@/shared/icons/drawer/title/HistoryIcon'
 import type { HistoryEntry, HistoryEntryType } from '@/shared/types'
-import { ClearOutlined, HistoryOutlined } from '@ant-design/icons'
-import { Button, Dropdown } from 'antd'
+import { ClearOutlined } from '@ant-design/icons'
+import { Button, Dropdown, Tooltip } from 'antd'
 import React from 'react'
+import { DrawerTitleButton } from '../DrawerTitle/styles'
 import {
   HistoryDropdownCheck,
   HistoryDropdownClearButtonWrapper,
@@ -130,9 +132,11 @@ export const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
       placement="bottomRight"
       getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
     >
-      <Button size="small" type="text" icon={<HistoryOutlined />} disabled={disabled}>
-        {showText && `历史${history.length > 0 ? ` (${history.length})` : ''}`}
-      </Button>
+      <Tooltip title="编辑历史">
+        <DrawerTitleButton size="small" type="text" icon={<HistoryIcon />} disabled={disabled}>
+          {showText && `历史${history.length > 0 ? ` (${history.length})` : ''}`}
+        </DrawerTitleButton>
+      </Tooltip>
     </Dropdown>
   )
 }

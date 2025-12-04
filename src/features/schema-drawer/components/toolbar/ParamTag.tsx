@@ -1,105 +1,86 @@
-import { CheckOutlined, CopyOutlined } from '@ant-design/icons'
 import { Tooltip } from 'antd'
-import copy from 'copy-to-clipboard'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React from 'react'
+import { CopyIcon } from '@/shared/icons/drawer/toolbar/CopyIcon'
+import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import {
-  AttributeTag,
   AttributeTagWrapper,
   CopyIconWrapper,
-  ParamItem,
-  ParamLabel,
   StyledCopyIcon,
 } from '../../styles/toolbar/toolbar.styles'
-
-/** 复制成功后图标显示时长（毫秒） */
-const COPY_SUCCESS_DISPLAY_DURATION = 2000
-/** 淡出动画时长（毫秒），需与 CSS transition 保持一致 */
-const FADE_OUT_DURATION = 200
 
 interface ParamTagProps {
   /** 参数值 */
   value: string
-  /** 参数索引（用于显示 params1, params2 等） */
+  /** 参数索引（用于显示 params 1, params 2 等） */
   index: number
-  /** 是否处于预览模式 */
-  previewEnabled?: boolean
+  /** 复制成功回调 */
+  onCopy?: () => void
+}
+
+/**
+ * 使用原生 Clipboard API 复制文本到剪贴板
+ * 与 antd6 内部实现方式一致
+ */
+const copyToClipboard = async (text: string): Promise<boolean> => {
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text)
+      return true
+    } catch {
+      return fallbackCopy(text)
+    }
+  }
+  return fallbackCopy(text)
+}
+
+/**
+ * 降级方案：使用 execCommand 复制
+ * 用于不支持 Clipboard API 或非安全上下文的环境
+ */
+const fallbackCopy = (text: string): boolean => {
+  const textArea = document.createElement('textarea')
+  textArea.value = text
+  textArea.style.position = 'absolute'
+  textArea.style.left = '-999999px'
+  document.body.prepend(textArea)
+  textArea.select()
+  try {
+    document.execCommand('copy')
+    return true
+  } catch {
+    return false
+  } finally {
+    textArea.remove()
+  }
 }
 
 /**
  * 单个参数标签组件
- * 显示参数值，支持复制功能
+ * 显示参数标签，hover 展示参数值，支持复制功能
  */
-export const ParamTag: React.FC<ParamTagProps> = ({ value, index, previewEnabled = false }) => {
-  /** 控制图标是否强制显示 */
-  const [isVisible, setIsVisible] = useState(false)
-  /** 控制显示勾还是复制图标 */
-  const [showSuccessIcon, setShowSuccessIcon] = useState(false)
+export const ParamTag: React.FC<ParamTagProps> = (props) => {
+  const { value, index, onCopy } = props
 
-  const visibilityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const iconTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  /**
-   * 预览模式下的 Tooltip 容器获取函数
-   * 挂载到 document.body，避免被预览容器的 overflow 裁剪
-   */
-  const tooltipContainer = useMemo(() => {
-    if (!previewEnabled) return undefined
-    return () => document.body
-  }, [previewEnabled])
-
-  /** 清理所有定时器 */
-  const clearTimers = () => {
-    if (visibilityTimerRef.current) {
-      clearTimeout(visibilityTimerRef.current)
-      visibilityTimerRef.current = null
-    }
-    if (iconTimerRef.current) {
-      clearTimeout(iconTimerRef.current)
-      iconTimerRef.current = null
-    }
-  }
-
-  /** 组件卸载时清理定时器 */
-  useEffect(() => {
-    return clearTimers
-  }, [])
-
-  const handleCopy = (e: React.MouseEvent) => {
+  const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    const success = copy(value)
+    const success = await copyToClipboard(value)
     if (success) {
-      clearTimers()
-      setIsVisible(true)
-      setShowSuccessIcon(true)
-
-      visibilityTimerRef.current = setTimeout(() => {
-        setIsVisible(false)
-        iconTimerRef.current = setTimeout(() => {
-          setShowSuccessIcon(false)
-        }, FADE_OUT_DURATION)
-      }, COPY_SUCCESS_DISPLAY_DURATION)
+      onCopy?.()
     } else {
-      console.error('复制失败: copy-to-clipboard 返回 false')
+      console.error('复制失败')
     }
   }
 
   return (
-    <ParamItem style={{ flexShrink: 0 }}>
-      <ParamLabel>params{index + 1}:</ParamLabel>
-      <Tooltip title={value} placement="bottom" getPopupContainer={tooltipContainer}>
-        <AttributeTagWrapper>
-          <AttributeTag>{value}</AttributeTag>
-          <CopyIconWrapper
-            className="copy-icon-wrapper"
-            onClick={handleCopy}
-            $forceVisible={isVisible}
-          >
-            <StyledCopyIcon $isSuccess={showSuccessIcon}>
-              {showSuccessIcon ? <CheckOutlined /> : <CopyOutlined />}
-            </StyledCopyIcon>
-          </CopyIconWrapper>
-        </AttributeTagWrapper>
-      </Tooltip>
-    </ParamItem>
+    <Tooltip title={value} placement="bottom" getPopupContainer={shadowRootManager.getContainer}>
+      <AttributeTagWrapper style={{ flexShrink: 0 }}>
+        <span>params {index + 1}</span>
+        <CopyIconWrapper onClick={handleCopy}>
+          <StyledCopyIcon>
+            <CopyIcon />
+          </StyledCopyIcon>
+        </CopyIconWrapper>
+      </AttributeTagWrapper>
+    </Tooltip>
   )
 }

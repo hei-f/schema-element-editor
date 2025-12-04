@@ -1,3 +1,4 @@
+import { Button, Segmented } from 'antd'
 import styled from 'styled-components'
 
 /**
@@ -7,9 +8,10 @@ export const EditorToolbar = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px 16px 16px;
-  border-bottom: 1px solid #f0f0f0;
-  background: #fafafa;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #f7f8fa;
+  margin: 12px 0;
   gap: 12px;
   flex-wrap: wrap;
 `
@@ -35,7 +37,7 @@ export const ParamsContainerWrapper = styled.div<{
     top: 0;
     bottom: 0;
     width: 20px;
-    background: linear-gradient(to right, rgba(255, 255, 255, 0.95), transparent);
+    background: linear-gradient(to right, rgba(247, 248, 250, 0.95), transparent);
     pointer-events: none;
     z-index: 1;
     opacity: ${(props) => props.$leftMaskOpacity};
@@ -49,7 +51,7 @@ export const ParamsContainerWrapper = styled.div<{
     top: 0;
     bottom: 0;
     width: 20px;
-    background: linear-gradient(to left, rgba(255, 255, 255, 0.95), transparent);
+    background: linear-gradient(to left, rgba(247, 248, 250, 0.95), transparent);
     pointer-events: none;
     z-index: 1;
     opacity: ${(props) => props.$rightMaskOpacity};
@@ -91,17 +93,25 @@ export const ParamItem = styled.div`
 
 /**
  * 属性标签包装器（支持复制功能）
+ * 作为 Flex 容器，内部展示参数标签和复制图标
  */
 export const AttributeTagWrapper = styled.span`
-  position: relative;
   display: inline-flex;
   align-items: center;
-  max-width: 100%;
-  overflow: hidden;
-
-  &:hover .copy-icon-wrapper {
-    opacity: 1;
-  }
+  gap: 8px;
+  padding: 4px 8px;
+  background:
+    linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--drawer-theme-color, #1677ff) 15%, transparent),
+      color-mix(in srgb, var(--drawer-theme-color, #1677ff) 15%, transparent)
+    ),
+    #ffffff;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: #666f8d;
+  cursor: pointer;
 `
 
 /**
@@ -117,17 +127,97 @@ export const ButtonGroup = styled.div`
 `
 
 /**
- * 属性标签
+ * 工具栏按钮
+ * 普通按钮使用固定样式，primary 按钮保留 Ant Design 默认主题色
+ */
+export const ToolbarButton = styled(Button)`
+  &.ant-btn {
+    border-radius: 16px;
+    padding: 2px 12px;
+    font-size: 12px;
+    height: auto;
+    line-height: 1.5;
+  }
+
+  /* 非 primary 按钮使用固定样式 */
+  &.ant-btn-default {
+    border: 1px solid #e6ecf4;
+    color: #666f8d;
+  }
+
+  /* primary 按钮保留主题色，只调整圆角和间距 */
+  &.ant-btn-primary {
+    border: none;
+  }
+`
+
+/**
+ * 工具栏 Segmented 切换组件
+ * 使用类型断言保留 Segmented 的泛型能力
+ */
+export const ToolbarSegmented = styled(Segmented)`
+  &.ant-segmented {
+    border-radius: 16px !important;
+    background: #e6ecf4 !important;
+    padding: 2px !important;
+    font-size: 12px;
+    color: #666f8d;
+    min-height: auto !important;
+  }
+
+  .ant-segmented-group {
+    gap: 0;
+  }
+
+  .ant-segmented-item {
+    border-radius: 16px !important;
+    font-size: 12px;
+    color: #666f8d;
+    transition: all 0.2s;
+    background: transparent !important;
+  }
+
+  .ant-segmented-item-label {
+    padding: 2px 8px !important;
+    min-height: auto !important;
+    line-height: 1.5 !important;
+    font-size: 12px;
+    color: #666f8d;
+  }
+
+  .ant-segmented-item-selected {
+    background: #ffffff !important;
+    color: #353e5c;
+  }
+
+  .ant-segmented-item-selected .ant-segmented-item-label {
+    color: #353e5c !important;
+  }
+
+  .ant-segmented-thumb {
+    border-radius: 16px !important;
+    background: #ffffff !important;
+  }
+` as typeof Segmented
+
+/**
+ * 属性标签（params 胶囊样式）
+ * 使用 CSS 变量 --drawer-theme-color 作为主题色，默认为 #1677FF
  */
 export const AttributeTag = styled.span`
   display: inline-block;
-  padding: 2px 8px;
-  background: #e6f7ff;
-  border: 1px solid #91d5ff;
-  border-radius: 4px;
+  padding: 4px 8px;
+  background:
+    linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--drawer-theme-color, #1677ff) 15%, transparent),
+      color-mix(in srgb, var(--drawer-theme-color, #1677ff) 15%, transparent)
+    ),
+    #ffffff;
+  border-radius: 8px;
   font-size: 12px;
   line-height: 16px;
-  color: #0050b3;
+  color: #666f8d;
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   max-width: 100%;
   overflow: hidden;
@@ -148,60 +238,28 @@ export const ParamLabel = styled.span`
 
 /**
  * 复制图标包装器
- * $forceVisible: 复制成功时强制显示图标
+ * 默认展示，点击可复制
  */
-export const CopyIconWrapper = styled.span<{ $forceVisible?: boolean }>`
-  position: absolute;
-  right: 4px;
-  top: 3px;
+export const CopyIconWrapper = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 16px;
-  opacity: ${(props) => (props.$forceVisible ? 1 : 0)};
-  transition:
-    opacity 0.2s ease,
-    background-color 0.2s ease;
   cursor: pointer;
-  z-index: 1;
-  padding: 0 3px;
-  background-color: rgba(230, 247, 255, 0.95);
-  border-radius: 3px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-
-  &:hover {
-    opacity: 1 !important;
-    background-color: rgba(230, 247, 255, 1);
-  }
 `
 
 /**
  * 复制图标样式
  */
-export const StyledCopyIcon = styled.span<{ $isSuccess?: boolean }>`
+export const StyledCopyIcon = styled.span`
   font-size: 12px;
-  color: ${(props) => (props.$isSuccess ? '#52c41a' : '#0050b3')};
+  color: #666f8d;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 16px;
   line-height: 1;
   vertical-align: middle;
-  transform: translateZ(0);
-  transform-origin: center center;
-  will-change: transform, color;
-  transition:
-    color 0.15s ease-out,
-    transform 0.15s ease-out;
-
-  &:hover {
-    color: ${(props) => (props.$isSuccess ? '#52c41a' : '#003a8c')};
-    transform: translateZ(0) scale(1.1);
-  }
-
-  &:active {
-    transform: translateZ(0) scale(0.95);
-  }
 
   svg {
     display: block;
