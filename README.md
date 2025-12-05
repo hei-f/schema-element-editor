@@ -2,7 +2,7 @@
 
 Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 
-![Version](https://img.shields.io/badge/version-1.21.0-blue)
+![Version](https://img.shields.io/badge/version-1.21.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 ## 功能
@@ -71,7 +71,7 @@ npm run demo
 
 ## 使用
 
-点击工具栏图标激活插件（绿色=激活，灰色=未激活）。
+点击工具栏图标激活插件（蓝色=激活，灰色=未激活）。
 
 ### 基础操作
 
