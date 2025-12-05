@@ -1,8 +1,7 @@
 import type { ElementAttributes, ToolbarButtonsConfig } from '@/shared/types'
 import { ContentType } from '@/shared/types'
-import { Button, Segmented, Tooltip } from 'antd'
-import { DiffOutlined } from '@ant-design/icons'
-import React, { useMemo } from 'react'
+import { Tooltip } from 'antd'
+import React from 'react'
 import {
   ButtonGroup,
   EditorToolbar as StyledEditorToolbar,
@@ -12,7 +11,12 @@ import {
 import { DIFF_DISPLAY_MODE_OPTIONS, type DiffDisplayMode } from '../editor/SchemaDiffView'
 import { ScrollableParams } from './ScrollableParams'
 
+/** 工具栏模式类型 */
+export type ToolbarMode = 'diff' | 'recording' | 'preview' | 'normal'
+
 interface DrawerToolbarProps {
+  /** 工具栏模式，用于控制按钮显示 */
+  mode?: ToolbarMode
   attributes: ElementAttributes
   contentType: ContentType
   canParse: boolean
@@ -55,9 +59,12 @@ interface DrawerToolbarProps {
 
 /**
  * 抽屉工具栏组件
+ * 工具栏始终保持在 DOM 中，按钮根据模式条件原子化渲染
+ * 无论 Diff 模式还是默认模式，工具栏结构保持一致，避免切换动画
  */
 export const DrawerToolbar: React.FC<DrawerToolbarProps> = (props) => {
   const {
+    mode = 'normal',
     attributes,
     contentType,
     canParse,
@@ -84,64 +91,54 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = (props) => {
     onCancelRepair,
     onCopyParam,
   } = props
-  /**
-   * 预览模式下的 Tooltip 容器获取函数
-   * 挂载到 document.body，避免被预览容器的 overflow 裁剪
-   */
-  const tooltipContainer = useMemo(() => {
-    if (!previewEnabled) return undefined
-    return () => document.body
-  }, [previewEnabled])
 
-  // Diff 模式下的简化工具栏
-  if (isDiffMode) {
-    return (
-      <StyledEditorToolbar>
-        <div style={{ flex: 1 }} />
-        <ButtonGroup>
-          {/* 修复确认按钮（如果有待确认的修复） */}
-          {hasPendingRepair && onApplyRepair && onCancelRepair && (
-            <>
-              <Tooltip title="应用修复后的内容">
-                <Button size="small" type="primary" onClick={onApplyRepair}>
-                  应用修复
-                </Button>
-              </Tooltip>
-              <Tooltip title="取消修复，恢复原内容">
-                <Button size="small" onClick={onCancelRepair}>
-                  取消
-                </Button>
-              </Tooltip>
-            </>
-          )}
-          <Tooltip title="选择数据展示格式进行对比">
-            <Segmented
-              size="small"
-              value={diffDisplayMode}
-              onChange={(value) => onDiffDisplayModeChange?.(value as DiffDisplayMode)}
-              options={DIFF_DISPLAY_MODE_OPTIONS}
-            />
-          </Tooltip>
-          <Tooltip title="关闭对比模式">
-            <Button size="small" type="primary" icon={<DiffOutlined />} onClick={onExitDiffMode}>
-              对比
-            </Button>
-          </Tooltip>
-        </ButtonGroup>
-      </StyledEditorToolbar>
-    )
+  /** 判断是否为 Diff 模式（支持 mode prop 和 isDiffMode prop） */
+  const isInDiffMode = mode === 'diff' || isDiffMode
+
+  /** Diff 按钮点击处理：根据当前模式决定进入或退出 */
+  const handleDiffButtonClick = () => {
+    if (isInDiffMode) {
+      onExitDiffMode?.()
+    } else {
+      onEnterDiffMode?.()
+    }
   }
 
   return (
     <StyledEditorToolbar>
-      <ScrollableParams params={attributes.params || []} onCopyParam={onCopyParam} />
+      {/* 参数区域：仅非 Diff 模式显示，Diff 模式使用等高占位保持按钮位置一致 */}
+      {!isInDiffMode ? (
+        <ScrollableParams params={attributes.params || []} onCopyParam={onCopyParam} />
+      ) : (
+        <div style={{ flex: 1, minHeight: 32 }} />
+      )}
+
       <ButtonGroup>
-        {previewEnabled && onRenderPreview && (
+        {/* 更新预览按钮：仅预览模式且非 Diff 时显示 */}
+        {!isInDiffMode && previewEnabled && onRenderPreview && (
           <ToolbarButton size="small" type="primary" onClick={onRenderPreview}>
             更新预览
           </ToolbarButton>
         )}
-        {toolbarButtons.astRawStringToggle && (
+
+        {/* 修复确认按钮：仅 Diff 模式且有待确认的修复时显示 */}
+        {isInDiffMode && hasPendingRepair && onApplyRepair && onCancelRepair && (
+          <>
+            <Tooltip title="应用修复后的内容">
+              <ToolbarButton size="small" type="primary" onClick={onApplyRepair}>
+                应用修复
+              </ToolbarButton>
+            </Tooltip>
+            <Tooltip title="取消修复，恢复原内容">
+              <ToolbarButton size="small" onClick={onCancelRepair}>
+                取消
+              </ToolbarButton>
+            </Tooltip>
+          </>
+        )}
+
+        {/* AST/RawString 切换：仅非 Diff 模式显示 */}
+        {!isInDiffMode && toolbarButtons.astRawStringToggle && (
           <Tooltip
             title={
               isRecording
@@ -150,7 +147,6 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = (props) => {
                   ? '当前数据类型错误'
                   : ''
             }
-            getPopupContainer={tooltipContainer}
           >
             <ToolbarSegmented
               options={[
@@ -163,80 +159,89 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = (props) => {
             />
           </Tooltip>
         )}
-        {toolbarButtons.escape && (
+
+        {/* 转义/去转义按钮：仅非 Diff 模式显示 */}
+        {!isInDiffMode && toolbarButtons.escape && (
           <>
-            <Tooltip
-              title="将内容包装成字符串值，添加引号和转义"
-              getPopupContainer={tooltipContainer}
-            >
+            <Tooltip title="将内容包装成字符串值，添加引号和转义">
               <ToolbarButton size="small" onClick={onEscape}>
                 转义
               </ToolbarButton>
             </Tooltip>
-            <Tooltip
-              title="将字符串值还原，移除外层引号和转义"
-              getPopupContainer={tooltipContainer}
-            >
+            <Tooltip title="将字符串值还原，移除外层引号和转义">
               <ToolbarButton size="small" onClick={onUnescape}>
                 去转义
               </ToolbarButton>
             </Tooltip>
           </>
         )}
-        {toolbarButtons.serialize && (
-          <Tooltip title="将 JSON 压缩成一行" getPopupContainer={tooltipContainer}>
+
+        {/* 压缩按钮：仅非 Diff 模式显示 */}
+        {!isInDiffMode && toolbarButtons.serialize && (
+          <Tooltip title="将 JSON 压缩成一行">
             <ToolbarButton size="small" onClick={onCompact}>
               压缩
             </ToolbarButton>
           </Tooltip>
         )}
-        {toolbarButtons.deserialize && (
-          <Tooltip
-            title={!canParse ? '当前内容不是有效的 JSON 格式' : '解析多层嵌套/转义的 JSON'}
-            getPopupContainer={tooltipContainer}
-          >
+
+        {/* 解析按钮：仅非 Diff 模式显示 */}
+        {!isInDiffMode && toolbarButtons.deserialize && (
+          <Tooltip title={!canParse ? '当前内容不是有效的 JSON 格式' : '解析多层嵌套/转义的 JSON'}>
             <ToolbarButton size="small" onClick={onParse} disabled={!canParse}>
               解析
             </ToolbarButton>
           </Tooltip>
         )}
-        {toolbarButtons.format && (
-          <Tooltip
-            title={!canParse ? '当前内容不是有效的 JSON 格式' : ''}
-            getPopupContainer={tooltipContainer}
-          >
+
+        {/* 格式化按钮：仅非 Diff 模式显示 */}
+        {!isInDiffMode && toolbarButtons.format && (
+          <Tooltip title={!canParse ? '当前内容不是有效的 JSON 格式' : ''}>
             <ToolbarButton size="small" onClick={onFormat} disabled={!canParse}>
               格式化
             </ToolbarButton>
           </Tooltip>
         )}
-        {/* JSON 错误诊断按钮（始终可用，点击时智能判断） */}
-        {onLocateError && (
-          <Tooltip
-            title="定位 JSON 语法错误位置（支持检测字符串内部的 JSON）"
-            getPopupContainer={tooltipContainer}
-          >
+
+        {/* 定位错误按钮：仅非 Diff 模式显示 */}
+        {!isInDiffMode && onLocateError && (
+          <Tooltip title="定位 JSON 语法错误位置（支持检测字符串内部的 JSON）">
             <ToolbarButton size="small" onClick={onLocateError}>
               定位错误
             </ToolbarButton>
           </Tooltip>
         )}
-        {onRepairJson && (
-          <Tooltip
-            title="尝试自动修复 JSON 语法错误（支持修复字符串内部的 JSON）"
-            getPopupContainer={tooltipContainer}
-          >
+
+        {/* 修复JSON按钮：仅非 Diff 模式显示 */}
+        {!isInDiffMode && onRepairJson && (
+          <Tooltip title="尝试自动修复 JSON 语法错误（支持修复字符串内部的 JSON）">
             <ToolbarButton size="small" onClick={onRepairJson}>
               修复JSON
             </ToolbarButton>
           </Tooltip>
         )}
-        {showDiffButton && onEnterDiffMode && (
-          <Tooltip title="对比模式：对比两段内容的差异" getPopupContainer={tooltipContainer}>
-            <ToolbarButton size="small" onClick={onEnterDiffMode}>
-              Diff
-            </ToolbarButton>
+
+        {/* 对比显示模式选择器：仅 Diff 模式显示 */}
+        {isInDiffMode && (
+          <Tooltip title="选择数据展示格式进行对比">
+            <ToolbarSegmented
+              size="small"
+              value={diffDisplayMode}
+              onChange={(value) => onDiffDisplayModeChange?.(value as DiffDisplayMode)}
+              options={DIFF_DISPLAY_MODE_OPTIONS}
+            />
           </Tooltip>
+        )}
+
+        {/* Diff 按钮：始终显示，根据模式决定样式和行为 */}
+        {showDiffButton && (
+          <ToolbarButton
+            size="small"
+            type={isInDiffMode ? 'primary' : 'default'}
+            onClick={handleDiffButtonClick}
+          >
+            Diff
+          </ToolbarButton>
         )}
       </ButtonGroup>
     </StyledEditorToolbar>

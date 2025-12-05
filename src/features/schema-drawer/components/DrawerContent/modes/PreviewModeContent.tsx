@@ -1,6 +1,5 @@
 import { ContentType } from '@/shared/types'
 import React from 'react'
-import { DrawerToolbar } from '../../toolbar/DrawerToolbar'
 import { CodeMirrorEditor } from '../../editor/CodeMirrorEditor'
 import {
   DragHintText,
@@ -19,20 +18,16 @@ import type { PreviewModeContentProps } from '../types'
 
 /**
  * 预览模式内容组件
- * 布局：预览区域占据左侧全高，编辑区域（工具栏+编辑器）在右侧
+ * 布局：预览区域占据左侧全高，编辑区域在右侧
+ * 工具栏由父组件统一管理
  * 支持预览关闭过渡状态：保持布局结构，预览区域显示为灰色背景
  */
 export const PreviewModeContent: React.FC<PreviewModeContentProps> = (props) => {
   const {
-    attributes,
     contentType,
-    canParse,
-    toolbarButtons,
-    toolbarActions,
     editorProps,
     notificationProps,
     isFullScreenTransition,
-    previewEnabled,
     previewWidth,
     isDragging,
     previewContainerRef,
@@ -80,29 +75,8 @@ export const PreviewModeContent: React.FC<PreviewModeContentProps> = (props) => 
             />
           )}
 
-          {/* 右侧编辑区域（工具栏 + 编辑器） */}
+          {/* 右侧编辑区域 */}
           <PreviewEditArea>
-            {/* 工具栏只在编辑区域上方 */}
-            <DrawerToolbar
-              attributes={attributes}
-              contentType={contentType}
-              canParse={canParse}
-              toolbarButtons={toolbarButtons}
-              previewEnabled={previewEnabled}
-              showDiffButton={true}
-              onFormat={toolbarActions.onFormat}
-              onEscape={toolbarActions.onEscape}
-              onUnescape={toolbarActions.onUnescape}
-              onCompact={toolbarActions.onCompact}
-              onParse={toolbarActions.onParse}
-              onSegmentChange={toolbarActions.onSegmentChange}
-              onRenderPreview={toolbarActions.onRenderPreview}
-              onEnterDiffMode={toolbarActions.onEnterDiffMode}
-              onLocateError={toolbarActions.onLocateError}
-              onRepairJson={toolbarActions.onRepairJson}
-              onCopyParam={toolbarActions.onCopyParam}
-            />
-
             {/* 编辑器容器，带圆角 */}
             <PreviewEditorContainer>
               {lightNotifications.map((notification, index) => (

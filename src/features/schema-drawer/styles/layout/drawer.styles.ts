@@ -68,6 +68,17 @@ export const DrawerContentContainer = styled.div`
 `
 
 /**
+ * 模式切换容器
+ * 用于包裹多个 ModeContentWrapper，限制绝对定位元素不溢出到 padding 区域
+ */
+export const ModeSwitchContainer = styled.div`
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+`
+
+/**
  * 抽屉底部按钮组（右对齐 + 间距）
  */
 export const DrawerFooter = styled.div`
@@ -334,4 +345,41 @@ export const FullScreenModeWrapper = styled.div<{ $animate?: boolean }>`
   flex-direction: column;
   height: 100%;
   animation: ${(props) => (props.$animate ? modeEnter : 'none')} 150ms ease-out;
+`
+
+/**
+ * 内容区域容器
+ * 用于保持所有模式内容在 DOM 中，通过 CSS 控制显示/隐藏
+ */
+export const ContentAreaContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+`
+
+/**
+ * 模式内容包装器
+ * 根据 $active 控制显示/隐藏，保持组件在 DOM 中避免重建
+ * 使用 visibility + height 隐藏而非 display:none，保持内部组件状态
+ */
+export const ModeContentWrapper = styled.div<{ $active: boolean }>`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: ${(props) => (props.$active ? 2 : 1)};
+  /* 非活跃的立即隐藏，不参与过渡 */
+  visibility: ${(props) => (props.$active ? 'visible' : 'hidden')};
+  /* 活跃的始终不透明，只用 transform 动画增加动感 */
+  opacity: 1;
+  transform: translateY(${(props) => (props.$active ? '0' : '12px')});
+  /* 只有激活时才有过渡动画（从偏移位置滑入） */
+  transition: ${(props) => (props.$active ? 'transform 180ms ease-out' : 'none')};
+  pointer-events: ${(props) => (props.$active ? 'auto' : 'none')};
 `

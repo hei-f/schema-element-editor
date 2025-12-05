@@ -136,6 +136,11 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   // 录制模式相关状态
   const [isInRecordingMode, setIsInRecordingMode] = useState(initialRecordingMode)
 
+  // Diff 显示模式状态
+  const [diffDisplayMode, setDiffDisplayMode] = useState<
+    'raw' | 'deserialize' | 'unescape' | 'ast'
+  >('raw')
+
   /**
    * 同步外部传入的录制模式状态
    * 当抽屉打开时立即设置，避免等待 afterOpenChange 动画完成后才切换
@@ -648,13 +653,13 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
    */
   const switchFullScreenMode = useCallback(
     (newMode: FullScreenMode) => {
-      // 退出预览模式时：使用过渡动画，保持布局结构
+      // 退出预览模式时：使用过渡动画，保持布局结构，然后切换到目标模式
       if (previewEnabled && newMode !== FULL_SCREEN_MODE.PREVIEW) {
         closePreviewWithTransition(() => {
           // 立即清理预览容器内容和恢复 z-index
           cleanupPreviewContainer()
           shadowDomContainerManager.resetZIndex()
-        })
+        }, newMode)
         return
       }
 
@@ -1025,11 +1030,14 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         push={false}
         getContainer={getPortalContainer}
         styles={{
+          wrapper: { zIndex: 1000 },
+          mask: { zIndex: 1000 },
           section: {
             borderRadius: isFullScreenMode ? '0px' : '12px 0px 0px 12px',
             transition: 'border-radius 0.3s ease',
-          },
-          body: { padding: 0, '--drawer-theme-color': themeColor } as React.CSSProperties,
+            '--drawer-theme-color': themeColor,
+          } as React.CSSProperties,
+          body: { padding: 0 },
           header: { position: 'relative', borderBottom: 'none' },
           footer: { borderTop: 'none', padding: '16px 24px' },
         }}
@@ -1090,6 +1098,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
             repairOriginalValue,
             pendingRepairedValue,
             editorValue,
+            diffDisplayMode,
+            onDiffDisplayModeChange: setDiffDisplayMode,
             onApplyRepair: handleApplyRepair,
             onCancelRepair: handleCancelRepair,
           }}

@@ -77,8 +77,14 @@ export interface DiffModeContentProps extends BaseContentProps {
   repairOriginalValue: string
   pendingRepairedValue: string
   editorValue: string
+  /** Diff 显示模式 */
+  diffDisplayMode: 'raw' | 'deserialize' | 'unescape' | 'ast'
+  /** Diff 显示模式变化回调 */
+  onDiffDisplayModeChange: (mode: 'raw' | 'deserialize' | 'unescape' | 'ast') => void
   onApplyRepair: () => void
   onCancelRepair: () => void
+  /** 是否隐藏工具栏（由父组件统一管理时使用） */
+  hideToolbar?: boolean
 }
 
 /**
@@ -92,6 +98,8 @@ export interface RecordingModeContentProps extends BaseContentProps {
   onStopRecording: () => void
   onSelectSnapshot: (id: number) => void
   onEnterDiffMode: () => void
+  /** 是否隐藏工具栏（由父组件统一管理时使用） */
+  hideToolbar?: boolean
 }
 
 /**
@@ -111,6 +119,8 @@ export interface PreviewModeContentProps extends BaseContentProps {
   isOpeningInitial: boolean
   /** 预览打开过渡中：整个动画期间，用于控制拖动条隐藏 */
   isOpeningTransition: boolean
+  /** 是否隐藏工具栏（由父组件统一管理时使用） */
+  hideToolbar?: boolean
 }
 
 /**
@@ -118,6 +128,8 @@ export interface PreviewModeContentProps extends BaseContentProps {
  */
 export interface NormalModeContentProps extends BaseContentProps {
   previewEnabled: boolean
+  /** 是否隐藏工具栏（由父组件统一管理时使用） */
+  hideToolbar?: boolean
 }
 
 /**
