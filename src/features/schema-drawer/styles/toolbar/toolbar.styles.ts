@@ -128,7 +128,7 @@ export const ButtonGroup = styled.div`
 
 /**
  * 工具栏按钮
- * 普通按钮使用固定样式，primary 按钮保留 Ant Design 默认主题色
+ * 普通按钮使用固定样式，primary 按钮使用 CSS 变量 --drawer-theme-color 作为主题色
  */
 export const ToolbarButton = styled(Button)`
   &.ant-btn {
@@ -145,9 +145,19 @@ export const ToolbarButton = styled(Button)`
     color: #666f8d;
   }
 
-  /* primary 按钮保留主题色，只调整圆角和间距 */
-  &.ant-btn-primary {
+  /* primary 按钮使用主题色（仅非禁用状态） */
+  &.ant-btn-primary:not(:disabled) {
     border: none;
+    background: var(--drawer-theme-color, #1677ff);
+    color: #ffffff;
+
+    &:hover {
+      background: color-mix(in srgb, var(--drawer-theme-color, #1677ff) 85%, #ffffff);
+    }
+
+    &:active {
+      background: color-mix(in srgb, var(--drawer-theme-color, #1677ff) 85%, #000000);
+    }
   }
 `
 

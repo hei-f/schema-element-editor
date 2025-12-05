@@ -86,6 +86,7 @@ export const DraftAutoSaveSuccess = styled.span`
 
 /**
  * 抽屉标题工具栏按钮
+ * primary 按钮使用 CSS 变量 --drawer-theme-color 作为主题色
  */
 export const DrawerTitleButton = styled(Button)`
   border-radius: 6px;
@@ -95,11 +96,18 @@ export const DrawerTitleButton = styled(Button)`
     color: rgba(53, 62, 92, 1);
   }
 
-  &.ant-btn-primary {
+  /* primary 按钮使用主题色（仅非禁用状态） */
+  &.ant-btn-primary:not(:disabled) {
+    background: var(--drawer-theme-color, #1677ff);
     color: #fff;
 
-    &:hover:not(:disabled) {
+    &:hover {
+      background: color-mix(in srgb, var(--drawer-theme-color, #1677ff) 85%, #ffffff);
       color: #fff;
+    }
+
+    &:active {
+      background: color-mix(in srgb, var(--drawer-theme-color, #1677ff) 85%, #000000);
     }
   }
 
