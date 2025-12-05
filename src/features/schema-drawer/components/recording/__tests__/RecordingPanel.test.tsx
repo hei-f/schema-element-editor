@@ -8,53 +8,10 @@ import { RecordingPanel } from '../RecordingPanel'
 import type { SchemaSnapshot } from '@/shared/types'
 
 // Mock styled-components
+// 注意：状态栏已提升到 DrawerContent，RecordingPanel 只包含版本列表和编辑器
 vi.mock('../../../styles/recording/recording.styles', () => ({
   RecordingModeContainer: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="recording-mode-container">{children}</div>
-  ),
-  RecordingStatusBar: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="recording-status-bar">{children}</div>
-  ),
-  RecordingStatusLeft: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="recording-status-left">{children}</div>
-  ),
-  RecordingIndicator: ({
-    children,
-    $isRecording,
-  }: {
-    children: React.ReactNode
-    $isRecording: boolean
-  }) => (
-    <span data-testid="recording-indicator" data-is-recording={$isRecording}>
-      {children}
-    </span>
-  ),
-  VersionCount: ({ children }: { children: React.ReactNode }) => (
-    <span data-testid="version-count">{children}</span>
-  ),
-  StopRecordingButton: ({
-    children,
-    onClick,
-  }: {
-    children: React.ReactNode
-    onClick: () => void
-  }) => (
-    <button data-testid="stop-recording-btn" onClick={onClick}>
-      {children}
-    </button>
-  ),
-  DiffButton: ({
-    children,
-    onClick,
-    $disabled,
-  }: {
-    children: React.ReactNode
-    onClick?: () => void
-    $disabled: boolean
-  }) => (
-    <button data-testid="diff-btn" onClick={onClick} disabled={$disabled}>
-      {children}
-    </button>
   ),
   RecordingContentArea: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="recording-content-area">{children}</div>
@@ -100,30 +57,13 @@ vi.mock('../../../styles/recording/recording.styles', () => ({
   ),
 }))
 
-// Mock antd components
-vi.mock('antd', () => ({
-  Tooltip: ({ children, title }: { children: React.ReactNode; title: string }) => (
-    <div data-testid="tooltip" data-title={title}>
-      {children}
-    </div>
-  ),
-}))
-
-// Mock ant-design icons
-vi.mock('@ant-design/icons', () => ({
-  DiffOutlined: () => <span data-testid="diff-icon">DiffIcon</span>,
-  PauseCircleOutlined: () => <span data-testid="pause-icon">PauseIcon</span>,
-}))
-
 describe('RecordingPanel', () => {
+  // 状态栏已提升到 DrawerContent，RecordingPanel 只包含版本列表和编辑器
   const defaultProps = {
     isRecording: false,
     snapshots: [] as SchemaSnapshot[],
     selectedSnapshotId: null,
-    onStopRecording: vi.fn(),
     onSelectSnapshot: vi.fn(),
-    onEnterDiffMode: vi.fn(),
-    toolbar: <div data-testid="toolbar-content">工具栏内容</div>,
     children: <div data-testid="editor-content">编辑器内容</div>,
   }
 
@@ -136,7 +76,6 @@ describe('RecordingPanel', () => {
       render(<RecordingPanel {...defaultProps} />)
 
       expect(screen.getByTestId('recording-mode-container')).toBeInTheDocument()
-      expect(screen.getByTestId('recording-status-bar')).toBeInTheDocument()
       expect(screen.getByTestId('recording-content-area')).toBeInTheDocument()
       expect(screen.getByTestId('panel-header')).toHaveTextContent('版本历史')
     })
@@ -160,37 +99,7 @@ describe('RecordingPanel', () => {
     })
   })
 
-  describe('录制状态显示', () => {
-    it('录制中应该显示"录制中"状态', () => {
-      render(<RecordingPanel {...defaultProps} isRecording={true} />)
-
-      const indicator = screen.getByTestId('recording-indicator')
-      expect(indicator).toHaveTextContent('录制中')
-      expect(indicator).toHaveAttribute('data-is-recording', 'true')
-    })
-
-    it('停止录制应该显示"已停止"状态', () => {
-      render(<RecordingPanel {...defaultProps} isRecording={false} />)
-
-      const indicator = screen.getByTestId('recording-indicator')
-      expect(indicator).toHaveTextContent('已停止')
-      expect(indicator).toHaveAttribute('data-is-recording', 'false')
-    })
-
-    it('录制中应该显示停止按钮', () => {
-      render(<RecordingPanel {...defaultProps} isRecording={true} />)
-
-      expect(screen.getByTestId('stop-recording-btn')).toBeInTheDocument()
-      expect(screen.getByTestId('pause-icon')).toBeInTheDocument()
-    })
-
-    it('停止录制后应该显示版本对比按钮', () => {
-      render(<RecordingPanel {...defaultProps} isRecording={false} />)
-
-      expect(screen.getByTestId('diff-btn')).toBeInTheDocument()
-      expect(screen.getByTestId('diff-icon')).toBeInTheDocument()
-    })
-  })
+  // 注意：录制状态栏测试已移至 RecordingStatusBar.test.tsx
 
   describe('空状态显示', () => {
     it('录制中无数据时应该显示"等待数据变化..."', () => {
@@ -253,11 +162,7 @@ describe('RecordingPanel', () => {
       expect(versionItems[2]).toHaveAttribute('data-is-active', 'false')
     })
 
-    it('应该显示正确的版本计数', () => {
-      render(<RecordingPanel {...defaultProps} snapshots={mockSnapshots} />)
-
-      expect(screen.getByTestId('version-count')).toHaveTextContent('已记录 3 个版本')
-    })
+    // 注意：版本计数测试已移至 RecordingStatusBar.test.tsx
   })
 
   describe('交互测试', () => {
@@ -266,16 +171,7 @@ describe('RecordingPanel', () => {
       { id: 2, content: '{"type": "paragraph"}', timestamp: 1500 },
     ]
 
-    it('点击停止按钮应该触发 onStopRecording', () => {
-      const onStopRecording = vi.fn()
-      render(
-        <RecordingPanel {...defaultProps} isRecording={true} onStopRecording={onStopRecording} />
-      )
-
-      fireEvent.click(screen.getByTestId('stop-recording-btn'))
-
-      expect(onStopRecording).toHaveBeenCalledTimes(1)
-    })
+    // 注意：停止按钮测试已移至 RecordingStatusBar.test.tsx
 
     it('点击快照应该触发 onSelectSnapshot', () => {
       const onSelectSnapshot = vi.fn()
@@ -293,75 +189,8 @@ describe('RecordingPanel', () => {
       expect(onSelectSnapshot).toHaveBeenCalledWith(2)
     })
 
-    it('点击版本对比按钮应该触发 onEnterDiffMode（当有足够快照时）', () => {
-      const onEnterDiffMode = vi.fn()
-      render(
-        <RecordingPanel
-          {...defaultProps}
-          isRecording={false}
-          snapshots={mockSnapshots}
-          onEnterDiffMode={onEnterDiffMode}
-        />
-      )
-
-      const diffBtn = screen.getByTestId('diff-btn')
-      expect(diffBtn).not.toBeDisabled()
-
-      fireEvent.click(diffBtn)
-
-      expect(onEnterDiffMode).toHaveBeenCalledTimes(1)
-    })
-
-    it('快照不足2个时版本对比按钮应该禁用', () => {
-      const onEnterDiffMode = vi.fn()
-      render(
-        <RecordingPanel
-          {...defaultProps}
-          isRecording={false}
-          snapshots={[{ id: 1, content: '{}', timestamp: 500 }]}
-          onEnterDiffMode={onEnterDiffMode}
-        />
-      )
-
-      const diffBtn = screen.getByTestId('diff-btn')
-      expect(diffBtn).toBeDisabled()
-
-      fireEvent.click(diffBtn)
-
-      expect(onEnterDiffMode).not.toHaveBeenCalled()
-    })
-
-    it('录制中时不应该显示版本对比按钮', () => {
-      render(<RecordingPanel {...defaultProps} isRecording={true} snapshots={mockSnapshots} />)
-
-      expect(screen.queryByTestId('diff-btn')).not.toBeInTheDocument()
-      expect(screen.getByTestId('stop-recording-btn')).toBeInTheDocument()
-    })
+    // 注意：版本对比按钮测试已移至 RecordingStatusBar.test.tsx
   })
 
-  describe('Tooltip 提示', () => {
-    it('快照不足时应该显示提示信息', () => {
-      render(
-        <RecordingPanel
-          {...defaultProps}
-          isRecording={false}
-          snapshots={[{ id: 1, content: '{}', timestamp: 500 }]}
-        />
-      )
-
-      const tooltip = screen.getByTestId('tooltip')
-      expect(tooltip).toHaveAttribute('data-title', '需要至少2个版本才能进行对比')
-    })
-
-    it('快照足够时应该显示正常提示', () => {
-      const mockSnapshots: SchemaSnapshot[] = [
-        { id: 1, content: '{}', timestamp: 500 },
-        { id: 2, content: '{"type": "paragraph"}', timestamp: 1500 },
-      ]
-      render(<RecordingPanel {...defaultProps} isRecording={false} snapshots={mockSnapshots} />)
-
-      const tooltip = screen.getByTestId('tooltip')
-      expect(tooltip).toHaveAttribute('data-title', '对比不同版本')
-    })
-  })
+  // 注意：Tooltip 提示测试已移至 RecordingStatusBar.test.tsx
 })
