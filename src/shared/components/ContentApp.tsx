@@ -23,9 +23,11 @@ import {
 } from '@/shared/utils/browser/message'
 import { storage } from '@/shared/utils/browser/storage'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
+import { generate } from '@ant-design/colors'
+import { createCache, StyleProvider } from '@ant-design/cssinjs'
 import { App as AntdApp, ConfigProvider, message as antdMessage } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { StyleSheetManager } from 'styled-components'
 import { IframeHighlightOverlay } from './IframeHighlightOverlay'
 
@@ -37,6 +39,12 @@ interface AppProps {
  * Schema Editor主应用
  */
 export const App: React.FC<AppProps> = ({ shadowRoot }) => {
+  /**
+   * 为 Shadow DOM 创建 antd 样式缓存
+   * 确保 antd 的 CSS-in-JS 样式正确注入到 Shadow DOM 中
+   */
+  const antdCache = useMemo(() => createCache(), [])
+
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [schemaData, setSchemaData] = useState<unknown>(undefined)
   const [currentAttributes, setCurrentAttributes] = useState<ElementAttributes>({ params: [] })
@@ -97,7 +105,6 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
   useEffect(() => {
     const loadConfig = async () => {
       const [
-        width,
         apiConfig,
         toolbarButtons,
         autoSaveDraft,
@@ -110,8 +117,8 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
         autoParseString,
         shortcuts,
         iframeConfigData,
+        themeColor,
       ] = await Promise.all([
-        storage.getDrawerWidth(),
         storage.getApiConfig(),
         storage.getToolbarButtons(),
         storage.getAutoSaveDraft(),
@@ -124,9 +131,9 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
         storage.getAutoParseString(),
         storage.getDrawerShortcuts(),
         storage.getIframeConfig(),
+        storage.getThemeColor(),
       ])
       setDrawerConfig({
-        width,
         apiConfig,
         toolbarButtons,
         autoSaveDraft,
@@ -137,6 +144,7 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
         editorTheme,
         recordingModeConfig,
         autoParseString,
+        themeColor,
       })
       setDrawerShortcuts(shortcuts)
       setIframeConfig(iframeConfigData)
@@ -233,6 +241,17 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
     },
     [checkPreviewFunction]
   )
+
+  /**
+   * 抽屉打开时立即隐藏滚动条，避免打开动画时画面抖动
+   * 使用 useLayoutEffect 确保在 DOM 更新后同步执行
+   * 注意：滚动条恢复在 SchemaDrawer 的 afterOpenChange 中处理（动画完成后）
+   */
+  useLayoutEffect(() => {
+    if (drawerOpen) {
+      document.body.style.overflow = 'hidden'
+    }
+  }, [drawerOpen])
 
   /**
    * 监听来自 injected script 的消息（windowFunction 模式）
@@ -506,38 +525,87 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
 
     // 抽屉关闭时，恢复元素监听
     window.dispatchEvent(new CustomEvent('schema-editor:resume-monitor'))
+    // 注意：滚动条恢复在 SchemaDrawer 的 afterOpenChange 中处理，确保动画完成后再恢复
   }
+
+  /** 动态主题配置：合并基础主题和用户配置的主题色 */
+  const dynamicTheme = useMemo(() => {
+    const themeColor = drawerConfig?.themeColor || DEFAULT_VALUES.themeColor
+    const colors = generate(themeColor)
+    const primaryColor = colors[5]
+    const hoverColor = colors[4]
+    const activeColor = colors[6]
+
+    // 计算颜色亮度，决定 primary 按钮的文字颜色
+    const getLuminance = (hex: string) => {
+      const rgb = parseInt(hex.slice(1), 16)
+      const r = (rgb >> 16) & 0xff
+      const g = (rgb >> 8) & 0xff
+      const b = rgb & 0xff
+      return (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    }
+    const primaryTextColor = getLuminance(primaryColor) > 0.5 ? '#000000' : '#ffffff'
+
+    return {
+      ...shadowDomTheme,
+      token: {
+        ...shadowDomTheme.token,
+        colorPrimary: primaryColor,
+        colorPrimaryHover: hoverColor,
+        colorPrimaryActive: activeColor,
+        colorInfo: primaryColor,
+        colorLink: primaryColor,
+        colorLinkHover: hoverColor,
+        colorLinkActive: activeColor,
+        colorTextLightSolid: primaryTextColor,
+      },
+    }
+  }, [drawerConfig?.themeColor])
+
+  /**
+   * 获取弹层容器
+   * 使用触发元素的父节点，确保弹层正确定位
+   */
+  const getPopupContainer = useCallback(
+    (triggerNode?: HTMLElement) => {
+      // 优先使用触发元素的父节点
+      if (triggerNode?.parentNode instanceof HTMLElement) {
+        return triggerNode.parentNode
+      }
+      // fallback 到 shadowRoot
+      return shadowRoot as unknown as HTMLElement
+    },
+    [shadowRoot]
+  )
 
   return (
     <StyleSheetManager target={shadowRoot as unknown as HTMLElement}>
-      <ConfigProvider
-        locale={zhCN}
-        theme={shadowDomTheme}
-        getPopupContainer={() => shadowRoot as unknown as HTMLElement}
-      >
-        <AntdApp>
-          {/* iframe 元素高亮覆盖层 */}
-          {iframeConfig?.enabled && (
-            <IframeHighlightOverlay
-              recordingModeColor={drawerConfig?.recordingModeConfig?.highlightColor}
-            />
-          )}
+      <StyleProvider container={shadowRoot as unknown as HTMLElement} cache={antdCache}>
+        <ConfigProvider locale={zhCN} theme={dynamicTheme} getPopupContainer={getPopupContainer}>
+          <AntdApp>
+            {/* iframe 元素高亮覆盖层 */}
+            {iframeConfig?.enabled && (
+              <IframeHighlightOverlay
+                recordingModeColor={drawerConfig?.recordingModeConfig?.highlightColor}
+              />
+            )}
 
-          {drawerConfig && drawerShortcuts && (
-            <SchemaDrawer
-              open={drawerOpen}
-              schemaData={schemaData}
-              attributes={currentAttributes}
-              onClose={handleCloseDrawer}
-              onSave={handleSave}
-              isRecordingMode={isRecordingMode}
-              config={drawerConfig}
-              hasPreviewFunction={hasPreviewFunction}
-              shortcuts={drawerShortcuts}
-            />
-          )}
-        </AntdApp>
-      </ConfigProvider>
+            {drawerConfig && drawerShortcuts && (
+              <SchemaDrawer
+                open={drawerOpen}
+                schemaData={schemaData}
+                attributes={currentAttributes}
+                onClose={handleCloseDrawer}
+                onSave={handleSave}
+                isRecordingMode={isRecordingMode}
+                config={drawerConfig}
+                hasPreviewFunction={hasPreviewFunction}
+                shortcuts={drawerShortcuts}
+              />
+            )}
+          </AntdApp>
+        </ConfigProvider>
+      </StyleProvider>
     </StyleSheetManager>
   )
 }

@@ -3,11 +3,11 @@ import { useDiffSync } from '../../diff/useDiffSync'
 
 describe('useDiffSync', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
+    vi.useFakeTimers({ shouldAdvanceTime: true })
   })
 
   afterEach(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   describe('初始化', () => {
@@ -95,7 +95,7 @@ describe('useDiffSync', () => {
 
       // 快进防抖时间
       await act(async () => {
-        jest.advanceTimersByTime(100)
+        vi.advanceTimersByTime(100)
       })
 
       // diff 结果应该更新
@@ -118,13 +118,13 @@ describe('useDiffSync', () => {
 
       // 在防抖时间内再次更新
       act(() => {
-        jest.advanceTimersByTime(100)
+        vi.advanceTimersByTime(100)
         result.current.setLeftContent('change 2')
       })
 
       // 快进剩余时间
       await act(async () => {
-        jest.advanceTimersByTime(300)
+        vi.advanceTimersByTime(300)
       })
 
       // 最终内容应该是最后一次更新
@@ -146,14 +146,14 @@ describe('useDiffSync', () => {
 
       // 300ms 后 diff 还未计算完成
       await act(async () => {
-        jest.advanceTimersByTime(300)
+        vi.advanceTimersByTime(300)
       })
 
       expect(result.current.isComputing).toBe(true)
 
       // 再等 200ms
       await act(async () => {
-        jest.advanceTimersByTime(200)
+        vi.advanceTimersByTime(200)
       })
 
       expect(result.current.isComputing).toBe(false)
@@ -319,14 +319,14 @@ describe('useDiffSync', () => {
 
       // 等待 setIsComputing(true) 的 setTimeout(0) 执行
       await act(async () => {
-        jest.advanceTimersByTime(1)
+        vi.advanceTimersByTime(1)
       })
 
       expect(result.current.isComputing).toBe(true)
 
       // 等待防抖完成
       await act(async () => {
-        jest.advanceTimersByTime(200)
+        vi.advanceTimersByTime(200)
       })
 
       expect(result.current.isComputing).toBe(false)
@@ -382,7 +382,7 @@ describe('useDiffSync', () => {
       // 这里主要验证不会抛出错误
       expect(() => {
         unmount()
-        jest.advanceTimersByTime(1000)
+        vi.advanceTimersByTime(1000)
       }).not.toThrow()
     })
   })

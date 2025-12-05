@@ -1,6 +1,13 @@
 import type { ThemeConfig } from 'antd'
 
 /**
+ * Modal 组件的 z-index
+ * Modal 使用 getContainer 渲染到 Shadow DOM 后可能脱离 ConfigProvider 上下文
+ * 需要显式设置 zIndex 确保 Modal 始终在 Drawer (z-index: 1000) 之上
+ */
+export const MODAL_Z_INDEX = 1100
+
+/**
  * Shadow DOM 环境专用的 Ant Design 主题配置
  *
  * 目的：
@@ -110,11 +117,17 @@ export const shadowDomTheme: ThemeConfig = {
     colorLinkActive: '#2ba89f', // 链接激活色
 
     // ============================================
+    // 🎯 特殊文本颜色（必须设置）
+    // Tooltip 等深色背景组件的文字颜色
+    // ============================================
+    colorTextLightSolid: '#ffffff', // 深色背景上的文字（白色）
+
+    // ============================================
     // 📊 层级系统（推荐设置）
     // 控制弹层的 z-index，避免层级错乱
     // ============================================
     zIndexBase: 0, // 基础层级
-    zIndexPopupBase: 1000, // 弹层基础层级
+    zIndexPopupBase: 1050, // 弹层基础层级（高于 Drawer 的 1000，确保 Tooltip 不被遮挡）
 
     // ============================================
     // 💡 说明
@@ -154,12 +167,13 @@ export const shadowDomTheme: ThemeConfig = {
 
     // Modal 组件配置
     Modal: {
-      // 使用默认配置
+      // Modal 的 z-index 需要在组件上直接设置，ComponentToken 不支持 zIndex 配置
     },
 
     // Tooltip 组件配置
     Tooltip: {
-      // 使用默认配置
+      // 提高 z-index 到最高，确保 Tooltip 在 Drawer mask 之上
+      zIndexPopup: 2147483647,
     },
   },
 }

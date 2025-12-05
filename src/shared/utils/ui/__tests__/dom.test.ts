@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import {
   isVisibleElement,
   findElementWithSchemaParams,
@@ -10,10 +11,10 @@ import {
 import { storage } from '../../browser/storage'
 
 // Mock storage
-jest.mock('../../browser/storage', () => ({
+vi.mock('../../browser/storage', () => ({
   storage: {
-    getAttributeName: jest.fn().mockResolvedValue('schema-params'),
-    getSearchConfig: jest.fn().mockResolvedValue({
+    getAttributeName: vi.fn().mockResolvedValue('schema-params'),
+    getSearchConfig: vi.fn().mockResolvedValue({
       limitUpwardSearch: true,
       searchDepthUp: 5,
     }),
@@ -83,9 +84,9 @@ describe('dom 工具函数', () => {
 
   describe('findElementWithSchemaParams', () => {
     beforeEach(() => {
-      jest.clearAllMocks()
-      ;(storage.getAttributeName as jest.Mock).mockResolvedValue('schema-params')
-      ;(storage.getSearchConfig as jest.Mock).mockResolvedValue({
+      vi.clearAllMocks()
+      ;(storage.getAttributeName as Mock).mockResolvedValue('schema-params')
+      ;(storage.getSearchConfig as Mock).mockResolvedValue({
         limitUpwardSearch: true,
         searchDepthUp: 5,
       })
@@ -94,7 +95,7 @@ describe('dom 工具函数', () => {
     it('应该返回空结果当没有匹配元素时', async () => {
       // Mock elementsFromPoint 返回空
       const originalElementsFromPoint = document.elementsFromPoint
-      document.elementsFromPoint = jest.fn().mockReturnValue([])
+      document.elementsFromPoint = vi.fn().mockReturnValue([])
 
       const result = await findElementWithSchemaParams(100, 100)
 
@@ -110,7 +111,7 @@ describe('dom 工具函数', () => {
       document.body.appendChild(element)
 
       const originalElementsFromPoint = document.elementsFromPoint
-      document.elementsFromPoint = jest.fn().mockReturnValue([element])
+      document.elementsFromPoint = vi.fn().mockReturnValue([element])
 
       const result = await findElementWithSchemaParams(100, 100)
 
@@ -128,7 +129,7 @@ describe('dom 工具函数', () => {
       document.body.appendChild(uiElement)
 
       const originalElementsFromPoint = document.elementsFromPoint
-      document.elementsFromPoint = jest.fn().mockReturnValue([uiElement])
+      document.elementsFromPoint = vi.fn().mockReturnValue([uiElement])
 
       const result = await findElementWithSchemaParams(100, 100)
 
@@ -146,7 +147,7 @@ describe('dom 工具函数', () => {
       document.body.appendChild(hiddenElement)
 
       const originalElementsFromPoint = document.elementsFromPoint
-      document.elementsFromPoint = jest.fn().mockReturnValue([hiddenElement])
+      document.elementsFromPoint = vi.fn().mockReturnValue([hiddenElement])
 
       const result = await findElementWithSchemaParams(100, 100)
 
@@ -165,7 +166,7 @@ describe('dom 工具函数', () => {
       document.body.appendChild(parent)
 
       const originalElementsFromPoint = document.elementsFromPoint
-      document.elementsFromPoint = jest.fn().mockReturnValue([child])
+      document.elementsFromPoint = vi.fn().mockReturnValue([child])
 
       const result = await findElementWithSchemaParams(100, 100)
 
@@ -177,7 +178,7 @@ describe('dom 工具函数', () => {
     })
 
     it('应该限制向上搜索深度', async () => {
-      ;(storage.getSearchConfig as jest.Mock).mockResolvedValue({
+      ;(storage.getSearchConfig as Mock).mockResolvedValue({
         limitUpwardSearch: true,
         searchDepthUp: 1,
       })
@@ -193,7 +194,7 @@ describe('dom 工具函数', () => {
       document.body.appendChild(grandparent)
 
       const originalElementsFromPoint = document.elementsFromPoint
-      document.elementsFromPoint = jest.fn().mockReturnValue([child])
+      document.elementsFromPoint = vi.fn().mockReturnValue([child])
 
       const result = await findElementWithSchemaParams(100, 100)
 
@@ -205,7 +206,7 @@ describe('dom 工具函数', () => {
     })
 
     it('不限制搜索深度时应该搜索到根元素', async () => {
-      ;(storage.getSearchConfig as jest.Mock).mockResolvedValue({
+      ;(storage.getSearchConfig as Mock).mockResolvedValue({
         limitUpwardSearch: false,
         searchDepthUp: 5,
       })
@@ -214,7 +215,7 @@ describe('dom 工具函数', () => {
       document.body.appendChild(element)
 
       const originalElementsFromPoint = document.elementsFromPoint
-      document.elementsFromPoint = jest.fn().mockReturnValue([element])
+      document.elementsFromPoint = vi.fn().mockReturnValue([element])
 
       const result = await findElementWithSchemaParams(100, 100)
 
@@ -237,7 +238,7 @@ describe('dom 工具函数', () => {
       document.body.appendChild(uiParent)
 
       const originalElementsFromPoint = document.elementsFromPoint
-      document.elementsFromPoint = jest.fn().mockReturnValue([child])
+      document.elementsFromPoint = vi.fn().mockReturnValue([child])
 
       const result = await findElementWithSchemaParams(100, 100)
 
@@ -263,14 +264,14 @@ describe('dom 工具函数', () => {
       const child = document.createElement('div')
       parent.appendChild(child)
       document.body.appendChild(grandparent)
-      ;(storage.getSearchConfig as jest.Mock).mockResolvedValue({
+      ;(storage.getSearchConfig as Mock).mockResolvedValue({
         limitUpwardSearch: true,
         searchDepthUp: 10,
       })
 
       const originalElementsFromPoint = document.elementsFromPoint
       // 返回 parent 而不是 child，这样 parent 不在 UI 元素内部
-      document.elementsFromPoint = jest.fn().mockReturnValue([grandparent])
+      document.elementsFromPoint = vi.fn().mockReturnValue([grandparent])
 
       const result = await findElementWithSchemaParams(100, 100)
 
@@ -293,14 +294,14 @@ describe('dom 工具函数', () => {
       const child = document.createElement('div')
       uiMiddle.appendChild(child)
       document.body.appendChild(target)
-      ;(storage.getSearchConfig as jest.Mock).mockResolvedValue({
+      ;(storage.getSearchConfig as Mock).mockResolvedValue({
         limitUpwardSearch: true,
         searchDepthUp: 10,
       })
 
       const originalElementsFromPoint = document.elementsFromPoint
       // 模拟返回一个不在 UI 元素内的元素
-      document.elementsFromPoint = jest.fn().mockReturnValue([target])
+      document.elementsFromPoint = vi.fn().mockReturnValue([target])
 
       const result = await findElementWithSchemaParams(100, 100)
 
@@ -323,7 +324,7 @@ describe('dom 工具函数', () => {
       const child = document.createElement('div')
       uiElement.appendChild(child)
       document.body.appendChild(grandparent)
-      ;(storage.getSearchConfig as jest.Mock).mockResolvedValue({
+      ;(storage.getSearchConfig as Mock).mockResolvedValue({
         limitUpwardSearch: true,
         searchDepthUp: 10,
       })
@@ -332,7 +333,7 @@ describe('dom 工具函数', () => {
       // child 本身在 UI 元素内部，会被过滤
       // 需要模拟 child 不在 UI 元素内部的情况
       // 直接返回 grandparent，它自身有 schema-params
-      document.elementsFromPoint = jest.fn().mockReturnValue([grandparent])
+      document.elementsFromPoint = vi.fn().mockReturnValue([grandparent])
 
       const result = await findElementWithSchemaParams(100, 100)
 
@@ -345,7 +346,7 @@ describe('dom 工具函数', () => {
 
   describe('getElementAttributes', () => {
     beforeEach(() => {
-      ;(storage.getAttributeName as jest.Mock).mockResolvedValue('schema-params')
+      ;(storage.getAttributeName as Mock).mockResolvedValue('schema-params')
     })
 
     it('应该返回空 params 当元素没有属性时', async () => {
@@ -398,7 +399,7 @@ describe('dom 工具函数', () => {
       document.body.appendChild(element)
 
       // Mock getBoundingClientRect
-      element.getBoundingClientRect = jest.fn().mockReturnValue({
+      element.getBoundingClientRect = vi.fn().mockReturnValue({
         left: 10,
         top: 20,
         width: 100,
@@ -433,7 +434,7 @@ describe('dom 工具函数', () => {
   describe('isClickInside', () => {
     it('应该返回 true 当点击在元素内部', () => {
       const element = document.createElement('div')
-      element.getBoundingClientRect = jest.fn().mockReturnValue({
+      element.getBoundingClientRect = vi.fn().mockReturnValue({
         left: 100,
         right: 200,
         top: 100,
@@ -450,7 +451,7 @@ describe('dom 工具函数', () => {
 
     it('应该返回 false 当点击在元素外部（左侧）', () => {
       const element = document.createElement('div')
-      element.getBoundingClientRect = jest.fn().mockReturnValue({
+      element.getBoundingClientRect = vi.fn().mockReturnValue({
         left: 100,
         right: 200,
         top: 100,
@@ -467,7 +468,7 @@ describe('dom 工具函数', () => {
 
     it('应该返回 false 当点击在元素外部（右侧）', () => {
       const element = document.createElement('div')
-      element.getBoundingClientRect = jest.fn().mockReturnValue({
+      element.getBoundingClientRect = vi.fn().mockReturnValue({
         left: 100,
         right: 200,
         top: 100,
@@ -484,7 +485,7 @@ describe('dom 工具函数', () => {
 
     it('应该返回 false 当点击在元素外部（上方）', () => {
       const element = document.createElement('div')
-      element.getBoundingClientRect = jest.fn().mockReturnValue({
+      element.getBoundingClientRect = vi.fn().mockReturnValue({
         left: 100,
         right: 200,
         top: 100,
@@ -501,7 +502,7 @@ describe('dom 工具函数', () => {
 
     it('应该返回 false 当点击在元素外部（下方）', () => {
       const element = document.createElement('div')
-      element.getBoundingClientRect = jest.fn().mockReturnValue({
+      element.getBoundingClientRect = vi.fn().mockReturnValue({
         left: 100,
         right: 200,
         top: 100,
@@ -518,7 +519,7 @@ describe('dom 工具函数', () => {
 
     it('应该返回 true 当点击在元素边界上', () => {
       const element = document.createElement('div')
-      element.getBoundingClientRect = jest.fn().mockReturnValue({
+      element.getBoundingClientRect = vi.fn().mockReturnValue({
         left: 100,
         right: 200,
         top: 100,

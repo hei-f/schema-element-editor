@@ -1,22 +1,23 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { useResizer, PREVIEW_WIDTH_LIMITS } from '../../ui/useResizer'
+import { previewContainerManager } from '@/core/content/core/preview-container'
 
 // Mock previewContainerManager
-jest.mock('@/core/content/core/preview-container', () => ({
+vi.mock('@/core/content/core/preview-container', () => ({
   previewContainerManager: {
-    hide: jest.fn(),
+    hide: vi.fn(),
   },
 }))
 
 describe('useResizer Hook 测试', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
-    jest.clearAllMocks()
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    vi.clearAllMocks()
   })
 
   afterEach(() => {
-    jest.runOnlyPendingTimers()
-    jest.useRealTimers()
+    vi.runOnlyPendingTimers()
+    vi.useRealTimers()
   })
 
   describe('常量导出', () => {
@@ -87,7 +88,7 @@ describe('useResizer Hook 测试', () => {
       const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
 
       const mockEvent = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -99,11 +100,10 @@ describe('useResizer Hook 测试', () => {
     })
 
     it('开始拖拽时隐藏预览容器', () => {
-      const { previewContainerManager } = require('@/core/content/core/preview-container')
       const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
 
       const mockEvent = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -116,12 +116,12 @@ describe('useResizer Hook 测试', () => {
 
   describe('鼠标事件处理', () => {
     it('拖拽状态时绑定全局鼠标事件', () => {
-      const addEventListenerSpy = jest.spyOn(document, 'addEventListener')
+      const addEventListenerSpy = vi.spyOn(document, 'addEventListener')
 
       const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
 
       const mockEvent = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -152,7 +152,7 @@ describe('useResizer Hook 测试', () => {
       })
 
       const mockEvent = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -184,7 +184,7 @@ describe('useResizer Hook 测试', () => {
       })
 
       const mockEvent = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -210,7 +210,7 @@ describe('useResizer Hook 测试', () => {
       const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
 
       const mockEvent = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -231,7 +231,7 @@ describe('useResizer Hook 测试', () => {
       const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
 
       const mockEvent = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -245,11 +245,18 @@ describe('useResizer Hook 测试', () => {
         document.dispatchEvent(new MouseEvent('mouseup'))
       })
 
+      // mouseup 后使用 setTimeout + requestAnimationFrame 延迟设置 isDragging
+      // 需要推进定时器并等待 requestAnimationFrame
+      await act(async () => {
+        vi.advanceTimersByTime(100)
+        await Promise.resolve()
+      })
+
       expect(result.current.isDragging).toBe(false)
     })
 
     it('mouseup 后触发 onResizeEnd 回调', async () => {
-      const onResizeEnd = jest.fn()
+      const onResizeEnd = vi.fn()
       const { result } = renderHook(() =>
         useResizer({
           initialWidth: 40,
@@ -258,7 +265,7 @@ describe('useResizer Hook 测试', () => {
       )
 
       const mockEvent = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -271,7 +278,7 @@ describe('useResizer Hook 测试', () => {
 
       // 等待 setTimeout
       act(() => {
-        jest.advanceTimersByTime(100)
+        vi.advanceTimersByTime(100)
       })
 
       await waitFor(() => {
@@ -282,12 +289,12 @@ describe('useResizer Hook 测试', () => {
 
   describe('卸载清理', () => {
     it('卸载时移除事件监听器', () => {
-      const removeEventListenerSpy = jest.spyOn(document, 'removeEventListener')
+      const removeEventListenerSpy = vi.spyOn(document, 'removeEventListener')
 
       const { result, unmount } = renderHook(() => useResizer({ initialWidth: 40 }))
 
       const mockEvent = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -300,6 +307,71 @@ describe('useResizer Hook 测试', () => {
       expect(removeEventListenerSpy).toHaveBeenCalledWith('mouseup', expect.any(Function))
 
       removeEventListenerSpy.mockRestore()
+    })
+  })
+
+  /**
+   * React 19 RefObject 类型兼容性测试
+   * React 19 中 useRef<T>(null) 返回 RefObject<T | null> 而非 RefObject<T>
+   */
+  describe('React 19 RefObject 类型兼容性', () => {
+    it('containerRef 初始值为 null（React 19 类型：RefObject<HTMLDivElement | null>）', () => {
+      const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
+
+      // React 19: useRef<HTMLDivElement>(null) 返回 RefObject<HTMLDivElement | null>
+      // 因此 containerRef.current 可以是 HTMLDivElement 或 null
+      expect(result.current.containerRef.current).toBeNull()
+    })
+
+    it('containerRef 类型应该允许 null 值', () => {
+      const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
+
+      // 验证类型兼容性：可以安全地检查 null
+      const isNull = result.current.containerRef.current === null
+      expect(isNull).toBe(true)
+    })
+
+    it('containerRef 赋值后应该能正确访问', () => {
+      const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
+
+      // 模拟 containerRef 被赋值后的情况
+      const mockContainer = {
+        getBoundingClientRect: () => ({
+          left: 0,
+          width: 1000,
+        }),
+      } as HTMLDivElement
+
+      Object.defineProperty(result.current.containerRef, 'current', {
+        value: mockContainer,
+        writable: true,
+      })
+
+      // React 19 类型系统下，访问 current 需要处理可能的 null
+      expect(result.current.containerRef.current).not.toBeNull()
+      expect(result.current.containerRef.current).toBe(mockContainer)
+    })
+
+    it('在 containerRef 为 null 时鼠标移动不应该崩溃', () => {
+      const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
+
+      const mockEvent = {
+        preventDefault: vi.fn(),
+      } as unknown as React.MouseEvent
+
+      // containerRef.current 为 null
+      expect(result.current.containerRef.current).toBeNull()
+
+      act(() => {
+        result.current.handleResizeStart(mockEvent)
+      })
+
+      // 不应该抛出错误
+      expect(() => {
+        act(() => {
+          document.dispatchEvent(new MouseEvent('mousemove', { clientX: 500 }))
+        })
+      }).not.toThrow()
     })
   })
 
@@ -320,7 +392,7 @@ describe('useResizer Hook 测试', () => {
       const { result } = renderHook(() => useResizer({ initialWidth: 40 }))
 
       const mockEvent = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -332,16 +404,18 @@ describe('useResizer Hook 测试', () => {
         document.dispatchEvent(new MouseEvent('mouseup'))
       })
 
-      act(() => {
-        jest.advanceTimersByTime(100)
+      // mouseup 后使用 setTimeout + requestAnimationFrame 延迟设置 isDragging
+      await act(async () => {
+        vi.advanceTimersByTime(100)
+        await Promise.resolve()
       })
 
       expect(result.current.isDragging).toBe(false)
     })
 
     it('onResizeEnd 回调变更时使用最新的回调', async () => {
-      const onResizeEnd1 = jest.fn()
-      const onResizeEnd2 = jest.fn()
+      const onResizeEnd1 = vi.fn()
+      const onResizeEnd2 = vi.fn()
 
       const { result, rerender } = renderHook(
         ({ onResizeEnd }) => useResizer({ initialWidth: 40, onResizeEnd }),
@@ -349,7 +423,7 @@ describe('useResizer Hook 测试', () => {
       )
 
       const mockEvent = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       } as unknown as React.MouseEvent
 
       act(() => {
@@ -364,7 +438,7 @@ describe('useResizer Hook 测试', () => {
       })
 
       act(() => {
-        jest.advanceTimersByTime(100)
+        vi.advanceTimersByTime(100)
       })
 
       await waitFor(() => {

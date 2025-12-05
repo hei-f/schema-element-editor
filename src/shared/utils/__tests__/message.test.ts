@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { MessageType } from '@/shared/types'
 import {
   listenChromeMessages,
@@ -12,7 +13,7 @@ import {
 
 describe('Message工具测试', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('sendMessageToBackground', () => {
@@ -22,7 +23,7 @@ describe('Message工具测试', () => {
         payload: { params: 'test-param' },
       }
 
-      ;(chrome.runtime.sendMessage as jest.Mock).mockResolvedValue({ success: true })
+      ;(chrome.runtime.sendMessage as Mock).mockResolvedValue({ success: true })
 
       await sendMessageToBackground(message)
 
@@ -36,7 +37,7 @@ describe('Message工具测试', () => {
         { type: MessageType.TOGGLE_ACTIVE, payload: { active: true } },
       ]
 
-      ;(chrome.runtime.sendMessage as jest.Mock).mockResolvedValue({ success: true })
+      ;(chrome.runtime.sendMessage as Mock).mockResolvedValue({ success: true })
 
       for (const msg of messages) {
         await sendMessageToBackground(msg)
@@ -52,7 +53,7 @@ describe('Message工具测试', () => {
       }
       const mockResponse = { data: { key: 'value' } }
 
-      ;(chrome.runtime.sendMessage as jest.Mock).mockResolvedValue(mockResponse)
+      ;(chrome.runtime.sendMessage as Mock).mockResolvedValue(mockResponse)
 
       const result = await sendMessageToBackground(message)
 
@@ -86,7 +87,7 @@ describe('Message工具测试', () => {
 
       postMessageToPage(message)
 
-      const call = (window.postMessage as jest.Mock).mock.calls[0]
+      const call = (window.postMessage as Mock).mock.calls[0]
       expect(call[0]).toHaveProperty('source', 'schema-editor-content')
       expect(call[1]).toBe('*')
     })
@@ -123,7 +124,7 @@ describe('Message工具测试', () => {
         payload: complexPayload,
       })
 
-      const call = (window.postMessage as jest.Mock).mock.calls[0]
+      const call = (window.postMessage as Mock).mock.calls[0]
       expect(call[0].payload).toEqual(complexPayload)
     })
   })
@@ -154,7 +155,7 @@ describe('Message工具测试', () => {
 
       postMessageToPage(message)
 
-      const call = (window.postMessage as jest.Mock).mock.calls[0]
+      const call = (window.postMessage as Mock).mock.calls[0]
       expect(call[0].payload).toHaveProperty('params')
     })
 
@@ -169,7 +170,7 @@ describe('Message工具测试', () => {
 
       postMessageToPage(message)
 
-      const call = (window.postMessage as jest.Mock).mock.calls[0]
+      const call = (window.postMessage as Mock).mock.calls[0]
       expect(call[0].payload).toHaveProperty('schema')
       expect(call[0].payload).toHaveProperty('params')
     })
@@ -185,7 +186,7 @@ describe('Message工具测试', () => {
 
       postMessageToPage(message)
 
-      const call = (window.postMessage as jest.Mock).mock.calls[0]
+      const call = (window.postMessage as Mock).mock.calls[0]
       expect(call[0].payload).toHaveProperty('success')
       expect(call[0].payload).toHaveProperty('data')
     })
@@ -199,7 +200,7 @@ describe('Message工具测试', () => {
         payload: { params: 'test-param' },
       }
 
-      ;(chrome.tabs.sendMessage as jest.Mock).mockResolvedValue({ success: true })
+      ;(chrome.tabs.sendMessage as Mock).mockResolvedValue({ success: true })
 
       await sendMessageToContent(tabId, message)
 
@@ -214,7 +215,7 @@ describe('Message工具测试', () => {
       }
       const mockResponse = { data: { key: 'value' } }
 
-      ;(chrome.tabs.sendMessage as jest.Mock).mockResolvedValue(mockResponse)
+      ;(chrome.tabs.sendMessage as Mock).mockResolvedValue(mockResponse)
 
       const result = await sendMessageToContent(tabId, message)
 
@@ -228,7 +229,7 @@ describe('Message工具测试', () => {
         payload: { params: 'test' },
       }
 
-      ;(chrome.tabs.sendMessage as jest.Mock).mockRejectedValue(new Error('Tab not found'))
+      ;(chrome.tabs.sendMessage as Mock).mockRejectedValue(new Error('Tab not found'))
 
       await expect(sendMessageToContent(tabId, message)).rejects.toThrow('Tab not found')
     })
@@ -236,15 +237,15 @@ describe('Message工具测试', () => {
 
   describe('listenChromeMessages', () => {
     it('应该监听同步消息', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       const message = { type: MessageType.GET_SCHEMA, payload: {} }
       const sender = {} as chrome.runtime.MessageSender
 
       listenChromeMessages(handler)
 
       // 获取注册的监听器
-      const listener = (chrome.runtime.onMessage.addListener as jest.Mock).mock.calls[0][0]
-      const sendResponse = jest.fn()
+      const listener = (chrome.runtime.onMessage.addListener as Mock).mock.calls[0][0]
+      const sendResponse = vi.fn()
 
       const result = listener(message, sender, sendResponse)
 
@@ -253,14 +254,14 @@ describe('Message工具测试', () => {
     })
 
     it('应该监听异步消息', () => {
-      const handler = jest.fn().mockResolvedValue(undefined)
+      const handler = vi.fn().mockResolvedValue(undefined)
       const message = { type: MessageType.UPDATE_SCHEMA, payload: {} }
       const sender = {} as chrome.runtime.MessageSender
 
       listenChromeMessages(handler)
 
-      const listener = (chrome.runtime.onMessage.addListener as jest.Mock).mock.calls[0][0]
-      const sendResponse = jest.fn()
+      const listener = (chrome.runtime.onMessage.addListener as Mock).mock.calls[0][0]
+      const sendResponse = vi.fn()
 
       const result = listener(message, sender, sendResponse)
 
@@ -269,14 +270,14 @@ describe('Message工具测试', () => {
     })
 
     it('应该处理返回 true 的 handler（需要异步响应）', () => {
-      const handler = jest.fn().mockReturnValue(true)
+      const handler = vi.fn().mockReturnValue(true)
       const message = { type: MessageType.GET_SCHEMA, payload: {} }
       const sender = {} as chrome.runtime.MessageSender
 
       listenChromeMessages(handler)
 
-      const listener = (chrome.runtime.onMessage.addListener as jest.Mock).mock.calls[0][0]
-      const sendResponse = jest.fn()
+      const listener = (chrome.runtime.onMessage.addListener as Mock).mock.calls[0][0]
+      const sendResponse = vi.fn()
 
       const result = listener(message, sender, sendResponse)
 
@@ -287,7 +288,7 @@ describe('Message工具测试', () => {
 
   describe('listenPageMessages', () => {
     it('应该监听来自页面的消息', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       const cleanup = listenPageMessages(handler)
 
       const event = new MessageEvent('message', {
@@ -311,7 +312,7 @@ describe('Message工具测试', () => {
     })
 
     it('应该忽略非当前窗口的消息', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       const cleanup = listenPageMessages(handler)
 
       const event = new MessageEvent('message', {
@@ -331,7 +332,7 @@ describe('Message工具测试', () => {
     })
 
     it('应该忽略非injected script的消息', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       const cleanup = listenPageMessages(handler)
 
       const event = new MessageEvent('message', {
@@ -351,7 +352,7 @@ describe('Message工具测试', () => {
     })
 
     it('应该正确清理监听器', () => {
-      const handler = jest.fn()
+      const handler = vi.fn()
       const cleanup = listenPageMessages(handler)
 
       cleanup()
@@ -373,11 +374,11 @@ describe('Message工具测试', () => {
 
   describe('sendRequestToHost', () => {
     beforeEach(() => {
-      jest.useFakeTimers()
+      vi.useFakeTimers({ shouldAdvanceTime: true })
     })
 
     afterEach(() => {
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
 
     it('应该发送请求并等待响应', async () => {
@@ -398,7 +399,7 @@ describe('Message工具测试', () => {
       )
 
       // 获取 requestId
-      const callArgs = (window.postMessage as jest.Mock).mock.calls[0][0]
+      const callArgs = (window.postMessage as Mock).mock.calls[0][0]
       const requestId = callArgs.requestId
 
       // 模拟宿主响应
@@ -426,7 +427,7 @@ describe('Message工具测试', () => {
       const requestPromise = sendRequestToHost(type, payload, 1)
 
       // 快进超过超时时间
-      jest.advanceTimersByTime(1100)
+      vi.advanceTimersByTime(1100)
 
       await expect(requestPromise).rejects.toThrow('请求超时（1秒）')
     })
@@ -452,7 +453,7 @@ describe('Message工具测试', () => {
 
   describe('initHostMessageListener', () => {
     it('应该监听宿主响应消息', () => {
-      const addEventListenerSpy = jest.spyOn(window, 'addEventListener')
+      const addEventListenerSpy = vi.spyOn(window, 'addEventListener')
 
       const cleanup = initHostMessageListener()
 
@@ -507,7 +508,7 @@ describe('Message工具测试', () => {
     })
 
     it('cleanup 应该清理待处理请求', () => {
-      jest.useFakeTimers()
+      vi.useFakeTimers({ shouldAdvanceTime: true })
 
       const cleanup = initHostMessageListener()
 
@@ -517,13 +518,13 @@ describe('Message工具测试', () => {
       // 调用 cleanup
       cleanup()
 
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
   })
 
   describe('错误场景', () => {
     it('应该处理sendMessageToBackground失败', async () => {
-      ;(chrome.runtime.sendMessage as jest.Mock).mockRejectedValue(new Error('SendMessage failed'))
+      ;(chrome.runtime.sendMessage as Mock).mockRejectedValue(new Error('SendMessage failed'))
 
       await expect(
         sendMessageToBackground({
@@ -551,7 +552,7 @@ describe('Message工具测试', () => {
   describe('边界情况测试', () => {
     it('应该处理非常长的params字符串', async () => {
       const longParams = 'a'.repeat(10000)
-      ;(chrome.runtime.sendMessage as jest.Mock).mockResolvedValue({ success: true })
+      ;(chrome.runtime.sendMessage as Mock).mockResolvedValue({ success: true })
 
       await sendMessageToBackground({
         type: MessageType.GET_SCHEMA,
@@ -589,7 +590,7 @@ describe('Message工具测试', () => {
         payload: specialPayload,
       })
 
-      const call = (window.postMessage as jest.Mock).mock.calls[0]
+      const call = (window.postMessage as Mock).mock.calls[0]
       expect(call[0].payload).toEqual(specialPayload)
     })
 

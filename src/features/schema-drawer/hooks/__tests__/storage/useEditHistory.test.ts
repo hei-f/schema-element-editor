@@ -3,17 +3,17 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { useEditHistory } from '../../storage/useEditHistory'
 
 // Mock logger
-jest.mock('@/shared/utils/logger', () => ({
+vi.mock('@/shared/utils/logger', () => ({
   logger: {
-    log: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
+    log: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
   },
 }))
 
 describe('useEditHistory Hook 测试', () => {
-  const mockOnLoadVersion = jest.fn()
-  const mockOnClearHistory = jest.fn()
+  const mockOnLoadVersion = vi.fn()
+  const mockOnClearHistory = vi.fn()
   const defaultProps = {
     paramsKey: 'test-params',
     editorValue: 'initial content',
@@ -23,12 +23,12 @@ describe('useEditHistory Hook 测试', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     sessionStorage.clear()
   })
 
   afterEach(() => {
-    jest.clearAllTimers()
+    vi.clearAllTimers()
   })
 
   describe('初始化', () => {
@@ -68,12 +68,12 @@ describe('useEditHistory Hook 测试', () => {
 
   describe('recordChange 防抖记录', () => {
     beforeEach(() => {
-      jest.useFakeTimers()
+      vi.useFakeTimers({ shouldAdvanceTime: true })
     })
 
     afterEach(() => {
-      jest.runOnlyPendingTimers()
-      jest.useRealTimers()
+      vi.runOnlyPendingTimers()
+      vi.useRealTimers()
     })
 
     it('应该在 2 秒后记录变更', async () => {
@@ -86,7 +86,7 @@ describe('useEditHistory Hook 测试', () => {
       expect(result.current.history).toHaveLength(0)
 
       act(() => {
-        jest.advanceTimersByTime(2000)
+        vi.advanceTimersByTime(2000)
       })
 
       await waitFor(() => {
@@ -101,14 +101,14 @@ describe('useEditHistory Hook 测试', () => {
 
       act(() => {
         result.current.recordChange('content 1')
-        jest.advanceTimersByTime(500)
+        vi.advanceTimersByTime(500)
         result.current.recordChange('content 2')
-        jest.advanceTimersByTime(500)
+        vi.advanceTimersByTime(500)
         result.current.recordChange('content 3')
       })
 
       act(() => {
-        jest.advanceTimersByTime(2000)
+        vi.advanceTimersByTime(2000)
       })
 
       await waitFor(() => {
@@ -125,7 +125,7 @@ describe('useEditHistory Hook 测试', () => {
       })
 
       act(() => {
-        jest.advanceTimersByTime(2000)
+        vi.advanceTimersByTime(2000)
       })
 
       await waitFor(() => {
@@ -134,7 +134,7 @@ describe('useEditHistory Hook 测试', () => {
 
       act(() => {
         result.current.recordChange('same content')
-        jest.advanceTimersByTime(2000)
+        vi.advanceTimersByTime(2000)
       })
 
       await waitFor(() => {
@@ -173,7 +173,7 @@ describe('useEditHistory Hook 测试', () => {
     })
 
     it('特殊版本不应该计入数量限制', async () => {
-      jest.useFakeTimers()
+      vi.useFakeTimers({ shouldAdvanceTime: true })
       const { result } = renderHook(() =>
         useEditHistory({
           ...defaultProps,
@@ -186,7 +186,7 @@ describe('useEditHistory Hook 测试', () => {
         result.current.recordChange('auto 1')
       })
       act(() => {
-        jest.advanceTimersByTime(2000)
+        vi.advanceTimersByTime(2000)
       })
 
       await waitFor(() => {
@@ -197,7 +197,7 @@ describe('useEditHistory Hook 测试', () => {
         result.current.recordChange('auto 2')
       })
       act(() => {
-        jest.advanceTimersByTime(2000)
+        vi.advanceTimersByTime(2000)
       })
 
       await waitFor(() => {
@@ -220,7 +220,7 @@ describe('useEditHistory Hook 测试', () => {
         expect(result.current.history).toHaveLength(5)
       })
 
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
   })
 
@@ -321,12 +321,12 @@ describe('useEditHistory Hook 测试', () => {
 
   describe('数量限制（FIFO）', () => {
     beforeEach(() => {
-      jest.useFakeTimers()
+      vi.useFakeTimers({ shouldAdvanceTime: true })
     })
 
     afterEach(() => {
-      jest.runOnlyPendingTimers()
-      jest.useRealTimers()
+      vi.runOnlyPendingTimers()
+      vi.useRealTimers()
     })
 
     it('超过限制时应该删除最旧的记录', async () => {
@@ -341,7 +341,7 @@ describe('useEditHistory Hook 测试', () => {
       for (let i = 1; i <= 4; i++) {
         act(() => {
           result.current.recordChange(`content ${i}`)
-          jest.advanceTimersByTime(2000)
+          vi.advanceTimersByTime(2000)
         })
         await waitFor(() => {
           expect(result.current.history).toHaveLength(Math.min(i, 3))
@@ -398,6 +398,15 @@ describe('useEditHistory Hook 测试', () => {
   })
 
   describe('合并历史排序', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+    })
+
+    afterEach(() => {
+      vi.runOnlyPendingTimers()
+      vi.useRealTimers()
+    })
+
     it('应该按时间戳倒序排序（最新在前）', () => {
       const { result } = renderHook(() => useEditHistory(defaultProps))
 
@@ -407,7 +416,7 @@ describe('useEditHistory Hook 测试', () => {
 
       // 延迟确保时间戳不同
       act(() => {
-        jest.advanceTimersByTime(10)
+        vi.advanceTimersByTime(10)
       })
 
       act(() => {
@@ -421,12 +430,12 @@ describe('useEditHistory Hook 测试', () => {
 
   describe('enabled 功能开关', () => {
     beforeEach(() => {
-      jest.useFakeTimers()
+      vi.useFakeTimers({ shouldAdvanceTime: true })
     })
 
     afterEach(() => {
-      jest.runOnlyPendingTimers()
-      jest.useRealTimers()
+      vi.runOnlyPendingTimers()
+      vi.useRealTimers()
     })
 
     it('enabled=false 时 recordChange 应该跳过记录', async () => {
@@ -442,7 +451,7 @@ describe('useEditHistory Hook 测试', () => {
       })
 
       act(() => {
-        jest.advanceTimersByTime(2000)
+        vi.advanceTimersByTime(2000)
       })
 
       await waitFor(() => {
@@ -508,7 +517,7 @@ describe('useEditHistory Hook 测试', () => {
       })
 
       act(() => {
-        jest.advanceTimersByTime(2000)
+        vi.advanceTimersByTime(2000)
       })
 
       await waitFor(() => {
@@ -538,7 +547,7 @@ describe('useEditHistory Hook 测试', () => {
       })
 
       act(() => {
-        jest.advanceTimersByTime(10)
+        vi.advanceTimersByTime(10)
         result.current.recordSpecialVersion(HistoryEntryType.Save, '版本2', 'content 2')
       })
 

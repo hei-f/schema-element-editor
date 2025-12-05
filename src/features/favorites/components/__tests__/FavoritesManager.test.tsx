@@ -3,17 +3,17 @@ import { render } from '@testing-library/react'
 import { FavoritesManager } from '../FavoritesManager'
 
 // Mock子组件
-jest.mock('../AddFavoriteModal', () => ({
+vi.mock('../AddFavoriteModal', () => ({
   AddFavoriteModal: ({ visible }: any) =>
     visible ? <div data-testid="add-favorite-modal">AddFavoriteModal</div> : null,
 }))
 
-jest.mock('../FavoritesListModal', () => ({
+vi.mock('../FavoritesListModal', () => ({
   FavoritesListModal: ({ visible }: any) =>
     visible ? <div data-testid="favorites-list-modal">FavoritesListModal</div> : null,
 }))
 
-jest.mock('../FavoriteEditModal', () => ({
+vi.mock('../FavoriteEditModal', () => ({
   FavoriteEditModal: ({ visible }: any) =>
     visible ? <div data-testid="edit-modal">FavoriteEditModal</div> : null,
 }))
@@ -36,19 +36,19 @@ describe('FavoritesManager组件测试', () => {
     editingFavoriteId: null,
     editingName: '',
     editingContent: '',
-    onAddFavoriteInputChange: jest.fn(),
-    onAddFavorite: jest.fn(),
-    onCloseAddFavoriteModal: jest.fn(),
-    onCloseFavoritesModal: jest.fn(),
-    onEditFavorite: jest.fn(),
-    onApplyFavorite: jest.fn(),
-    onDeleteFavorite: jest.fn(),
-    onSaveEdit: jest.fn(),
-    onCloseEditModal: jest.fn(),
+    onAddFavoriteInputChange: vi.fn(),
+    onAddFavorite: vi.fn(),
+    onCloseAddFavoriteModal: vi.fn(),
+    onCloseFavoritesModal: vi.fn(),
+    onEditFavorite: vi.fn(),
+    onApplyFavorite: vi.fn(),
+    onDeleteFavorite: vi.fn(),
+    onSaveEdit: vi.fn(),
+    onCloseEditModal: vi.fn(),
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('基本渲染', () => {
@@ -169,14 +169,14 @@ describe('FavoritesManager组件测试', () => {
   describe('回调函数props', () => {
     it('应该接收所有回调函数', () => {
       const callbacks = {
-        onAddFavoriteInputChange: jest.fn(),
-        onAddFavorite: jest.fn(),
-        onCloseAddFavoriteModal: jest.fn(),
-        onCloseFavoritesModal: jest.fn(),
-        onPreviewFavorite: jest.fn(),
-        onApplyFavorite: jest.fn(),
-        onDeleteFavorite: jest.fn(),
-        onClosePreviewModal: jest.fn(),
+        onAddFavoriteInputChange: vi.fn(),
+        onAddFavorite: vi.fn(),
+        onCloseAddFavoriteModal: vi.fn(),
+        onCloseFavoritesModal: vi.fn(),
+        onPreviewFavorite: vi.fn(),
+        onApplyFavorite: vi.fn(),
+        onDeleteFavorite: vi.fn(),
+        onClosePreviewModal: vi.fn(),
       }
 
       const { container } = render(<FavoritesManager {...defaultProps} {...callbacks} />)

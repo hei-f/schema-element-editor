@@ -1,5 +1,6 @@
 import type { CodeMirrorEditorHandle } from '@/features/schema-drawer/components/editor/CodeMirrorEditor'
 import { CodeMirrorEditor } from '@/features/schema-drawer/components/editor/CodeMirrorEditor'
+import { MODAL_Z_INDEX } from '@/shared/constants/theme'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { Button, Modal } from 'antd'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -166,6 +167,7 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = ({
         okText: '确定',
         cancelText: '取消',
         getContainer: shadowRootManager.getContainer,
+        zIndex: MODAL_Z_INDEX,
         onOk: () => {
           onClose()
         },
@@ -187,6 +189,7 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = ({
       onCancel={handleClose}
       width={900}
       getContainer={shadowRootManager.getContainer}
+      zIndex={MODAL_Z_INDEX}
       footer={[
         <Button key="cancel" onClick={handleClose} disabled={isSaving}>
           取消

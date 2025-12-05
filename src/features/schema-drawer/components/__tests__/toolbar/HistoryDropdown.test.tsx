@@ -6,7 +6,7 @@ import { HistoryDropdown } from '../../toolbar/HistoryDropdown'
 
 describe('HistoryDropdown组件测试', () => {
   // 增加整个测试套件的超时时间，因为Popover组件渲染较慢
-  jest.setTimeout(15000)
+  // Vitest 在 vitest.config.ts 中配置超时
 
   const mockHistoryEntry = {
     id: 'entry_1',
@@ -19,13 +19,13 @@ describe('HistoryDropdown组件测试', () => {
   const defaultProps = {
     history: [mockHistoryEntry],
     currentIndex: 0,
-    onLoadVersion: jest.fn(),
-    onClearHistory: jest.fn(),
+    onLoadVersion: vi.fn(),
+    onClearHistory: vi.fn(),
     disabled: false,
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // 初始化 shadowRootManager，并将容器添加到 document.body
     const mockShadowRoot = document.createElement('div') as unknown as ShadowRoot
@@ -213,7 +213,7 @@ describe('HistoryDropdown组件测试', () => {
   describe('用户交互', () => {
     it('应该在点击历史记录时调用onLoadVersion', async () => {
       const user = userEvent.setup()
-      const onLoadVersion = jest.fn()
+      const onLoadVersion = vi.fn()
 
       render(<HistoryDropdown {...defaultProps} onLoadVersion={onLoadVersion} />)
 
@@ -236,7 +236,7 @@ describe('HistoryDropdown组件测试', () => {
 
     it('应该在点击清除按钮时调用onClearHistory', async () => {
       const user = userEvent.setup()
-      const onClearHistory = jest.fn()
+      const onClearHistory = vi.fn()
 
       render(<HistoryDropdown {...defaultProps} onClearHistory={onClearHistory} />)
 

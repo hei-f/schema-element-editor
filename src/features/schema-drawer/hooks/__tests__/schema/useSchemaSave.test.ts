@@ -1,25 +1,26 @@
+import type { Mock } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useSchemaSave } from '../../schema/useSchemaSave'
 import { storage } from '@/shared/utils/browser/storage'
 import { schemaTransformer } from '../../../services/schema-transformer'
 
 // Mock storage
-jest.mock('@/shared/utils/browser/storage', () => ({
+vi.mock('@/shared/utils/browser/storage', () => ({
   storage: {
-    deleteDraft: jest.fn().mockResolvedValue(undefined),
+    deleteDraft: vi.fn().mockResolvedValue(undefined),
   },
 }))
 
 // Mock schemaTransformer
-jest.mock('../../../services/schema-transformer', () => ({
+vi.mock('../../../services/schema-transformer', () => ({
   schemaTransformer: {
-    prepareSaveData: jest.fn(),
+    prepareSaveData: vi.fn(),
   },
 }))
 
 describe('useSchemaSave', () => {
-  const mockOnSaveSuccess = jest.fn()
-  const mockOnSave = jest.fn()
+  const mockOnSaveSuccess = vi.fn()
+  const mockOnSave = vi.fn()
 
   const defaultProps = {
     editorValue: '{"name": "test"}',
@@ -30,12 +31,12 @@ describe('useSchemaSave', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('初始状态', () => {
     it('应该返回正确的初始状态', () => {
-      ;(schemaTransformer.prepareSaveData as jest.Mock).mockReturnValue({
+      ;(schemaTransformer.prepareSaveData as Mock).mockReturnValue({
         success: true,
         data: { name: 'test' },
       })
@@ -50,7 +51,7 @@ describe('useSchemaSave', () => {
   describe('handleSave 成功场景', () => {
     it('应该成功保存数据', async () => {
       const mockData = { name: 'test' }
-      ;(schemaTransformer.prepareSaveData as jest.Mock).mockReturnValue({
+      ;(schemaTransformer.prepareSaveData as Mock).mockReturnValue({
         success: true,
         data: mockData,
       })
@@ -72,7 +73,7 @@ describe('useSchemaSave', () => {
     })
 
     it('应该在保存过程中设置 isSaving 为 true', async () => {
-      ;(schemaTransformer.prepareSaveData as jest.Mock).mockReturnValue({
+      ;(schemaTransformer.prepareSaveData as Mock).mockReturnValue({
         success: true,
         data: {},
       })
@@ -101,7 +102,7 @@ describe('useSchemaSave', () => {
         wasStringData: true,
         editorValue: '"test string"',
       }
-      ;(schemaTransformer.prepareSaveData as jest.Mock).mockReturnValue({
+      ;(schemaTransformer.prepareSaveData as Mock).mockReturnValue({
         success: true,
         data: 'test string',
       })
@@ -120,7 +121,7 @@ describe('useSchemaSave', () => {
 
   describe('handleSave 失败场景', () => {
     it('当数据转换失败时应该抛出错误', async () => {
-      ;(schemaTransformer.prepareSaveData as jest.Mock).mockReturnValue({
+      ;(schemaTransformer.prepareSaveData as Mock).mockReturnValue({
         success: false,
         error: '无效的 JSON 格式',
       })
@@ -138,7 +139,7 @@ describe('useSchemaSave', () => {
     })
 
     it('当数据转换失败且没有错误消息时应该使用默认消息', async () => {
-      ;(schemaTransformer.prepareSaveData as jest.Mock).mockReturnValue({
+      ;(schemaTransformer.prepareSaveData as Mock).mockReturnValue({
         success: false,
       })
 
@@ -152,7 +153,7 @@ describe('useSchemaSave', () => {
     })
 
     it('当保存 API 调用失败时应该抛出错误', async () => {
-      ;(schemaTransformer.prepareSaveData as jest.Mock).mockReturnValue({
+      ;(schemaTransformer.prepareSaveData as Mock).mockReturnValue({
         success: true,
         data: {},
       })
@@ -171,7 +172,7 @@ describe('useSchemaSave', () => {
     })
 
     it('即使保存失败也应该恢复 isSaving 状态', async () => {
-      ;(schemaTransformer.prepareSaveData as jest.Mock).mockReturnValue({
+      ;(schemaTransformer.prepareSaveData as Mock).mockReturnValue({
         success: false,
         error: '转换失败',
       })
@@ -192,7 +193,7 @@ describe('useSchemaSave', () => {
 
   describe('props 变化', () => {
     it('应该使用最新的 editorValue', async () => {
-      ;(schemaTransformer.prepareSaveData as jest.Mock).mockReturnValue({
+      ;(schemaTransformer.prepareSaveData as Mock).mockReturnValue({
         success: true,
         data: {},
       })
@@ -216,7 +217,7 @@ describe('useSchemaSave', () => {
     })
 
     it('应该使用最新的 paramsKey 删除草稿', async () => {
-      ;(schemaTransformer.prepareSaveData as jest.Mock).mockReturnValue({
+      ;(schemaTransformer.prepareSaveData as Mock).mockReturnValue({
         success: true,
         data: {},
       })

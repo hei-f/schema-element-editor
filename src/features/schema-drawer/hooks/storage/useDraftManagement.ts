@@ -1,3 +1,4 @@
+import { MODAL_Z_INDEX } from '@/shared/constants/theme'
 import { storage } from '@/shared/utils/browser/storage'
 import { logger } from '@/shared/utils/logger'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
@@ -132,6 +133,7 @@ export const useDraftManagement = ({
         okText: '加载',
         cancelText: '取消',
         getContainer: shadowRootManager.getContainer,
+        zIndex: MODAL_Z_INDEX,
         onOk: async () => {
           await loadDraftContent()
         },
@@ -152,6 +154,7 @@ export const useDraftManagement = ({
       okType: 'danger',
       cancelText: '取消',
       getContainer: shadowRootManager.getContainer,
+      zIndex: MODAL_Z_INDEX,
       onOk: async () => {
         try {
           await storage.deleteDraft(paramsKey)

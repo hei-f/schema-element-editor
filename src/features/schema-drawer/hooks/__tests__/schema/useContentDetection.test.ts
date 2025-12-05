@@ -3,25 +3,25 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { useContentDetection } from '../../schema/useContentDetection'
 
 // Mock transformers
-jest.mock('@/shared/utils/schema/transformers', () => ({
-  isElementsArray: jest.fn(),
-  isStringData: jest.fn(),
+vi.mock('@/shared/utils/schema/transformers', () => ({
+  isElementsArray: vi.fn(),
+  isStringData: vi.fn(),
 }))
 
 import { isElementsArray, isStringData } from '@/shared/utils/schema/transformers'
 
-const mockIsElementsArray = isElementsArray as jest.MockedFunction<typeof isElementsArray>
-const mockIsStringData = isStringData as jest.MockedFunction<typeof isStringData>
+const mockIsElementsArray = vi.mocked(isElementsArray)
+const mockIsStringData = vi.mocked(isStringData)
 
 describe('useContentDetection Hook 测试', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
+    vi.clearAllMocks()
+    vi.useFakeTimers({ shouldAdvanceTime: true })
   })
 
   afterEach(() => {
-    jest.runOnlyPendingTimers()
-    jest.useRealTimers()
+    vi.runOnlyPendingTimers()
+    vi.useRealTimers()
   })
 
   describe('初始化', () => {
@@ -137,7 +137,7 @@ describe('useContentDetection Hook 测试', () => {
 
       // 300ms后，状态应该更新
       act(() => {
-        jest.advanceTimersByTime(300)
+        vi.advanceTimersByTime(300)
       })
 
       await waitFor(() => {
@@ -154,14 +154,14 @@ describe('useContentDetection Hook 测试', () => {
 
       act(() => {
         result.current.debouncedDetectContent(JSON.stringify('value1'))
-        jest.advanceTimersByTime(100)
+        vi.advanceTimersByTime(100)
         result.current.debouncedDetectContent(JSON.stringify('value2'))
-        jest.advanceTimersByTime(100)
+        vi.advanceTimersByTime(100)
         result.current.debouncedDetectContent(JSON.stringify('value3'))
       })
 
       act(() => {
-        jest.advanceTimersByTime(300)
+        vi.advanceTimersByTime(300)
       })
 
       await waitFor(() => {
@@ -180,13 +180,13 @@ describe('useContentDetection Hook 测试', () => {
 
       act(() => {
         result.current.debouncedDetectContent(JSON.stringify([{ type: 'element' }]))
-        jest.advanceTimersByTime(250)
+        vi.advanceTimersByTime(250)
         // 在第一次检测完成前，开始第二次检测
         result.current.debouncedDetectContent('{invalid')
       })
 
       act(() => {
-        jest.advanceTimersByTime(300)
+        vi.advanceTimersByTime(300)
       })
 
       await waitFor(() => {
@@ -273,7 +273,7 @@ describe('useContentDetection Hook 测试', () => {
       })
 
       act(() => {
-        jest.advanceTimersByTime(300)
+        vi.advanceTimersByTime(300)
       })
 
       // 应该被更新为RawString
@@ -308,13 +308,13 @@ describe('useContentDetection Hook 测试', () => {
       inputSteps.forEach((input) => {
         act(() => {
           result.current.debouncedDetectContent(input)
-          jest.advanceTimersByTime(50) // 模拟输入间隔
+          vi.advanceTimersByTime(50) // 模拟输入间隔
         })
       })
 
       // 等待最后一次检测完成
       act(() => {
-        jest.advanceTimersByTime(300)
+        vi.advanceTimersByTime(300)
       })
 
       await waitFor(() => {

@@ -1,62 +1,76 @@
 import { storage } from '@/shared/utils/browser/storage'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { Mocked } from 'vitest'
 import { OptionsApp } from '../OptionsApp'
 
 // Mock storage
-jest.mock('@/shared/utils/browser/storage', () => ({
+vi.mock('@/shared/utils/browser/storage', () => ({
   storage: {
-    getAttributeName: jest.fn(),
-    getSearchConfig: jest.fn(),
-    getGetFunctionName: jest.fn(),
-    getUpdateFunctionName: jest.fn(),
-    getAutoParseString: jest.fn(),
-    getEnableDebugLog: jest.fn(),
-    getToolbarButtons: jest.fn(),
-    getDrawerWidth: jest.fn(),
-    getHighlightColor: jest.fn(),
-    getMaxFavoritesCount: jest.fn(),
-    getAutoSaveDraft: jest.fn(),
-    getPreviewConfig: jest.fn(),
-    getMaxHistoryCount: jest.fn(),
-    getHighlightAllConfig: jest.fn(),
-    getRecordingModeConfig: jest.fn(),
-    getEnableAstTypeHints: jest.fn(),
-    getExportConfig: jest.fn(),
-    getEditorTheme: jest.fn(),
-    getPreviewFunctionName: jest.fn(),
-    getApiConfig: jest.fn(),
-    setAttributeName: jest.fn(),
-    setSearchConfig: jest.fn(),
-    setFunctionNames: jest.fn(),
-    setAutoParseString: jest.fn(),
-    setEnableDebugLog: jest.fn(),
-    setToolbarButtons: jest.fn(),
-    setDrawerWidth: jest.fn(),
-    setHighlightColor: jest.fn(),
-    setMaxFavoritesCount: jest.fn(),
-    setAutoSaveDraft: jest.fn(),
-    setPreviewConfig: jest.fn(),
-    setMaxHistoryCount: jest.fn(),
-    setHighlightAllConfig: jest.fn(),
-    setRecordingModeConfig: jest.fn(),
-    setEnableAstTypeHints: jest.fn(),
-    setExportConfig: jest.fn(),
-    setEditorTheme: jest.fn(),
-    setApiConfig: jest.fn(),
+    getAttributeName: vi.fn(),
+    getSearchConfig: vi.fn(),
+    getGetFunctionName: vi.fn(),
+    getUpdateFunctionName: vi.fn(),
+    getAutoParseString: vi.fn(),
+    getEnableDebugLog: vi.fn(),
+    getToolbarButtons: vi.fn(),
+    getDrawerWidth: vi.fn(),
+    getHighlightColor: vi.fn(),
+    getMaxFavoritesCount: vi.fn(),
+    getAutoSaveDraft: vi.fn(),
+    getPreviewConfig: vi.fn(),
+    getMaxHistoryCount: vi.fn(),
+    getHighlightAllConfig: vi.fn(),
+    getRecordingModeConfig: vi.fn(),
+    getEnableAstTypeHints: vi.fn(),
+    getExportConfig: vi.fn(),
+    getEditorTheme: vi.fn(),
+    getPreviewFunctionName: vi.fn(),
+    getApiConfig: vi.fn(),
+    setAttributeName: vi.fn(),
+    setSearchConfig: vi.fn(),
+    setFunctionNames: vi.fn(),
+    setAutoParseString: vi.fn(),
+    setEnableDebugLog: vi.fn(),
+    setToolbarButtons: vi.fn(),
+    setDrawerWidth: vi.fn(),
+    setHighlightColor: vi.fn(),
+    setMaxFavoritesCount: vi.fn(),
+    setAutoSaveDraft: vi.fn(),
+    setPreviewConfig: vi.fn(),
+    setMaxHistoryCount: vi.fn(),
+    setHighlightAllConfig: vi.fn(),
+    setRecordingModeConfig: vi.fn(),
+    setEnableAstTypeHints: vi.fn(),
+    setExportConfig: vi.fn(),
+    setEditorTheme: vi.fn(),
+    setApiConfig: vi.fn(),
+    getThemeColor: vi.fn(),
+    setThemeColor: vi.fn(),
   },
 }))
 
 // Mock chrome.tabs API
 const mockChromeTabs = {
-  create: jest.fn(),
+  create: vi.fn(),
 }
+
+// Mock chrome.storage.onChanged API
+const mockStorageOnChanged = {
+  addListener: vi.fn(),
+  removeListener: vi.fn(),
+}
+
 ;(global as any).chrome = {
   ...(global as any).chrome,
   tabs: mockChromeTabs,
+  storage: {
+    ...(global as any).chrome?.storage,
+    onChanged: mockStorageOnChanged,
+  },
 }
 
-const mockStorage = storage as jest.Mocked<typeof storage>
+const mockStorage = storage as Mocked<typeof storage>
 
 describe('OptionsApp组件测试', () => {
   const defaultMockValues = {
@@ -80,7 +94,8 @@ describe('OptionsApp组件测试', () => {
       history: true,
     },
     drawerWidth: '800px',
-    highlightColor: '#39C5BB',
+    highlightColor: '#1677FF',
+    themeColor: '#1677FF',
     maxFavoritesCount: 50,
     autoSaveDraft: false,
     previewConfig: {
@@ -128,8 +143,8 @@ describe('OptionsApp组件测试', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
+    vi.clearAllMocks()
+    vi.useFakeTimers({ shouldAdvanceTime: true })
 
     // 设置默认的mock返回值
     mockStorage.getAttributeName.mockResolvedValue(defaultMockValues.attributeName)
@@ -152,11 +167,12 @@ describe('OptionsApp组件测试', () => {
     mockStorage.getEditorTheme.mockResolvedValue(defaultMockValues.editorTheme)
     mockStorage.getPreviewFunctionName.mockResolvedValue(defaultMockValues.previewFunctionName)
     mockStorage.getApiConfig.mockResolvedValue(defaultMockValues.apiConfig)
+    mockStorage.getThemeColor.mockResolvedValue(defaultMockValues.themeColor)
   })
 
   afterEach(() => {
-    jest.runOnlyPendingTimers()
-    jest.useRealTimers()
+    vi.runOnlyPendingTimers()
+    vi.useRealTimers()
   })
 
   describe('基本渲染', () => {
@@ -353,6 +369,45 @@ describe('OptionsApp组件测试', () => {
       await waitFor(() => {
         const formItems = container.querySelectorAll('.ant-form-item')
         expect(formItems.length).toBeGreaterThan(0)
+      })
+    })
+  })
+
+  /**
+   * Document Metadata 测试
+   * React 19 升级：由于 Chrome 扩展限制，使用 useEffect 设置 document.title
+   */
+  describe('Document Metadata (React 19)', () => {
+    it('应该在组件挂载时设置 document.title', async () => {
+      render(<OptionsApp />)
+
+      await waitFor(() => {
+        // 验证 document.title 包含应用名称和版本号
+        expect(document.title).toMatch(/Schema Editor 设置/)
+        expect(document.title).toMatch(/v\d+\.\d+\.\d+/)
+      })
+    })
+
+    it('document.title 应该包含正确的格式', async () => {
+      render(<OptionsApp />)
+
+      await waitFor(() => {
+        // 验证格式为 "Schema Editor 设置 (vX.X.X)"
+        expect(document.title).toMatch(/^Schema Editor 设置 \(v\d+\.\d+\.\d+\)$/)
+      })
+    })
+
+    it('应该正确显示版本号', async () => {
+      render(<OptionsApp />)
+
+      await waitFor(() => {
+        // 从页面获取版本号并验证 document.title 中包含相同版本
+        const versionElement = screen.getByText(/v\d+\.\d+\.\d+/)
+        const versionText = versionElement.textContent
+
+        if (versionText) {
+          expect(document.title).toContain(versionText)
+        }
       })
     })
   })

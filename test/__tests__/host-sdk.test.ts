@@ -19,17 +19,17 @@ describe('Host SDK - createSchemaEditorBridge', () => {
     originalTop = window.top
 
     // Mock window.addEventListener
-    window.addEventListener = jest.fn((event: string, handler: any) => {
+    window.addEventListener = vi.fn((event: string, handler: any) => {
       if (event === 'message') {
         messageListeners.push(handler)
       }
     }) as any
 
     // Mock window.removeEventListener
-    window.removeEventListener = jest.fn() as any
+    window.removeEventListener = vi.fn() as any
 
     // Mock window.postMessage
-    window.postMessage = jest.fn((message: any) => {
+    window.postMessage = vi.fn((message: any) => {
       postedMessages.push(message)
     }) as any
   })
@@ -176,7 +176,7 @@ describe('Host SDK - createSchemaEditorBridge', () => {
 
   describe('getSchema', () => {
     it('应正确处理 GET_SCHEMA 请求', () => {
-      const getSchema = jest.fn((params: string) => ({ id: params, data: 'test' }))
+      const getSchema = vi.fn((params: string) => ({ id: params, data: 'test' }))
 
       simulateBridge({ getSchema, updateSchema: () => true })
 
@@ -198,7 +198,7 @@ describe('Host SDK - createSchemaEditorBridge', () => {
     })
 
     it('getSchema 抛出异常时应返回错误', () => {
-      const getSchema = jest.fn(() => {
+      const getSchema = vi.fn(() => {
         throw new Error('Schema not found')
       })
 
@@ -222,7 +222,7 @@ describe('Host SDK - createSchemaEditorBridge', () => {
 
   describe('updateSchema', () => {
     it('应正确处理 UPDATE_SCHEMA 请求', () => {
-      const updateSchema = jest.fn(() => true)
+      const updateSchema = vi.fn(() => true)
 
       simulateBridge({ getSchema: () => null, updateSchema })
 
@@ -242,7 +242,7 @@ describe('Host SDK - createSchemaEditorBridge', () => {
     })
 
     it('updateSchema 返回 false 时应返回失败', () => {
-      const updateSchema = jest.fn(() => false)
+      const updateSchema = vi.fn(() => false)
 
       simulateBridge({ getSchema: () => null, updateSchema })
 
@@ -263,7 +263,7 @@ describe('Host SDK - createSchemaEditorBridge', () => {
 
   describe('消息过滤', () => {
     it('应忽略非插件来源的消息', () => {
-      const getSchema = jest.fn()
+      const getSchema = vi.fn()
 
       simulateBridge({ getSchema, updateSchema: () => true })
 
@@ -279,7 +279,7 @@ describe('Host SDK - createSchemaEditorBridge', () => {
     })
 
     it('应忽略没有 requestId 的消息', () => {
-      const getSchema = jest.fn()
+      const getSchema = vi.fn()
 
       simulateBridge({ getSchema, updateSchema: () => true })
 
@@ -294,7 +294,7 @@ describe('Host SDK - createSchemaEditorBridge', () => {
     })
 
     it('应忽略来自其他窗口的消息', () => {
-      const getSchema = jest.fn()
+      const getSchema = vi.fn()
 
       simulateBridge({ getSchema, updateSchema: () => true })
 
@@ -319,7 +319,7 @@ describe('Host SDK - createSchemaEditorBridge', () => {
       // 模拟在 iframe 中
       const mockTop = {} as Window
       const mockParent = {
-        postMessage: jest.fn(),
+        postMessage: vi.fn(),
       } as unknown as Window
 
       Object.defineProperty(window, 'top', { value: mockTop, writable: true })
@@ -340,7 +340,7 @@ describe('Host SDK - createSchemaEditorBridge', () => {
       Object.defineProperty(window, 'top', { value: mockTop, writable: true })
       Object.defineProperty(window, 'parent', { value: mockParent, writable: true })
 
-      const getSchema = jest.fn((params: string) => ({ fromIframe: true, params }))
+      const getSchema = vi.fn((params: string) => ({ fromIframe: true, params }))
 
       // 创建接受 parent 消息的监听器
       const handleMessage = (event: MessageEvent) => {
@@ -411,7 +411,7 @@ describe('Host SDK - createSchemaEditorBridge', () => {
     })
 
     it('RENDER_PREVIEW 应调用 renderPreview 函数', () => {
-      const renderPreview = jest.fn()
+      const renderPreview = vi.fn()
 
       simulateBridge({
         getSchema: () => null,
@@ -435,8 +435,8 @@ describe('Host SDK - createSchemaEditorBridge', () => {
     })
 
     it('CLEANUP_PREVIEW 应调用清理函数', () => {
-      const cleanupFn = jest.fn()
-      const renderPreview = jest.fn(() => cleanupFn)
+      const cleanupFn = vi.fn()
+      const renderPreview = vi.fn(() => cleanupFn)
 
       simulateBridge({
         getSchema: () => null,

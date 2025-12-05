@@ -1,20 +1,20 @@
 import { schemaTransformer, SchemaTransformer } from '../schema-transformer'
 
 // Mock transformers
-jest.mock('@/shared/utils/schema/serializer', () => ({
-  escapeJson: jest.fn(),
-  unescapeJson: jest.fn(),
-  compactJson: jest.fn(),
-  parseNestedJson: jest.fn(),
+vi.mock('@/shared/utils/schema/serializer', () => ({
+  escapeJson: vi.fn(),
+  unescapeJson: vi.fn(),
+  compactJson: vi.fn(),
+  parseNestedJson: vi.fn(),
 }))
 
-jest.mock('@/shared/utils/schema/transformers', () => ({
-  formatJsonString: jest.fn(),
-  convertToASTString: jest.fn(),
-  convertToMarkdownString: jest.fn(),
-  parserSchemaNodeToMarkdown: jest.fn(),
-  isElementsArray: jest.fn(),
-  isStringData: jest.fn(),
+vi.mock('@/shared/utils/schema/transformers', () => ({
+  formatJsonString: vi.fn(),
+  convertToASTString: vi.fn(),
+  convertToMarkdownString: vi.fn(),
+  parserSchemaNodeToMarkdown: vi.fn(),
+  isElementsArray: vi.fn(),
+  isStringData: vi.fn(),
 }))
 
 import {
@@ -32,24 +32,20 @@ import {
   parserSchemaNodeToMarkdown,
 } from '@/shared/utils/schema/transformers'
 
-const mockEscapeJson = escapeJson as jest.MockedFunction<typeof escapeJson>
-const mockUnescapeJson = unescapeJson as jest.MockedFunction<typeof unescapeJson>
-const mockCompactJson = compactJson as jest.MockedFunction<typeof compactJson>
-const mockParseNestedJson = parseNestedJson as jest.MockedFunction<typeof parseNestedJson>
-const mockFormatJsonString = formatJsonString as jest.MockedFunction<typeof formatJsonString>
-const mockConvertToASTString = convertToASTString as jest.MockedFunction<typeof convertToASTString>
-const mockConvertToMarkdownString = convertToMarkdownString as jest.MockedFunction<
-  typeof convertToMarkdownString
->
-const mockParserSchemaNodeToMarkdown = parserSchemaNodeToMarkdown as jest.MockedFunction<
-  typeof parserSchemaNodeToMarkdown
->
-const mockIsElementsArray = isElementsArray as jest.MockedFunction<typeof isElementsArray>
-const mockIsStringData = isStringData as jest.MockedFunction<typeof isStringData>
+const mockEscapeJson = vi.mocked(escapeJson)
+const mockUnescapeJson = vi.mocked(unescapeJson)
+const mockCompactJson = vi.mocked(compactJson)
+const mockParseNestedJson = vi.mocked(parseNestedJson)
+const mockFormatJsonString = vi.mocked(formatJsonString)
+const mockConvertToASTString = vi.mocked(convertToASTString)
+const mockConvertToMarkdownString = vi.mocked(convertToMarkdownString)
+const mockParserSchemaNodeToMarkdown = vi.mocked(parserSchemaNodeToMarkdown)
+const mockIsElementsArray = vi.mocked(isElementsArray)
+const mockIsStringData = vi.mocked(isStringData)
 
 describe('SchemaTransformer 测试', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('单例', () => {

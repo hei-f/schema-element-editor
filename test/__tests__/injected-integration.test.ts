@@ -22,7 +22,7 @@ describe('Injected Script 集成测试', () => {
     global.chrome = {
       storage: {
         local: {
-          get: jest.fn((_keys: string[], callback: (result: any) => void) => {
+          get: vi.fn((_keys: string[], callback: (result: any) => void) => {
             callback(mockStorage)
           }),
         },
@@ -30,14 +30,14 @@ describe('Injected Script 集成测试', () => {
     } as any
 
     // Mock window.addEventListener
-    global.window.addEventListener = jest.fn((event: string, handler: any) => {
+    global.window.addEventListener = vi.fn((event: string, handler: any) => {
       if (event === 'message') {
         messageListeners.push(handler)
       }
     }) as any
 
     // Mock window.postMessage
-    global.window.postMessage = jest.fn((message: any) => {
+    global.window.postMessage = vi.fn((message: any) => {
       postedMessages.push(message)
     }) as any
   })
@@ -174,7 +174,7 @@ describe('Injected Script 集成测试', () => {
   describe('默认函数名', () => {
     it('应该使用默认函数名获取Schema', () => {
       // 设置页面函数
-      ;(window as any).__getSchemaByParams = jest.fn((params: string) => ({
+      ;(window as any).__getSchemaByParams = vi.fn((params: string) => ({
         data: 'test',
         params,
       }))
@@ -208,7 +208,7 @@ describe('Injected Script 集成测试', () => {
     })
 
     it('应该使用默认函数名更新Schema', () => {
-      ;(window as any).__updateSchemaByParams = jest.fn(() => true)
+      ;(window as any).__updateSchemaByParams = vi.fn(() => true)
 
       simulateInjectedScript()
 
@@ -262,7 +262,7 @@ describe('Injected Script 集成测试', () => {
 
   describe('自定义函数名', () => {
     it('应该使用自定义函数名获取Schema', () => {
-      ;(window as any).myCustomGetFn = jest.fn((params: string) => ({
+      ;(window as any).myCustomGetFn = vi.fn((params: string) => ({
         custom: 'data',
         params,
       }))
@@ -304,7 +304,7 @@ describe('Injected Script 集成测试', () => {
     })
 
     it('应该使用自定义函数名更新Schema', () => {
-      ;(window as any).myCustomUpdateFn = jest.fn(() => true)
+      ;(window as any).myCustomUpdateFn = vi.fn(() => true)
 
       simulateInjectedScript()
 
@@ -415,7 +415,7 @@ describe('Injected Script 集成测试', () => {
 
   describe('错误处理', () => {
     it('当函数执行抛出异常时应该捕获错误', () => {
-      ;(window as any).__getSchemaByParams = jest.fn(() => {
+      ;(window as any).__getSchemaByParams = vi.fn(() => {
         throw new Error('Function execution error')
       })
 
@@ -438,7 +438,7 @@ describe('Injected Script 集成测试', () => {
     })
 
     it('更新函数抛出异常时应该捕获错误', () => {
-      ;(window as any).__updateSchemaByParams = jest.fn(() => {
+      ;(window as any).__updateSchemaByParams = vi.fn(() => {
         throw new Error('Update error')
       })
 
@@ -568,7 +568,7 @@ describe('Injected Script 集成测试', () => {
 
   describe('CONFIG_SYNC 消息处理', () => {
     it('应该通过 CONFIG_SYNC 消息更新函数名配置', () => {
-      ;(window as any).syncedGetFn = jest.fn(() => ({ synced: true }))
+      ;(window as any).syncedGetFn = vi.fn(() => ({ synced: true }))
 
       simulateInjectedScript()
 
@@ -593,8 +593,8 @@ describe('Injected Script 集成测试', () => {
     })
 
     it('应该支持只更新部分配置', () => {
-      ;(window as any).partialGetFn = jest.fn(() => ({ partial: true }))
-      ;(window as any).__updateSchemaByParams = jest.fn(() => true)
+      ;(window as any).partialGetFn = vi.fn(() => ({ partial: true }))
+      ;(window as any).__updateSchemaByParams = vi.fn(() => true)
 
       simulateInjectedScript()
 
@@ -625,7 +625,7 @@ describe('Injected Script 集成测试', () => {
     })
 
     it('当配置为空时应该保持默认函数名', () => {
-      ;(window as any).__getSchemaByParams = jest.fn(() => ({ default: true }))
+      ;(window as any).__getSchemaByParams = vi.fn(() => ({ default: true }))
 
       simulateInjectedScript()
 

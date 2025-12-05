@@ -15,7 +15,8 @@ import type { DecorationSet, ViewUpdate } from '@codemirror/view'
 import { Decoration, EditorView, keymap, lineNumbers, WidgetType } from '@codemirror/view'
 import { DEFAULT_EDITOR_THEME, EDITOR_THEMES } from '@/shared/constants/editor-themes'
 import type { EditorTheme } from '@/shared/types'
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
+import type { Ref } from 'react'
+import { useEffect, useImperativeHandle, useMemo, useRef } from 'react'
 import { jsonDarkHighlight, jsonLightHighlight } from '../../styles/editor/codemirror.styles'
 import { getEditorThemeVars } from '../../styles/editor/editor-theme-vars'
 import { DiffEditorWrapper } from '../../styles/recording/recording.styles'
@@ -241,6 +242,8 @@ const diffDecorationsField = StateField.define<DecorationSet>({
 })
 
 interface DiffEditorProps {
+  /** 组件引用（React 19 支持直接作为 prop 传递） */
+  ref?: Ref<DiffEditorHandle>
   /** 初始内容 */
   defaultValue: string
   /** 内容变化回调 */
@@ -268,10 +271,12 @@ export interface DiffEditorHandle {
 
 /**
  * Diff 编辑器组件
+ * React 19: ref 直接作为 prop 传递，无需 forwardRef
  * 基于 CodeMirror，支持占位行装饰和行背景高亮
  */
-export const DiffEditor = forwardRef<DiffEditorHandle, DiffEditorProps>((props, ref) => {
+export const DiffEditor = (props: DiffEditorProps) => {
   const {
+    ref,
     defaultValue,
     onChange,
     onHorizontalScroll,
@@ -285,6 +290,10 @@ export const DiffEditor = forwardRef<DiffEditorHandle, DiffEditorProps>((props, 
   const onChangeRef = useRef(onChange)
   const onHorizontalScrollRef = useRef(onHorizontalScroll)
   const isSyncingScrollRef = useRef(false)
+  /** 初始值 ref（仅用于首次创建编辑器，不触发重新创建） */
+  const initialValueRef = useRef(defaultValue)
+  /** 初始 diffLines ref（仅用于首次创建编辑器） */
+  const initialDiffLinesRef = useRef(diffLines)
 
   // 获取主题变量
   const themeVars = useMemo(() => getEditorThemeVars(theme), [theme])
@@ -355,7 +364,7 @@ export const DiffEditor = forwardRef<DiffEditorHandle, DiffEditorProps>((props, 
     if (!containerRef.current) return
 
     const state = EditorState.create({
-      doc: defaultValue,
+      doc: initialValueRef.current,
       extensions: [
         // 基础功能
         lineNumbers(),
@@ -417,11 +426,11 @@ export const DiffEditor = forwardRef<DiffEditorHandle, DiffEditorProps>((props, 
 
     viewRef.current = view
 
-    // 初始化装饰
-    if (diffLines.length > 0) {
+    // 初始化装饰（使用 ref 中的初始值）
+    if (initialDiffLinesRef.current.length > 0) {
       view.dispatch({
         effects: setDiffDecorations.of({
-          lines: diffLines,
+          lines: initialDiffLinesRef.current,
           placeholderStripe1: themeVars.placeholderStripe1,
           placeholderStripe2: themeVars.placeholderStripe2,
           placeholderBorder: themeVars.placeholderBorder,
@@ -442,8 +451,7 @@ export const DiffEditor = forwardRef<DiffEditorHandle, DiffEditorProps>((props, 
       view.destroy()
       viewRef.current = null
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [theme, themeVars, getThemeExtensions, readOnly]) // defaultValue 和 diffLines 仅用于初始化，有单独的 effect 处理更新
+  }, [theme, themeVars, getThemeExtensions, readOnly])
 
   // 更新 diff 装饰
   useEffect(() => {
@@ -460,6 +468,4 @@ export const DiffEditor = forwardRef<DiffEditorHandle, DiffEditorProps>((props, 
   }, [diffLines, themeVars])
 
   return <DiffEditorWrapper ref={containerRef} />
-})
-
-DiffEditor.displayName = 'DiffEditor'
+}

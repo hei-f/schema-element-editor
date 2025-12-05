@@ -2,10 +2,10 @@ import type { Draft } from '@/shared/types'
 import { DraftManager, draftManager } from '../draft-manager'
 
 // Mock logger
-jest.mock('@/shared/utils/logger', () => ({
+vi.mock('@/shared/utils/logger', () => ({
   logger: {
-    log: jest.fn(),
-    error: jest.fn(),
+    log: vi.fn(),
+    error: vi.fn(),
   },
 }))
 
@@ -16,7 +16,7 @@ describe('DraftManager 测试', () => {
 
   beforeEach(() => {
     manager = new DraftManager()
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('单例', () => {
@@ -31,7 +31,7 @@ describe('DraftManager 测试', () => {
         content: 'test content',
         timestamp: Date.now(),
       }
-      const mockGetter = jest.fn().mockResolvedValue(mockDraft)
+      const mockGetter = vi.fn().mockResolvedValue(mockDraft)
 
       const result = await manager.getDraft('test-key', mockGetter)
 
@@ -40,7 +40,7 @@ describe('DraftManager 测试', () => {
     })
 
     it('草稿不存在时应该返回null', async () => {
-      const mockGetter = jest.fn().mockResolvedValue(null)
+      const mockGetter = vi.fn().mockResolvedValue(null)
 
       const result = await manager.getDraft('non-existent', mockGetter)
 
@@ -50,7 +50,7 @@ describe('DraftManager 测试', () => {
 
   describe('saveDraft 保存草稿', () => {
     it('应该创建草稿对象并保存', async () => {
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
       const beforeSave = Date.now()
 
       await manager.saveDraft('test-key', 'test content', mockSaver)
@@ -68,7 +68,7 @@ describe('DraftManager 测试', () => {
     })
 
     it('应该处理空内容', async () => {
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       await manager.saveDraft('test-key', '', mockSaver)
 
@@ -83,7 +83,7 @@ describe('DraftManager 测试', () => {
 
   describe('deleteDraft 删除草稿', () => {
     it('应该调用storage删除草稿', async () => {
-      const mockDeleter = jest.fn().mockResolvedValue(undefined)
+      const mockDeleter = vi.fn().mockResolvedValue(undefined)
 
       await manager.deleteDraft('test-key', mockDeleter)
 
@@ -197,8 +197,8 @@ describe('DraftManager 测试', () => {
         'draft:expired2': { content: 'test2', timestamp: now - 3 * 24 * 60 * 60 * 1000 } as Draft,
         'draft:valid': { content: 'test3', timestamp: now - 12 * 60 * 60 * 1000 } as Draft,
       }
-      const mockGetAll = jest.fn().mockResolvedValue(mockAllData)
-      const mockRemove = jest.fn().mockResolvedValue(undefined)
+      const mockGetAll = vi.fn().mockResolvedValue(mockAllData)
+      const mockRemove = vi.fn().mockResolvedValue(undefined)
 
       const count = await manager.cleanExpiredDrafts(1, 'draft:', mockGetAll, mockRemove)
 
@@ -212,8 +212,8 @@ describe('DraftManager 测试', () => {
       const mockAllData = {
         'draft:key': { content: 'test', timestamp: now } as Draft,
       }
-      const mockGetAll = jest.fn().mockResolvedValue(mockAllData)
-      const mockRemove = jest.fn()
+      const mockGetAll = vi.fn().mockResolvedValue(mockAllData)
+      const mockRemove = vi.fn()
 
       const count = await manager.cleanExpiredDrafts(1, 'draft:', mockGetAll, mockRemove)
 
@@ -223,8 +223,8 @@ describe('DraftManager 测试', () => {
     })
 
     it('出错时应该记录错误并返回0', async () => {
-      const mockGetAll = jest.fn().mockRejectedValue(new Error('Storage error'))
-      const mockRemove = jest.fn()
+      const mockGetAll = vi.fn().mockRejectedValue(new Error('Storage error'))
+      const mockRemove = vi.fn()
 
       const count = await manager.cleanExpiredDrafts(1, 'draft:', mockGetAll, mockRemove)
 
@@ -238,8 +238,8 @@ describe('DraftManager 测试', () => {
       const mockAllData = {
         'draft:expired': { content: 'test', timestamp: now - 2 * 24 * 60 * 60 * 1000 } as Draft,
       }
-      const mockGetAll = jest.fn().mockResolvedValue(mockAllData)
-      const mockRemove = jest.fn().mockRejectedValue(new Error('Delete error'))
+      const mockGetAll = vi.fn().mockResolvedValue(mockAllData)
+      const mockRemove = vi.fn().mockRejectedValue(new Error('Delete error'))
 
       const count = await manager.cleanExpiredDrafts(1, 'draft:', mockGetAll, mockRemove)
 
@@ -250,9 +250,9 @@ describe('DraftManager 测试', () => {
 
   describe('综合场景', () => {
     it('应该完整处理草稿生命周期', async () => {
-      const mockGetter = jest.fn()
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
-      const mockDeleter = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn()
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
+      const mockDeleter = vi.fn().mockResolvedValue(undefined)
 
       // 保存草稿
       await manager.saveDraft('test-key', 'test content', mockSaver)
@@ -286,8 +286,8 @@ describe('DraftManager 测试', () => {
         }
       }
 
-      const mockGetAll = jest.fn().mockResolvedValue(mockAllData)
-      const mockRemove = jest.fn().mockResolvedValue(undefined)
+      const mockGetAll = vi.fn().mockResolvedValue(mockAllData)
+      const mockRemove = vi.fn().mockResolvedValue(undefined)
 
       const count = await manager.cleanExpiredDrafts(1, 'draft:', mockGetAll, mockRemove)
 

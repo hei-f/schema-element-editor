@@ -38,6 +38,12 @@ export class ElementMonitor {
   private isActive: boolean = false
   private currentElement: HTMLElement | null = null
   private tooltipElement: HTMLDivElement | null = null
+  // tooltip 内容缓存，避免重复重建 DOM
+  private tooltipCache: {
+    params: string[]
+    isValid: boolean
+    isRecordingMode: boolean
+  } | null = null
   private onElementClickCallback:
     | ((element: HTMLElement, attrs: ElementAttributes) => void)
     | null = null
@@ -341,17 +347,17 @@ export class ElementMonitor {
     this.tooltipElement.style.cssText = `
       position: fixed;
       z-index: 2147483647;
-      background: rgba(0, 0, 0, 0.85);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 6px;
+      display: none;
+      flex-direction: column;
+      background: #E1ECFB;
+      color: #3D3D3D;
+      border-radius: 8px;
       font-size: 12px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       pointer-events: none;
-      display: none;
       max-width: 300px;
-      word-wrap: break-word;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      transition: left 0.1s ease-out, top 0.1s ease-out;
     `
     document.body.appendChild(this.tooltipElement)
   }
@@ -630,10 +636,20 @@ export class ElementMonitor {
     const { target } = await findElementWithSchemaParams(event.clientX, event.clientY)
 
     if (!target) {
-      // 没找到任何元素
+      // 没找到任何元素，显示"非法目标"
       if (this.isIframeMode) {
-        // iframe 模式：通知 top frame 清除高亮
-        sendClearHighlightToTop()
+        // iframe 模式：发送"非法目标"信息给 top frame
+        const topFrameMousePos = convertMousePositionToTopFrame(event.clientX, event.clientY)
+        if (topFrameMousePos) {
+          // 发送一个空的 rect 和无效状态
+          sendElementHoverToTop(
+            { left: 0, top: 0, width: 0, height: 0 },
+            { params: [] },
+            false,
+            topFrameMousePos,
+            this.isRecordingMode
+          )
+        }
       } else {
         // top frame 模式：直接清理高亮并显示"非法目标"
         this.clearHighlight()
@@ -735,6 +751,21 @@ export class ElementMonitor {
   }
 
   /**
+   * 检查 tooltip 内容是否需要更新
+   */
+  private isTooltipContentChanged(
+    params: string[],
+    isValid: boolean,
+    isRecordingMode: boolean
+  ): boolean {
+    if (!this.tooltipCache) return true
+    if (this.tooltipCache.isValid !== isValid) return true
+    if (this.tooltipCache.isRecordingMode !== isRecordingMode) return true
+    if (this.tooltipCache.params.length !== params.length) return true
+    return this.tooltipCache.params.some((param, index) => param !== params[index])
+  }
+
+  /**
    * 显示tooltip
    */
   private showTooltip(attrs: ElementAttributes, isValid: boolean, event: MouseEvent): void {
@@ -742,33 +773,71 @@ export class ElementMonitor {
 
     const mousePos = getMousePosition(event)
 
-    if (isValid) {
-      // 显示参数列表
-      const lines: string[] = []
+    // 检查内容是否变化，如果相同则只更新位置
+    if (!this.isTooltipContentChanged(attrs.params, isValid, this.isRecordingMode)) {
+      this.positionTooltip(mousePos.x, mousePos.y)
+      this.tooltipElement.style.display = 'flex'
+      return
+    }
 
+    // 更新缓存
+    this.tooltipCache = {
+      params: [...attrs.params],
+      isValid,
+      isRecordingMode: this.isRecordingMode,
+    }
+
+    // 内容变化，重建 DOM
+    this.tooltipElement.innerHTML = ''
+
+    if (isValid) {
       // 录制模式下添加醒目提示
       if (this.isRecordingMode) {
-        lines.push(
-          '<div style="background: #ff4d4f; color: white; padding: 4px 8px; margin: -8px -12px 8px -12px; border-radius: 6px 6px 0 0; font-weight: 600; font-size: 13px; text-align: center;">🔴 录制模式</div>'
-        )
+        const label = document.createElement('div')
+        label.style.cssText = `
+          background: #ff4d4f;
+          color: white;
+          padding: 4px 8px;
+          font-weight: 600;
+          font-size: 13px;
+          text-align: center;
+        `
+        label.textContent = '🔴 录制模式'
+        this.tooltipElement.appendChild(label)
       }
 
+      // 内容容器
+      const content = document.createElement('div')
+      content.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 4px 8px;
+      `
+
+      // 显示参数列表
       attrs.params.forEach((param, index) => {
-        lines.push(`params${index + 1}: ${param}`)
+        const line = document.createElement('div')
+        line.textContent = `params${index + 1}: ${param}`
+        content.appendChild(line)
       })
-      this.tooltipElement.innerHTML = lines.join('<br>')
-      this.tooltipElement.style.background = 'rgba(0, 0, 0, 0.9)'
-      this.tooltipElement.style.color = 'white'
+
+      this.tooltipElement.appendChild(content)
+      this.tooltipElement.style.background = '#E1ECFB'
+      this.tooltipElement.style.color = '#3D3D3D'
     } else {
-      // 显示"非法目标"
-      this.tooltipElement.textContent = '非法目标'
+      // 内容容器
+      const content = document.createElement('div')
+      content.style.cssText = 'padding: 4px 8px;'
+      content.textContent = '非法目标'
+      this.tooltipElement.appendChild(content)
       this.tooltipElement.style.background = 'rgba(255, 77, 79, 0.9)'
       this.tooltipElement.style.color = 'white'
     }
 
     // 定位tooltip
     this.positionTooltip(mousePos.x, mousePos.y)
-    this.tooltipElement.style.display = 'block'
+    this.tooltipElement.style.display = 'flex'
   }
 
   /**
@@ -807,6 +876,9 @@ export class ElementMonitor {
 
     // 清除当前元素引用
     this.currentElement = null
+
+    // 清空 tooltip 缓存
+    this.tooltipCache = null
 
     // 隐藏 tooltip
     if (this.tooltipElement) {
@@ -893,17 +965,16 @@ export class ElementMonitor {
       position: absolute;
       top: -26px;
       left: 0;
-      padding: 8px 12px;
-      background: rgba(0, 0, 0, 0.85);
-      color: white;
+      padding: 4px 8px;
+      background: #E1ECFB;
+      color: #3D3D3D;
       font-size: 12px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      border-radius: 6px;
+      border-radius: 8px;
       white-space: nowrap;
       max-width: 300px;
       overflow: hidden;
       text-overflow: ellipsis;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     `
 
     // 格式化标签内容（单行显示）
@@ -959,7 +1030,7 @@ export class ElementMonitor {
       width: ${width}px;
       height: ${height}px;
       border: 2px solid ${color};
-      box-shadow: 0 0 10px ${this.hexToRgba(color, 0.5)};
+      border-radius: 12px;
       pointer-events: none;
       z-index: 999998;
       box-sizing: border-box;
@@ -1048,15 +1119,5 @@ export class ElementMonitor {
 
       item.boxElement.style.transform = `translate(${item.initialRect.left + deltaX}px, ${item.initialRect.top + deltaY}px)`
     }
-  }
-
-  /**
-   * 将 hex 颜色转换为 rgba 格式
-   */
-  private hexToRgba(hex: string, alpha: number): string {
-    const r = parseInt(hex.slice(1, 3), 16)
-    const g = parseInt(hex.slice(3, 5), 16)
-    const b = parseInt(hex.slice(5, 7), 16)
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`
   }
 }

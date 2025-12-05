@@ -1,3 +1,4 @@
+import { MODAL_Z_INDEX } from '@/shared/constants/theme'
 import type { Favorite } from '@/shared/types'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import type { TableColumnsType } from 'antd'
@@ -101,6 +102,7 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
       footer={null}
       width={800}
       getContainer={shadowRootManager.getContainer}
+      zIndex={MODAL_Z_INDEX}
     >
       <ListSearchContainer>
         <FullWidthSearchInput

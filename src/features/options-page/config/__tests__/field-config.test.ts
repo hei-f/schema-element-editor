@@ -7,16 +7,16 @@ import {
 import { storage } from '@/shared/utils/browser/storage'
 
 // Mock storage
-jest.mock('@/shared/utils/browser/storage', () => ({
+vi.mock('@/shared/utils/browser/storage', () => ({
   storage: {
-    setApiConfig: jest.fn().mockResolvedValue(undefined),
-    setSearchConfig: jest.fn().mockResolvedValue(undefined),
-    setFunctionNames: jest.fn().mockResolvedValue(undefined),
-    setToolbarButtons: jest.fn().mockResolvedValue(undefined),
-    setPreviewConfig: jest.fn().mockResolvedValue(undefined),
-    setHighlightAllConfig: jest.fn().mockResolvedValue(undefined),
-    setRecordingModeConfig: jest.fn().mockResolvedValue(undefined),
-    setExportConfig: jest.fn().mockResolvedValue(undefined),
+    setApiConfig: vi.fn().mockResolvedValue(undefined),
+    setSearchConfig: vi.fn().mockResolvedValue(undefined),
+    setFunctionNames: vi.fn().mockResolvedValue(undefined),
+    setToolbarButtons: vi.fn().mockResolvedValue(undefined),
+    setPreviewConfig: vi.fn().mockResolvedValue(undefined),
+    setHighlightAllConfig: vi.fn().mockResolvedValue(undefined),
+    setRecordingModeConfig: vi.fn().mockResolvedValue(undefined),
+    setExportConfig: vi.fn().mockResolvedValue(undefined),
   },
 }))
 
@@ -186,7 +186,7 @@ describe('field-config测试', () => {
 
   describe('FIELD_GROUPS save方法', () => {
     beforeEach(() => {
-      jest.clearAllMocks()
+      vi.clearAllMocks()
     })
 
     it('apiConfig.save 应该调用 storage.setApiConfig', async () => {

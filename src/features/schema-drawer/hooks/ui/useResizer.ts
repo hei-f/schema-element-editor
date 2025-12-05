@@ -26,8 +26,8 @@ interface UseResizerReturn {
   setWidth: (width: number) => void
   /** 是否正在拖拽 */
   isDragging: boolean
-  /** 容器 ref */
-  containerRef: React.RefObject<HTMLDivElement>
+  /** 容器 ref（React 19: RefObject 类型包含 null） */
+  containerRef: React.RefObject<HTMLDivElement | null>
   /** 开始拖拽处理函数 */
   handleResizeStart: (e: React.MouseEvent) => void
 }
@@ -86,18 +86,23 @@ export const useResizer = (options: UseResizerOptions): UseResizerReturn => {
     }
 
     const handleMouseUp = () => {
-      setIsDragging(false)
-
       // 使用 ref 获取最新的 width 值
       const finalWidth = widthRef.current
+      const roundedWidth = Math.round(finalWidth)
 
-      // 拖拽结束后触发回调（使用 ref 获取最新回调）
-      if (onResizeEndRef.current) {
-        // 使用 setTimeout 等待 React 完成渲染后再回调
-        setTimeout(() => {
-          onResizeEndRef.current?.(Math.round(finalWidth))
-        }, 50)
-      }
+      // 先同步更新宽度为取整后的值
+      setWidth(roundedWidth)
+
+      // 使用 setTimeout 等待 React 完成渲染后再触发回调和禁用拖拽状态
+      setTimeout(() => {
+        // 先触发回调，让外部状态更新为取整后的值
+        onResizeEndRef.current?.(roundedWidth)
+
+        // 再延迟一帧设置 isDragging=false，确保外部状态更新完成后再启用 transition
+        requestAnimationFrame(() => {
+          setIsDragging(false)
+        })
+      }, 50)
     }
 
     document.addEventListener('mousemove', handleMouseMove)

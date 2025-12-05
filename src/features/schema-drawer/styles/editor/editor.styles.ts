@@ -7,6 +7,7 @@ export const EditorContainer = styled.div`
   flex: 1;
   overflow: hidden;
   position: relative;
+  border-radius: 12px;
 `
 
 /**

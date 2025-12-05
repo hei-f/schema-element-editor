@@ -1,55 +1,86 @@
-import { CheckOutlined, CopyOutlined } from '@ant-design/icons'
 import { Tooltip } from 'antd'
-import React, { useState } from 'react'
+import React from 'react'
+import { CopyIcon } from '@/shared/icons/drawer/toolbar/CopyIcon'
+import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import {
-  AttributeTag,
   AttributeTagWrapper,
   CopyIconWrapper,
-  ParamItem,
-  ParamLabel,
   StyledCopyIcon,
 } from '../../styles/toolbar/toolbar.styles'
 
 interface ParamTagProps {
   /** 参数值 */
   value: string
-  /** 参数索引（用于显示 params1, params2 等） */
+  /** 参数索引（用于显示 params 1, params 2 等） */
   index: number
+  /** 复制成功回调 */
+  onCopy?: () => void
+}
+
+/**
+ * 使用原生 Clipboard API 复制文本到剪贴板
+ * 与 antd6 内部实现方式一致
+ */
+const copyToClipboard = async (text: string): Promise<boolean> => {
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text)
+      return true
+    } catch {
+      return fallbackCopy(text)
+    }
+  }
+  return fallbackCopy(text)
+}
+
+/**
+ * 降级方案：使用 execCommand 复制
+ * 用于不支持 Clipboard API 或非安全上下文的环境
+ */
+const fallbackCopy = (text: string): boolean => {
+  const textArea = document.createElement('textarea')
+  textArea.value = text
+  textArea.style.position = 'absolute'
+  textArea.style.left = '-999999px'
+  document.body.prepend(textArea)
+  textArea.select()
+  try {
+    document.execCommand('copy')
+    return true
+  } catch {
+    return false
+  } finally {
+    textArea.remove()
+  }
 }
 
 /**
  * 单个参数标签组件
- * 显示参数值，支持复制功能
+ * 显示参数标签，hover 展示参数值，支持复制功能
  */
-export const ParamTag: React.FC<ParamTagProps> = ({ value, index }) => {
-  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied'>('idle')
+export const ParamTag: React.FC<ParamTagProps> = (props) => {
+  const { value, index, onCopy } = props
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    try {
-      await navigator.clipboard.writeText(value)
-      setCopyStatus('copied')
-      setTimeout(() => {
-        setCopyStatus('idle')
-      }, 2000)
-    } catch (err) {
-      console.error('复制失败:', err)
+    const success = await copyToClipboard(value)
+    if (success) {
+      onCopy?.()
+    } else {
+      console.error('复制失败')
     }
   }
 
   return (
-    <ParamItem style={{ flexShrink: 0 }}>
-      <ParamLabel>params{index + 1}:</ParamLabel>
-      <Tooltip title={value} placement="bottom">
-        <AttributeTagWrapper>
-          <AttributeTag>{value}</AttributeTag>
-          <CopyIconWrapper className="copy-icon-wrapper" onClick={handleCopy}>
-            <StyledCopyIcon $isSuccess={copyStatus === 'copied'}>
-              {copyStatus === 'copied' ? <CheckOutlined /> : <CopyOutlined />}
-            </StyledCopyIcon>
-          </CopyIconWrapper>
-        </AttributeTagWrapper>
-      </Tooltip>
-    </ParamItem>
+    <Tooltip title={value} placement="bottom" getPopupContainer={shadowRootManager.getContainer}>
+      <AttributeTagWrapper style={{ flexShrink: 0 }}>
+        <span>params {index + 1}</span>
+        <CopyIconWrapper onClick={handleCopy}>
+          <StyledCopyIcon>
+            <CopyIcon />
+          </StyledCopyIcon>
+        </CopyIconWrapper>
+      </AttributeTagWrapper>
+    </Tooltip>
   )
 }

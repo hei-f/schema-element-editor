@@ -1,29 +1,32 @@
 import { renderHook, act } from '@testing-library/react'
-import { message } from 'antd'
+import { message, Modal } from 'antd'
 import { useFileImportExport } from '../../storage/useFileImportExport'
 import { logger } from '@/shared/utils/logger'
 
 // Mock dependencies
-jest.mock('antd', () => ({
+vi.mock('antd', () => ({
   message: {
-    error: jest.fn(),
-    success: jest.fn(),
-    warning: jest.fn(),
+    error: vi.fn(),
+    success: vi.fn(),
+    warning: vi.fn(),
   },
   Modal: {
-    confirm: jest.fn(),
-    destroyAll: jest.fn(),
+    confirm: vi.fn(),
+    destroyAll: vi.fn(),
   },
 }))
 
-jest.mock('@/shared/utils/logger', () => ({
+const mockedModalConfirm = vi.mocked(Modal.confirm)
+const mockedModalDestroyAll = vi.mocked(Modal.destroyAll)
+
+vi.mock('@/shared/utils/logger', () => ({
   logger: {
-    log: jest.fn(),
-    error: jest.fn(),
+    log: vi.fn(),
+    error: vi.fn(),
   },
 }))
 
-jest.mock('@/shared/utils/shadow-root-manager', () => ({
+vi.mock('@/shared/utils/shadow-root-manager', () => ({
   shadowRootManager: {
     getContainer: () => document.body,
   },
@@ -37,8 +40,8 @@ global.chrome = {
 } as any
 
 describe('useFileImportExport', () => {
-  const mockOnImportSuccess = jest.fn()
-  const mockShowLightNotification = jest.fn()
+  const mockOnImportSuccess = vi.fn()
+  const mockShowLightNotification = vi.fn()
 
   const defaultProps = {
     editorValue: '{"type": "card", "title": "test"}',
@@ -51,14 +54,14 @@ describe('useFileImportExport', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     // Mock URL.createObjectURL and revokeObjectURL
-    global.URL.createObjectURL = jest.fn(() => 'blob:mock-url')
-    global.URL.revokeObjectURL = jest.fn()
+    global.URL.createObjectURL = vi.fn(() => 'blob:mock-url')
+    global.URL.revokeObjectURL = vi.fn()
   })
 
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   describe('handleExport', () => {
@@ -97,7 +100,7 @@ describe('useFileImportExport', () => {
     })
 
     it('应该正确清理 Blob URL', () => {
-      jest.useFakeTimers()
+      vi.useFakeTimers({ shouldAdvanceTime: true })
       const { result } = renderHook(() => useFileImportExport(defaultProps))
 
       act(() => {
@@ -105,10 +108,10 @@ describe('useFileImportExport', () => {
       })
 
       // 快进 100ms
-      jest.advanceTimersByTime(100)
+      vi.advanceTimersByTime(100)
 
       expect(global.URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url')
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
 
     it('当 JSON 解析失败时应该提示数据处理错误', () => {
@@ -128,7 +131,6 @@ describe('useFileImportExport', () => {
     })
 
     it('启用自定义文件名时应该弹出 Modal', () => {
-      const { Modal } = require('antd')
       const { result } = renderHook(() =>
         useFileImportExport({
           ...defaultProps,
@@ -140,7 +142,7 @@ describe('useFileImportExport', () => {
         result.current.handleExport()
       })
 
-      expect(Modal.confirm).toHaveBeenCalledWith(
+      expect(mockedModalConfirm).toHaveBeenCalledWith(
         expect.objectContaining({
           title: '导出文件',
           okText: '导出',
@@ -150,11 +152,11 @@ describe('useFileImportExport', () => {
     })
 
     it('自定义文件名时点击确定应该导出文件', () => {
-      const { Modal } = require('antd')
       let onOkCallback: () => void
 
-      Modal.confirm.mockImplementation((config: any) => {
+      mockedModalConfirm.mockImplementation((config: any) => {
         onOkCallback = config.onOk
+        return { destroy: vi.fn(), update: vi.fn() }
       })
 
       const { result } = renderHook(() =>
@@ -177,16 +179,16 @@ describe('useFileImportExport', () => {
     })
 
     it('自定义文件名为空时 onOk 应该提示警告并返回 reject', async () => {
-      const { Modal } = require('antd')
       let capturedConfig: any
 
-      Modal.confirm.mockImplementation((config: any) => {
+      mockedModalConfirm.mockImplementation((config: any) => {
         capturedConfig = config
         // 模拟触发 input 的 onChange 将值清空
         const inputElement = { target: { value: '' } }
         // 从 content 中获取 input 并触发 onChange
         const inputProps = config.content.props.children[1].props
         inputProps.onChange(inputElement)
+        return { destroy: vi.fn(), update: vi.fn() }
       })
 
       const { result } = renderHook(() =>
@@ -208,11 +210,11 @@ describe('useFileImportExport', () => {
     })
 
     it('自定义文件名时按 Enter 键应该触发导出', () => {
-      const { Modal } = require('antd')
       let capturedConfig: any
 
-      Modal.confirm.mockImplementation((config: any) => {
+      mockedModalConfirm.mockImplementation((config: any) => {
         capturedConfig = config
+        return { destroy: vi.fn(), update: vi.fn() }
       })
 
       const { result } = renderHook(() =>
@@ -234,16 +236,16 @@ describe('useFileImportExport', () => {
         inputProps.onKeyDown({ key: 'Enter' })
       })
 
-      expect(Modal.destroyAll).toHaveBeenCalled()
+      expect(mockedModalDestroyAll).toHaveBeenCalled()
       expect(mockShowLightNotification).toHaveBeenCalledWith('✅ 已导出到文件')
     })
 
     it('自定义文件名为空时按 Enter 键应该提示警告', () => {
-      const { Modal } = require('antd')
       let capturedConfig: any
 
-      Modal.confirm.mockImplementation((config: any) => {
+      mockedModalConfirm.mockImplementation((config: any) => {
         capturedConfig = config
+        return { destroy: vi.fn(), update: vi.fn() }
       })
 
       const { result } = renderHook(() =>
@@ -269,15 +271,15 @@ describe('useFileImportExport', () => {
       })
 
       expect(message.warning).toHaveBeenCalledWith('文件名不能为空')
-      expect(Modal.destroyAll).not.toHaveBeenCalled()
+      expect(mockedModalDestroyAll).not.toHaveBeenCalled()
     })
 
     it('自定义文件名时按其他键不应该触发导出', () => {
-      const { Modal } = require('antd')
       let capturedConfig: any
 
-      Modal.confirm.mockImplementation((config: any) => {
+      mockedModalConfirm.mockImplementation((config: any) => {
         capturedConfig = config
+        return { destroy: vi.fn(), update: vi.fn() }
       })
 
       const { result } = renderHook(() =>
@@ -298,7 +300,7 @@ describe('useFileImportExport', () => {
         inputProps.onKeyDown({ key: 'a' })
       })
 
-      expect(Modal.destroyAll).not.toHaveBeenCalled()
+      expect(mockedModalDestroyAll).not.toHaveBeenCalled()
     })
   })
 
@@ -326,7 +328,7 @@ describe('useFileImportExport', () => {
 
       // Mock FileReader
       const mockFileReader = {
-        readAsText: jest.fn(function (this: any) {
+        readAsText: vi.fn(function (this: any) {
           setTimeout(() => {
             this.onload({
               target: {
@@ -346,7 +348,7 @@ describe('useFileImportExport', () => {
           }, 0)
         }),
       }
-      global.FileReader = jest.fn(() => mockFileReader) as any
+      global.FileReader = vi.fn(() => mockFileReader) as any
 
       act(() => {
         result.current.handleImport(mockFile)
@@ -371,7 +373,7 @@ describe('useFileImportExport', () => {
       const { result } = renderHook(() => useFileImportExport(defaultProps))
 
       const mockFileReader = {
-        readAsText: jest.fn(function (this: any) {
+        readAsText: vi.fn(function (this: any) {
           setTimeout(() => {
             this.onload({
               target: {
@@ -381,7 +383,7 @@ describe('useFileImportExport', () => {
           }, 0)
         }),
       }
-      global.FileReader = jest.fn(() => mockFileReader) as any
+      global.FileReader = vi.fn(() => mockFileReader) as any
 
       const mockFile = new File([JSON.stringify({ type: 'card', title: 'plain' })], 'test.json', {
         type: 'application/json',
@@ -421,7 +423,7 @@ describe('useFileImportExport', () => {
       const { result } = renderHook(() => useFileImportExport(defaultProps))
 
       const mockFileReader = {
-        readAsText: jest.fn(function (this: any) {
+        readAsText: vi.fn(function (this: any) {
           setTimeout(() => {
             this.onload({
               target: { result: 'invalid json' },
@@ -429,7 +431,7 @@ describe('useFileImportExport', () => {
           }, 0)
         }),
       }
-      global.FileReader = jest.fn(() => mockFileReader) as any
+      global.FileReader = vi.fn(() => mockFileReader) as any
 
       const mockFile = new File(['invalid json'], 'test.json', {
         type: 'application/json',
@@ -451,7 +453,7 @@ describe('useFileImportExport', () => {
       const { result } = renderHook(() => useFileImportExport(defaultProps))
 
       const mockFileReader = {
-        readAsText: jest.fn(function (this: any) {
+        readAsText: vi.fn(function (this: any) {
           setTimeout(() => {
             this.onload({
               target: {
@@ -471,7 +473,7 @@ describe('useFileImportExport', () => {
           }, 0)
         }),
       }
-      global.FileReader = jest.fn(() => mockFileReader) as any
+      global.FileReader = vi.fn(() => mockFileReader) as any
 
       const mockFile = new File(['test'], 'test.json', {
         type: 'application/json',
@@ -493,13 +495,13 @@ describe('useFileImportExport', () => {
       const { result } = renderHook(() => useFileImportExport(defaultProps))
 
       const mockFileReader = {
-        readAsText: jest.fn(function (this: any) {
+        readAsText: vi.fn(function (this: any) {
           setTimeout(() => {
             this.onerror()
           }, 0)
         }),
       }
-      global.FileReader = jest.fn(() => mockFileReader) as any
+      global.FileReader = vi.fn(() => mockFileReader) as any
 
       const mockFile = new File(['test'], 'test.json', {
         type: 'application/json',

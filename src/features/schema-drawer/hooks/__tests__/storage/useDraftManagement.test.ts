@@ -1,3 +1,4 @@
+import type { Mocked } from 'vitest'
 import { storage } from '@/shared/utils/browser/storage'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { act, renderHook, waitFor } from '@testing-library/react'
@@ -5,27 +6,27 @@ import { Modal } from 'antd'
 import { useDraftManagement } from '../../storage/useDraftManagement'
 
 // Mock dependencies
-jest.mock('@/shared/utils/browser/storage')
-jest.mock('@/shared/utils/logger', () => ({
+vi.mock('@/shared/utils/browser/storage')
+vi.mock('@/shared/utils/logger', () => ({
   logger: {
-    log: jest.fn(),
-    error: jest.fn(),
+    log: vi.fn(),
+    error: vi.fn(),
   },
 }))
-jest.mock('antd', () => ({
+vi.mock('antd', () => ({
   Modal: {
-    confirm: jest.fn(),
+    confirm: vi.fn(),
   },
 }))
 
-const mockStorage = storage as jest.Mocked<typeof storage>
-const mockModal = Modal as jest.Mocked<typeof Modal>
+const mockStorage = storage as Mocked<typeof storage>
+const mockModal = Modal as Mocked<typeof Modal>
 
 describe('useDraftManagement Hook 测试', () => {
-  const mockOnLoadDraft = jest.fn()
-  const mockOnSuccess = jest.fn()
-  const mockOnWarning = jest.fn()
-  const mockOnError = jest.fn()
+  const mockOnLoadDraft = vi.fn()
+  const mockOnSuccess = vi.fn()
+  const mockOnWarning = vi.fn()
+  const mockOnError = vi.fn()
 
   const defaultProps = {
     paramsKey: 'test-params',
@@ -40,8 +41,8 @@ describe('useDraftManagement Hook 测试', () => {
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
-    jest.useFakeTimers()
+    vi.clearAllMocks()
+    vi.useFakeTimers({ shouldAdvanceTime: true })
 
     // 初始化 shadowRootManager
     const mockShadowRoot = document.createElement('div') as unknown as ShadowRoot
@@ -49,8 +50,8 @@ describe('useDraftManagement Hook 测试', () => {
   })
 
   afterEach(() => {
-    jest.runOnlyPendingTimers()
-    jest.useRealTimers()
+    vi.runOnlyPendingTimers()
+    vi.useRealTimers()
     shadowRootManager.reset()
   })
 
@@ -157,7 +158,7 @@ describe('useDraftManagement Hook 测试', () => {
         content: 'draft content',
         timestamp: Date.now(),
       })
-      mockModal.confirm.mockImplementation(({ onOk }) => {
+      mockModal.confirm.mockImplementation(({ onOk }: { onOk?: () => void }) => {
         onOk?.()
         return {} as any
       })
@@ -210,7 +211,7 @@ describe('useDraftManagement Hook 测试', () => {
   describe('handleDeleteDraft 删除草稿', () => {
     it('应该显示确认对话框并删除草稿', async () => {
       mockStorage.deleteDraft.mockResolvedValue(undefined)
-      mockModal.confirm.mockImplementation(({ onOk }) => {
+      mockModal.confirm.mockImplementation(({ onOk }: { onOk?: () => void }) => {
         onOk?.()
         return {} as any
       })
@@ -237,7 +238,7 @@ describe('useDraftManagement Hook 测试', () => {
 
     it('删除失败时应该显示错误提示', async () => {
       mockStorage.deleteDraft.mockRejectedValue(new Error('Delete error'))
-      mockModal.confirm.mockImplementation(({ onOk }) => {
+      mockModal.confirm.mockImplementation(({ onOk }: { onOk?: () => void }) => {
         onOk?.()
         return {} as any
       })
@@ -272,7 +273,7 @@ describe('useDraftManagement Hook 测试', () => {
       expect(result.current.draftAutoSaveStatus).toBe('saving')
 
       await act(async () => {
-        jest.advanceTimersByTime(3000)
+        vi.advanceTimersByTime(3000)
       })
 
       await waitFor(() => {
@@ -282,7 +283,7 @@ describe('useDraftManagement Hook 测试', () => {
       })
 
       await act(async () => {
-        jest.advanceTimersByTime(2000)
+        vi.advanceTimersByTime(2000)
       })
 
       await waitFor(() => {
@@ -295,7 +296,7 @@ describe('useDraftManagement Hook 测试', () => {
 
       act(() => {
         result.current.debouncedAutoSaveDraft('content')
-        jest.advanceTimersByTime(3000)
+        vi.advanceTimersByTime(3000)
       })
 
       expect(mockStorage.saveDraft).not.toHaveBeenCalled()
@@ -312,7 +313,7 @@ describe('useDraftManagement Hook 测试', () => {
 
       act(() => {
         result.current.debouncedAutoSaveDraft('content')
-        jest.advanceTimersByTime(3000)
+        vi.advanceTimersByTime(3000)
       })
 
       expect(mockStorage.saveDraft).not.toHaveBeenCalled()
@@ -330,14 +331,14 @@ describe('useDraftManagement Hook 测试', () => {
 
       act(() => {
         result.current.debouncedAutoSaveDraft('content 1')
-        jest.advanceTimersByTime(1000)
+        vi.advanceTimersByTime(1000)
         result.current.debouncedAutoSaveDraft('content 2')
-        jest.advanceTimersByTime(1000)
+        vi.advanceTimersByTime(1000)
         result.current.debouncedAutoSaveDraft('content 3')
       })
 
       await act(async () => {
-        jest.advanceTimersByTime(3000)
+        vi.advanceTimersByTime(3000)
       })
 
       await waitFor(() => {
@@ -361,7 +362,7 @@ describe('useDraftManagement Hook 测试', () => {
       })
 
       await act(async () => {
-        jest.advanceTimersByTime(3000)
+        vi.advanceTimersByTime(3000)
       })
 
       await waitFor(() => {
@@ -386,7 +387,7 @@ describe('useDraftManagement Hook 测试', () => {
       expect(result.current.showDraftNotification).toBe(true)
 
       await act(async () => {
-        jest.advanceTimersByTime(3000)
+        vi.advanceTimersByTime(3000)
       })
 
       await waitFor(() => {
@@ -406,7 +407,7 @@ describe('useDraftManagement Hook 测试', () => {
 
       unmount()
 
-      expect(jest.getTimerCount()).toBe(0)
+      expect(vi.getTimerCount()).toBe(0)
     })
   })
 
@@ -463,7 +464,7 @@ describe('useDraftManagement Hook 测试', () => {
       })
 
       await act(async () => {
-        jest.advanceTimersByTime(3000)
+        vi.advanceTimersByTime(3000)
       })
 
       expect(mockStorage.saveDraft).not.toHaveBeenCalled()

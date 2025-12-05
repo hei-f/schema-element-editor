@@ -1,4 +1,4 @@
-import { useEffect, type DependencyList } from 'react'
+import { useEffect, useLayoutEffect, useRef, type DependencyList } from 'react'
 
 /**
  * 延迟执行的 useEffect
@@ -15,11 +15,17 @@ export function useDeferredEffect(
   options: { delay?: number; enabled?: boolean } = {}
 ): void {
   const { delay = 0, enabled = true } = options
+  /** 存储 effect 函数的 ref，避免将其作为依赖项 */
+  const effectRef = useRef(effect)
+
+  // 在 layout effect 中更新 ref，确保在主 effect 执行前完成
+  useLayoutEffect(() => {
+    effectRef.current = effect
+  })
 
   useEffect(() => {
     if (!enabled) return
-    const timer = setTimeout(effect, delay)
+    const timer = setTimeout(() => effectRef.current(), delay)
     return () => clearTimeout(timer)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [...deps, enabled, delay])
+  }, [...deps, enabled, delay]) // deps 是动态数组，展开是必要的
 }

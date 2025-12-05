@@ -58,7 +58,7 @@ export const PreviewConfigSection: React.FC<PreviewConfigSectionProps> = (props)
       </Form.Item>
 
       <div id="field-z-index">
-        <Divider orientation="left" plain style={{ margin: '8px 0' }}>
+        <Divider titlePlacement="left" plain style={{ margin: '8px 0' }}>
           层级配置
         </Divider>
       </div>
@@ -74,7 +74,7 @@ export const PreviewConfigSection: React.FC<PreviewConfigSectionProps> = (props)
       <Form.Item
         label="预览模式 z-index"
         name={FORM_PATHS.previewConfig.zIndex.preview}
-        extra="预览模式下的层级，需低于 antd 弹窗默认值 1000 以显示弹窗"
+        extra="预览容器的层级，编辑器会自动使用 +1 的层级以确保 Tooltip 等弹出层正常显示"
       >
         <FixedWidthInputNumber min={1} max={2147483647} $width={150} />
       </Form.Item>

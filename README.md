@@ -2,7 +2,7 @@
 
 Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 
-![Version](https://img.shields.io/badge/version-1.19.2-blue)
+![Version](https://img.shields.io/badge/version-1.21.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 ## 功能
@@ -23,10 +23,12 @@ Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 - 📥📤 **导入导出**: 支持导出Schema为JSON文件，也可从文件导入，方便数据分享和备份
 - ⚙️ **灵活配置**: 可自定义属性名、搜索深度、节流间隔等参数
 - 🎨 **样式隔离**: 使用Shadow DOM确保样式不受页面干扰
+- 🌈 **主题色配置** (v1.21.0+): 支持自定义插件主题色，配置页面和编辑器界面统一应用
+- 🤝 **[Agentic UI](https://github.com/anthropics/agentic-ui) 原生支持**: 内置 postMessage 通信适配，开发环境下可直接调试 Bubble 组件数据
 
 ## 技术栈
 
-React 18 + TypeScript + Vite + Ant Design 5 + CodeMirror + Chrome Extension MV3
+React 19 + TypeScript + Vite + Ant Design 6 + CodeMirror 6 + Chrome Extension MV3
 
 ## 开发
 
@@ -70,7 +72,7 @@ npm run demo
 
 ## 使用
 
-点击工具栏图标激活插件（绿色=激活，灰色=未激活）。
+点击工具栏图标激活插件（蓝色=激活，灰色=未激活）。
 
 ### 基础操作
 
@@ -234,6 +236,31 @@ useSchemaEditor({
 })
 ```
 
+**自定义消息配置示例：**
+
+```typescript
+useSchemaEditor({
+  getSchema: (params) => dataStore[params],
+  updateSchema: (schema, params) => {
+    dataStore[params] = schema
+    return true
+  },
+  // 自定义消息标识（需与插件配置页面一致）
+  sourceConfig: {
+    content: 'my-app-content', // 插件端标识，默认 'schema-editor-content'
+    host: 'my-app-host', // 宿主端标识，默认 'schema-editor-host'
+  },
+  // 自定义消息类型（需与插件配置页面一致）
+  messageTypes: {
+    getSchema: 'MY_GET_SCHEMA', // 默认 'GET_SCHEMA'
+    updateSchema: 'MY_UPDATE_SCHEMA', // 默认 'UPDATE_SCHEMA'
+    checkPreview: 'MY_CHECK_PREVIEW', // 默认 'CHECK_PREVIEW'
+    renderPreview: 'MY_RENDER_PREVIEW', // 默认 'RENDER_PREVIEW'
+    cleanupPreview: 'MY_CLEANUP_PREVIEW', // 默认 'CLEANUP_PREVIEW'
+  },
+})
+```
+
 #### 手动实现 postMessage 监听
 
 如果不使用 SDK，也可以手动实现 postMessage 监听：
@@ -346,7 +373,34 @@ window.__getContentPreview = (data, containerId: string) => {
 
 属性值为参数数组的 `join(',')` 结果。
 
-> **注意**：`data-id` 符合 [Agentic UI](https://github.com/ant-design/agentic-ui) 的规范，使用默认配置即可，无需用户手动配置属性名。如有特殊需求，属性名也可在配置页面自定义。
+> **注意**：`data-id` 符合 Agentic UI 的规范，使用默认配置即可，无需用户手动配置属性名。如有特殊需求，属性名也可在配置页面自定义。
+
+### Agentic UI 集成
+
+Agentic UI 已内置 postMessage 通信适配，开发环境下开箱即用。
+
+**使用方式：**
+
+1. 激活插件（工具栏图标变为蓝色）
+2. 按住 Alt/Option 悬停目标 Bubble，点击打开编辑器
+
+**组件要求：**
+
+| 组件         | 要求                                       |
+| ------------ | ------------------------------------------ |
+| `Bubble`     | 需配置 `id` 属性                           |
+| `BubbleList` | 数据项需包含 `id` 字段（组件内部自动传递） |
+
+```tsx
+// Bubble 需指定 id
+<Bubble
+  id="msg-1"
+  originData={{ id: 'msg-1', role: 'assistant', originContent: '# Hello' }}
+/>
+
+// BubbleList 数据项需包含 id 字段
+<BubbleList bubbleList={[{ id: 'msg-1', role: 'assistant', content: '...' }]} />
+```
 
 ### Markdown 字符串自动解析 (v1.0.6+)
 
@@ -365,7 +419,7 @@ window.__getContentById = (params: string) => {
 }
 ```
 
-插件会自动将 Markdown 字符串解析为结构化的 Elements 数组进行编辑，保存时自动转换回 Markdown 字符串。该功能默认开启，符合 [Agentic UI](https://github.com/ant-design/agentic-ui) 的数据规范，可在配置页面【高级】选项中关闭。
+插件会自动将 Markdown 字符串解析为结构化的 Elements 数组进行编辑，保存时自动转换回 Markdown 字符串。该功能默认开启，符合 Agentic UI 的数据规范，可在配置页面【高级】选项中关闭。
 
 ### AST 智能类型提示 (v1.5.0+)
 

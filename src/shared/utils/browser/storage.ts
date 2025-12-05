@@ -302,6 +302,7 @@ class StorageManager {
       previewFunctionName,
       apiConfig,
       drawerShortcuts,
+      themeColor,
     ] = await Promise.all([
       this.getActiveState(),
       this.getDrawerWidth(),
@@ -327,6 +328,7 @@ class StorageManager {
       this.getPreviewFunctionName(),
       this.getApiConfig(),
       this.getDrawerShortcuts(),
+      this.getThemeColor(),
     ])
     const exportConfig = await this.getExportConfig()
     return {
@@ -355,6 +357,7 @@ class StorageManager {
       previewFunctionName,
       apiConfig,
       drawerShortcuts,
+      themeColor,
     }
   }
 
@@ -848,6 +851,20 @@ class StorageManager {
    */
   async setDrawerShortcuts(config: DrawerShortcutsConfig): Promise<void> {
     return this.setSimple('drawerShortcuts', config)
+  }
+
+  /**
+   * 获取主题色
+   */
+  async getThemeColor(): Promise<string> {
+    return this.getSimple<string>('themeColor')
+  }
+
+  /**
+   * 设置主题色
+   */
+  async setThemeColor(color: string): Promise<void> {
+    return this.setSimple('themeColor', color)
   }
 }
 

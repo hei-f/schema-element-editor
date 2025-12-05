@@ -3,12 +3,12 @@ import { useLightNotifications } from '../../ui/useLightNotifications'
 
 describe('useLightNotifications Hook 测试', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
+    vi.useFakeTimers({ shouldAdvanceTime: true })
   })
 
   afterEach(() => {
-    jest.runOnlyPendingTimers()
-    jest.useRealTimers()
+    vi.runOnlyPendingTimers()
+    vi.useRealTimers()
   })
 
   describe('初始化', () => {
@@ -71,7 +71,7 @@ describe('useLightNotifications Hook 测试', () => {
       expect(result.current.lightNotifications).toHaveLength(1)
 
       act(() => {
-        jest.advanceTimersByTime(1500)
+        vi.advanceTimersByTime(1500)
       })
 
       await waitFor(() => {
@@ -87,7 +87,7 @@ describe('useLightNotifications Hook 测试', () => {
       })
 
       act(() => {
-        jest.advanceTimersByTime(500)
+        vi.advanceTimersByTime(500)
       })
 
       act(() => {
@@ -98,7 +98,7 @@ describe('useLightNotifications Hook 测试', () => {
 
       // 再过1000ms，第一个通知应该消失
       act(() => {
-        jest.advanceTimersByTime(1000)
+        vi.advanceTimersByTime(1000)
       })
 
       await waitFor(() => {
@@ -108,7 +108,7 @@ describe('useLightNotifications Hook 测试', () => {
 
       // 再过500ms，第二个通知也应该消失
       act(() => {
-        jest.advanceTimersByTime(500)
+        vi.advanceTimersByTime(500)
       })
 
       await waitFor(() => {
@@ -124,7 +124,7 @@ describe('useLightNotifications Hook 测试', () => {
       })
 
       act(() => {
-        jest.advanceTimersByTime(1500)
+        vi.advanceTimersByTime(1500)
       })
 
       await waitFor(() => {
@@ -132,7 +132,7 @@ describe('useLightNotifications Hook 测试', () => {
       })
 
       // 定时器应该被清理（没有直接的方式验证，但通过运行时无错误来验证）
-      expect(jest.getTimerCount()).toBe(0)
+      expect(vi.getTimerCount()).toBe(0)
     })
   })
 
@@ -146,12 +146,12 @@ describe('useLightNotifications Hook 测试', () => {
         result.current.showLightNotification('通知3')
       })
 
-      expect(jest.getTimerCount()).toBe(3)
+      expect(vi.getTimerCount()).toBe(3)
 
       unmount()
 
       // 所有定时器应该被清理
-      expect(jest.getTimerCount()).toBe(0)
+      expect(vi.getTimerCount()).toBe(0)
     })
 
     it('卸载后定时器不应该触发状态更新', () => {
@@ -165,7 +165,7 @@ describe('useLightNotifications Hook 测试', () => {
 
       // 这不应该导致任何错误
       act(() => {
-        jest.advanceTimersByTime(1500)
+        vi.advanceTimersByTime(1500)
       })
 
       // 没有错误就是成功
@@ -233,7 +233,7 @@ describe('useLightNotifications Hook 测试', () => {
       expect(result.current.lightNotifications).toHaveLength(10)
 
       act(() => {
-        jest.advanceTimersByTime(1500)
+        vi.advanceTimersByTime(1500)
       })
 
       await waitFor(() => {

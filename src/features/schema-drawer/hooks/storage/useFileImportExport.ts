@@ -5,6 +5,7 @@ import {
   generateExportFileName,
   validateFileSize,
 } from '../../utils/file-helpers'
+import { MODAL_Z_INDEX } from '@/shared/constants/theme'
 import { logger } from '@/shared/utils/logger'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { Modal, message } from 'antd'
@@ -162,6 +163,7 @@ export const useFileImportExport = ({
         okText: '导出',
         cancelText: '取消',
         getContainer: shadowRootManager.getContainer,
+        zIndex: MODAL_Z_INDEX,
         onOk: () => {
           const fileName = inputValue.trim()
           if (fileName) {

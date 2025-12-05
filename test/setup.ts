@@ -1,63 +1,68 @@
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
+import { vi } from 'vitest'
+
+// Mock build-time constants - 测试环境下设置为开发模式
+// 注：__IS_RELEASE_BUILD__ 类型已在 src/vite-env.d.ts 中声明
+;(globalThis as any).__IS_RELEASE_BUILD__ = false
 
 // Mock Chrome API
 global.chrome = {
   runtime: {
-    sendMessage: jest.fn(),
+    sendMessage: vi.fn(),
     onMessage: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
     },
-    getURL: jest.fn((path: string) => `chrome-extension://test-id/${path}`),
+    getURL: vi.fn((path: string) => `chrome-extension://test-id/${path}`),
     onInstalled: {
-      addListener: jest.fn(),
+      addListener: vi.fn(),
     },
     onStartup: {
-      addListener: jest.fn(),
+      addListener: vi.fn(),
     },
   },
   storage: {
     local: {
-      get: jest.fn((_keys: any) => Promise.resolve({})),
-      set: jest.fn(() => Promise.resolve()),
-      remove: jest.fn(() => Promise.resolve()),
+      get: vi.fn((_keys: any) => Promise.resolve({})),
+      set: vi.fn(() => Promise.resolve()),
+      remove: vi.fn(() => Promise.resolve()),
     },
   },
   tabs: {
-    sendMessage: jest.fn(() => Promise.resolve()),
-    query: jest.fn(() => Promise.resolve([])),
+    sendMessage: vi.fn(() => Promise.resolve()),
+    query: vi.fn(() => Promise.resolve([])),
   },
   action: {
     onClicked: {
-      addListener: jest.fn(),
+      addListener: vi.fn(),
     },
-    setTitle: jest.fn(() => Promise.resolve()),
-    setIcon: jest.fn(() => Promise.resolve()),
+    setTitle: vi.fn(() => Promise.resolve()),
+    setIcon: vi.fn(() => Promise.resolve()),
   },
 } as any
 
 // Mock window.postMessage
-global.postMessage = jest.fn()
+global.postMessage = vi.fn()
 
 // Suppress console errors in tests
 global.console = {
   ...console,
-  error: jest.fn(),
-  warn: jest.fn(),
+  error: vi.fn(),
+  warn: vi.fn(),
 }
 
 // Mock window.matchMedia (required by Ant Design)
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation((query) => ({
+  value: vi.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
   })),
 })
 

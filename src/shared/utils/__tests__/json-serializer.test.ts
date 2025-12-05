@@ -154,7 +154,6 @@ describe('JSON处理工具测试', () => {
     })
 
     it('应该处理循环引用导致的错误', () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const obj: Record<string, any> = { key: 'value' }
       obj.self = obj // 创建循环引用
 

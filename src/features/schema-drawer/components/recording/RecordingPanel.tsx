@@ -1,20 +1,12 @@
 import type { SchemaSnapshot } from '@/shared/types'
-import { DiffOutlined, PauseCircleOutlined } from '@ant-design/icons'
-import { Tooltip } from 'antd'
 import React from 'react'
 import {
-  DiffButton,
   EmptyState,
   PanelHeader,
   RecordingContentArea,
   RecordingEditorArea,
-  RecordingIndicator,
   RecordingModeContainer,
   RecordingPanelContainer,
-  RecordingStatusBar,
-  RecordingStatusLeft,
-  StopRecordingButton,
-  VersionCount,
   VersionInfo,
   VersionItem,
   VersionListContainer,
@@ -29,12 +21,8 @@ interface RecordingPanelProps {
   snapshots: SchemaSnapshot[]
   /** 当前选中的快照ID */
   selectedSnapshotId: number | null
-  /** 停止录制回调 */
-  onStopRecording: () => void
   /** 选择快照回调 */
   onSelectSnapshot: (id: number) => void
-  /** 进入Diff模式回调 */
-  onEnterDiffMode: () => void
   /** 编辑器内容（children） */
   children: React.ReactNode
 }
@@ -52,49 +40,14 @@ function formatTimestamp(ms: number): string {
 
 /**
  * 录制面板组件
- * 包含：状态栏、版本列表、编辑器区域
+ * 包含：版本列表 + 编辑器区域
+ * 状态栏已提升到 DrawerContent 层级统一管理
  */
 export const RecordingPanel: React.FC<RecordingPanelProps> = (props) => {
-  const {
-    isRecording,
-    snapshots,
-    selectedSnapshotId,
-    onStopRecording,
-    onSelectSnapshot,
-    onEnterDiffMode,
-    children,
-  } = props
-
-  const canDiff = !isRecording && snapshots.length >= 2
+  const { isRecording, snapshots, selectedSnapshotId, onSelectSnapshot, children } = props
 
   return (
     <RecordingModeContainer>
-      {/* 状态栏 */}
-      <RecordingStatusBar>
-        <RecordingStatusLeft>
-          <RecordingIndicator $isRecording={isRecording}>
-            {isRecording ? '录制中' : '已停止'}
-          </RecordingIndicator>
-          <VersionCount>已记录 {snapshots.length} 个版本</VersionCount>
-        </RecordingStatusLeft>
-
-        <div style={{ display: 'flex', gap: 8 }}>
-          {isRecording ? (
-            <StopRecordingButton onClick={onStopRecording}>
-              <PauseCircleOutlined />
-              停止录制
-            </StopRecordingButton>
-          ) : (
-            <Tooltip title={snapshots.length < 2 ? '需要至少2个版本才能进行对比' : '对比不同版本'}>
-              <DiffButton $disabled={!canDiff} onClick={canDiff ? onEnterDiffMode : undefined}>
-                <DiffOutlined />
-                版本对比
-              </DiffButton>
-            </Tooltip>
-          )}
-        </div>
-      </RecordingStatusBar>
-
       {/* 内容区域：左侧面板 + 右侧编辑器 */}
       <RecordingContentArea>
         {/* 左侧录制面板 */}
@@ -112,7 +65,9 @@ export const RecordingPanel: React.FC<RecordingPanelProps> = (props) => {
                   onClick={() => onSelectSnapshot(snapshot.id)}
                 >
                   <VersionInfo>
-                    <VersionNumber>版本 {index + 1}</VersionNumber>
+                    <VersionNumber $isActive={snapshot.id === selectedSnapshotId}>
+                      版本 {index + 1}
+                    </VersionNumber>
                     <VersionTimestamp>{formatTimestamp(snapshot.timestamp)}</VersionTimestamp>
                   </VersionInfo>
                 </VersionItem>

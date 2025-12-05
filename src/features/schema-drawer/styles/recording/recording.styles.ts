@@ -36,9 +36,9 @@ export const RecordingStatusBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 16px;
-  background: ${(props) => props.theme.toolbarBackground};
-  border-bottom: 1px solid ${(props) => props.theme.toolbarBorder};
+  padding: 12px 16px;
+  background: #eaebed;
+  border-radius: 12px;
 `
 
 /**
@@ -108,29 +108,32 @@ export const RecordingContentArea = styled.div`
   display: flex;
   flex: 1;
   overflow: hidden;
+  gap: 8px;
 `
 
 /**
  * 录制面板（左侧）
  */
 export const RecordingPanelContainer = styled.div`
-  width: 280px;
-  min-width: 280px;
+  width: 180px;
+  min-width: 180px;
   display: flex;
   flex-direction: column;
-  background: ${(props) => props.theme.panelBackground};
-  border-right: 1px solid ${(props) => props.theme.panelBorder};
+  background: #eaebed;
+  border-radius: 12px;
 `
 
 /**
  * 面板头部
  */
 export const PanelHeader = styled.div`
-  padding: 12px 16px;
-  border-bottom: 1px solid ${(props) => props.theme.panelBorder};
-  font-size: 13px;
+  padding: 8px 16px;
+  border-width: 0px 0px 1px 0px;
+  border-style: solid;
+  border-color: #e1e3e5;
+  font-size: 14px;
   font-weight: 500;
-  color: ${(props) => props.theme.textPrimary};
+  color: #353e5c;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -169,53 +172,51 @@ export const VersionItem = styled.div<{ $isActive?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
-  margin-bottom: 4px;
-  border-radius: 6px;
+  padding: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
 
   ${(props) =>
     props.$isActive
       ? css`
-          background: ${props.theme.listItemActiveBackground};
-          border: 1px solid ${props.theme.listItemActiveBorder};
+          background: #f7f8fa;
+          border-radius: 8px;
         `
       : css`
           background: transparent;
-          border: 1px solid transparent;
+          border-radius: 6px;
 
           &:hover {
-            background: ${props.theme.listItemHoverBackground};
-            border-color: ${props.theme.listItemHoverBackground};
+            background: rgba(0, 0, 0, 0.04);
           }
         `}
 `
 
 /**
- * 版本信息
+ * 版本信息容器（左右布局）
  */
 export const VersionInfo = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 `
 
 /**
  * 版本序号
  */
-export const VersionNumber = styled.span`
-  font-size: 13px;
-  font-weight: 500;
-  color: ${(props) => props.theme.textPrimary};
+export const VersionNumber = styled.span<{ $isActive?: boolean }>`
+  font-size: 12px;
+  font-weight: ${(props) => (props.$isActive ? 500 : 400)};
+  color: ${(props) => (props.$isActive ? '#1677ff' : '#353e5c')};
 `
 
 /**
  * 版本时间
  */
 export const VersionTimestamp = styled.span`
-  font-size: 11px;
-  color: ${(props) => props.theme.textSecondary};
+  font-size: 10px;
+  color: #b9c0cb;
 `
 
 /**
@@ -226,6 +227,7 @@ export const RecordingEditorArea = styled.div`
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border-radius: 12px;
 `
 
 /**
@@ -237,6 +239,7 @@ export const DiffModeContainer = styled.div`
   height: 100%;
   overflow: hidden;
   background: ${(props) => props.theme.panelBackground};
+  border-radius: 12px;
 `
 
 /**
@@ -714,31 +717,36 @@ export const ModifiedLineBackground = `
 `
 
 /**
- * 停止按钮样式（显眼）
+ * 录制操作按钮基础样式（统一尺寸）
  */
-export const StopRecordingButton = styled.button`
+const recordingActionButtonBase = css`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 16px;
-  background: linear-gradient(135deg, #ff4d4f 0%, #f5222d 100%);
-  border: none;
-  border-radius: 6px;
-  color: white;
+  min-width: 100px;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+`
+
+/**
+ * 停止按钮样式（显眼）
+ */
+export const StopRecordingButton = styled.button`
+  ${recordingActionButtonBase}
+  background: linear-gradient(135deg, #ff4d4f 0%, #f5222d 100%);
+  border: none;
+  color: white;
   box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
 
   &:hover {
     background: linear-gradient(135deg, #ff7875 0%, #ff4d4f 100%);
     box-shadow: 0 4px 12px rgba(255, 77, 79, 0.4);
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: translateY(0);
   }
 `
 
@@ -746,18 +754,12 @@ export const StopRecordingButton = styled.button`
  * Diff按钮
  */
 export const DiffButton = styled.button<{ $disabled?: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  ${recordingActionButtonBase}
   background: ${(props) =>
     props.$disabled ? 'rgba(255, 255, 255, 0.05)' : 'rgba(24, 144, 255, 0.15)'};
   border: 1px solid ${(props) => (props.$disabled ? 'transparent' : 'rgba(24, 144, 255, 0.3)')};
-  border-radius: 6px;
   color: ${(props) => (props.$disabled ? '#6b7280' : '#1890ff')};
-  font-size: 12px;
   cursor: ${(props) => (props.$disabled ? 'not-allowed' : 'pointer')};
-  transition: all 0.2s ease;
 
   ${(props) =>
     !props.$disabled &&

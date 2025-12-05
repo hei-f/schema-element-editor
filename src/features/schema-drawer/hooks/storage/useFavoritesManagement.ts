@@ -1,3 +1,4 @@
+import { MODAL_Z_INDEX } from '@/shared/constants/theme'
 import type { Favorite } from '@/shared/types'
 import { storage } from '@/shared/utils/browser/storage'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
@@ -132,6 +133,7 @@ export const useFavoritesManagement = ({
           okText: '应用',
           cancelText: '取消',
           getContainer: shadowRootManager.getContainer,
+          zIndex: MODAL_Z_INDEX,
           onOk: () => {
             applyFavoriteContent(favorite)
           },

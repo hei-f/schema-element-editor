@@ -3,6 +3,7 @@ import tsPlugin from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooksPlugin from 'eslint-plugin-react-hooks'
+import reactCompilerPlugin from 'eslint-plugin-react-compiler'
 import prettierPlugin from 'eslint-plugin-prettier'
 
 export default [
@@ -97,6 +98,7 @@ export default [
       '@typescript-eslint': tsPlugin,
       react: reactPlugin,
       'react-hooks': reactHooksPlugin,
+      'react-compiler': reactCompilerPlugin,
       prettier: prettierPlugin,
     },
     settings: {
@@ -109,6 +111,7 @@ export default [
       ...reactPlugin.configs.recommended.rules,
       ...reactPlugin.configs['jsx-runtime'].rules,
       ...reactHooksPlugin.configs.recommended.rules,
+      'react-compiler/react-compiler': 'error',
       'prettier/prettier': 'error',
       'prefer-const': 'error',
       // 允许以 _ 开头的未使用变量
@@ -128,6 +131,20 @@ export default [
       'react/no-unescaped-entities': 'off',
       // 测试文件中需要 require
       '@typescript-eslint/no-require-imports': 'off',
+    },
+  },
+  // 测试文件专用规则 - 放宽类型检查（必须放在通用规则之后才能覆盖）
+  {
+    files: [
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      '**/__tests__/**/*.ts',
+      '**/__tests__/**/*.tsx',
+      'test/**/*.ts',
+    ],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
     },
   },
 ]

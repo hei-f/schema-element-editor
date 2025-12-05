@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest'
 import { MessageType } from '@/shared/types'
 
 /**
@@ -10,13 +11,13 @@ describe('Background Service Worker', () => {
   let mockStorage: any
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // Mock storage
     mockStorage = {
       isActive: false,
     }
-    ;(chrome.storage.local.get as jest.Mock).mockImplementation((keys: string | string[]) => {
+    ;(chrome.storage.local.get as Mock).mockImplementation((keys: string | string[]) => {
       if (typeof keys === 'string') {
         return Promise.resolve({ [keys]: mockStorage[keys] })
       }
@@ -28,7 +29,7 @@ describe('Background Service Worker', () => {
       }
       return Promise.resolve(result)
     })
-    ;(chrome.storage.local.set as jest.Mock).mockImplementation((items: any) => {
+    ;(chrome.storage.local.set as Mock).mockImplementation((items: any) => {
       Object.assign(mockStorage, items)
       return Promise.resolve()
     })
@@ -41,8 +42,8 @@ describe('Background Service Worker', () => {
         { id: 2, url: 'https://test.com' },
       ]
 
-      ;(chrome.tabs.query as jest.Mock).mockResolvedValue(mockTabs)
-      ;(chrome.tabs.sendMessage as jest.Mock).mockResolvedValue(undefined)
+      ;(chrome.tabs.query as Mock).mockResolvedValue(mockTabs)
+      ;(chrome.tabs.sendMessage as Mock).mockResolvedValue(undefined)
 
       // 模拟 storage.toggleActiveState
       const toggleActiveState = async () => {
@@ -83,7 +84,7 @@ describe('Background Service Worker', () => {
         { id: 3, url: 'https://another.com' },
       ]
 
-      ;(chrome.tabs.query as jest.Mock).mockResolvedValue(mockTabs)
+      ;(chrome.tabs.query as Mock).mockResolvedValue(mockTabs)
 
       const tabs = await chrome.tabs.query({})
 
@@ -99,8 +100,8 @@ describe('Background Service Worker', () => {
         { id: 3, url: 'https://another.com' },
       ]
 
-      ;(chrome.tabs.query as jest.Mock).mockResolvedValue(mockTabs)
-      ;(chrome.tabs.sendMessage as jest.Mock).mockResolvedValue(undefined)
+      ;(chrome.tabs.query as Mock).mockResolvedValue(mockTabs)
+      ;(chrome.tabs.sendMessage as Mock).mockResolvedValue(undefined)
 
       // 模拟广播逻辑
       const broadcastToAllTabs = async (isActive: boolean) => {
@@ -144,8 +145,8 @@ describe('Background Service Worker', () => {
         { id: 3, url: 'https://another.com' },
       ]
 
-      ;(chrome.tabs.query as jest.Mock).mockResolvedValue(mockTabs)
-      ;(chrome.tabs.sendMessage as jest.Mock).mockResolvedValue(undefined)
+      ;(chrome.tabs.query as Mock).mockResolvedValue(mockTabs)
+      ;(chrome.tabs.sendMessage as Mock).mockResolvedValue(undefined)
 
       const broadcastToAllTabs = async (isActive: boolean) => {
         const tabs = await chrome.tabs.query({})
@@ -181,10 +182,10 @@ describe('Background Service Worker', () => {
         { id: 3, url: 'https://another.com' },
       ]
 
-      ;(chrome.tabs.query as jest.Mock).mockResolvedValue(mockTabs)
+      ;(chrome.tabs.query as Mock).mockResolvedValue(mockTabs)
 
       // 模拟第二个标签页发送失败
-      ;(chrome.tabs.sendMessage as jest.Mock).mockImplementation((tabId: number) => {
+      ;(chrome.tabs.sendMessage as Mock).mockImplementation((tabId: number) => {
         if (tabId === 2) {
           return Promise.reject(new Error('Cannot access chrome:// URLs'))
         }
@@ -216,7 +217,7 @@ describe('Background Service Worker', () => {
     })
 
     it('应该处理 tabs.query 失败的情况', async () => {
-      ;(chrome.tabs.query as jest.Mock).mockRejectedValue(new Error('Query failed'))
+      ;(chrome.tabs.query as Mock).mockRejectedValue(new Error('Query failed'))
 
       const broadcastToAllTabs = async (isActive: boolean) => {
         try {
@@ -320,8 +321,8 @@ describe('Background Service Worker', () => {
       ]
 
       mockStorage.isActive = false
-      ;(chrome.tabs.query as jest.Mock).mockResolvedValue(mockTabs)
-      ;(chrome.tabs.sendMessage as jest.Mock).mockResolvedValue(undefined)
+      ;(chrome.tabs.query as Mock).mockResolvedValue(mockTabs)
+      ;(chrome.tabs.sendMessage as Mock).mockResolvedValue(undefined)
 
       // 模拟完整的点击处理逻辑
       const handleIconClick = async () => {
@@ -493,7 +494,7 @@ describe('Background Service Worker', () => {
 
     it('当 storage 读取失败时，应该使用默认状态（false）并继续执行', async () => {
       // 模拟 storage 读取失败
-      ;(chrome.storage.local.get as jest.Mock).mockRejectedValueOnce(new Error('Storage error'))
+      ;(chrome.storage.local.get as Mock).mockRejectedValueOnce(new Error('Storage error'))
 
       const restoreIconState = async () => {
         let isActive = false

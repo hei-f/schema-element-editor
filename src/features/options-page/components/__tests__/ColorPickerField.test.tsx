@@ -5,13 +5,13 @@ import { ColorPickerField } from '../ColorPickerField'
 describe('ColorPickerField组件测试', () => {
   const defaultProps = {
     value: '#FF0000',
-    onChange: jest.fn(),
+    onChange: vi.fn(),
     showText: true,
     format: 'hex' as const,
   }
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('基本渲染', () => {
@@ -122,7 +122,7 @@ describe('ColorPickerField组件测试', () => {
     }, 10000)
 
     it('应该接受onChange回调', () => {
-      const onChange = jest.fn()
+      const onChange = vi.fn()
       render(<ColorPickerField {...defaultProps} onChange={onChange} />)
 
       // onChange prop应该被接受
@@ -215,8 +215,8 @@ describe('ColorPickerField组件测试', () => {
     })
 
     it('应该支持onChange更新', () => {
-      const onChange1 = jest.fn()
-      const onChange2 = jest.fn()
+      const onChange1 = vi.fn()
+      const onChange2 = vi.fn()
 
       const { rerender } = render(<ColorPickerField {...defaultProps} onChange={onChange1} />)
       rerender(<ColorPickerField {...defaultProps} onChange={onChange2} />)

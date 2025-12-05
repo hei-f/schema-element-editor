@@ -23,7 +23,7 @@ describe('shadowRootManager', () => {
     })
 
     it('应该在重复初始化时显示警告', () => {
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation()
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
       shadowRootManager.init(mockShadowRoot)
       shadowRootManager.init(mockShadowRoot)

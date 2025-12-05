@@ -1,12 +1,13 @@
+import type { Mock } from 'vitest'
 import { storage } from '../browser/storage'
 
 describe('Storage工具测试', () => {
   beforeEach(() => {
     // 清除所有mock调用记录
-    jest.clearAllMocks()
+    vi.clearAllMocks()
 
     // 重置chrome.storage.local.get的mock返回值
-    ;(chrome.storage.local.get as jest.Mock).mockImplementation(() => Promise.resolve({}))
+    ;(chrome.storage.local.get as Mock).mockImplementation(() => Promise.resolve({}))
   })
 
   describe('getActiveState', () => {
@@ -16,7 +17,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该返回存储的值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ isActive: true })
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({ isActive: true })
 
       const result = await storage.getActiveState()
       expect(result).toBe(true)
@@ -44,7 +45,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该返回存储的宽度', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ drawerWidth: '1200px' })
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({ drawerWidth: '1200px' })
 
       const result = await storage.getDrawerWidth()
       expect(result).toBe('1200px')
@@ -72,7 +73,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该返回存储的属性名', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ attributeName: 'custom-attr' })
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({ attributeName: 'custom-attr' })
 
       const result = await storage.getAttributeName()
       expect(result).toBe('custom-attr')
@@ -126,7 +127,7 @@ describe('Storage工具测试', () => {
         exportConfig: {
           customFileName: false,
         },
-        highlightColor: '#39C5BB',
+        highlightColor: '#1677FF',
         iframeConfig: {
           enabled: false,
           schemaTarget: 'iframe',
@@ -179,11 +180,12 @@ describe('Storage工具测试', () => {
           openOrUpdatePreview: { key: 'p', ctrlOrCmd: false, shift: false, alt: true },
           closePreview: { key: 'p', ctrlOrCmd: false, shift: true, alt: true },
         },
+        themeColor: '#1677FF',
       })
     })
 
     it('应该返回所有存储的值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         isActive: true,
         drawerWidth: '1000px',
         attributeName: 'custom-attr',
@@ -228,7 +230,7 @@ describe('Storage工具测试', () => {
         exportConfig: {
           customFileName: false,
         },
-        highlightColor: '#39C5BB',
+        highlightColor: '#1677FF',
         iframeConfig: {
           enabled: false,
           schemaTarget: 'iframe',
@@ -281,11 +283,12 @@ describe('Storage工具测试', () => {
           openOrUpdatePreview: { key: 'p', ctrlOrCmd: false, shift: false, alt: true },
           closePreview: { key: 'p', ctrlOrCmd: false, shift: true, alt: true },
         },
+        themeColor: '#1677FF',
       })
     })
 
     it('应该合并默认值和存储值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         isActive: true,
       })
 
@@ -320,7 +323,7 @@ describe('Storage工具测试', () => {
         exportConfig: {
           customFileName: false,
         },
-        highlightColor: '#39C5BB',
+        highlightColor: '#1677FF',
         iframeConfig: {
           enabled: false,
           schemaTarget: 'iframe',
@@ -373,6 +376,7 @@ describe('Storage工具测试', () => {
           openOrUpdatePreview: { key: 'p', ctrlOrCmd: false, shift: false, alt: true },
           closePreview: { key: 'p', ctrlOrCmd: false, shift: true, alt: true },
         },
+        themeColor: '#1677FF',
       })
     })
   })
@@ -389,7 +393,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该返回存储的搜索配置', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         searchConfig: {
           limitUpwardSearch: true,
           searchDepthUp: 10,
@@ -407,7 +411,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该处理部分存储的配置', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         searchConfig: {
           searchDepthUp: 8,
         },
@@ -422,7 +426,7 @@ describe('Storage工具测试', () => {
 
   describe('setSearchConfig', () => {
     it('应该保存完整的搜索配置', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         searchConfig: {
           limitUpwardSearch: false,
           searchDepthUp: 0,
@@ -446,7 +450,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该支持部分更新搜索配置', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         searchConfig: {
           limitUpwardSearch: false,
           searchDepthUp: 0,
@@ -468,7 +472,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该保存throttleInterval的变更', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         searchConfig: {
           limitUpwardSearch: false,
           searchDepthUp: 5,
@@ -497,7 +501,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该返回存储的函数名', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         getFunctionName: 'customGetFunction',
       })
 
@@ -513,7 +517,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该返回存储的函数名', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         updateFunctionName: 'customUpdateFunction',
       })
 
@@ -536,7 +540,7 @@ describe('Storage工具测试', () => {
 
   describe('getAllData', () => {
     it('应该返回包含函数名的所有数据', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockImplementation((keys) => {
+      ;(chrome.storage.local.get as Mock).mockImplementation((keys) => {
         const mockData: any = {
           isActive: true,
           drawerWidth: '1000px',
@@ -592,7 +596,7 @@ describe('Storage工具测试', () => {
         exportConfig: {
           customFileName: false,
         },
-        highlightColor: '#39C5BB',
+        highlightColor: '#1677FF',
         iframeConfig: {
           enabled: false,
           schemaTarget: 'iframe',
@@ -645,6 +649,7 @@ describe('Storage工具测试', () => {
           openOrUpdatePreview: { key: 'p', ctrlOrCmd: false, shift: false, alt: true },
           closePreview: { key: 'p', ctrlOrCmd: false, shift: true, alt: true },
         },
+        themeColor: '#1677FF',
       })
     })
   })
@@ -656,7 +661,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该返回存储的值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         autoParseString: false,
       })
 
@@ -698,7 +703,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该返回存储的工具栏按钮配置', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         toolbarButtons: {
           astRawStringToggle: false,
           deserialize: true,
@@ -713,7 +718,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该保存工具栏按钮配置', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         toolbarButtons: {
           astRawStringToggle: true,
           escape: true,
@@ -752,11 +757,11 @@ describe('Storage工具测试', () => {
   describe('高亮框颜色', () => {
     it('应该返回默认颜色', async () => {
       const result = await storage.getHighlightColor()
-      expect(result).toBe('#39C5BB')
+      expect(result).toBe('#1677FF')
     })
 
     it('应该返回存储的颜色', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         highlightColor: '#FF0000',
       })
 
@@ -780,7 +785,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该返回存储的最大收藏数量', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         maxFavoritesCount: 100,
       })
 
@@ -804,7 +809,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该返回存储的草稿保留天数', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         draftRetentionDays: 14,
       })
 
@@ -826,7 +831,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该返回存储的自动保存草稿配置', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         autoSaveDraft: false,
       })
 
@@ -848,7 +853,7 @@ describe('Storage工具测试', () => {
     })
 
     it('应该返回存储的草稿自动保存防抖时间', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         draftAutoSaveDebounce: 5000,
       })
 
@@ -871,7 +876,7 @@ describe('Storage工具测试', () => {
         content: 'test content',
         timestamp: Date.now(),
       }
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         'draft:test-key': mockDraft,
       })
 
@@ -910,7 +915,7 @@ describe('Storage工具测试', () => {
           lastUsedTime: Date.now(),
         },
       ]
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         favorites: mockFavorites,
       })
 
@@ -928,34 +933,34 @@ describe('Storage工具测试', () => {
 
   describe('错误处理', () => {
     it('get操作失败时应该返回默认值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.get as Mock).mockRejectedValue(new Error('Storage error'))
 
       const result = await storage.getActiveState()
       expect(result).toBe(false)
     })
 
     it('getFunctionName失败时应该返回默认值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.get as Mock).mockRejectedValue(new Error('Storage error'))
 
       const result = await storage.getGetFunctionName()
       expect(result).toBe('__getContentById')
     })
 
     it('set操作失败时不应该抛出错误', async () => {
-      ;(chrome.storage.local.set as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.set as Mock).mockRejectedValue(new Error('Storage error'))
 
       // setActiveState内部捕获了错误，不会抛出
       await expect(storage.setActiveState(true)).resolves.not.toThrow()
     })
 
     it('setFunctionNames失败时不应该抛出错误', async () => {
-      ;(chrome.storage.local.set as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.set as Mock).mockRejectedValue(new Error('Storage error'))
 
       await expect(storage.setFunctionNames('fn1', 'fn2', 'fn3')).resolves.not.toThrow()
     })
 
     it('getToolbarButtons失败时应该返回默认值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.get as Mock).mockRejectedValue(new Error('Storage error'))
 
       const result = await storage.getToolbarButtons()
       expect(result).toEqual({
@@ -973,14 +978,14 @@ describe('Storage工具测试', () => {
     })
 
     it('getFavorites失败时应该返回空数组', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.get as Mock).mockRejectedValue(new Error('Storage error'))
 
       const result = await storage.getFavorites()
       expect(result).toEqual([])
     })
 
     it('getDraft失败时应该返回null', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.get as Mock).mockRejectedValue(new Error('Storage error'))
 
       const result = await storage.getDraft('test-key')
       expect(result).toBeNull()
@@ -989,13 +994,13 @@ describe('Storage工具测试', () => {
 
   describe('未覆盖方法补充测试', () => {
     beforeEach(() => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({})
-      ;(chrome.storage.local.set as jest.Mock).mockResolvedValue(undefined)
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({})
+      ;(chrome.storage.local.set as Mock).mockResolvedValue(undefined)
     })
 
     it('toggleActiveState应该切换激活状态', async () => {
       // 初始状态为false
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValueOnce({
+      ;(chrome.storage.local.get as Mock).mockResolvedValueOnce({
         isActive: false,
       })
 
@@ -1008,7 +1013,7 @@ describe('Storage工具测试', () => {
     })
 
     it('toggleActiveState应该从true切换到false', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValueOnce({
+      ;(chrome.storage.local.get as Mock).mockResolvedValueOnce({
         isActive: true,
       })
 
@@ -1051,7 +1056,7 @@ describe('Storage工具测试', () => {
         throttleInterval: 200,
       }
 
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValueOnce({
+      ;(chrome.storage.local.get as Mock).mockResolvedValueOnce({
         searchConfig: existingConfig,
       })
 
@@ -1066,8 +1071,8 @@ describe('Storage工具测试', () => {
     })
 
     it('setSearchConfig失败时应该捕获错误', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({})
-      ;(chrome.storage.local.set as jest.Mock).mockRejectedValue(new Error('Set error'))
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({})
+      ;(chrome.storage.local.set as Mock).mockRejectedValue(new Error('Set error'))
 
       await expect(storage.setSearchConfig({ searchDepthUp: 10 })).resolves.not.toThrow()
     })
@@ -1091,7 +1096,7 @@ describe('Storage工具测试', () => {
     })
 
     it('getAutoParseString应该返回配置值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         autoParseString: true,
       })
 
@@ -1108,7 +1113,7 @@ describe('Storage工具测试', () => {
     })
 
     it('getEnableDebugLog应该返回配置值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         enableDebugLog: true,
       })
 
@@ -1125,7 +1130,7 @@ describe('Storage工具测试', () => {
     })
 
     it('getHighlightColor应该返回颜色值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         highlightColor: '#FF5733',
       })
 
@@ -1135,13 +1140,13 @@ describe('Storage工具测试', () => {
 
     it('getHighlightColor应该使用validator验证颜色值', async () => {
       // 返回无效的空字符串
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         highlightColor: '',
       })
 
       const result = await storage.getHighlightColor()
       // 应该返回默认值
-      expect(result).toBe('#39C5BB')
+      expect(result).toBe('#1677FF')
     })
 
     it('setHighlightColor应该设置颜色', async () => {
@@ -1153,7 +1158,7 @@ describe('Storage工具测试', () => {
     })
 
     it('getMaxFavoritesCount应该返回数量', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         maxFavoritesCount: 100,
       })
 
@@ -1170,7 +1175,7 @@ describe('Storage工具测试', () => {
     })
 
     it('getDraftRetentionDays应该返回天数', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         draftRetentionDays: 14,
       })
 
@@ -1187,7 +1192,7 @@ describe('Storage工具测试', () => {
     })
 
     it('getAutoSaveDraft应该返回配置', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         autoSaveDraft: true,
       })
 
@@ -1204,7 +1209,7 @@ describe('Storage工具测试', () => {
     })
 
     it('getMaxHistoryCount应该返回数量', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         maxHistoryCount: 100,
       })
 
@@ -1227,7 +1232,7 @@ describe('Storage工具测试', () => {
     })
 
     it('deleteDraft失败时应该捕获错误', async () => {
-      ;(chrome.storage.local.remove as jest.Mock).mockRejectedValue(new Error('Remove error'))
+      ;(chrome.storage.local.remove as Mock).mockRejectedValue(new Error('Remove error'))
 
       await expect(storage.deleteDraft('test-key')).resolves.not.toThrow()
     })
@@ -1245,7 +1250,7 @@ describe('Storage工具测试', () => {
     })
 
     it('getHighlightAllConfig应该返回存储的配置', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         highlightAllConfig: {
           enabled: false,
           keyBinding: 'h',
@@ -1263,7 +1268,7 @@ describe('Storage工具测试', () => {
 
     it('getHighlightAllConfig应该合并存储的配置', async () => {
       // 存储配置会被直接合并，不再进行验证
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         highlightAllConfig: {
           enabled: true,
           keyBinding: 'ab',
@@ -1282,7 +1287,7 @@ describe('Storage工具测试', () => {
 
     it('getHighlightAllConfig应该返回存储的keyBinding值', async () => {
       // 存储配置会被直接合并
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         highlightAllConfig: {
           enabled: true,
           keyBinding: '@',
@@ -1301,7 +1306,7 @@ describe('Storage工具测试', () => {
 
     it('getHighlightAllConfig应该接受大写字母', async () => {
       // 大写字母是有效的
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         highlightAllConfig: {
           enabled: true,
           keyBinding: 'H',
@@ -1320,7 +1325,7 @@ describe('Storage工具测试', () => {
 
     it('getHighlightAllConfig应该接受数字', async () => {
       // 数字是有效的
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         highlightAllConfig: {
           enabled: true,
           keyBinding: '1',
@@ -1339,7 +1344,7 @@ describe('Storage工具测试', () => {
 
     it('getHighlightAllConfig应该返回存储的maxHighlightCount值', async () => {
       // 存储配置会被直接合并
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         highlightAllConfig: {
           enabled: true,
           keyBinding: 'a',
@@ -1358,7 +1363,7 @@ describe('Storage工具测试', () => {
 
     it('getHighlightAllConfig应该返回较大的maxHighlightCount值', async () => {
       // 存储配置会被直接合并
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         highlightAllConfig: {
           enabled: true,
           keyBinding: 'a',
@@ -1440,7 +1445,7 @@ describe('Storage工具测试', () => {
     })
 
     it('getApiConfig应该返回存储的配置', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         apiConfig: {
           communicationMode: 'windowFunction',
           requestTimeout: 10,
@@ -1467,7 +1472,7 @@ describe('Storage工具测试', () => {
 
     it('getApiConfig应该返回存储的communicationMode值', async () => {
       // 存储配置会被直接合并
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         apiConfig: {
           communicationMode: 'invalidMode',
           requestTimeout: 5,
@@ -1494,7 +1499,7 @@ describe('Storage工具测试', () => {
     })
 
     it('getApiConfig应该返回存储的requestTimeout值（小值）', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         apiConfig: {
           communicationMode: 'postMessage',
           requestTimeout: 0,
@@ -1507,7 +1512,7 @@ describe('Storage工具测试', () => {
     })
 
     it('getApiConfig应该返回存储的requestTimeout值（大值）', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         apiConfig: {
           communicationMode: 'postMessage',
           requestTimeout: 60,
@@ -1520,7 +1525,7 @@ describe('Storage工具测试', () => {
     })
 
     it('getApiConfig应该接受有效的边界值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         apiConfig: {
           communicationMode: 'postMessage',
           requestTimeout: 1, // 最小值
@@ -1546,7 +1551,7 @@ describe('Storage工具测试', () => {
     })
 
     it('getApiConfig应该接受最大超时值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         apiConfig: {
           communicationMode: 'postMessage',
           requestTimeout: 30, // 最大值
@@ -1558,7 +1563,7 @@ describe('Storage工具测试', () => {
     })
 
     it('getApiConfig应该接受windowFunction模式', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         apiConfig: {
           communicationMode: 'windowFunction',
           requestTimeout: 5,
@@ -1618,7 +1623,7 @@ describe('Storage工具测试', () => {
     })
 
     it('getApiConfig失败时应该返回默认值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.get as Mock).mockRejectedValue(new Error('Storage error'))
 
       const result = await storage.getApiConfig()
       expect(result).toEqual({
@@ -1639,7 +1644,7 @@ describe('Storage工具测试', () => {
     })
 
     it('setApiConfig失败时不应该抛出错误', async () => {
-      ;(chrome.storage.local.set as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.set as Mock).mockRejectedValue(new Error('Storage error'))
 
       const config = {
         communicationMode: 'postMessage' as const,
@@ -1664,31 +1669,31 @@ describe('Storage工具测试', () => {
   describe('Favorites 收藏相关方法', () => {
     beforeEach(() => {
       // 重置 mock 确保每个测试独立
-      ;(chrome.storage.local.get as jest.Mock).mockReset()
-      ;(chrome.storage.local.set as jest.Mock).mockReset()
-      ;(chrome.storage.local.get as jest.Mock).mockImplementation(() => Promise.resolve({}))
-      ;(chrome.storage.local.set as jest.Mock).mockResolvedValue(undefined)
+      ;(chrome.storage.local.get as Mock).mockReset()
+      ;(chrome.storage.local.set as Mock).mockReset()
+      ;(chrome.storage.local.get as Mock).mockImplementation(() => Promise.resolve({}))
+      ;(chrome.storage.local.set as Mock).mockResolvedValue(undefined)
     })
 
     it('getFavorites 应该返回收藏列表', async () => {
       const mockFavorites = [
         { id: '1', name: 'Fav1', content: '{}', timestamp: Date.now(), lastUsedTime: Date.now() },
       ]
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ favorites: mockFavorites })
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({ favorites: mockFavorites })
 
       const result = await storage.getFavorites()
       expect(result).toEqual(mockFavorites)
     })
 
     it('getFavorites 失败时应该返回空数组', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.get as Mock).mockRejectedValue(new Error('Storage error'))
 
       const result = await storage.getFavorites()
       expect(result).toEqual([])
     })
 
     it('addFavorite 应该添加收藏', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         favorites: [],
         maxFavoritesCount: 50,
       })
@@ -1699,11 +1704,11 @@ describe('Storage工具测试', () => {
     })
 
     it('addFavorite 失败时应该抛出错误', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         favorites: [],
         maxFavoritesCount: 50,
       })
-      ;(chrome.storage.local.set as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.set as Mock).mockRejectedValue(new Error('Storage error'))
 
       await expect(storage.addFavorite('Test', '{}')).rejects.toThrow()
     })
@@ -1718,7 +1723,7 @@ describe('Storage工具测试', () => {
           lastUsedTime: Date.now(),
         },
       ]
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ favorites: mockFavorites })
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({ favorites: mockFavorites })
 
       await storage.updateFavorite('test-id', 'New Name', '{"new": true}')
 
@@ -1726,7 +1731,7 @@ describe('Storage工具测试', () => {
     })
 
     it('updateFavorite 收藏不存在时应该抛出错误', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ favorites: [] })
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({ favorites: [] })
 
       await expect(storage.updateFavorite('non-existent', 'Name', '{}')).rejects.toThrow(
         '收藏不存在'
@@ -1743,7 +1748,7 @@ describe('Storage工具测试', () => {
           lastUsedTime: Date.now(),
         },
       ]
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ favorites: mockFavorites })
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({ favorites: mockFavorites })
 
       await storage.deleteFavorite('test-id')
 
@@ -1760,8 +1765,8 @@ describe('Storage工具测试', () => {
           lastUsedTime: Date.now(),
         },
       ]
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ favorites: mockFavorites })
-      ;(chrome.storage.local.set as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({ favorites: mockFavorites })
+      ;(chrome.storage.local.set as Mock).mockRejectedValue(new Error('Storage error'))
 
       await expect(storage.deleteFavorite('test-id')).rejects.toThrow()
     })
@@ -1776,7 +1781,7 @@ describe('Storage工具测试', () => {
           lastUsedTime: Date.now() - 10000,
         },
       ]
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ favorites: mockFavorites })
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({ favorites: mockFavorites })
 
       await storage.updateFavoriteUsedTime('test-id')
 
@@ -1784,7 +1789,7 @@ describe('Storage工具测试', () => {
     })
 
     it('updateFavoriteUsedTime 失败时不应该抛出错误', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.get as Mock).mockRejectedValue(new Error('Storage error'))
 
       await expect(storage.updateFavoriteUsedTime('test-id')).resolves.not.toThrow()
     })
@@ -1798,7 +1803,7 @@ describe('Storage工具测试', () => {
         timestamp: now - i * 1000,
         lastUsedTime: now - i * 1000,
       }))
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         favorites: mockFavorites,
         maxFavoritesCount: 5,
       })
@@ -1809,7 +1814,7 @@ describe('Storage工具测试', () => {
     })
 
     it('cleanOldFavorites 失败时不应该抛出错误', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.get as Mock).mockRejectedValue(new Error('Storage error'))
 
       await expect(storage.cleanOldFavorites()).resolves.not.toThrow()
     })
@@ -1818,10 +1823,10 @@ describe('Storage工具测试', () => {
   describe('其他未覆盖方法', () => {
     beforeEach(() => {
       // 重置 mock 确保每个测试独立
-      ;(chrome.storage.local.get as jest.Mock).mockReset()
-      ;(chrome.storage.local.set as jest.Mock).mockReset()
-      ;(chrome.storage.local.get as jest.Mock).mockImplementation(() => Promise.resolve({}))
-      ;(chrome.storage.local.set as jest.Mock).mockResolvedValue(undefined)
+      ;(chrome.storage.local.get as Mock).mockReset()
+      ;(chrome.storage.local.set as Mock).mockReset()
+      ;(chrome.storage.local.get as Mock).mockImplementation(() => Promise.resolve({}))
+      ;(chrome.storage.local.set as Mock).mockResolvedValue(undefined)
     })
 
     it('setPreviewConfig 应该保存预览配置', async () => {
@@ -1873,21 +1878,21 @@ describe('Storage工具测试', () => {
 
     it('getExportConfig 应该返回导出配置', async () => {
       const config = { customFileName: true }
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ exportConfig: config })
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({ exportConfig: config })
 
       const result = await storage.getExportConfig()
       expect(result).toEqual(config)
     })
 
     it('getExportConfig 失败时应该返回默认值', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.get as Mock).mockRejectedValue(new Error('Storage error'))
 
       const result = await storage.getExportConfig()
       expect(result).toEqual({ customFileName: false })
     })
 
     it('setExportConfig 应该保存导出配置', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         exportConfig: { customFileName: false },
       })
 
@@ -1897,8 +1902,8 @@ describe('Storage工具测试', () => {
     })
 
     it('setExportConfig 失败时应该抛出错误', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({ exportConfig: {} })
-      ;(chrome.storage.local.set as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({ exportConfig: {} })
+      ;(chrome.storage.local.set as Mock).mockRejectedValue(new Error('Storage error'))
 
       await expect(storage.setExportConfig({ customFileName: true })).rejects.toThrow()
     })
@@ -1910,7 +1915,7 @@ describe('Storage工具测试', () => {
         timestamp: now - 100 * 24 * 60 * 60 * 1000, // 100天前
         url: 'https://example.com',
       }
-      ;(chrome.storage.local.get as jest.Mock).mockResolvedValue({
+      ;(chrome.storage.local.get as Mock).mockResolvedValue({
         draftRetentionDays: 30,
         'draft:old-param': oldDraft,
       })
@@ -1922,13 +1927,13 @@ describe('Storage工具测试', () => {
     })
 
     it('cleanExpiredDrafts 失败时不应该抛出错误', async () => {
-      ;(chrome.storage.local.get as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.get as Mock).mockRejectedValue(new Error('Storage error'))
 
       await expect(storage.cleanExpiredDrafts()).resolves.not.toThrow()
     })
 
     it('saveDraft 失败时不应该抛出错误', async () => {
-      ;(chrome.storage.local.set as jest.Mock).mockRejectedValue(new Error('Storage error'))
+      ;(chrome.storage.local.set as Mock).mockRejectedValue(new Error('Storage error'))
 
       await expect(storage.saveDraft('test-param', '{}')).resolves.not.toThrow()
     })

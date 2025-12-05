@@ -25,7 +25,7 @@ describe('FavoritesManager 测试', () => {
   describe('getFavorites 获取收藏列表', () => {
     it('应该调用storage获取收藏', async () => {
       const mockFavorites = [createMockFavorite('1'), createMockFavorite('2')]
-      const mockGetter = jest.fn().mockResolvedValue(mockFavorites)
+      const mockGetter = vi.fn().mockResolvedValue(mockFavorites)
 
       const result = await manager.getFavorites(mockGetter)
 
@@ -34,7 +34,7 @@ describe('FavoritesManager 测试', () => {
     })
 
     it('空列表应该返回空数组', async () => {
-      const mockGetter = jest.fn().mockResolvedValue([])
+      const mockGetter = vi.fn().mockResolvedValue([])
 
       const result = await manager.getFavorites(mockGetter)
 
@@ -45,8 +45,8 @@ describe('FavoritesManager 测试', () => {
   describe('addFavorite 添加收藏', () => {
     it('应该添加新收藏到列表开头', async () => {
       const existingFavorites = [createMockFavorite('existing')]
-      const mockGetter = jest.fn().mockResolvedValue(existingFavorites)
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue(existingFavorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       await manager.addFavorite('New Fav', 'new content', 10, mockGetter, mockSaver)
 
@@ -58,8 +58,8 @@ describe('FavoritesManager 测试', () => {
     })
 
     it('应该生成唯一ID和时间戳', async () => {
-      const mockGetter = jest.fn().mockResolvedValue([])
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue([])
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
       const beforeAdd = Date.now()
 
       await manager.addFavorite('Test', 'content', 10, mockGetter, mockSaver)
@@ -79,8 +79,8 @@ describe('FavoritesManager 测试', () => {
         { ...createMockFavorite('old2'), name: 'old2', lastUsedTime: now - 2000 },
         { ...createMockFavorite('recent'), name: 'recent', lastUsedTime: now - 1000 },
       ]
-      const mockGetter = jest.fn().mockResolvedValue(existingFavorites)
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue(existingFavorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       await manager.addFavorite('New', 'content', 3, mockGetter, mockSaver)
 
@@ -94,8 +94,8 @@ describe('FavoritesManager 测试', () => {
 
     it('未超过最大数量时不应该删除', async () => {
       const existingFavorites = [createMockFavorite('1'), createMockFavorite('2')]
-      const mockGetter = jest.fn().mockResolvedValue(existingFavorites)
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue(existingFavorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       await manager.addFavorite('New', 'content', 10, mockGetter, mockSaver)
 
@@ -108,8 +108,8 @@ describe('FavoritesManager 测试', () => {
     it('应该更新指定收藏的名称和内容', async () => {
       const beforeUpdate = Date.now()
       const favorites = [createMockFavorite('target'), createMockFavorite('other')]
-      const mockGetter = jest.fn().mockResolvedValue(favorites)
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       await manager.updateFavorite(
         'target',
@@ -130,8 +130,8 @@ describe('FavoritesManager 测试', () => {
 
     it('收藏不存在时应该抛出错误', async () => {
       const favorites = [createMockFavorite('1')]
-      const mockGetter = jest.fn().mockResolvedValue(favorites)
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       await expect(
         manager.updateFavorite('non-existent', 'Name', 'Content', mockGetter, mockSaver)
@@ -144,8 +144,8 @@ describe('FavoritesManager 测试', () => {
   describe('deleteFavorite 删除收藏', () => {
     it('应该删除指定ID的收藏', async () => {
       const favorites = [createMockFavorite('1'), createMockFavorite('2'), createMockFavorite('3')]
-      const mockGetter = jest.fn().mockResolvedValue(favorites)
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       await manager.deleteFavorite('2', mockGetter, mockSaver)
 
@@ -158,8 +158,8 @@ describe('FavoritesManager 测试', () => {
 
     it('ID不存在时应该不改变列表', async () => {
       const favorites = [createMockFavorite('1')]
-      const mockGetter = jest.fn().mockResolvedValue(favorites)
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       await manager.deleteFavorite('non-existent', mockGetter, mockSaver)
 
@@ -175,8 +175,8 @@ describe('FavoritesManager 测试', () => {
         createMockFavorite('target', beforeUpdate - 10000),
         createMockFavorite('other', beforeUpdate),
       ]
-      const mockGetter = jest.fn().mockResolvedValue(favorites)
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       await manager.updateFavoriteUsedTime('target', mockGetter, mockSaver)
 
@@ -191,8 +191,8 @@ describe('FavoritesManager 测试', () => {
 
     it('ID不存在时不应该保存', async () => {
       const favorites = [createMockFavorite('1')]
-      const mockGetter = jest.fn().mockResolvedValue(favorites)
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       await manager.updateFavoriteUsedTime('non-existent', mockGetter, mockSaver)
 
@@ -209,8 +209,8 @@ describe('FavoritesManager 测试', () => {
         createMockFavorite('recent', now - 1000),
         createMockFavorite('newest', now),
       ]
-      const mockGetter = jest.fn().mockResolvedValue(favorites)
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       const deletedCount = await manager.cleanOldFavorites(2, mockGetter, mockSaver)
 
@@ -223,8 +223,8 @@ describe('FavoritesManager 测试', () => {
 
     it('未超过最大数量时应该返回0', async () => {
       const favorites = [createMockFavorite('1'), createMockFavorite('2')]
-      const mockGetter = jest.fn().mockResolvedValue(favorites)
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       const deletedCount = await manager.cleanOldFavorites(5, mockGetter, mockSaver)
 
@@ -234,8 +234,8 @@ describe('FavoritesManager 测试', () => {
 
     it('刚好等于最大数量时应该返回0', async () => {
       const favorites = [createMockFavorite('1'), createMockFavorite('2')]
-      const mockGetter = jest.fn().mockResolvedValue(favorites)
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       const deletedCount = await manager.cleanOldFavorites(2, mockGetter, mockSaver)
 
@@ -252,8 +252,8 @@ describe('FavoritesManager 测试', () => {
         createMockFavorite('2', now - 1000),
         createMockFavorite('3', now - 3000),
       ]
-      const mockGetter = jest.fn().mockResolvedValue(favorites)
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       await manager.cleanOldFavorites(2, mockGetter, mockSaver)
 
@@ -268,8 +268,8 @@ describe('FavoritesManager 测试', () => {
         { ...createMockFavorite('old'), timestamp: now - 5000, lastUsedTime: undefined } as any,
         { ...createMockFavorite('new'), timestamp: now - 1000, lastUsedTime: undefined } as any,
       ]
-      const mockGetter = jest.fn().mockResolvedValue(favorites)
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       await manager.cleanOldFavorites(1, mockGetter, mockSaver)
 
@@ -280,8 +280,8 @@ describe('FavoritesManager 测试', () => {
 
   describe('综合场景', () => {
     it('应该处理完整的收藏生命周期', async () => {
-      const mockGetter = jest.fn()
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn()
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       // 初始为空
       mockGetter.mockResolvedValueOnce([])
@@ -317,8 +317,8 @@ describe('FavoritesManager 测试', () => {
         favorites.push(createMockFavorite(`fav${i}`, now - i * 1000))
       }
 
-      const mockGetter = jest.fn().mockResolvedValue(favorites)
-      const mockSaver = jest.fn().mockResolvedValue(undefined)
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
 
       await manager.cleanOldFavorites(10, mockGetter, mockSaver)
 

@@ -8,7 +8,7 @@ import { IframeBridgeMessageType } from '@/shared/types'
 describe('iframe-bridge', () => {
   describe('iframeConfig.enabled 配置检查', () => {
     it('当 iframeEnabled = false 时，throttledBroadcastToIframe 不应发送广播', () => {
-      const broadcastAltKeyState = jest.fn()
+      const broadcastAltKeyState = vi.fn()
       const iframeEnabled = false
 
       // 模拟 throttledBroadcastToIframe 逻辑
@@ -22,7 +22,7 @@ describe('iframe-bridge', () => {
     })
 
     it('当 iframeEnabled = true 时，throttledBroadcastToIframe 应发送广播', () => {
-      const broadcastAltKeyState = jest.fn()
+      const broadcastAltKeyState = vi.fn()
       const iframeEnabled = true
 
       const throttledBroadcastToIframe = (mouseX: number, mouseY: number) => {
@@ -35,7 +35,7 @@ describe('iframe-bridge', () => {
     })
 
     it('handleResumeMonitor 在 iframeEnabled = false 时不应广播', () => {
-      const broadcastAltKeyState = jest.fn()
+      const broadcastAltKeyState = vi.fn()
       const isIframeMode = false
       const iframeEnabled = false
 
@@ -48,7 +48,7 @@ describe('iframe-bridge', () => {
     })
 
     it('handleResumeMonitor 在 iframeEnabled = true 时应广播', () => {
-      const broadcastAltKeyState = jest.fn()
+      const broadcastAltKeyState = vi.fn()
       const isIframeMode = false
       const iframeEnabled = true
 
@@ -60,7 +60,7 @@ describe('iframe-bridge', () => {
     })
 
     it('handleKeyUp 在 iframeEnabled = false 时不应广播清除消息', () => {
-      const broadcastAltKeyState = jest.fn()
+      const broadcastAltKeyState = vi.fn()
       const isIframeMode = false
       const iframeEnabled = false
 
@@ -127,17 +127,17 @@ describe('iframe-bridge', () => {
     originalParent = window.parent
 
     // Mock window.addEventListener
-    window.addEventListener = jest.fn((event: string, handler: any) => {
+    window.addEventListener = vi.fn((event: string, handler: any) => {
       if (event === 'message') {
         messageListeners.push(handler)
       }
     }) as any
 
     // Mock window.removeEventListener
-    window.removeEventListener = jest.fn() as any
+    window.removeEventListener = vi.fn() as any
 
     // Mock window.postMessage
-    window.postMessage = jest.fn((message: any) => {
+    window.postMessage = vi.fn((message: any) => {
       postedMessages.push({ target: 'self', message })
     }) as any
   })
@@ -211,7 +211,7 @@ describe('iframe-bridge', () => {
   describe('消息发送', () => {
     it('sendToTopFrame 应向 window.top 发送消息', () => {
       const mockTop = {
-        postMessage: jest.fn(),
+        postMessage: vi.fn(),
       } as unknown as Window
 
       Object.defineProperty(window, 'top', { value: mockTop, writable: true })
@@ -232,13 +232,13 @@ describe('iframe-bridge', () => {
     it('broadcastToIframes 应向所有 iframe 发送消息', () => {
       // 创建 mock iframes
       const mockIframe1 = {
-        contentWindow: { postMessage: jest.fn() },
+        contentWindow: { postMessage: vi.fn() },
       }
       const mockIframe2 = {
-        contentWindow: { postMessage: jest.fn() },
+        contentWindow: { postMessage: vi.fn() },
       }
 
-      document.querySelectorAll = jest.fn(() => [mockIframe1, mockIframe2]) as any
+      document.querySelectorAll = vi.fn(() => [mockIframe1, mockIframe2]) as any
 
       const IFRAME_BRIDGE_SOURCE = 'schema-editor-iframe-bridge'
       const message = {
@@ -266,7 +266,7 @@ describe('iframe-bridge', () => {
     it('应正确过滤非 iframe-bridge 消息', () => {
       const IFRAME_BRIDGE_SOURCE = 'schema-editor-iframe-bridge'
       const handlers = {
-        onElementHover: jest.fn(),
+        onElementHover: vi.fn(),
       }
 
       // 模拟 initIframeBridgeListener
@@ -295,7 +295,7 @@ describe('iframe-bridge', () => {
     it('应正确处理 ELEMENT_CLICK 消息', () => {
       const IFRAME_BRIDGE_SOURCE = 'schema-editor-iframe-bridge'
       const handlers = {
-        onElementClick: jest.fn(),
+        onElementClick: vi.fn(),
       }
 
       const listener = (event: MessageEvent) => {
@@ -325,7 +325,7 @@ describe('iframe-bridge', () => {
     it('应正确处理 CLEAR_HIGHLIGHT 消息', () => {
       const IFRAME_BRIDGE_SOURCE = 'schema-editor-iframe-bridge'
       const handlers = {
-        onClearHighlight: jest.fn(),
+        onClearHighlight: vi.fn(),
       }
 
       const listener = (event: MessageEvent) => {
@@ -349,7 +349,7 @@ describe('iframe-bridge', () => {
     it('应正确处理 SYNC_ALT_KEY 消息', () => {
       const IFRAME_BRIDGE_SOURCE = 'schema-editor-iframe-bridge'
       const handlers = {
-        onAltKeySync: jest.fn(),
+        onAltKeySync: vi.fn(),
       }
 
       const listener = (event: MessageEvent) => {

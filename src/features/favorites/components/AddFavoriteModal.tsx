@@ -1,3 +1,4 @@
+import { MODAL_Z_INDEX } from '@/shared/constants/theme'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { Input, Modal } from 'antd'
 import React from 'react'
@@ -29,6 +30,7 @@ export const AddFavoriteModal: React.FC<AddFavoriteModalProps> = ({
       okText="添加"
       cancelText="取消"
       getContainer={shadowRootManager.getContainer}
+      zIndex={MODAL_Z_INDEX}
     >
       <Input
         placeholder="请输入收藏名称（不超过50字符）"

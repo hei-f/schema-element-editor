@@ -5,11 +5,24 @@
 
 set -e  # 遇到错误立即退出
 
+# 恢复开发模式的函数（确保即使构建失败也会执行）
+restore_dev_mode() {
+  echo "🔧 恢复开发模式..."
+  sed -i '' 's/const IS_RELEASE_BUILD = true/const IS_RELEASE_BUILD = false/' vite.config.ts
+}
+
+# 注册退出时的清理函数
+trap restore_dev_mode EXIT
+
 echo "🚀 开始打包 Schema Editor..."
 
 # 获取版本号
 VERSION=$(grep '"version"' src/manifest.json | sed 's/.*"version": "\(.*\)".*/\1/')
 echo "📦 版本号: v$VERSION"
+
+# 切换到发布模式（移除 console，隐藏调试开关）
+echo "🔧 切换到发布模式..."
+sed -i '' 's/const IS_RELEASE_BUILD = false/const IS_RELEASE_BUILD = true/' vite.config.ts
 
 # 清理并构建生产版本
 echo "🧹 清理旧文件..."
