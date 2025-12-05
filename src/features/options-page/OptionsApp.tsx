@@ -208,7 +208,7 @@ export const OptionsApp: React.FC = () => {
   }, [themeColor])
 
   return (
-    <ConfigProvider theme={themeConfig} tooltip={{ unique: true }}>
+    <ConfigProvider theme={themeConfig}>
       <PageRoot
         ref={pageRootRef}
         style={

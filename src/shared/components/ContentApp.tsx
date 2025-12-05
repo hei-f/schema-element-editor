@@ -562,15 +562,26 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
     }
   }, [drawerConfig?.themeColor])
 
+  /**
+   * 获取弹层容器
+   * 使用触发元素的父节点，确保弹层正确定位
+   */
+  const getPopupContainer = useCallback(
+    (triggerNode?: HTMLElement) => {
+      // 优先使用触发元素的父节点
+      if (triggerNode?.parentNode instanceof HTMLElement) {
+        return triggerNode.parentNode
+      }
+      // fallback 到 shadowRoot
+      return shadowRoot as unknown as HTMLElement
+    },
+    [shadowRoot]
+  )
+
   return (
     <StyleSheetManager target={shadowRoot as unknown as HTMLElement}>
       <StyleProvider container={shadowRoot as unknown as HTMLElement} cache={antdCache}>
-        <ConfigProvider
-          locale={zhCN}
-          theme={dynamicTheme}
-          getPopupContainer={() => shadowRoot as unknown as HTMLElement}
-          tooltip={{ unique: true }}
-        >
+        <ConfigProvider locale={zhCN} theme={dynamicTheme} getPopupContainer={getPopupContainer}>
           <AntdApp>
             {/* iframe 元素高亮覆盖层 */}
             {iframeConfig?.enabled && (
