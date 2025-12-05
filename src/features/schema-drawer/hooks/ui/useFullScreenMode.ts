@@ -98,32 +98,46 @@ export function useFullScreenMode(initialMode: FullScreenMode = FULL_SCREEN_MODE
 
   /**
    * 关闭预览模式（带过渡动画）
-   * 1. 立即设置 isClosingPreview，触发预览内容隐藏但保留布局
-   * 2. 延迟后切换到 NONE 模式，完成过渡
+   * - 如果目标是 NONE：等待动画完成后再切换
+   * - 如果目标是其他模式（如 DIFF）：立即切换模式，预览收缩只是视觉效果
    * @param onBeforeClose 关闭前的回调（用于清理预览容器等）
+   * @param targetMode 关闭后要切换到的目标模式，默认为 NONE
    */
-  const closePreviewWithTransition = useCallback((onBeforeClose?: () => void) => {
-    // 清除之前的定时器
-    if (closingTimerRef.current) {
-      clearTimeout(closingTimerRef.current)
-    }
+  const closePreviewWithTransition = useCallback(
+    (onBeforeClose?: () => void, targetMode: FullScreenMode = FULL_SCREEN_MODE.NONE) => {
+      // 清除之前的定时器
+      if (closingTimerRef.current) {
+        clearTimeout(closingTimerRef.current)
+      }
 
-    // 立即执行清理回调
-    onBeforeClose?.()
+      // 立即执行清理回调
+      onBeforeClose?.()
 
-    // 设置过渡状态
-    setIsClosingPreview(true)
+      // 如果目标是其他模式（非 NONE），立即切换以获得更流畅的体验
+      if (targetMode !== FULL_SCREEN_MODE.NONE) {
+        setMode((prev) => {
+          setPrevMode(prev)
+          return targetMode
+        })
+        // 不需要过渡动画，直接完成
+        return
+      }
 
-    // 延迟切换模式，等待 Drawer 动画完成
-    closingTimerRef.current = setTimeout(() => {
-      setMode((prev) => {
-        setPrevMode(prev)
-        return FULL_SCREEN_MODE.NONE
-      })
-      setIsClosingPreview(false)
-      closingTimerRef.current = null
-    }, DRAWER_TRANSITION_DURATION)
-  }, [])
+      // 目标是 NONE 时，使用过渡动画
+      setIsClosingPreview(true)
+
+      // 延迟切换模式，等待 Drawer 动画完成
+      closingTimerRef.current = setTimeout(() => {
+        setMode((prev) => {
+          setPrevMode(prev)
+          return targetMode
+        })
+        setIsClosingPreview(false)
+        closingTimerRef.current = null
+      }, DRAWER_TRANSITION_DURATION)
+    },
+    []
+  )
 
   const reset = useCallback(() => {
     // 清除过渡定时器
