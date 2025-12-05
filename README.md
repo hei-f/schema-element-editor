@@ -24,7 +24,7 @@ Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 - ⚙️ **灵活配置**: 可自定义属性名、搜索深度、节流间隔等参数
 - 🎨 **样式隔离**: 使用Shadow DOM确保样式不受页面干扰
 - 🌈 **主题色配置** (v1.21.0+): 支持自定义插件主题色，配置页面和编辑器界面统一应用
-- 🤝 **[Agentic UI](https://github.com/anthropics/agentic-ui) 原生支持**: 内置 postMessage 通信适配，开发环境下可直接调试 Bubble 组件数据
+- 🤝 **[Agentic UI](https://github.com/ant-design/agentic-ui) 原生支持**: 内置 postMessage 通信适配，开发环境下可直接调试 Bubble 组件数据
 
 ## 技术栈
 
