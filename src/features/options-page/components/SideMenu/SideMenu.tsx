@@ -168,8 +168,7 @@ export const SideMenu: React.FC<SideMenuProps> = (props) => {
           <CollapseButton
             $collapsed={collapsed}
             onClick={() => onCollapsedChange(!collapsed)}
-            type="fill"
-            style={{ border: 'none' }}
+            type="text"
           >
             <RightOutlined />
           </CollapseButton>
