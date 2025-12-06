@@ -49,7 +49,6 @@ const TestCard = styled(Card)<{ $isValid?: boolean }>`
 `
 
 const LogPanel = styled(Card)`
-  margin-top: 24px;
   max-height: 300px;
   overflow-y: auto;
 

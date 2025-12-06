@@ -8,11 +8,13 @@ import {
   MenuUnfoldOutlined,
   RobotOutlined,
   BlockOutlined,
+  SettingOutlined,
 } from '@ant-design/icons'
 import { AstTestPage } from './pages/AstTestPage'
 import { SchemaTestPage } from './pages/SchemaTestPage'
 import { AgenticDemoPage } from './pages/AgenticDemoPage'
 import { IframeTestPage } from './pages/IframeTestPage'
+import { OptionsTestPage } from './pages/OptionsTestPage'
 import styled from 'styled-components'
 
 const { Header, Content, Sider } = Layout
@@ -59,34 +61,48 @@ const Logo = styled.div`
   }
 `
 
-const BodyLayout = styled(Layout)`
-  margin-top: ${HEADER_HEIGHT}px;
+const BodyLayout = styled(Layout)<{ $hideHeader?: boolean }>`
+  margin-top: ${(props) => (props.$hideHeader ? 0 : HEADER_HEIGHT)}px;
 `
 
-const AppSider = styled(Sider)<{ $collapsed: boolean }>`
+const AppSider = styled(Sider)<{
+  $collapsed: boolean
+  $rightSide?: boolean
+  $hideHeader?: boolean
+}>`
   position: fixed !important;
-  left: 0;
-  top: ${HEADER_HEIGHT}px;
+  ${(props) => (props.$rightSide ? 'right: 0;' : 'left: 0;')}
+  top: ${(props) => (props.$hideHeader ? 0 : HEADER_HEIGHT)}px;
   bottom: 0;
   z-index: 99;
   background: #fff !important;
-  border-right: 1px solid #f0f0f0;
+  ${(props) =>
+    props.$rightSide ? 'border-left: 1px solid #f0f0f0;' : 'border-right: 1px solid #f0f0f0;'}
   overflow-y: auto;
   width: ${(props) => (props.$collapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH)}px !important;
   min-width: ${(props) => (props.$collapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH)}px !important;
   max-width: ${(props) => (props.$collapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH)}px !important;
 `
 
-const AppContent = styled(Content)<{ $siderCollapsed: boolean }>`
-  margin-left: ${(props) => (props.$siderCollapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH)}px;
-  padding: 24px;
-  background: #f5f5f5;
-  min-height: calc(100vh - ${HEADER_HEIGHT}px);
+const AppContent = styled(Content)<{
+  $siderCollapsed: boolean
+  $rightSide?: boolean
+  $noPadding?: boolean
+}>`
+  ${(props) =>
+    props.$rightSide
+      ? `margin-right: ${props.$siderCollapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH}px;`
+      : `margin-left: ${props.$siderCollapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH}px;`}
+  padding: ${(props) => (props.$noPadding ? 0 : 24)}px;
+  background: ${(props) => (props.$noPadding ? 'transparent' : '#f5f5f5')};
+  min-height: 100vh;
   overflow: auto;
-  transition: margin-left 0.2s ease;
+  transition:
+    margin-left 0.2s ease,
+    margin-right 0.2s ease;
 `
 
-type PageKey = 'ast-test' | 'schema-test' | 'agentic-demo' | 'iframe-test'
+type PageKey = 'ast-test' | 'schema-test' | 'agentic-demo' | 'iframe-test' | 'options-test'
 
 /** 默认页面 */
 const DEFAULT_PAGE: PageKey = 'schema-test'
@@ -96,7 +112,13 @@ const DEFAULT_PAGE: PageKey = 'schema-test'
  */
 const getPageFromHash = (): PageKey => {
   const hash = window.location.hash.slice(1) // 移除 #
-  const validPages: PageKey[] = ['ast-test', 'schema-test', 'agentic-demo', 'iframe-test']
+  const validPages: PageKey[] = [
+    'ast-test',
+    'schema-test',
+    'agentic-demo',
+    'iframe-test',
+    'options-test',
+  ]
   return validPages.includes(hash as PageKey) ? (hash as PageKey) : DEFAULT_PAGE
 }
 
@@ -109,12 +131,20 @@ const setHashToUrl = (page: PageKey) => {
 
 export const TestApp: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<PageKey>(getPageFromHash)
-  const [siderCollapsed, setSiderCollapsed] = useState(false)
+  const [siderCollapsed, setSiderCollapsed] = useState(() => getPageFromHash() === 'options-test')
+
+  /** 是否为设置页开发模式（隐藏 header，菜单在右侧折叠） */
+  const isOptionsPage = currentPage === 'options-test'
 
   // 监听 hash 变化（浏览器前进/后退）
   useEffect(() => {
     const handleHashChange = () => {
-      setCurrentPage(getPageFromHash())
+      const newPage = getPageFromHash()
+      setCurrentPage(newPage)
+      // 设置页模式下自动折叠侧边栏
+      if (newPage === 'options-test') {
+        setSiderCollapsed(true)
+      }
     }
 
     window.addEventListener('hashchange', handleHashChange)
@@ -125,6 +155,10 @@ export const TestApp: React.FC = () => {
   const handlePageChange = useCallback((page: PageKey) => {
     setCurrentPage(page)
     setHashToUrl(page)
+    // 设置页模式下自动折叠侧边栏
+    if (page === 'options-test') {
+      setSiderCollapsed(true)
+    }
   }, [])
 
   const menuItems = [
@@ -148,6 +182,11 @@ export const TestApp: React.FC = () => {
       icon: <BlockOutlined />,
       label: 'iframe 测试',
     },
+    {
+      key: 'options-test',
+      icon: <SettingOutlined />,
+      label: '设置页开发',
+    },
   ]
 
   const renderPage = () => {
@@ -160,6 +199,8 @@ export const TestApp: React.FC = () => {
         return <AgenticDemoPage siderCollapsed={siderCollapsed} />
       case 'iframe-test':
         return <IframeTestPage siderCollapsed={siderCollapsed} />
+      case 'options-test':
+        return <OptionsTestPage siderCollapsed={siderCollapsed} />
       default:
         return <SchemaTestPage siderCollapsed={siderCollapsed} />
     }
@@ -167,28 +208,33 @@ export const TestApp: React.FC = () => {
 
   return (
     <AppLayout>
-      <AppHeader $siderCollapsed={siderCollapsed}>
-        <HeaderLeft>
-          <Button
-            type="text"
-            icon={siderCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setSiderCollapsed(!siderCollapsed)}
-            style={{ color: '#fff', marginRight: 16 }}
-          />
-          <Logo>
-            <BugOutlined className="logo-icon" />
-            <Title level={4} style={{ margin: 0, color: '#fff' }}>
-              Schema Editor 测试工具
-            </Title>
-          </Logo>
-        </HeaderLeft>
-      </AppHeader>
-      <BodyLayout>
+      {/* Header - 设置页模式下隐藏 */}
+      {!isOptionsPage && (
+        <AppHeader $siderCollapsed={siderCollapsed}>
+          <HeaderLeft>
+            <Button
+              type="text"
+              icon={siderCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setSiderCollapsed(!siderCollapsed)}
+              style={{ color: '#fff', marginRight: 16 }}
+            />
+            <Logo>
+              <BugOutlined className="logo-icon" />
+              <Title level={4} style={{ margin: 0, color: '#fff' }}>
+                Schema Editor 测试工具
+              </Title>
+            </Logo>
+          </HeaderLeft>
+        </AppHeader>
+      )}
+      <BodyLayout $hideHeader={isOptionsPage}>
         <AppSider
           width={siderCollapsed ? SIDER_COLLAPSED_WIDTH : SIDER_WIDTH}
           $collapsed={siderCollapsed}
           collapsed={siderCollapsed}
           collapsedWidth={SIDER_COLLAPSED_WIDTH}
+          $rightSide={isOptionsPage}
+          $hideHeader={isOptionsPage}
         >
           <Menu
             mode="inline"
@@ -199,7 +245,13 @@ export const TestApp: React.FC = () => {
             style={{ height: '100%', paddingTop: 8 }}
           />
         </AppSider>
-        <AppContent $siderCollapsed={siderCollapsed}>{renderPage()}</AppContent>
+        <AppContent
+          $siderCollapsed={siderCollapsed}
+          $rightSide={isOptionsPage}
+          $noPadding={isOptionsPage}
+        >
+          {renderPage()}
+        </AppContent>
       </BodyLayout>
     </AppLayout>
   )
