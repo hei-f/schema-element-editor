@@ -106,7 +106,7 @@ class PreviewContainerManager {
       height: ${position.height}px;
       z-index: ${this.currentZIndex};
       background: #f5f5f5;
-      border-right: 1px solid #e8e8e8;
+      border-radius: 12px;
       overflow: auto;
       padding: 16px;
       box-sizing: border-box;

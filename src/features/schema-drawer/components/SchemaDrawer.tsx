@@ -942,6 +942,9 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
    */
   const isFullScreenMode = (previewEnabled && !isClosingPreview) || isDiffMode
 
+  /** 是否为最大宽度（手动拖拽到最大或全屏模式） */
+  const isMaxWidth = isFullScreenMode || drawerSize >= window.innerWidth - 10
+
   /**
    * 计算抽屉宽度
    * - 全屏模式：100vw
@@ -1034,7 +1037,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
           wrapper: { zIndex: 1000 },
           mask: { zIndex: 1000 },
           section: {
-            borderRadius: isFullScreenMode ? '0px' : '12px 0px 0px 12px',
+            borderRadius: isMaxWidth ? '0px' : '12px 0px 0px 12px',
             transition: 'border-radius 0.3s ease',
             '--drawer-theme-color': themeColor,
           } as React.CSSProperties,

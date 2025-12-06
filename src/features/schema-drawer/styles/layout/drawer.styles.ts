@@ -147,15 +147,15 @@ export const DrawerTitleActions = styled.div`
 
 /** 预览模式布局间距常量 */
 const PREVIEW_GAP = 16
-const RESIZER_WIDTH = 8
-/** 拖动条距离预览区域右边缘的偏移：(GAP - RESIZER_WIDTH) / 2 - GAP/2 = -4px */
+const RESIZER_WIDTH = 4
+/** 拖动条距离预览区域右边缘的偏移：(GAP - RESIZER_WIDTH) / 2 - GAP/2 = -6px */
 const RESIZER_LEFT_OFFSET = (PREVIEW_GAP - RESIZER_WIDTH) / 2 - PREVIEW_GAP / 2
 
 /**
  * 预览区域可拖拽分隔条
- * 使用绝对定位放置在 gap 中间，左右各 4px 空隙
+ * 使用绝对定位放置在 gap 中间
  * 位置计算：预览区域宽度 = calc(previewWidth% - 8px)
- *          拖动条居中在 gap = 预览右边缘 + 4px = calc(previewWidth% - 8px + 4px) = calc(previewWidth% - 4px)
+ *          拖动条居中在 gap
  */
 export const PreviewResizer = styled.div<{ $isDragging?: boolean; $previewWidth?: number }>`
   width: ${RESIZER_WIDTH}px;
@@ -166,8 +166,7 @@ export const PreviewResizer = styled.div<{ $isDragging?: boolean; $previewWidth?
   left: calc(${(props) => props.$previewWidth || 0}% + ${RESIZER_LEFT_OFFSET}px);
   top: 0;
   transition: ${(props) => (props.$isDragging ? 'none' : 'left 300ms ease-out, background 0.2s')};
-  border-left: 1px solid #bfbfbf;
-  border-right: 1px solid #bfbfbf;
+  border-radius: 2px;
   user-select: none;
   z-index: 10;
 
@@ -175,12 +174,13 @@ export const PreviewResizer = styled.div<{ $isDragging?: boolean; $previewWidth?
     background: var(--drawer-theme-color, #1677ff);
   }
 
+  /* 扩大点击热区 */
   &::before {
     content: '';
     position: absolute;
     top: 0;
-    left: -4px;
-    right: -4px;
+    left: -6px;
+    right: -6px;
     bottom: 0;
     cursor: col-resize;
   }
