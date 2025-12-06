@@ -1,7 +1,8 @@
 import { FORM_PATHS } from '@/shared/constants/form-paths'
 import { DesktopOutlined } from '@ant-design/icons'
-import { ColorPicker, Form, Space, Switch, Tooltip } from 'antd'
+import { Form, Space, Switch, Tooltip } from 'antd'
 import React from 'react'
+import { ColorPickerField } from '../components/ColorPickerField'
 import { SectionCard } from '../components/SectionCard'
 import { FormSectionLabelWithVariant } from '../components/FormSectionLabelWithVariant'
 import { FormContent, FormSection, HelpTooltipIcon } from '../styles/layout.styles'
@@ -73,9 +74,8 @@ export const EditorConfigSection: React.FC<SectionProps> = (props) => {
               </Space>
             }
             name={FORM_PATHS.themeColor}
-            getValueFromEvent={(color) => color.toHexString()}
           >
-            <ColorPicker format="hex" showText />
+            <ColorPickerField />
           </Form.Item>
         </FormContent>
       </FormSection>
