@@ -4,6 +4,28 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { DrawerToolbar } from '../../toolbar/DrawerToolbar'
 
+/**
+ * 辅助函数：获取可见的按钮元素
+ * ResponsiveButtonGroup 使用隐藏的测量容器渲染按钮副本，
+ * 导致按钮文本可能出现多次，需要选择可见的那个
+ */
+const getVisibleButton = (text: string | RegExp) => {
+  const buttons = screen.getAllByText(text)
+  // 找到第一个不在 visibility: hidden 容器中的按钮
+  const visibleButton = buttons.find((btn) => {
+    let parent = btn.parentElement
+    while (parent) {
+      const style = window.getComputedStyle(parent)
+      if (style.visibility === 'hidden') {
+        return false
+      }
+      parent = parent.parentElement
+    }
+    return true
+  })
+  return visibleButton || buttons[0]
+}
+
 describe('DrawerToolbar组件测试', () => {
   const mockAttributes = {
     params: ['param1', 'param2', 'param3'],
@@ -34,6 +56,11 @@ describe('DrawerToolbar组件测试', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    // Mock offsetWidth 返回足够大的值，防止参数区域被隐藏
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 800,
+    })
   })
 
   describe('基本渲染', () => {
@@ -48,9 +75,9 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      expect(screen.getByText('params 1')).toBeInTheDocument()
-      expect(screen.getByText('params 2')).toBeInTheDocument()
-      expect(screen.getByText('params 3')).toBeInTheDocument()
+      expect(screen.getAllByText('params 1').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('params 2').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('params 3').length).toBeGreaterThan(0)
     })
 
     it('应该在没有参数时不渲染参数容器', () => {
@@ -89,9 +116,9 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      expect(screen.getByText(/解\s*析/)).toBeInTheDocument()
+      expect(screen.getAllByText(/解\s*析/).length).toBeGreaterThan(0)
       expect(screen.queryByText(/压\s*缩/)).not.toBeInTheDocument()
-      expect(screen.getByText(/格式化/)).toBeInTheDocument()
+      expect(screen.getAllByText(/格式化/).length).toBeGreaterThan(0)
       expect(screen.queryByText('更新预览')).not.toBeInTheDocument()
     })
   })
@@ -108,8 +135,8 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      expect(screen.getByText('AST')).toBeInTheDocument()
-      expect(screen.getByText('RawString')).toBeInTheDocument()
+      expect(screen.getAllByText('AST').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('RawString').length).toBeGreaterThan(0)
     })
 
     it('应该在contentType为Other时禁用Segmented', () => {
@@ -123,8 +150,13 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      // Segmented组件应该被禁用
-      const segmented = screen.getByText('AST').closest('.ant-segmented')
+      // Segmented组件应该被禁用（找到可见的那个）
+      const astElements = screen.getAllByText('AST')
+      const visibleAst = astElements.find((el) => {
+        const segmented = el.closest('.ant-segmented')
+        return segmented && !segmented.closest('[style*="visibility: hidden"]')
+      })
+      const segmented = visibleAst?.closest('.ant-segmented')
       expect(segmented).toHaveClass('ant-segmented-disabled')
     })
 
@@ -141,7 +173,11 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      await user.click(screen.getByText('RawString'))
+      // 使用可见的 RawString 按钮
+      const rawStringButton = getVisibleButton('RawString')
+      if (rawStringButton) {
+        await user.click(rawStringButton)
+      }
 
       expect(mockHandlers.onSegmentChange).toHaveBeenCalledWith(ContentType.RawString)
     }, 10000)
@@ -161,7 +197,10 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      await user.click(screen.getByText('格式化'))
+      const formatButton = getVisibleButton('格式化')
+      if (formatButton) {
+        await user.click(formatButton)
+      }
 
       expect(mockHandlers.onFormat).toHaveBeenCalledTimes(1)
     })
@@ -179,7 +218,10 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      await user.click(screen.getByText(/压\s*缩/))
+      const compactButton = getVisibleButton(/压\s*缩/)
+      if (compactButton) {
+        await user.click(compactButton)
+      }
 
       expect(mockHandlers.onCompact).toHaveBeenCalledTimes(1)
     })
@@ -197,7 +239,10 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      await user.click(screen.getByText(/解\s*析/))
+      const parseButton = getVisibleButton(/解\s*析/)
+      if (parseButton) {
+        await user.click(parseButton)
+      }
 
       expect(mockHandlers.onParse).toHaveBeenCalledTimes(1)
     })
@@ -213,10 +258,10 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      // 对于Ant Design Button，需要查找父级button元素
-      const formatButton = screen.getByText(/格式化/).closest('button')
-      const compactButton = screen.getByText(/压\s*缩/).closest('button')
-      const parseButton = screen.getByText(/解\s*析/).closest('button')
+      // 对于Ant Design Button，需要查找父级button元素（使用可见的按钮）
+      const formatButton = getVisibleButton(/格式化/)?.closest('button')
+      const compactButton = getVisibleButton(/压\s*缩/)?.closest('button')
+      const parseButton = getVisibleButton(/解\s*析/)?.closest('button')
 
       // 格式化和解析需要有效JSON，所以被禁用
       expect(formatButton).toBeDisabled()
@@ -239,7 +284,7 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      expect(screen.getByText('更新预览')).toBeInTheDocument()
+      expect(screen.getAllByText('更新预览').length).toBeGreaterThan(0)
     })
 
     it('应该在previewEnabled为false时不显示预览按钮', () => {
@@ -288,7 +333,10 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      await user.click(screen.getByText('更新预览'))
+      const previewButton = getVisibleButton('更新预览')
+      if (previewButton) {
+        await user.click(previewButton)
+      }
 
       expect(mockHandlers.onRenderPreview).toHaveBeenCalledTimes(1)
     })
@@ -308,8 +356,8 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      expect(screen.getByText('params 1')).toBeInTheDocument()
-      expect(screen.getByText('params 50')).toBeInTheDocument()
+      expect(screen.getAllByText('params 1').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('params 50').length).toBeGreaterThan(0)
     })
 
     it('应该处理非常长的参数值', () => {
@@ -326,7 +374,7 @@ describe('DrawerToolbar组件测试', () => {
       )
 
       // 参数值显示在 tooltip 中，只验证标签存在
-      expect(screen.getByText('params 1')).toBeInTheDocument()
+      expect(screen.getAllByText('params 1').length).toBeGreaterThan(0)
     })
 
     it('应该处理特殊字符参数', () => {
@@ -343,9 +391,9 @@ describe('DrawerToolbar组件测试', () => {
       )
 
       // 参数值显示在 tooltip 中，只验证标签存在
-      expect(screen.getByText('params 1')).toBeInTheDocument()
-      expect(screen.getByText('params 2')).toBeInTheDocument()
-      expect(screen.getByText('params 3')).toBeInTheDocument()
+      expect(screen.getAllByText('params 1').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('params 2').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('params 3').length).toBeGreaterThan(0)
     })
 
     it('应该处理所有按钮都禁用的情况', () => {
@@ -404,7 +452,13 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      const segmented = screen.getByText('AST').closest('.ant-segmented')
+      // 找到可见的Segmented组件
+      const astElements = screen.getAllByText('AST')
+      const visibleAst = astElements.find((el) => {
+        const segmented = el.closest('.ant-segmented')
+        return segmented && !segmented.closest('[style*="visibility: hidden"]')
+      })
+      const segmented = visibleAst?.closest('.ant-segmented')
       expect(segmented).not.toHaveClass('ant-segmented-disabled')
     })
 
@@ -419,7 +473,13 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      const segmented = screen.getByText('RawString').closest('.ant-segmented')
+      // 找到可见的Segmented组件
+      const rawStringElements = screen.getAllByText('RawString')
+      const visibleRawString = rawStringElements.find((el) => {
+        const segmented = el.closest('.ant-segmented')
+        return segmented && !segmented.closest('[style*="visibility: hidden"]')
+      })
+      const segmented = visibleRawString?.closest('.ant-segmented')
       expect(segmented).not.toHaveClass('ant-segmented-disabled')
     })
 
@@ -434,7 +494,13 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      const segmented = screen.getByText('AST').closest('.ant-segmented')
+      // 找到可见的Segmented组件
+      const astElements = screen.getAllByText('AST')
+      const visibleAst = astElements.find((el) => {
+        const segmented = el.closest('.ant-segmented')
+        return segmented && !segmented.closest('[style*="visibility: hidden"]')
+      })
+      const segmented = visibleAst?.closest('.ant-segmented')
       expect(segmented).toHaveClass('ant-segmented-disabled')
     })
   })
@@ -466,9 +532,9 @@ describe('DrawerToolbar组件测试', () => {
       )
 
       // 验证参数标签被渲染
-      expect(screen.getByText('params 1')).toBeInTheDocument()
-      expect(screen.getByText('params 2')).toBeInTheDocument()
-      expect(screen.getByText('params 3')).toBeInTheDocument()
+      expect(screen.getAllByText('params 1').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('params 2').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('params 3').length).toBeGreaterThan(0)
     })
 
     it('应该渲染AttributeTagWrapper组件', () => {
@@ -482,9 +548,9 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      // 验证params标签被渲染
+      // 验证params标签被渲染（可能因为其他组件出现多次）
       const params = screen.getAllByText(/params \d/)
-      expect(params).toHaveLength(3)
+      expect(params.length).toBeGreaterThanOrEqual(3)
 
       params.forEach((param) => {
         // 每个param应该在一个包含复制功能的结构中
@@ -504,9 +570,9 @@ describe('DrawerToolbar组件测试', () => {
       )
 
       // 验证参数标签被渲染（每个标签都包含复制图标）
-      expect(screen.getByText('params 1')).toBeInTheDocument()
-      expect(screen.getByText('params 2')).toBeInTheDocument()
-      expect(screen.getByText('params 3')).toBeInTheDocument()
+      expect(screen.getAllByText('params 1').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('params 2').length).toBeGreaterThan(0)
+      expect(screen.getAllByText('params 3').length).toBeGreaterThan(0)
     })
   })
 
@@ -532,7 +598,7 @@ describe('DrawerToolbar组件测试', () => {
       )
 
       // Diff模式下应该显示退出按钮，不显示格式化等按钮
-      expect(screen.getByText('Diff')).toBeInTheDocument()
+      expect(screen.getAllByText('Diff').length).toBeGreaterThan(0)
       expect(screen.queryByText('格式化')).not.toBeInTheDocument()
       expect(screen.queryByText(/压\s*缩/)).not.toBeInTheDocument()
     })
@@ -556,9 +622,9 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      // 应该显示应用修复和取消按钮（Ant Design 会在两个中文字符间添加空格）
-      expect(screen.getByText('应用修复')).toBeInTheDocument()
-      expect(screen.getByText(/取\s*消/)).toBeInTheDocument()
+      // 应该显示应用修复和取消按钮（可能因为测量容器出现多次）
+      expect(screen.getAllByText('应用修复').length).toBeGreaterThan(0)
+      expect(screen.getAllByText(/取\s*消/).length).toBeGreaterThan(0)
     })
 
     it('点击应用修复按钮应该触发回调', async () => {
@@ -581,7 +647,10 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      await user.click(screen.getByText('应用修复'))
+      const applyButton = getVisibleButton('应用修复')
+      if (applyButton) {
+        await user.click(applyButton)
+      }
       expect(onApplyRepair).toHaveBeenCalled()
     })
 
@@ -605,7 +674,10 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      await user.click(screen.getByText(/取\s*消/))
+      const cancelButton = getVisibleButton(/取\s*消/)
+      if (cancelButton) {
+        await user.click(cancelButton)
+      }
       expect(onCancelRepair).toHaveBeenCalled()
     })
 
@@ -643,7 +715,10 @@ describe('DrawerToolbar组件测试', () => {
         />
       )
 
-      await user.click(screen.getByText('Diff'))
+      const diffButton = getVisibleButton('Diff')
+      if (diffButton) {
+        await user.click(diffButton)
+      }
       expect(diffModeHandlers.onExitDiffMode).toHaveBeenCalled()
     })
   })
