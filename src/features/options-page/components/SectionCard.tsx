@@ -1,11 +1,13 @@
-import { Collapse, theme } from 'antd'
+import { Collapse, theme, Tooltip, Flex } from 'antd'
 import React from 'react'
 import {
-  CardSubtitle,
   PanelActionButton,
   PanelActions,
   PanelHeader,
+  PanelIcon,
   PanelTitle,
+  PanelTitleWrapper,
+  PanelTitleHelpIcon,
   StyledCollapseModern,
 } from '../styles/layout.styles'
 
@@ -16,10 +18,14 @@ interface SectionCardProps {
   title: string
   /** 卡片副标题（描述） */
   subtitle?: string
+  /** 卡片图标 */
+  icon?: React.ComponentType
   /** 卡片内容 */
   children: React.ReactNode
   /** 唯一的key，用于Collapse */
   panelKey: string
+  /** 区块 ID，用于滚动定位 */
+  sectionId?: string
   /** 是否默认展开（非受控模式） */
   defaultActive?: boolean
   /** 是否展开（受控模式） */
@@ -44,8 +50,10 @@ export const SectionCard: React.FC<SectionCardProps> = (props) => {
   const {
     title,
     subtitle,
+    icon: Icon,
     children,
     panelKey,
+    sectionId,
     defaultActive = false,
     isActive,
     onActiveChange,
@@ -78,7 +86,19 @@ export const SectionCard: React.FC<SectionCardProps> = (props) => {
 
   const headerContent = (
     <PanelHeader align="center" justify="space-between">
-      <PanelTitle>{title}</PanelTitle>
+      <PanelTitleWrapper align="center" gap={8}>
+        {Icon && (
+          <PanelIcon>
+            <Icon />
+          </PanelIcon>
+        )}
+        <PanelTitle>{title}</PanelTitle>
+        {subtitle && (
+          <Tooltip title={subtitle}>
+            <PanelTitleHelpIcon />
+          </Tooltip>
+        )}
+      </PanelTitleWrapper>
       {hasActions && (
         <PanelActions align="center" gap={8}>
           {extraActions?.map((action, index) => (
@@ -114,10 +134,11 @@ export const SectionCard: React.FC<SectionCardProps> = (props) => {
     : { defaultActiveKey: defaultActive ? [panelKey] : [], onChange: handleChange }
 
   return (
-    <StyledCollapseModern {...collapseProps}>
+    <StyledCollapseModern id={sectionId} {...collapseProps}>
       <Panel header={headerContent} key={panelKey}>
-        {subtitle && <CardSubtitle>{subtitle}</CardSubtitle>}
-        {children}
+        <Flex vertical gap={24}>
+          {children}
+        </Flex>
       </Panel>
     </StyledCollapseModern>
   )
