@@ -129,13 +129,14 @@ export const ButtonGroup = styled.div`
 /**
  * 工具栏按钮
  * 普通按钮使用固定样式，primary 按钮使用 CSS 变量 --drawer-theme-color 作为主题色
+ * 使用固定高度避免 hover 时高度变化
  */
 export const ToolbarButton = styled(Button)`
   &.ant-btn {
     border-radius: 16px;
     padding: 2px 12px;
     font-size: 12px;
-    height: auto;
+    height: 24px;
     line-height: 1.5;
   }
 
@@ -147,7 +148,7 @@ export const ToolbarButton = styled(Button)`
 
   /* primary 按钮使用主题色（仅非禁用状态） */
   &.ant-btn-primary:not(:disabled) {
-    border: none;
+    border: 1px solid transparent;
     background: var(--drawer-theme-color, #1677ff);
     color: #ffffff;
 
