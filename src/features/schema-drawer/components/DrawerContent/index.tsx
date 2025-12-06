@@ -138,7 +138,7 @@ export const DrawerContent: React.FC<DrawerContentProps> = (props) => {
       toolbarButtons={baseProps.toolbarButtons}
       previewEnabled={previewEnabled}
       isRecording={isRecording}
-      showDiffButton={!isInRecordingMode}
+      showDiffButton={!isInRecordingMode || isDiffMode}
       isDiffMode={isDiffMode}
       diffDisplayMode={diffModeProps.diffDisplayMode}
       onDiffDisplayModeChange={diffModeProps.onDiffDisplayModeChange}
@@ -206,32 +206,24 @@ export const DrawerContent: React.FC<DrawerContentProps> = (props) => {
       )
     }
 
-    // 录制模式 - 录制状态栏 + (版本历史 | 编辑器)
+    // 录制模式 - (版本历史 | 编辑器)，录制状态栏已移至外部处理
     if (showRecordingLayout) {
       return (
-        <>
-          <RecordingStatusBar
-            isRecording={isRecording}
-            snapshots={snapshots}
-            onStopRecording={recordingModeProps.onStopRecording}
-            onEnterDiffMode={recordingModeProps.onEnterDiffMode}
-          />
-          <ContentAreaContainer>
-            <RecordingModeContainer>
-              <RecordingContentArea>
-                <VersionHistoryPanel
-                  isRecording={isRecording}
-                  snapshots={snapshots}
-                  selectedSnapshotId={selectedSnapshotId}
-                  onSelectSnapshot={onSelectSnapshot}
-                />
-                <RecordingEditorArea>
-                  <EditorContainer>{renderEditor()}</EditorContainer>
-                </RecordingEditorArea>
-              </RecordingContentArea>
-            </RecordingModeContainer>
-          </ContentAreaContainer>
-        </>
+        <ContentAreaContainer>
+          <RecordingModeContainer>
+            <RecordingContentArea>
+              <VersionHistoryPanel
+                isRecording={isRecording}
+                snapshots={snapshots}
+                selectedSnapshotId={selectedSnapshotId}
+                onSelectSnapshot={onSelectSnapshot}
+              />
+              <RecordingEditorArea>
+                <EditorContainer>{renderEditor()}</EditorContainer>
+              </RecordingEditorArea>
+            </RecordingContentArea>
+          </RecordingModeContainer>
+        </ContentAreaContainer>
       )
     }
 
@@ -246,6 +238,16 @@ export const DrawerContent: React.FC<DrawerContentProps> = (props) => {
   return (
     <ThemeProvider theme={editorThemeVars}>
       <DrawerContentContainer>
+        {/* 录制模式下：录制状态栏在工具栏之上 */}
+        {showRecordingLayout && (
+          <RecordingStatusBar
+            isRecording={isRecording}
+            snapshots={snapshots}
+            onStopRecording={recordingModeProps.onStopRecording}
+            onEnterDiffMode={recordingModeProps.onEnterDiffMode}
+          />
+        )}
+
         {/* 工具栏：固定在顶部，不参与模式切换动画 */}
         {renderToolbar()}
 
