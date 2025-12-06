@@ -110,14 +110,17 @@ export const useSectionNavigation = (): UseSectionNavigationReturn => {
           if (entry.isIntersecting) {
             // 元素进入可视区域，开始高亮动画
             observer.disconnect()
+            // 使用 requestAnimationFrame 确保动画重置可靠
+            // 先移除类，等待下一帧后再添加，确保浏览器识别为新动画
             element.classList.remove('anchor-highlight')
-            void element.offsetWidth
-            element.classList.add('anchor-highlight')
-            const timerId = setTimeout(() => {
-              element.classList.remove('anchor-highlight')
-              highlightStateRef.current.timerId = null
-            }, 2000)
-            highlightStateRef.current.timerId = timerId
+            requestAnimationFrame(() => {
+              element.classList.add('anchor-highlight')
+              const timerId = setTimeout(() => {
+                element.classList.remove('anchor-highlight')
+                highlightStateRef.current.timerId = null
+              }, 2000)
+              highlightStateRef.current.timerId = timerId
+            })
           }
         },
         {

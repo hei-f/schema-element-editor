@@ -123,11 +123,17 @@ describe('useSectionNavigation', () => {
       })
       vi.stubGlobal('IntersectionObserver', IntersectionObserverMock)
 
+      // Mock requestAnimationFrame
+      vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
+        setTimeout(() => cb(0), 0)
+        return 0
+      })
+
       act(() => {
         result.current.scrollToAnchor('anchor-test')
       })
 
-      // 等待 IntersectionObserver 回调
+      // 等待 IntersectionObserver 回调和 requestAnimationFrame
       act(() => {
         vi.advanceTimersByTime(10)
       })
