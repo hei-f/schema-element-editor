@@ -1,53 +1,60 @@
 import type { MockedFunction } from 'vitest'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { useSchemaRecording } from '../../schema/useSchemaRecording'
-import { MessageType } from '@/shared/types'
-
-// Mock communication-mode
-vi.mock('@/shared/utils/communication-mode', () => ({
-  getCommunicationMode: vi.fn(),
-}))
 
 // Mock message utils
 vi.mock('@/shared/utils/browser/message', () => ({
-  listenPageMessages: vi.fn(),
-  postMessageToPage: vi.fn(),
   sendRequestToHost: vi.fn(),
+  listenHostPush: vi.fn(),
 }))
 
-import { getCommunicationMode } from '@/shared/utils/communication-mode'
-import {
-  listenPageMessages,
-  postMessageToPage,
-  sendRequestToHost,
-} from '@/shared/utils/browser/message'
+// Mock logger
+vi.mock('@/shared/utils/logger', () => ({
+  logger: {
+    log: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
+}))
 
-const mockGetCommunicationMode = getCommunicationMode as MockedFunction<typeof getCommunicationMode>
-const mockListenPageMessages = listenPageMessages as MockedFunction<typeof listenPageMessages>
-const mockPostMessageToPage = postMessageToPage as MockedFunction<typeof postMessageToPage>
+import { sendRequestToHost, listenHostPush } from '@/shared/utils/browser/message'
+
 const mockSendRequestToHost = sendRequestToHost as MockedFunction<typeof sendRequestToHost>
+const mockListenHostPush = listenHostPush as MockedFunction<typeof listenHostPush>
 
 describe('useSchemaRecording Hook 测试', () => {
   const defaultProps = {
     attributes: { params: ['param1', 'param2'] },
     pollingInterval: 1000,
     onSchemaChange: vi.fn(),
-    apiConfig: null,
+    apiConfig: {
+      communicationMode: 'postMessage' as const,
+      requestTimeout: 5,
+      sourceConfig: {
+        contentSource: 'test-content',
+        hostSource: 'test-host',
+      },
+      messageTypes: {
+        getSchema: 'GET_SCHEMA',
+        updateSchema: 'UPDATE_SCHEMA',
+        checkPreview: 'CHECK_PREVIEW',
+        renderPreview: 'RENDER_PREVIEW',
+        cleanupPreview: 'CLEANUP_PREVIEW',
+        startRecording: 'START_RECORDING',
+        stopRecording: 'STOP_RECORDING',
+        schemaPush: 'SCHEMA_PUSH',
+      },
+    },
   }
 
   beforeEach(() => {
     vi.clearAllMocks()
     vi.useFakeTimers({ shouldAdvanceTime: true })
 
-    // 默认设置为 windowFunction 模式
-    mockGetCommunicationMode.mockReturnValue({
-      communicationMode: 'windowFunction',
-      isPostMessageMode: false,
-      isWindowFunctionMode: true,
-    })
-
     // 默认返回清理函数
-    mockListenPageMessages.mockReturnValue(vi.fn())
+    mockListenHostPush.mockReturnValue(vi.fn())
+    // 默认返回成功响应
+    mockSendRequestToHost.mockResolvedValue({ success: true, data: {} })
   })
 
   afterEach(() => {
@@ -69,148 +76,31 @@ describe('useSchemaRecording Hook 测试', () => {
     })
   })
 
-  describe('开始录制 - windowFunction 模式', () => {
-    beforeEach(() => {
-      mockGetCommunicationMode.mockReturnValue({
-        communicationMode: 'windowFunction',
-        isPostMessageMode: false,
-        isWindowFunctionMode: true,
-      })
-    })
+  describe('开始录制 - 轮询模式（默认）', () => {
+    it('应该在开始录制时设置 isRecording 为 true', async () => {
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
+        })
+      )
 
-    it('应该在开始录制时设置 isRecording 为 true', () => {
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
-
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
       expect(result.current.isRecording).toBe(true)
     })
 
-    it('应该注册消息监听器', () => {
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
-
-      act(() => {
-        result.current.startRecording()
-      })
-
-      expect(mockListenPageMessages).toHaveBeenCalledTimes(1)
-    })
-
-    it('应该立即发送获取 schema 请求', () => {
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
-
-      act(() => {
-        result.current.startRecording()
-      })
-
-      expect(mockPostMessageToPage).toHaveBeenCalledWith({
-        type: MessageType.GET_SCHEMA,
-        payload: { params: 'param1,param2' },
-      })
-    })
-
-    it('应该按轮询间隔定期发送请求', () => {
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
-
-      act(() => {
-        result.current.startRecording()
-      })
-
-      expect(mockPostMessageToPage).toHaveBeenCalledTimes(1)
-
-      act(() => {
-        vi.advanceTimersByTime(1000)
-      })
-
-      expect(mockPostMessageToPage).toHaveBeenCalledTimes(2)
-
-      act(() => {
-        vi.advanceTimersByTime(1000)
-      })
-
-      expect(mockPostMessageToPage).toHaveBeenCalledTimes(3)
-    })
-
-    it('重复调用 startRecording 应该被忽略', () => {
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
-
-      act(() => {
-        result.current.startRecording()
-        result.current.startRecording()
-        result.current.startRecording()
-      })
-
-      expect(mockListenPageMessages).toHaveBeenCalledTimes(1)
-    })
-
-    it('应该处理来自 injected script 的 schema 响应', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
-        return vi.fn()
-      })
-
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
-
-      act(() => {
-        result.current.startRecording()
-      })
-
-      // 模拟收到 schema 响应
-      act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { name: 'test' } },
-        })
-      })
-
-      await waitFor(() => {
-        expect(result.current.snapshots).toHaveLength(1)
-        expect(result.current.snapshots[0].content).toBe('{\n  "name": "test"\n}')
-        expect(result.current.selectedSnapshotId).toBe(0)
-      })
-
-      expect(defaultProps.onSchemaChange).toHaveBeenCalledWith('{\n  "name": "test"\n}')
-    })
-  })
-
-  describe('开始录制 - postMessage 模式', () => {
-    const postMessageProps = {
-      ...defaultProps,
-      apiConfig: {
-        communicationMode: 'postMessage' as const,
-        requestTimeout: 5,
-        sourceConfig: {
-          contentSource: 'test-content',
-          hostSource: 'test-host',
-        },
-        messageTypes: {
-          getSchema: 'GET_SCHEMA',
-          updateSchema: 'UPDATE_SCHEMA',
-          checkPreview: 'CHECK_PREVIEW',
-          renderPreview: 'RENDER_PREVIEW',
-          cleanupPreview: 'CLEANUP_PREVIEW',
-          startRecording: 'START_RECORDING',
-          stopRecording: 'STOP_RECORDING',
-          schemaPush: 'SCHEMA_PUSH',
-        },
-      },
-    }
-
-    beforeEach(() => {
-      mockGetCommunicationMode.mockReturnValue({
-        communicationMode: 'postMessage',
-        isPostMessageMode: true,
-        isWindowFunctionMode: false,
-      })
-    })
-
     it('应该使用 sendRequestToHost 发送请求', async () => {
       mockSendRequestToHost.mockResolvedValue({ success: true, data: { name: 'test' } })
 
-      const { result } = renderHook(() => useSchemaRecording(postMessageProps))
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
+        })
+      )
 
       await act(async () => {
         result.current.startRecording()
@@ -220,14 +110,19 @@ describe('useSchemaRecording Hook 测试', () => {
         'GET_SCHEMA',
         { params: 'param1,param2' },
         5,
-        postMessageProps.apiConfig.sourceConfig
+        defaultProps.apiConfig.sourceConfig
       )
     })
 
-    it('应该处理 postMessage 模式的响应并创建快照', async () => {
+    it('应该处理轮询模式的响应并创建快照', async () => {
       mockSendRequestToHost.mockResolvedValue({ success: true, data: { key: 'value' } })
 
-      const { result } = renderHook(() => useSchemaRecording(postMessageProps))
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
+        })
+      )
 
       await act(async () => {
         result.current.startRecording()
@@ -239,10 +134,15 @@ describe('useSchemaRecording Hook 测试', () => {
       })
     })
 
-    it('应该按轮询间隔定期发送 postMessage 请求', async () => {
+    it('应该按轮询间隔定期发送请求', async () => {
       mockSendRequestToHost.mockResolvedValue({ success: true, data: { count: 1 } })
 
-      const { result } = renderHook(() => useSchemaRecording(postMessageProps))
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
+        })
+      )
 
       await act(async () => {
         result.current.startRecording()
@@ -261,10 +161,33 @@ describe('useSchemaRecording Hook 测试', () => {
       expect(mockSendRequestToHost).toHaveBeenCalledTimes(1)
     })
 
+    it('重复调用 startRecording 应该被忽略', async () => {
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
+        })
+      )
+
+      await act(async () => {
+        result.current.startRecording()
+        result.current.startRecording()
+        result.current.startRecording()
+      })
+
+      // 只应该发送一次请求
+      expect(mockSendRequestToHost).toHaveBeenCalledTimes(1)
+    })
+
     it('应该忽略单次请求失败', async () => {
       mockSendRequestToHost.mockRejectedValue(new Error('网络错误'))
 
-      const { result } = renderHook(() => useSchemaRecording(postMessageProps))
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
+        })
+      )
 
       // 不应该抛出错误
       await act(async () => {
@@ -276,67 +199,176 @@ describe('useSchemaRecording Hook 测试', () => {
     })
   })
 
-  describe('停止录制', () => {
-    it('应该在停止录制时设置 isRecording 为 false', () => {
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
+  describe('开始录制 - 事件驱动模式', () => {
+    const eventDrivenProps = {
+      ...defaultProps,
+      dataFetchMode: 'eventDriven' as const,
+    }
 
+    it('应该注册宿主推送监听器', async () => {
+      mockSendRequestToHost.mockResolvedValue({ success: true })
+
+      const { result } = renderHook(() => useSchemaRecording(eventDrivenProps))
+
+      await act(async () => {
+        result.current.startRecording()
+      })
+
+      expect(mockListenHostPush).toHaveBeenCalledTimes(1)
+      expect(mockListenHostPush).toHaveBeenCalledWith(
+        'SCHEMA_PUSH',
+        expect.any(Function),
+        eventDrivenProps.apiConfig.sourceConfig
+      )
+    })
+
+    it('应该发送开始录制指令给宿主', async () => {
+      mockSendRequestToHost.mockResolvedValue({ success: true })
+
+      const { result } = renderHook(() => useSchemaRecording(eventDrivenProps))
+
+      await act(async () => {
+        result.current.startRecording()
+      })
+
+      expect(mockSendRequestToHost).toHaveBeenCalledWith(
+        'START_RECORDING',
+        { params: 'param1,param2' },
+        5,
+        eventDrivenProps.apiConfig.sourceConfig
+      )
+    })
+
+    it('应该处理宿主推送的数据并创建快照', async () => {
+      let pushHandler: ((payload: any) => void) | null = null
+      mockListenHostPush.mockImplementation((_, handler) => {
+        pushHandler = handler
+        return vi.fn()
+      })
+      mockSendRequestToHost.mockResolvedValue({ success: true })
+
+      const { result } = renderHook(() => useSchemaRecording(eventDrivenProps))
+
+      await act(async () => {
+        result.current.startRecording()
+      })
+
+      // 模拟宿主推送数据
       act(() => {
+        pushHandler?.({ success: true, data: { name: 'test' } })
+      })
+
+      await waitFor(() => {
+        expect(result.current.snapshots).toHaveLength(1)
+        expect(result.current.snapshots[0].content).toBe('{\n  "name": "test"\n}')
+        expect(result.current.selectedSnapshotId).toBe(0)
+      })
+
+      expect(defaultProps.onSchemaChange).toHaveBeenCalledWith('{\n  "name": "test"\n}')
+    })
+
+    it('开始录制失败时应该清理监听器', async () => {
+      const cleanupFn = vi.fn()
+      mockListenHostPush.mockReturnValue(cleanupFn)
+      mockSendRequestToHost.mockResolvedValue({ success: false, error: '宿主不支持录制' })
+
+      const { result } = renderHook(() => useSchemaRecording(eventDrivenProps))
+
+      await act(async () => {
+        result.current.startRecording()
+      })
+
+      // 开始录制失败，监听器应该被清理
+      expect(cleanupFn).toHaveBeenCalled()
+      expect(result.current.isRecording).toBe(false)
+    })
+  })
+
+  describe('停止录制', () => {
+    it('应该在停止录制时设置 isRecording 为 false', async () => {
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
+        })
+      )
+
+      await act(async () => {
         result.current.startRecording()
       })
 
       expect(result.current.isRecording).toBe(true)
 
-      act(() => {
+      await act(async () => {
         result.current.stopRecording()
       })
 
       expect(result.current.isRecording).toBe(false)
     })
 
-    it('应该清理轮询定时器', () => {
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
+    it('应该清理轮询定时器', async () => {
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
+        })
+      )
 
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
-      act(() => {
+      await act(async () => {
         result.current.stopRecording()
       })
 
       // 清除之前的调用记录
-      mockPostMessageToPage.mockClear()
+      mockSendRequestToHost.mockClear()
 
       // 推进时间，不应该再有请求发送
-      act(() => {
+      await act(async () => {
         vi.advanceTimersByTime(3000)
       })
 
-      expect(mockPostMessageToPage).not.toHaveBeenCalled()
+      expect(mockSendRequestToHost).not.toHaveBeenCalled()
     })
 
-    it('应该调用消息监听器的清理函数', () => {
+    it('事件驱动模式应该发送停止录制指令', async () => {
       const cleanupFn = vi.fn()
-      mockListenPageMessages.mockReturnValue(cleanupFn)
+      mockListenHostPush.mockReturnValue(cleanupFn)
+      mockSendRequestToHost.mockResolvedValue({ success: true })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'eventDriven',
+        })
+      )
 
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
-      act(() => {
+      mockSendRequestToHost.mockClear()
+
+      await act(async () => {
         result.current.stopRecording()
       })
 
+      expect(mockSendRequestToHost).toHaveBeenCalledWith(
+        'STOP_RECORDING',
+        { params: 'param1,param2' },
+        5,
+        defaultProps.apiConfig.sourceConfig
+      )
       expect(cleanupFn).toHaveBeenCalled()
     })
 
-    it('未录制时调用 stopRecording 应该安全执行', () => {
+    it('未录制时调用 stopRecording 应该安全执行', async () => {
       const { result } = renderHook(() => useSchemaRecording(defaultProps))
 
       // 不应该抛出错误
-      act(() => {
+      await act(async () => {
         result.current.stopRecording()
       })
 
@@ -346,23 +378,17 @@ describe('useSchemaRecording Hook 测试', () => {
 
   describe('Schema 响应处理', () => {
     it('应该正确处理字符串类型的数据', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
-        return vi.fn()
-      })
+      mockSendRequestToHost.mockResolvedValue({ success: true, data: 'plain text content' })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
-
-      act(() => {
-        result.current.startRecording()
-      })
-
-      act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: 'plain text content' },
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
         })
+      )
+
+      await act(async () => {
+        result.current.startRecording()
       })
 
       await waitFor(() => {
@@ -372,23 +398,17 @@ describe('useSchemaRecording Hook 测试', () => {
     })
 
     it('应该正确处理数组类型的数据', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
-        return vi.fn()
-      })
+      mockSendRequestToHost.mockResolvedValue({ success: true, data: [1, 2, 3] })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
-
-      act(() => {
-        result.current.startRecording()
-      })
-
-      act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: [1, 2, 3] },
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
         })
+      )
+
+      await act(async () => {
+        result.current.startRecording()
       })
 
       await waitFor(() => {
@@ -398,38 +418,35 @@ describe('useSchemaRecording Hook 测试', () => {
     })
 
     it('应该去重相同内容的响应', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
+      let pushHandler: ((payload: any) => void) | null = null
+      mockListenHostPush.mockImplementation((_, handler) => {
+        pushHandler = handler
         return vi.fn()
       })
+      mockSendRequestToHost.mockResolvedValue({ success: true })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'eventDriven',
+        })
+      )
 
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
       // 发送相同内容三次
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { same: 'content' } },
-        })
+        pushHandler?.({ success: true, data: { same: 'content' } })
       })
 
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { same: 'content' } },
-        })
+        pushHandler?.({ success: true, data: { same: 'content' } })
       })
 
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { same: 'content' } },
-        })
+        pushHandler?.({ success: true, data: { same: 'content' } })
       })
 
       await waitFor(() => {
@@ -439,37 +456,34 @@ describe('useSchemaRecording Hook 测试', () => {
     })
 
     it('应该为不同内容创建多个快照', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
+      let pushHandler: ((payload: any) => void) | null = null
+      mockListenHostPush.mockImplementation((_, handler) => {
+        pushHandler = handler
         return vi.fn()
       })
+      mockSendRequestToHost.mockResolvedValue({ success: true })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'eventDriven',
+        })
+      )
 
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { version: 1 } },
-        })
+        pushHandler?.({ success: true, data: { version: 1 } })
       })
 
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { version: 2 } },
-        })
+        pushHandler?.({ success: true, data: { version: 2 } })
       })
 
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { version: 3 } },
-        })
+        pushHandler?.({ success: true, data: { version: 3 } })
       })
 
       await waitFor(() => {
@@ -481,23 +495,17 @@ describe('useSchemaRecording Hook 测试', () => {
     })
 
     it('应该忽略失败的响应', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
-        return vi.fn()
-      })
+      mockSendRequestToHost.mockResolvedValue({ success: false, error: '获取失败' })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
-
-      act(() => {
-        result.current.startRecording()
-      })
-
-      act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: false, error: '获取失败' },
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
         })
+      )
+
+      await act(async () => {
+        result.current.startRecording()
       })
 
       // 等待一小段时间确保状态稳定
@@ -509,23 +517,17 @@ describe('useSchemaRecording Hook 测试', () => {
     })
 
     it('应该忽略 data 为 undefined 的响应', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
-        return vi.fn()
-      })
+      mockSendRequestToHost.mockResolvedValue({ success: true })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
-
-      act(() => {
-        result.current.startRecording()
-      })
-
-      act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true },
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
         })
+      )
+
+      await act(async () => {
+        result.current.startRecording()
       })
 
       await act(async () => {
@@ -536,27 +538,30 @@ describe('useSchemaRecording Hook 测试', () => {
     })
 
     it('停止录制后不应该处理响应', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
+      let pushHandler: ((payload: any) => void) | null = null
+      mockListenHostPush.mockImplementation((_, handler) => {
+        pushHandler = handler
         return vi.fn()
       })
+      mockSendRequestToHost.mockResolvedValue({ success: true })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'eventDriven',
+        })
+      )
 
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
-      act(() => {
+      await act(async () => {
         result.current.stopRecording()
       })
 
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { should: 'not appear' } },
-        })
+        pushHandler?.({ success: true, data: { should: 'not appear' } })
       })
 
       await act(async () => {
@@ -569,24 +574,27 @@ describe('useSchemaRecording Hook 测试', () => {
 
   describe('快照时间戳', () => {
     it('应该记录相对于录制开始的时间戳', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
+      let pushHandler: ((payload: any) => void) | null = null
+      mockListenHostPush.mockImplementation((_, handler) => {
+        pushHandler = handler
         return vi.fn()
       })
+      mockSendRequestToHost.mockResolvedValue({ success: true })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'eventDriven',
+        })
+      )
 
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
       // 立即收到第一个响应
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { v: 1 } },
-        })
+        pushHandler?.({ success: true, data: { v: 1 } })
       })
 
       // 推进 500ms
@@ -596,10 +604,7 @@ describe('useSchemaRecording Hook 测试', () => {
 
       // 收到第二个响应
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { v: 2 } },
-        })
+        pushHandler?.({ success: true, data: { v: 2 } })
       })
 
       await waitFor(() => {
@@ -614,30 +619,30 @@ describe('useSchemaRecording Hook 测试', () => {
 
   describe('选择快照', () => {
     it('应该更新 selectedSnapshotId', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
+      let pushHandler: ((payload: any) => void) | null = null
+      mockListenHostPush.mockImplementation((_, handler) => {
+        pushHandler = handler
         return vi.fn()
       })
+      mockSendRequestToHost.mockResolvedValue({ success: true })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'eventDriven',
+        })
+      )
 
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { v: 1 } },
-        })
+        pushHandler?.({ success: true, data: { v: 1 } })
       })
 
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { v: 2 } },
-        })
+        pushHandler?.({ success: true, data: { v: 2 } })
       })
 
       await waitFor(() => {
@@ -657,23 +662,26 @@ describe('useSchemaRecording Hook 测试', () => {
     })
 
     it('选择不存在的快照 ID 应该被忽略', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
+      let pushHandler: ((payload: any) => void) | null = null
+      mockListenHostPush.mockImplementation((_, handler) => {
+        pushHandler = handler
         return vi.fn()
       })
+      mockSendRequestToHost.mockResolvedValue({ success: true })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'eventDriven',
+        })
+      )
 
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { v: 1 } },
-        })
+        pushHandler?.({ success: true, data: { v: 1 } })
       })
 
       await waitFor(() => {
@@ -696,30 +704,30 @@ describe('useSchemaRecording Hook 测试', () => {
 
   describe('清空快照', () => {
     it('应该清空所有快照并重置状态', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
+      let pushHandler: ((payload: any) => void) | null = null
+      mockListenHostPush.mockImplementation((_, handler) => {
+        pushHandler = handler
         return vi.fn()
       })
+      mockSendRequestToHost.mockResolvedValue({ success: true })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'eventDriven',
+        })
+      )
 
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { v: 1 } },
-        })
+        pushHandler?.({ success: true, data: { v: 1 } })
       })
 
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { v: 2 } },
-        })
+        pushHandler?.({ success: true, data: { v: 2 } })
       })
 
       await waitFor(() => {
@@ -735,44 +743,44 @@ describe('useSchemaRecording Hook 测试', () => {
     })
 
     it('清空后新录制应该从 ID 0 开始', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
+      let pushHandler: ((payload: any) => void) | null = null
+      mockListenHostPush.mockImplementation((_, handler) => {
+        pushHandler = handler
         return vi.fn()
       })
+      mockSendRequestToHost.mockResolvedValue({ success: true })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'eventDriven',
+        })
+      )
 
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { v: 1 } },
-        })
+        pushHandler?.({ success: true, data: { v: 1 } })
       })
 
       await waitFor(() => {
         expect(result.current.snapshots).toHaveLength(1)
       })
 
-      act(() => {
+      await act(async () => {
         result.current.stopRecording()
         result.current.clearSnapshots()
       })
 
       // 重新开始录制
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: { new: 'data' } },
-        })
+        pushHandler?.({ success: true, data: { new: 'data' } })
       })
 
       await waitFor(() => {
@@ -783,35 +791,46 @@ describe('useSchemaRecording Hook 测试', () => {
   })
 
   describe('组件卸载', () => {
-    it('应该在卸载时清理定时器', () => {
-      const { result, unmount } = renderHook(() => useSchemaRecording(defaultProps))
+    it('应该在卸载时清理定时器', async () => {
+      const { result, unmount } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
+        })
+      )
 
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
       unmount()
 
       // 推进时间，不应该有错误发生
-      act(() => {
+      await act(async () => {
         vi.advanceTimersByTime(5000)
       })
 
       // 验证没有额外的请求发送
-      const callCount = mockPostMessageToPage.mock.calls.length
-      act(() => {
+      const callCount = mockSendRequestToHost.mock.calls.length
+      await act(async () => {
         vi.advanceTimersByTime(5000)
       })
-      expect(mockPostMessageToPage).toHaveBeenCalledTimes(callCount)
+      expect(mockSendRequestToHost).toHaveBeenCalledTimes(callCount)
     })
 
-    it('应该在卸载时清理消息监听器', () => {
+    it('应该在卸载时清理宿主推送监听器', async () => {
       const cleanupFn = vi.fn()
-      mockListenPageMessages.mockReturnValue(cleanupFn)
+      mockListenHostPush.mockReturnValue(cleanupFn)
+      mockSendRequestToHost.mockResolvedValue({ success: true })
 
-      const { result, unmount } = renderHook(() => useSchemaRecording(defaultProps))
+      const { result, unmount } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'eventDriven',
+        })
+      )
 
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
@@ -819,21 +838,47 @@ describe('useSchemaRecording Hook 测试', () => {
 
       expect(cleanupFn).toHaveBeenCalled()
     })
+
+    it('事件驱动模式卸载时应该发送停止录制指令', async () => {
+      mockListenHostPush.mockReturnValue(vi.fn())
+      mockSendRequestToHost.mockResolvedValue({ success: true })
+
+      const { result, unmount } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'eventDriven',
+        })
+      )
+
+      await act(async () => {
+        result.current.startRecording()
+      })
+
+      mockSendRequestToHost.mockClear()
+
+      unmount()
+
+      // 卸载时应该发送停止录制指令
+      await waitFor(() => {
+        expect(mockSendRequestToHost).toHaveBeenCalledWith(
+          'STOP_RECORDING',
+          { params: 'param1,param2' },
+          5,
+          defaultProps.apiConfig.sourceConfig
+        )
+      })
+    })
   })
 
   describe('API 配置', () => {
     it('应该使用默认的 messageTypes 当 apiConfig 未提供时', async () => {
-      mockGetCommunicationMode.mockReturnValue({
-        communicationMode: 'postMessage',
-        isPostMessageMode: true,
-        isWindowFunctionMode: false,
-      })
       mockSendRequestToHost.mockResolvedValue({ success: true, data: {} })
 
       const { result } = renderHook(() =>
         useSchemaRecording({
           ...defaultProps,
-          apiConfig: null,
+          apiConfig: undefined,
+          dataFetchMode: 'polling',
         })
       )
 
@@ -851,11 +896,6 @@ describe('useSchemaRecording Hook 测试', () => {
     })
 
     it('应该使用自定义的 requestTimeout', async () => {
-      mockGetCommunicationMode.mockReturnValue({
-        communicationMode: 'postMessage',
-        isPostMessageMode: true,
-        isWindowFunctionMode: false,
-      })
       mockSendRequestToHost.mockResolvedValue({ success: true, data: {} })
 
       const customApiConfig = {
@@ -881,6 +921,7 @@ describe('useSchemaRecording Hook 测试', () => {
         useSchemaRecording({
           ...defaultProps,
           apiConfig: customApiConfig,
+          dataFetchMode: 'polling',
         })
       )
 
@@ -897,27 +938,54 @@ describe('useSchemaRecording Hook 测试', () => {
     })
   })
 
-  describe('边界情况', () => {
-    it('应该处理无法 stringify 的数据', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
-        return vi.fn()
-      })
+  describe('自动停止功能', () => {
+    it('应该在指定时间无数据变化后自动停止录制', async () => {
+      const onAutoStop = vi.fn()
+      mockSendRequestToHost.mockResolvedValue({ success: true, data: { initial: 'data' } })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
+          autoStopTimeout: 2, // 2秒无变化后自动停止
+          onAutoStop,
+        })
+      )
 
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
-      // 创建一个包含循环引用的对象是不可能通过 postMessage 传递的
-      // 但我们可以测试其他边界情况，比如 Symbol
-      act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: 12345 },
+      // 等待第一个数据到达
+      await waitFor(() => {
+        expect(result.current.snapshots).toHaveLength(1)
+      })
+
+      // 推进时间超过自动停止阈值（数据不变化）
+      await act(async () => {
+        vi.advanceTimersByTime(3000)
+      })
+
+      await waitFor(() => {
+        expect(result.current.isRecording).toBe(false)
+        expect(onAutoStop).toHaveBeenCalled()
+      })
+    })
+  })
+
+  describe('边界情况', () => {
+    it('应该处理无法 stringify 的数据', async () => {
+      mockSendRequestToHost.mockResolvedValue({ success: true, data: 12345 })
+
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
         })
+      )
+
+      await act(async () => {
+        result.current.startRecording()
       })
 
       await waitFor(() => {
@@ -927,23 +995,17 @@ describe('useSchemaRecording Hook 测试', () => {
     })
 
     it('应该处理空对象', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
-        return vi.fn()
-      })
+      mockSendRequestToHost.mockResolvedValue({ success: true, data: {} })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
-
-      act(() => {
-        result.current.startRecording()
-      })
-
-      act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: {} },
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
         })
+      )
+
+      await act(async () => {
+        result.current.startRecording()
       })
 
       await waitFor(() => {
@@ -953,23 +1015,19 @@ describe('useSchemaRecording Hook 测试', () => {
     })
 
     it('应该处理空数组', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
-        return vi.fn()
-      })
+      mockSendRequestToHost.mockResolvedValue({ success: true, data: [] })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
-
-      act(() => {
-        result.current.startRecording()
-      })
-
-      act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: [] },
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
         })
+      )
+
+      await act(async () => {
+        result.current.startRecording()
+        // 等待 pollSchema 的 Promise 完成
+        await vi.advanceTimersByTimeAsync(0)
       })
 
       await waitFor(() => {
@@ -979,23 +1037,19 @@ describe('useSchemaRecording Hook 测试', () => {
     })
 
     it('应该处理 null 值', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
-        return vi.fn()
-      })
+      mockSendRequestToHost.mockResolvedValue({ success: true, data: null })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
-
-      act(() => {
-        result.current.startRecording()
-      })
-
-      act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: null },
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
         })
+      )
+
+      await act(async () => {
+        result.current.startRecording()
+        // 等待 pollSchema 的 Promise 完成
+        await vi.advanceTimersByTimeAsync(0)
       })
 
       await waitFor(() => {
@@ -1005,23 +1059,19 @@ describe('useSchemaRecording Hook 测试', () => {
     })
 
     it('应该处理 boolean 值', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
-        return vi.fn()
-      })
+      mockSendRequestToHost.mockResolvedValue({ success: true, data: false })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
-
-      act(() => {
-        result.current.startRecording()
-      })
-
-      act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: false },
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
         })
+      )
+
+      await act(async () => {
+        result.current.startRecording()
+        // 等待 pollSchema 的 Promise 完成
+        await vi.advanceTimersByTimeAsync(0)
       })
 
       await waitFor(() => {
@@ -1031,24 +1081,17 @@ describe('useSchemaRecording Hook 测试', () => {
     })
 
     it('应该处理空字符串（会被去重因为初始值为空）', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
-        return vi.fn()
-      })
+      mockSendRequestToHost.mockResolvedValue({ success: true, data: '' })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
-
-      act(() => {
-        result.current.startRecording()
-      })
-
-      // 空字符串与初始的 lastContentRef.current = '' 相同，所以会被去重跳过
-      act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: '' },
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'polling',
         })
+      )
+
+      await act(async () => {
+        result.current.startRecording()
       })
 
       await act(async () => {
@@ -1060,24 +1103,27 @@ describe('useSchemaRecording Hook 测试', () => {
     })
 
     it('空字符串在有内容后应该被记录', async () => {
-      let messageHandler: ((msg: any) => void) | null = null
-      mockListenPageMessages.mockImplementation((handler) => {
-        messageHandler = handler
+      let pushHandler: ((payload: any) => void) | null = null
+      mockListenHostPush.mockImplementation((_, handler) => {
+        pushHandler = handler
         return vi.fn()
       })
+      mockSendRequestToHost.mockResolvedValue({ success: true })
 
-      const { result } = renderHook(() => useSchemaRecording(defaultProps))
+      const { result } = renderHook(() =>
+        useSchemaRecording({
+          ...defaultProps,
+          dataFetchMode: 'eventDriven',
+        })
+      )
 
-      act(() => {
+      await act(async () => {
         result.current.startRecording()
       })
 
       // 先发送非空内容
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: 'some content' },
-        })
+        pushHandler?.({ success: true, data: 'some content' })
       })
 
       await waitFor(() => {
@@ -1086,10 +1132,7 @@ describe('useSchemaRecording Hook 测试', () => {
 
       // 再发送空字符串
       act(() => {
-        messageHandler?.({
-          type: MessageType.SCHEMA_RESPONSE,
-          payload: { success: true, data: '' },
-        })
+        pushHandler?.({ success: true, data: '' })
       })
 
       await waitFor(() => {

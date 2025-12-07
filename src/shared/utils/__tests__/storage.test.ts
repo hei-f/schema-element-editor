@@ -1464,6 +1464,9 @@ describe('Storage工具测试', () => {
           checkPreview: 'CHECK_PREVIEW',
           renderPreview: 'RENDER_PREVIEW',
           cleanupPreview: 'CLEANUP_PREVIEW',
+          startRecording: 'START_RECORDING',
+          stopRecording: 'STOP_RECORDING',
+          schemaPush: 'SCHEMA_PUSH',
         },
       })
     })
@@ -1490,6 +1493,9 @@ describe('Storage工具测试', () => {
           checkPreview: 'CHECK_PREVIEW',
           renderPreview: 'RENDER_PREVIEW',
           cleanupPreview: 'CLEANUP_PREVIEW',
+          startRecording: 'START_RECORDING',
+          stopRecording: 'STOP_RECORDING',
+          schemaPush: 'SCHEMA_PUSH',
         },
       })
     })
@@ -1518,6 +1524,9 @@ describe('Storage工具测试', () => {
           checkPreview: 'CHECK_PREVIEW',
           renderPreview: 'RENDER_PREVIEW',
           cleanupPreview: 'CLEANUP_PREVIEW',
+          startRecording: 'START_RECORDING',
+          stopRecording: 'STOP_RECORDING',
+          schemaPush: 'SCHEMA_PUSH',
         },
       })
     })
@@ -1570,6 +1579,9 @@ describe('Storage工具测试', () => {
           checkPreview: 'CHECK_PREVIEW',
           renderPreview: 'RENDER_PREVIEW',
           cleanupPreview: 'CLEANUP_PREVIEW',
+          startRecording: 'START_RECORDING',
+          stopRecording: 'STOP_RECORDING',
+          schemaPush: 'SCHEMA_PUSH',
         },
       })
     })
