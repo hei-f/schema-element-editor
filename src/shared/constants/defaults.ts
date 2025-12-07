@@ -61,6 +61,7 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     keyBinding: 'r',
     highlightColor: '#FF4D4F',
     pollingInterval: 100,
+    autoStopTimeout: null,
   },
   iframeConfig: {
     enabled: false,

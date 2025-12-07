@@ -123,6 +123,8 @@ export const FORM_PATHS = {
     highlightColor: ['recordingModeConfig', 'highlightColor'],
     /** 轮询间隔 */
     pollingInterval: ['recordingModeConfig', 'pollingInterval'],
+    /** 自动停止超时时间 */
+    autoStopTimeout: ['recordingModeConfig', 'autoStopTimeout'],
   },
 
   /** iframe 支持配置 */

@@ -91,7 +91,9 @@ export const useSettingsForm = (props: UseSettingsFormProps): UseSettingsFormRet
       (fieldPath[0] === 'highlightAllConfig' &&
         ['keyBinding', 'maxHighlightCount'].includes(fieldPath[1])) ||
       (fieldPath[0] === 'recordingModeConfig' &&
-        ['keyBinding', 'pollingInterval', 'highlightColor'].includes(fieldPath[1])) ||
+        ['keyBinding', 'pollingInterval', 'highlightColor', 'autoStopTimeout'].includes(
+          fieldPath[1]
+        )) ||
       (fieldPath[0] === 'apiConfig' && apiConfigDebounceFields.includes(fieldPath[1]))
     )
   }, [])

@@ -254,6 +254,39 @@ export const ElementDetectionSection: React.FC<SectionProps> = (props) => {
           >
             <FixedWidthInputNumber min={50} max={1000} step={50} $width={150} suffix="ms" />
           </Form.Item>
+          <Form.Item
+            label={
+              <Space>
+                数据无变化自动停止
+                <Tooltip title="录制期间数据超过指定时间无变化时自动停止录制，设为空则禁用">
+                  <HelpTooltipIcon />
+                </Tooltip>
+              </Space>
+            }
+            name={FORM_PATHS.recordingModeConfig.autoStopTimeout}
+            rules={[
+              {
+                validator: (_, value) => {
+                  if (value === null || value === undefined || value === '') {
+                    return Promise.resolve()
+                  }
+                  if (typeof value === 'number' && value >= 5 && value <= 300) {
+                    return Promise.resolve()
+                  }
+                  return Promise.reject(new Error('请输入 5-300 之间的数字，或留空禁用'))
+                },
+              },
+            ]}
+          >
+            <FixedWidthInputNumber
+              min={5}
+              max={300}
+              step={5}
+              $width={150}
+              suffix="秒"
+              placeholder="留空禁用"
+            />
+          </Form.Item>
           <SpacedAlert
             message="录制模式说明"
             description={

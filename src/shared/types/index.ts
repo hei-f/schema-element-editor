@@ -140,6 +140,8 @@ export interface RecordingModeConfig {
   highlightColor: string
   /** 轮询间隔（毫秒） */
   pollingInterval: number
+  /** 自动停止录制的超时时间（秒），null 表示禁用 */
+  autoStopTimeout: number | null
 }
 
 /**

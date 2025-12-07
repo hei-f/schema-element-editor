@@ -149,6 +149,7 @@ export const FIELD_GROUPS: Record<string, FieldGroup> = {
       FORM_PATHS.recordingModeConfig.keyBinding,
       FORM_PATHS.recordingModeConfig.highlightColor,
       FORM_PATHS.recordingModeConfig.pollingInterval,
+      FORM_PATHS.recordingModeConfig.autoStopTimeout,
     ],
     save: async (allValues: any) => {
       await storage.setRecordingModeConfig(allValues.recordingModeConfig)
@@ -198,6 +199,7 @@ export const DEBOUNCE_FIELD_PATHS: readonly (readonly string[])[] = [
   FORM_PATHS.recordingModeConfig.keyBinding,
   FORM_PATHS.recordingModeConfig.highlightColor,
   FORM_PATHS.recordingModeConfig.pollingInterval,
+  FORM_PATHS.recordingModeConfig.autoStopTimeout,
   FORM_PATHS.apiConfig.requestTimeout,
   FORM_PATHS.apiConfig.sourceConfig.contentSource,
   FORM_PATHS.apiConfig.sourceConfig.hostSource,
