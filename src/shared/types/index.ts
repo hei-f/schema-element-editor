@@ -114,6 +114,8 @@ export interface PreviewConfig {
   autoUpdate: boolean
   /** z-index 配置 */
   zIndex: ZIndexConfig
+  /** 是否启用内置预览器（当宿主未提供预览函数时使用） */
+  enableBuiltinPreview: boolean
 }
 
 /**

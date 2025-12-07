@@ -49,6 +49,7 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
       default: 2147483646,
       preview: 999,
     },
+    enableBuiltinPreview: true,
   },
   maxHistoryCount: 50,
   highlightAllConfig: {

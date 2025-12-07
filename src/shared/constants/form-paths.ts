@@ -98,6 +98,8 @@ export const FORM_PATHS = {
       /** 预览模式 z-index */
       preview: ['previewConfig', 'zIndex', 'preview'],
     },
+    /** 是否启用内置预览器 */
+    enableBuiltinPreview: ['previewConfig', 'enableBuiltinPreview'],
   },
 
   /** 最大历史记录数量 */
