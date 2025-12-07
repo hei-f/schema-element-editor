@@ -121,6 +121,8 @@ export interface PreviewModeContentProps extends BaseContentProps {
   isOpeningTransition: boolean
   /** 是否隐藏工具栏（由父组件统一管理时使用） */
   hideToolbar?: boolean
+  /** 是否使用内置预览器（宿主没有预览函数时的 fallback） */
+  useBuiltinPreview?: boolean
 }
 
 /**

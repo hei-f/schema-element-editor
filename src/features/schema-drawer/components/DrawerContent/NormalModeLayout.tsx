@@ -19,6 +19,7 @@ import { LightSuccessNotification } from '../../styles/notifications/notificatio
 import { CodeMirrorEditor } from '../editor/CodeMirrorEditor'
 import { DiffModeContent } from './modes'
 import { ToolbarSection } from './shared/ToolbarSection'
+import { BuiltinPreview } from '../preview/BuiltinPreview'
 import type { ToolbarMode } from '../toolbar/DrawerToolbar'
 import type { BaseContentProps, DiffModeContentProps, PreviewModeContentProps } from './types'
 import type { EditorThemeVars } from '../../styles/editor/editor-theme-vars'
@@ -88,6 +89,7 @@ export const NormalModeLayout: React.FC<NormalModeLayoutProps> = (props) => {
     isClosingTransition,
     isOpeningInitial,
     isOpeningTransition,
+    useBuiltinPreview,
   } = previewModeProps
 
   /** 是否显示预览区域（预览模式或预览关闭过渡中） */
@@ -171,15 +173,20 @@ export const NormalModeLayout: React.FC<NormalModeLayoutProps> = (props) => {
           <PreviewEditorRow ref={isClosingTransition ? undefined : previewContainerRef}>
             {/* 左侧预览占位区域（全高） */}
             <PreviewPlaceholder
-              ref={isClosingTransition ? undefined : previewPlaceholderRef}
+              ref={isClosingTransition || useBuiltinPreview ? undefined : previewPlaceholderRef}
               $width={previewWidth}
               $isClosing={isClosingTransition}
               $isOpening={isOpeningInitial}
               $isDragging={isDragging}
-            />
+            >
+              {/* 内置预览器模式：直接在占位区域内渲染 MarkdownEditor */}
+              {useBuiltinPreview && !isClosingTransition && !isOpeningInitial && (
+                <BuiltinPreview editorValue={editorValue} contentType={contentType} />
+              )}
+            </PreviewPlaceholder>
 
-            {/* 拖拽时的蒙层提示 */}
-            {!isClosingTransition && isDragging && (
+            {/* 拖拽时的蒙层提示（内置预览时不显示） */}
+            {!isClosingTransition && isDragging && !useBuiltinPreview && (
               <DragOverlay $width={previewWidth}>
                 <DragWidthIndicator>{Math.round(previewWidth)}%</DragWidthIndicator>
                 <DragHintText>松开鼠标完成调整</DragHintText>

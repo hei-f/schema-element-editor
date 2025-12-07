@@ -12,7 +12,7 @@ import type {
   HistoryEntry,
   SchemaDrawerConfig,
 } from '@/shared/types'
-import { HistoryEntryType, MessageType } from '@/shared/types'
+import { ContentType, HistoryEntryType, MessageType } from '@/shared/types'
 import { postMessageToPage, sendRequestToHost } from '@/shared/utils/browser/message'
 import { storage } from '@/shared/utils/browser/storage'
 import { logger } from '@/shared/utils/logger'
@@ -713,11 +713,31 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   })
 
   /**
+   * 当前内容类型是否支持内置预览（AST 或 RawString）
+   */
+  const isBuiltinPreviewSupported =
+    contentType === ContentType.Ast || contentType === ContentType.RawString
+
+  /**
+   * 是否使用内置预览器
+   * 条件：宿主没有预览函数 + 开启了内置预览器配置 + 内容类型支持
+   */
+  const useBuiltinPreview =
+    !hasPreviewFunction && previewConfig.enableBuiltinPreview && isBuiltinPreviewSupported
+
+  /**
+   * 是否可以使用预览功能
+   * 宿主有预览函数，或者（开启了内置预览器 + 内容类型支持）
+   */
+  const canUsePreview =
+    hasPreviewFunction || (previewConfig.enableBuiltinPreview && isBuiltinPreviewSupported)
+
+  /**
    * 切换预览状态
    */
   const handleTogglePreview = useCallback(() => {
-    if (!hasPreviewFunction) {
-      message.warning('页面未提供预览函数')
+    if (!canUsePreview) {
+      message.warning('当前内容类型不支持预览')
       return
     }
 
@@ -726,7 +746,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     } else {
       switchFullScreenMode(FULL_SCREEN_MODE.PREVIEW)
     }
-  }, [hasPreviewFunction, previewEnabled, switchFullScreenMode])
+  }, [canUsePreview, previewEnabled, switchFullScreenMode])
 
   /**
    * 快捷键保存处理函数
@@ -741,11 +761,16 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   }, [isModified, isSaving, handleSave, message])
 
   /**
-   * 手动渲染预览
+   * 手动渲染预览（宿主预览器模式）
    * 预览数据与保存数据使用相同的转换逻辑，确保类型一致
+   * 注意：内置预览器模式下不调用此函数，预览内容由 BuiltinPreview 组件直接渲染
    */
   const handleRenderPreview = useCallback(
     async (isAutoUpdate = false) => {
+      // 内置预览器模式下不需要手动渲染
+      if (useBuiltinPreview) {
+        return
+      }
       if (!previewEnabled || !hasPreviewFunction) {
         return
       }
@@ -828,6 +853,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
       }
     },
     [
+      useBuiltinPreview,
       previewEnabled,
       hasPreviewFunction,
       editorValue,
@@ -842,12 +868,13 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   const handleRenderPreviewRef = useLatest(handleRenderPreview)
 
   /**
-   * 当预览开启时，自动渲染第一次
+   * 当预览开启时，自动渲染第一次（宿主预览器模式）
    * 延迟 350ms 等待 Drawer 宽度动画和预览区域动画完成（两者都是 300ms）
+   * 内置预览器模式下不需要此 effect，预览内容实时响应
    */
   useDeferredEffect(() => handleRenderPreviewRef.current(), [previewEnabled], {
     delay: 350,
-    enabled: previewEnabled && hasPreviewFunction,
+    enabled: previewEnabled && hasPreviewFunction && !useBuiltinPreview,
   })
 
   // TODO: resize 逻辑有问题，暂时注释掉
@@ -895,32 +922,35 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   // }, [previewEnabled, hasPreviewFunction])
 
   /**
-   * 自动更新预览（当开启自动更新时）
+   * 自动更新预览（当开启自动更新时，宿主预览器模式）
+   * 内置预览器模式下不需要此 effect，预览内容实时响应
    */
   useDeferredEffect(() => handleRenderPreviewRef.current(true), [editorValue], {
     delay: previewConfig.updateDelay,
-    enabled: previewEnabled && previewConfig.autoUpdate && hasPreviewFunction,
+    enabled: previewEnabled && previewConfig.autoUpdate && hasPreviewFunction && !useBuiltinPreview,
   })
 
   /**
    * 打开或更新预览（快捷键专用）
    * 预览关闭时：打开预览
-   * 预览打开时：更新预览内容
+   * 预览打开时：更新预览内容（仅宿主预览器模式需要手动更新）
    */
   const handleOpenOrUpdatePreview = useCallback(() => {
-    if (!hasPreviewFunction) {
-      message.warning('页面未提供预览函数')
+    if (!canUsePreview) {
+      message.warning('当前内容类型不支持预览')
       return
     }
 
     if (previewEnabled) {
-      // 预览已打开，触发更新
-      handleRenderPreview()
+      // 预览已打开，内置预览器模式下不需要手动更新，宿主预览器模式下触发更新
+      if (!useBuiltinPreview) {
+        handleRenderPreview()
+      }
     } else {
       // 预览未打开，打开预览
       switchFullScreenMode(FULL_SCREEN_MODE.PREVIEW)
     }
-  }, [hasPreviewFunction, previewEnabled, switchFullScreenMode, handleRenderPreview])
+  }, [canUsePreview, previewEnabled, useBuiltinPreview, switchFullScreenMode, handleRenderPreview])
 
   /**
    * 关闭预览（快捷键专用）
@@ -942,7 +972,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     canSave: isModified && !isSaving,
     canFormat: canParse,
     isPreviewOpen: previewEnabled,
-    hasPreviewFunction,
+    hasPreviewFunction: canUsePreview,
   })
 
   /**
@@ -1012,7 +1042,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
             onLoadVersion={loadHistoryVersion}
             onClearHistory={clearHistory}
             hasHistory={hasHistory}
-            hasPreviewFunction={hasPreviewFunction}
+            hasPreviewFunction={canUsePreview}
             previewEnabled={previewEnabled}
             isPreviewTransitioning={isClosingPreview || isOpeningTransition}
             onTogglePreview={handleTogglePreview}
@@ -1079,7 +1109,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
               onCompact: handleCompact,
               onParse: handleParse,
               onSegmentChange: handleSegmentChange,
-              onRenderPreview: handleRenderPreview,
+              // 内置预览器模式下不需要手动更新预览
+              onRenderPreview: useBuiltinPreview ? undefined : handleRenderPreview,
               onLocateError: handleLocateError,
               onRepairJson: handleRepairJson,
               onEnterDiffMode: handleEnterDiffMode,
@@ -1131,6 +1162,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
             isClosingTransition: isClosingPreview,
             isOpeningInitial: isOpeningPreview,
             isOpeningTransition,
+            useBuiltinPreview,
           }}
           normalModeProps={{
             previewEnabled,
