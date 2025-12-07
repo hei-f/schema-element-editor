@@ -204,6 +204,7 @@ describe('storage-config', () => {
           keyBinding: 'r',
           highlightColor: '#FF4D4F',
           pollingInterval: 100,
+          autoStopTimeout: null,
         })
       ).toBe(true)
 
@@ -213,6 +214,7 @@ describe('storage-config', () => {
           keyBinding: '5',
           highlightColor: 'red',
           pollingInterval: 50,
+          autoStopTimeout: 30,
         })
       ).toBe(true)
 
@@ -222,6 +224,7 @@ describe('storage-config', () => {
           keyBinding: 'A',
           highlightColor: '#000',
           pollingInterval: 1000,
+          autoStopTimeout: 300,
         })
       ).toBe(true)
     })
@@ -233,6 +236,7 @@ describe('storage-config', () => {
           keyBinding: 'r',
           highlightColor: '#FF4D4F',
           pollingInterval: 100,
+          autoStopTimeout: null,
         })
       ).toBe(false)
     })
@@ -244,6 +248,7 @@ describe('storage-config', () => {
           keyBinding: 'rr',
           highlightColor: '#FF4D4F',
           pollingInterval: 100,
+          autoStopTimeout: null,
         })
       ).toBe(false)
     })
@@ -255,6 +260,7 @@ describe('storage-config', () => {
           keyBinding: 'r',
           highlightColor: '',
           pollingInterval: 100,
+          autoStopTimeout: null,
         })
       ).toBe(false)
     })
@@ -266,6 +272,7 @@ describe('storage-config', () => {
           keyBinding: 'r',
           highlightColor: '#FF4D4F',
           pollingInterval: 49,
+          autoStopTimeout: null,
         })
       ).toBe(false)
 
@@ -275,6 +282,7 @@ describe('storage-config', () => {
           keyBinding: 'r',
           highlightColor: '#FF4D4F',
           pollingInterval: 1001,
+          autoStopTimeout: null,
         })
       ).toBe(false)
     })
@@ -560,6 +568,7 @@ describe('storage-config', () => {
           keyBinding: 'r',
           highlightColor: '#000',
           pollingInterval: 50,
+          autoStopTimeout: null,
         })
       ).toBe(true)
 
@@ -570,6 +579,7 @@ describe('storage-config', () => {
           keyBinding: 'r',
           highlightColor: '#000',
           pollingInterval: 1000,
+          autoStopTimeout: null,
         })
       ).toBe(true)
     })

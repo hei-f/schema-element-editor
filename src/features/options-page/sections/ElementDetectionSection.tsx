@@ -270,16 +270,16 @@ export const ElementDetectionSection: React.FC<SectionProps> = (props) => {
                   if (value === null || value === undefined || value === '') {
                     return Promise.resolve()
                   }
-                  if (typeof value === 'number' && value >= 5 && value <= 300) {
+                  if (typeof value === 'number' && value >= 3 && value <= 300) {
                     return Promise.resolve()
                   }
-                  return Promise.reject(new Error('请输入 5-300 之间的数字，或留空禁用'))
+                  return Promise.reject(new Error('请输入 3-300 之间的数字，或留空禁用'))
                 },
               },
             ]}
           >
             <FixedWidthInputNumber
-              min={5}
+              min={3}
               max={300}
               step={5}
               $width={150}
