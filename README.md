@@ -2,7 +2,7 @@
 
 Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 
-![Version](https://img.shields.io/badge/version-1.24.0-blue)
+![Version](https://img.shields.io/badge/version-1.25.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 ## 功能
@@ -359,7 +359,16 @@ window.__getContentPreview = (data, containerId: string) => {
 3. 可拖拽分隔条调整预览/编辑器宽度
 4. 支持手动更新或自动更新预览（可在配置页面设置）
 
-如果页面未提供预览函数，预览按钮将被禁用。
+**内置预览器 (v1.25.0+)**：
+
+当宿主页面未提供 `renderPreview` 函数时，插件提供内置的 Markdown 预览器作为 fallback：
+
+- 支持 AST（Elements[]）类型内容的预览
+- 支持 RawString（Markdown 字符串）类型内容的预览
+- 实时响应编辑内容变化，无需手动刷新
+- 可在配置页面【预览行为】中开启/关闭「启用内置预览器」选项
+
+> **注意**：内置预览器仅支持 AST 和 RawString 类型，JSON 对象类型不支持预览。如需自定义预览效果，建议宿主页面提供 `renderPreview` 函数。
 
 ### 元素标记
 
