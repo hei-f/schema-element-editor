@@ -213,8 +213,13 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   } = useSchemaRecording({
     attributes,
     pollingInterval: recordingConfig?.pollingInterval || 100,
-    onSchemaChange: updateEditorContent,
+    // 录制模式下跳过内容类型检测以提升性能，录制结束后再统一检测
+    onSchemaChange: (content) => updateEditorContent(content, { detectType: false }),
     apiConfig,
+    autoStopTimeout: recordingConfig?.autoStopTimeout,
+    onAutoStop: () => {
+      message.info('数据无变化，录制已自动停止')
+    },
   })
 
   /** 轻量提示 */
@@ -310,6 +315,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
       handleClose()
     },
     onSave,
+    isRecordingMode: isInRecordingMode,
+    contentType,
   })
 
   /** 历史版本加载回调（解耦设计） */
@@ -510,9 +517,11 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
 
   /**
    * 处理抽屉拖拽中宽度变化
+   * 在录制模式下需要减去录制面板宽度，因为 antd Drawer 返回的是完整宽度
    */
   const handleDrawerResize = (newSize: number) => {
-    setDrawerSize(newSize)
+    const adjustedSize = isInRecordingMode ? newSize - RECORDING_PANEL_WIDTH : newSize
+    setDrawerSize(adjustedSize)
   }
 
   /**
@@ -971,10 +980,14 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
 
   /**
    * 处理停止录制
+   * 停止后触发内容类型检测，更新 Segment 状态
    */
-  const handleStopRecording = useCallback(() => {
+  const handleStopRecording = () => {
     stopRecording()
-  }, [stopRecording])
+    // 录制结束后触发内容类型检测
+    const result = detectContentType(editorValue)
+    updateContentType(result)
+  }
 
   /**
    * 处理进入Diff模式
@@ -982,15 +995,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   const handleEnterDiffMode = useCallback(() => {
     switchFullScreenMode(FULL_SCREEN_MODE.DIFF)
   }, [switchFullScreenMode])
-  /**
-   * 处理选择快照
-   */
-  const handleSelectSnapshot = useCallback(
-    (id: number) => {
-      selectSnapshot(id)
-    },
-    [selectSnapshot]
-  )
 
   return (
     <>
@@ -1113,7 +1117,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
             selectedSnapshotId,
             previewEnabled,
             onStopRecording: handleStopRecording,
-            onSelectSnapshot: handleSelectSnapshot,
+            onSelectSnapshot: selectSnapshot,
             onEnterDiffMode: handleEnterDiffMode,
           }}
           previewModeProps={{
