@@ -1,6 +1,6 @@
 import { DEFAULT_VALUES } from '@/shared/constants/defaults'
 import { FORM_PATHS } from '@/shared/constants/form-paths'
-import type { ApiConfig, CommunicationMode } from '@/shared/types'
+import type { CommunicationMode } from '@/shared/types'
 import { ApiOutlined } from '@ant-design/icons'
 import { Alert, Form, Input, Radio, Space, Tooltip, Typography } from 'antd'
 import React from 'react'
@@ -32,7 +32,6 @@ export const IntegrationConfigSection: React.FC<SectionProps> = (props) => {
   const getFunctionName = Form.useWatch<string>(FORM_PATHS.getFunctionName)
   const updateFunctionName = Form.useWatch<string>(FORM_PATHS.updateFunctionName)
   const previewFunctionName = Form.useWatch<string>(FORM_PATHS.previewFunctionName)
-  const apiConfig = Form.useWatch<ApiConfig>(['apiConfig'])
 
   return (
     <SectionCard
@@ -303,127 +302,121 @@ export const IntegrationConfigSection: React.FC<SectionProps> = (props) => {
                   style={{ maxWidth: 300 }}
                 />
               </Form.Item>
+              <Form.Item
+                label={
+                  <Space>
+                    开始录制
+                    <Tooltip title="通知宿主开始录制的消息类型">
+                      <HelpTooltipIcon />
+                    </Tooltip>
+                  </Space>
+                }
+                name={FORM_PATHS.apiConfig.messageTypes.startRecording}
+                rules={[
+                  { required: true, message: '请输入消息类型' },
+                  { pattern: /^[A-Z][A-Z0-9_]*$/, message: '建议使用大写字母和下划线' },
+                ]}
+              >
+                <Input
+                  placeholder={DEFAULT_VALUES.apiConfig.messageTypes.startRecording}
+                  style={{ maxWidth: 300 }}
+                />
+              </Form.Item>
+              <Form.Item
+                label={
+                  <Space>
+                    停止录制
+                    <Tooltip title="通知宿主停止录制的消息类型">
+                      <HelpTooltipIcon />
+                    </Tooltip>
+                  </Space>
+                }
+                name={FORM_PATHS.apiConfig.messageTypes.stopRecording}
+                rules={[
+                  { required: true, message: '请输入消息类型' },
+                  { pattern: /^[A-Z][A-Z0-9_]*$/, message: '建议使用大写字母和下划线' },
+                ]}
+              >
+                <Input
+                  placeholder={DEFAULT_VALUES.apiConfig.messageTypes.stopRecording}
+                  style={{ maxWidth: 300 }}
+                />
+              </Form.Item>
+              <Form.Item
+                label={
+                  <Space>
+                    推送数据
+                    <Tooltip title="宿主推送录制数据给插件的消息类型">
+                      <HelpTooltipIcon />
+                    </Tooltip>
+                  </Space>
+                }
+                name={FORM_PATHS.apiConfig.messageTypes.schemaPush}
+                rules={[
+                  { required: true, message: '请输入消息类型' },
+                  { pattern: /^[A-Z][A-Z0-9_]*$/, message: '建议使用大写字母和下划线' },
+                ]}
+              >
+                <Input
+                  placeholder={DEFAULT_VALUES.apiConfig.messageTypes.schemaPush}
+                  style={{ maxWidth: 300 }}
+                />
+              </Form.Item>
             </FormContent>
           </FormSection>
 
           <ExampleSection vertical gap={8}>
-            <ExampleLabel strong>postMessage 模式 - 宿主页面示例：</ExampleLabel>
+            <ExampleLabel strong>postMessage 模式 - 宿主页面示例（推荐使用 SDK）：</ExampleLabel>
             <CodeBlock>
-              <span className="comment">{'// 监听扩展请求'}</span>
+              <span className="comment">{'// 安装: npm install @schema-editor/host-sdk'}</span>
               {'\n'}
-              <span className="keyword">window</span>.
-              <span className="function">addEventListener</span>(
-              <span className="string">'message'</span>, (event) =&gt; {'{'}
-              {'\n'}
-              {'  '}
-              <span className="keyword">if</span> (event.source !=={' '}
-              <span className="keyword">window</span>) <span className="keyword">return</span>;
+              <span className="keyword">import</span> {'{ useSchemaEditor }'}{' '}
+              <span className="keyword">from</span>{' '}
+              <span className="string">'@schema-editor/host-sdk'</span>;{'\n\n'}
+              <span className="keyword">function</span> <span className="function">App</span>(){' '}
+              {'{'}
               {'\n'}
               {'  '}
-              <span className="keyword">if</span> (event.data?.source !=={' '}
-              <span className="string">
-                '
-                {apiConfig?.sourceConfig?.contentSource ??
-                  DEFAULT_VALUES.apiConfig.sourceConfig.contentSource}
-                '
-              </span>
-              ) <span className="keyword">return</span>;{'\n\n'}
-              {'  '}
-              <span className="keyword">const</span> {'{ type, payload, requestId }'} = event.data;
-              {'\n'}
-              {'  '}
-              <span className="keyword">let</span> result;{'\n\n'}
-              {'  '}
-              <span className="keyword">switch</span> (type) {'{'}
+              <span className="keyword">const</span> {'{ pushSchema }'} ={' '}
+              <span className="function">useSchemaEditor</span>({'{'}
               {'\n'}
               {'    '}
-              <span className="keyword">case</span>{' '}
-              <span className="string">
-                '
-                {apiConfig?.messageTypes?.getSchema ??
-                  DEFAULT_VALUES.apiConfig.messageTypes.getSchema}
-                '
-              </span>
-              :{'\n'}
-              {'      '}result = {'{ success: true, data: getSchema(payload.params) }'};{'\n'}
+              <span className="comment">{'// 获取 schema（必填）'}</span>
+              {'\n'}
+              {'    '}getSchema: (params) =&gt; dataStore[params],{'\n'}
+              {'    '}
+              <span className="comment">{'// 更新 schema（必填）'}</span>
+              {'\n'}
+              {'    '}updateSchema: (schema, params) =&gt; {'{'}
+              {'\n'}
+              {'      '}dataStore[params] = schema;{'\n'}
               {'      '}
-              <span className="keyword">break</span>;{'\n'}
+              <span className="keyword">return</span> <span className="keyword">true</span>;{'\n'}
+              {'    }'},{'\n'}
               {'    '}
-              <span className="keyword">case</span>{' '}
-              <span className="string">
-                '
-                {apiConfig?.messageTypes?.updateSchema ??
-                  DEFAULT_VALUES.apiConfig.messageTypes.updateSchema}
-                '
-              </span>
-              :{'\n'}
-              {'      '}result = {'{ success: updateSchema(payload.schema, payload.params) }'};
+              <span className="comment">{'// 渲染预览（可选）'}</span>
               {'\n'}
-              {'      '}
-              <span className="keyword">break</span>;{'\n'}
-              {'    '}
-              <span className="keyword">case</span>{' '}
-              <span className="string">
-                '
-                {apiConfig?.messageTypes?.checkPreview ??
-                  DEFAULT_VALUES.apiConfig.messageTypes.checkPreview}
-                '
-              </span>
-              :{'\n'}
-              {'      '}result = {'{ exists: true }'};{'\n'}
-              {'      '}
-              <span className="keyword">break</span>;{'\n'}
-              {'    '}
-              <span className="keyword">case</span>{' '}
-              <span className="string">
-                '
-                {apiConfig?.messageTypes?.renderPreview ??
-                  DEFAULT_VALUES.apiConfig.messageTypes.renderPreview}
-                '
-              </span>
-              :{'\n'}
+              {'    '}renderPreview: (schema, containerId) =&gt; {'{'}
+              {'\n'}
               {'      '}
               <span className="keyword">const</span> container ={' '}
               <span className="keyword">document</span>.
-              <span className="function">getElementById</span>(payload.containerId);{'\n'}
-              {'      '}renderPreview(payload.schema, container);{'\n'}
-              {'      '}result = {'{ success: true }'};{'\n'}
+              <span className="function">getElementById</span>(containerId);{'\n'}
               {'      '}
-              <span className="keyword">break</span>;{'\n'}
-              {'    '}
-              <span className="keyword">case</span>{' '}
-              <span className="string">
-                '
-                {apiConfig?.messageTypes?.cleanupPreview ??
-                  DEFAULT_VALUES.apiConfig.messageTypes.cleanupPreview}
-                '
-              </span>
-              :{'\n'}
-              {'      '}cleanupPreview();{'\n'}
-              {'      '}result = {'{ success: true }'};{'\n'}
-              {'      '}
-              <span className="keyword">break</span>;{'\n'}
-              {'  }'}
-              {'\n\n'}
-              {'  '}
-              <span className="comment">{'// 发送响应（必须携带 requestId）'}</span>
+              <span className="comment">{'// 渲染预览内容...'}</span>
               {'\n'}
+              {'    }'},{'\n'}
+              {'  }'});{'\n\n'}
               {'  '}
-              <span className="keyword">window</span>.<span className="function">postMessage</span>(
-              {'{'}
-              {'\n'}
-              {'    '}source:{' '}
-              <span className="string">
-                '
-                {apiConfig?.sourceConfig?.hostSource ??
-                  DEFAULT_VALUES.apiConfig.sourceConfig.hostSource}
-                '
+              <span className="comment">
+                {'// 录制模式（可选）：推送数据以获得更好的性能，不配置则可以使用轮询模式'}
               </span>
-              ,{'\n'}
-              {'    '}requestId,{'\n'}
-              {'    '}...result{'\n'}
-              {'  }'},<span className="string"> '*'</span>);{'\n'}
-              {'}'});
+              {'\n'}
+              {'  '}sseHandler.onData = (params, data) =&gt;{' '}
+              <span className="function">pushSchema</span>(params, data);{'\n\n'}
+              {'  '}
+              <span className="keyword">return</span> &lt;div&gt;...&lt;/div&gt;;{'\n'}
+              {'}'}
             </CodeBlock>
           </ExampleSection>
         </>

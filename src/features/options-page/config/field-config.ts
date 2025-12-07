@@ -77,6 +77,9 @@ export const FIELD_GROUPS: Record<string, FieldGroup> = {
       FORM_PATHS.apiConfig.messageTypes.checkPreview,
       FORM_PATHS.apiConfig.messageTypes.renderPreview,
       FORM_PATHS.apiConfig.messageTypes.cleanupPreview,
+      FORM_PATHS.apiConfig.messageTypes.startRecording,
+      FORM_PATHS.apiConfig.messageTypes.stopRecording,
+      FORM_PATHS.apiConfig.messageTypes.schemaPush,
     ],
     save: async (allValues: any) => {
       await storage.setApiConfig(allValues.apiConfig)
@@ -148,6 +151,7 @@ export const FIELD_GROUPS: Record<string, FieldGroup> = {
       FORM_PATHS.recordingModeConfig.enabled,
       FORM_PATHS.recordingModeConfig.keyBinding,
       FORM_PATHS.recordingModeConfig.highlightColor,
+      FORM_PATHS.recordingModeConfig.dataFetchMode,
       FORM_PATHS.recordingModeConfig.pollingInterval,
       FORM_PATHS.recordingModeConfig.autoStopTimeout,
     ],

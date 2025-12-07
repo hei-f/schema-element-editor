@@ -1,6 +1,8 @@
 import { DEFAULT_VALUES } from '@/shared/constants/defaults'
 import { FORM_PATHS } from '@/shared/constants/form-paths'
-import type { IframeSchemaTarget } from '@/shared/types'
+import { RECORDING_DATA_FETCH_MODE } from '@/shared/constants/recording'
+import { COMMUNICATION_MODE } from '@/shared/constants/ui-modes'
+import type { CommunicationMode, IframeSchemaTarget, RecordingDataFetchMode } from '@/shared/types'
 import { SearchOutlined } from '@ant-design/icons'
 import { Form, Radio, Space, Switch, Tooltip, Typography } from 'antd'
 import React from 'react'
@@ -28,6 +30,18 @@ export const ElementDetectionSection: React.FC<SectionProps> = (props) => {
 
   /** 通过 Form.useWatch 获取属性名 */
   const attributeName = Form.useWatch<string>(FORM_PATHS.attributeName)
+  /** 通过 Form.useWatch 获取通信模式 */
+  const communicationMode = Form.useWatch<CommunicationMode>(FORM_PATHS.apiConfig.communicationMode)
+  /** 通过 Form.useWatch 获取数据获取模式 */
+  const dataFetchMode = Form.useWatch<RecordingDataFetchMode>(
+    FORM_PATHS.recordingModeConfig.dataFetchMode
+  )
+
+  /** 事件驱动模式是否可用（仅 postMessage 模式下可用） */
+  const isEventDrivenAvailable = communicationMode === COMMUNICATION_MODE.POST_MESSAGE
+  /** 当前是否选择了事件驱动但通信模式不支持 */
+  const isEventDrivenIncompatible =
+    dataFetchMode === RECORDING_DATA_FETCH_MODE.EVENT_DRIVEN && !isEventDrivenAvailable
 
   return (
     <SectionCard
@@ -240,8 +254,39 @@ export const ElementDetectionSection: React.FC<SectionProps> = (props) => {
           <Form.Item
             label={
               <Space>
+                数据获取模式
+                <Tooltip title="轮询模式：插件定时调用 getSchema 获取数据，兼容所有宿主；事件驱动：宿主调用 recording.push() 主动推送，性能更好（仅 postMessage 模式）">
+                  <HelpTooltipIcon />
+                </Tooltip>
+              </Space>
+            }
+            name={FORM_PATHS.recordingModeConfig.dataFetchMode}
+          >
+            <Radio.Group>
+              <Radio value="polling">轮询模式（兼容所有通信模式）</Radio>
+              <Radio value="eventDriven" disabled={!isEventDrivenAvailable}>
+                <Space>
+                  事件驱动
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    仅 postMessage 模式
+                  </Text>
+                </Space>
+              </Radio>
+            </Radio.Group>
+          </Form.Item>
+          {isEventDrivenIncompatible && (
+            <SpacedAlert
+              message="事件驱动模式不可用"
+              description="当前通信模式为 Window 函数模式，不支持事件驱动。请切换到 postMessage 模式，或使用轮询模式。"
+              type="warning"
+              showIcon
+            />
+          )}
+          <Form.Item
+            label={
+              <Space>
                 轮询间隔 (毫秒)
-                <Tooltip title="Schema 变化检测的频率，建议 100ms">
+                <Tooltip title="轮询模式下获取数据的时间间隔，建议 100ms">
                   <HelpTooltipIcon />
                 </Tooltip>
               </Space>
@@ -293,8 +338,15 @@ export const ElementDetectionSection: React.FC<SectionProps> = (props) => {
               <div>
                 <p>1. 按 Alt + 快捷键（默认 R）切换到录制模式，高亮框会变成红色</p>
                 <p>2. 点击目标元素，以录制模式打开Schema编辑器</p>
-                <p>3. 录制模式会每隔指定时间轮询Schema变化，并记录每个不同的版本</p>
-                <p>4. 停止录制后，可以选择任意两个版本进行差异对比</p>
+                <p>
+                  3. <strong>轮询模式</strong>
+                  ：只需配置 getSchema，插件定时获取数据，兼容 postMessage 和 Window 函数模式
+                </p>
+                <p>
+                  4. <strong>事件驱动</strong>：需要宿主调用 recording.push() 推送数据，性能更好，
+                  <strong>仅 postMessage 模式可用</strong>
+                </p>
+                <p>5. 停止录制后，可以选择任意两个版本进行差异对比</p>
               </div>
             }
             type="info"
