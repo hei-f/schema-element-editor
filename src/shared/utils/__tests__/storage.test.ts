@@ -1850,6 +1850,7 @@ describe('Storage工具测试', () => {
         keyBinding: 'r',
         highlightColor: '#ff0000',
         pollingInterval: 100,
+        autoStopTimeout: null,
       }
       await storage.setRecordingModeConfig(config)
 

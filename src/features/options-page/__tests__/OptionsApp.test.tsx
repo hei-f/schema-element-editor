@@ -119,6 +119,7 @@ describe('OptionsApp组件测试', () => {
       keyBinding: 'r',
       highlightColor: '#FF4D4F',
       pollingInterval: 100,
+      autoStopTimeout: null,
     },
     enableAstTypeHints: true,
     exportConfig: {
