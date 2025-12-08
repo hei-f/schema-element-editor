@@ -271,7 +271,7 @@ export const ResponsiveButtonGroup: React.FC<ResponsiveButtonGroupProps> = (prop
           gap: BUTTON_GAP,
           visibility: 'hidden',
           pointerEvents: 'none',
-          overflow: 'hidden',
+          // overflow: 'hidden',
           whiteSpace: 'nowrap',
         }}
       >

@@ -31,13 +31,14 @@ export const RecordingModeContainer = styled.div`
 
 /**
  * 录制状态栏
+ * 背景色与工具栏一致
  */
 export const RecordingStatusBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  background: #eaebed;
+  background: #f7f8fa;
   border-radius: 12px;
 `
 
@@ -752,13 +753,13 @@ export const StopRecordingButton = styled.button`
 
 /**
  * Diff按钮
+ * 禁用状态使用更明显的灰色样式，确保在浅色背景上可见
  */
 export const DiffButton = styled.button<{ $disabled?: boolean }>`
   ${recordingActionButtonBase}
-  background: ${(props) =>
-    props.$disabled ? 'rgba(255, 255, 255, 0.05)' : 'rgba(24, 144, 255, 0.15)'};
-  border: 1px solid ${(props) => (props.$disabled ? 'transparent' : 'rgba(24, 144, 255, 0.3)')};
-  color: ${(props) => (props.$disabled ? '#6b7280' : '#1890ff')};
+  background: ${(props) => (props.$disabled ? '#e6ecf4' : 'rgba(24, 144, 255, 0.15)')};
+  border: 1px solid ${(props) => (props.$disabled ? '#d9e0ea' : 'rgba(24, 144, 255, 0.3)')};
+  color: ${(props) => (props.$disabled ? '#a0aec0' : '#1890ff')};
   cursor: ${(props) => (props.$disabled ? 'not-allowed' : 'pointer')};
 
   ${(props) =>

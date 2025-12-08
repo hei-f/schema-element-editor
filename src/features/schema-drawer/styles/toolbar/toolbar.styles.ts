@@ -155,7 +155,7 @@ export const ResponsiveButtonGroupScrollable = styled.div`
   align-items: center;
   min-width: 0;
   flex: 1;
-  overflow: hidden;
+  /* overflow: hidden; */
 `
 
 /**
@@ -174,7 +174,7 @@ export const ResponsiveButtonGroupFixed = styled.div`
  * 更多按钮
  */
 export const MoreButton = styled(Button)`
-  &.ant-btn {
+  &.see-btn {
     border-radius: 16px;
     padding: 2px 8px;
     font-size: 12px;
@@ -240,45 +240,21 @@ export const MoreMenuItem = styled.div<{ $disabled?: boolean }>`
  * 使用固定高度避免 hover 时高度变化
  */
 export const ToolbarButton = styled(Button)`
-  &.ant-btn {
+  &.see-btn {
     border-radius: 16px;
     padding: 2px 12px;
     font-size: 12px;
     height: 24px;
     line-height: 1.5;
   }
-
-  /* 非 primary 按钮使用固定样式，覆盖 antd 默认的主题色效果 */
-  &.ant-btn-default {
-    border: 1px solid #e6ecf4;
-    color: #666f8d;
-    background: #ffffff;
-
-    &:hover {
-      border-color: #c9d1e0;
-      color: #4a5168;
-      background: #f5f7fa;
-    }
-
-    &:active {
-      border-color: #b8c2d4;
-      color: #3d4459;
-      background: #eef1f6;
-    }
-
-    /* 去掉点击后的光环效果 */
-    &:focus {
-      border-color: #e6ecf4;
-      box-shadow: none;
-    }
-
-    &:focus:hover {
-      border-color: #c9d1e0;
-    }
-  }
+  /* border-radius: 16px;
+  padding: 2px 12px;
+  font-size: 12px;
+  min-height: 24px;
+  line-height: 1.5; */
 
   /* primary 按钮使用主题色（仅非禁用状态） */
-  &.ant-btn-primary:not(:disabled) {
+  &.see-btn-primary:not(:disabled):not(.see-btn-disabled) {
     border: 1px solid transparent;
     background: var(--drawer-theme-color, #1677ff);
     color: #ffffff;
@@ -298,7 +274,7 @@ export const ToolbarButton = styled(Button)`
  * 使用类型断言保留 Segmented 的泛型能力
  */
 export const ToolbarSegmented = styled(Segmented)`
-  &.ant-segmented {
+  &.see-segmented {
     border-radius: 16px !important;
     background: #e6ecf4 !important;
     padding: 2px !important;
@@ -307,19 +283,19 @@ export const ToolbarSegmented = styled(Segmented)`
     min-height: auto !important;
   }
 
-  .ant-segmented-group {
+  .see-segmented-group {
     gap: 0;
   }
 
-  .ant-segmented-item {
+  .see-segmented-item {
     border-radius: 16px !important;
     font-size: 12px;
     color: #666f8d;
-    transition: all 0.2s;
+    /* transition: all 0.2s; */
     background: transparent !important;
   }
 
-  .ant-segmented-item-label {
+  .see-segmented-item-label {
     padding: 2px 8px !important;
     min-height: auto !important;
     line-height: 1.5 !important;
@@ -327,16 +303,16 @@ export const ToolbarSegmented = styled(Segmented)`
     color: #666f8d;
   }
 
-  .ant-segmented-item-selected {
+  .see-segmented-item-selected {
     background: #ffffff !important;
     color: #353e5c;
   }
 
-  .ant-segmented-item-selected .ant-segmented-item-label {
+  .see-segmented-item-selected .see-segmented-item-label {
     color: #353e5c !important;
   }
 
-  .ant-segmented-thumb {
+  .see-segmented-thumb {
     border-radius: 16px !important;
     background: #ffffff !important;
   }

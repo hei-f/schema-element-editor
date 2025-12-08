@@ -89,15 +89,17 @@ export const DraftAutoSaveSuccess = styled.span`
  * primary 按钮使用 CSS 变量 --drawer-theme-color 作为主题色
  */
 export const DrawerTitleButton = styled(Button)`
-  border-radius: 6px;
-  color: rgba(102, 111, 141, 1);
+  &.see-btn {
+    border-radius: 6px;
+    color: rgba(102, 111, 141, 1);
 
-  &:hover:not(:disabled) {
-    color: rgba(53, 62, 92, 1);
+    &:hover:not(:disabled) {
+      color: rgba(53, 62, 92, 1);
+    }
   }
 
   /* primary 按钮使用主题色（仅非禁用状态） */
-  &.ant-btn-primary:not(:disabled) {
+  &.see-btn-primary:not(:disabled):not(.see-btn-disabled) {
     background: var(--drawer-theme-color, #1677ff);
     color: #fff;
 
@@ -111,7 +113,7 @@ export const DrawerTitleButton = styled(Button)`
     }
   }
 
-  .ant-btn-icon {
+  .see-btn-icon {
     display: flex;
     justify-content: center;
     align-items: center;
