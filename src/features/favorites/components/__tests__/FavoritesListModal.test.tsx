@@ -1,4 +1,4 @@
-import { act, render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@test/test-utils'
 import userEvent from '@testing-library/user-event'
 import type { Favorite } from '@/shared/types'
 import { FavoritesListModal } from '../FavoritesListModal'

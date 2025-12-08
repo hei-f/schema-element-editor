@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@test/test-utils'
 import userEvent from '@testing-library/user-event'
 import { FavoriteEditModal } from '../FavoriteEditModal'
 
@@ -345,8 +345,11 @@ describe('FavoriteEditModal组件测试', () => {
 
       // 应该显示确认对话框（antd Modal.confirm）
       await waitFor(() => {
-        // 检查确认对话框的存在（通过 ant-modal-confirm 类）
-        const confirmModal = document.querySelector('.see-modal-confirm')
+        // 检查确认对话框的存在
+        // Modal.confirm 是静态方法，可能使用默认前缀 ant- 或自定义前缀 see-
+        const confirmModal =
+          document.querySelector('.see-modal-confirm') ||
+          document.querySelector('.ant-modal-confirm')
         expect(confirmModal).toBeInTheDocument()
       })
     })

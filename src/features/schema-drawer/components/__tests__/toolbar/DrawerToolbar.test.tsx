@@ -1,6 +1,6 @@
 import type { Mock } from 'vitest'
 import { ContentType } from '@/shared/types'
-import { render, screen } from '@testing-library/react'
+import { render, screen } from '@test/test-utils'
 import userEvent from '@testing-library/user-event'
 import { DrawerToolbar } from '../../toolbar/DrawerToolbar'
 

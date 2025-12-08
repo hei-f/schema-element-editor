@@ -97,7 +97,7 @@ describe('shadowDomTheme', () => {
     describe('层级系统', () => {
       it('应该包含 z-index 配置', () => {
         expect(shadowDomTheme.token?.zIndexBase).toBe(0)
-        expect(shadowDomTheme.token?.zIndexPopupBase).toBe(1050)
+        // zIndexPopupBase 已注释掉，使用 see- 前缀后不再需要
       })
     })
   })
@@ -162,7 +162,7 @@ describe('shadowDomTheme', () => {
         shadowDomTheme.token?.controlHeightLG,
         shadowDomTheme.token?.controlHeightSM,
         shadowDomTheme.token?.zIndexBase,
-        shadowDomTheme.token?.zIndexPopupBase,
+        // zIndexPopupBase 已注释掉，使用 see- 前缀后不再需要
       ]
 
       numberTokens.forEach((value) => {
