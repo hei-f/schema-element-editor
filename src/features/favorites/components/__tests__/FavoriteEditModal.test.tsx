@@ -43,7 +43,7 @@ vi.mock('@/features/schema-drawer/components/editor/CodeMirrorEditor', () => ({
  * 获取 Modal footer 中的保存按钮
  */
 const getSaveButton = (): HTMLButtonElement => {
-  const footer = document.querySelector('.ant-modal-footer')
+  const footer = document.querySelector('.see-modal-footer')
   if (footer) {
     const buttons = footer.querySelectorAll('button')
     // 保存按钮通常是最后一个（primary 按钮）
@@ -56,7 +56,7 @@ const getSaveButton = (): HTMLButtonElement => {
  * 获取 Modal footer 中的取消按钮
  */
 const getCancelButton = (): HTMLButtonElement => {
-  const footer = document.querySelector('.ant-modal-footer')
+  const footer = document.querySelector('.see-modal-footer')
   if (footer) {
     const buttons = footer.querySelectorAll('button')
     // 取消按钮通常是第一个
@@ -346,7 +346,7 @@ describe('FavoriteEditModal组件测试', () => {
       // 应该显示确认对话框（antd Modal.confirm）
       await waitFor(() => {
         // 检查确认对话框的存在（通过 ant-modal-confirm 类）
-        const confirmModal = document.querySelector('.ant-modal-confirm')
+        const confirmModal = document.querySelector('.see-modal-confirm')
         expect(confirmModal).toBeInTheDocument()
       })
     })

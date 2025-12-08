@@ -121,8 +121,8 @@ describe('FavoritesListModal组件测试', () => {
     it('应该在没有收藏时显示空状态', () => {
       render(<FavoritesListModal {...defaultProps} favoritesList={[]} />)
 
-      // antd Table 空状态会显示 .ant-empty 类
-      const emptyState = document.querySelector('.ant-empty')
+      // antd Table 空状态会显示 .see-empty 类
+      const emptyState = document.querySelector('.see-empty')
       expect(emptyState).toBeInTheDocument()
     })
   })
@@ -196,8 +196,8 @@ describe('FavoritesListModal组件测试', () => {
       })
 
       await waitFor(() => {
-        // antd Table 空状态会显示 .ant-empty 类
-        const emptyState = document.querySelector('.ant-empty')
+        // antd Table 空状态会显示 .see-empty 类
+        const emptyState = document.querySelector('.see-empty')
         expect(emptyState).toBeInTheDocument()
       })
     })
@@ -275,7 +275,7 @@ describe('FavoritesListModal组件测试', () => {
       const onClose = vi.fn()
       render(<FavoritesListModal {...defaultProps} onClose={onClose} />)
 
-      const closeButton = document.querySelector('.ant-modal-close')
+      const closeButton = document.querySelector('.see-modal-close')
       if (closeButton) {
         await user.click(closeButton)
         expect(onClose).toHaveBeenCalled()
@@ -296,7 +296,7 @@ describe('FavoritesListModal组件测试', () => {
       render(<FavoritesListModal {...defaultProps} favoritesList={manyFavorites} />)
 
       // 检查分页组件存在
-      const pagination = document.querySelector('.ant-pagination')
+      const pagination = document.querySelector('.see-pagination')
       expect(pagination).toBeInTheDocument()
     })
   })

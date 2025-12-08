@@ -153,11 +153,11 @@ describe('DrawerToolbar组件测试', () => {
       // Segmented组件应该被禁用（找到可见的那个）
       const astElements = screen.getAllByText('AST')
       const visibleAst = astElements.find((el) => {
-        const segmented = el.closest('.ant-segmented')
+        const segmented = el.closest('.see-segmented')
         return segmented && !segmented.closest('[style*="visibility: hidden"]')
       })
-      const segmented = visibleAst?.closest('.ant-segmented')
-      expect(segmented).toHaveClass('ant-segmented-disabled')
+      const segmented = visibleAst?.closest('.see-segmented')
+      expect(segmented).toHaveClass('see-segmented-disabled')
     })
 
     it('应该调用onSegmentChange当切换类型时', async () => {
@@ -455,11 +455,11 @@ describe('DrawerToolbar组件测试', () => {
       // 找到可见的Segmented组件
       const astElements = screen.getAllByText('AST')
       const visibleAst = astElements.find((el) => {
-        const segmented = el.closest('.ant-segmented')
+        const segmented = el.closest('.see-segmented')
         return segmented && !segmented.closest('[style*="visibility: hidden"]')
       })
-      const segmented = visibleAst?.closest('.ant-segmented')
-      expect(segmented).not.toHaveClass('ant-segmented-disabled')
+      const segmented = visibleAst?.closest('.see-segmented')
+      expect(segmented).not.toHaveClass('see-segmented-disabled')
     })
 
     it('应该在RawString类型下正常显示', () => {
@@ -476,11 +476,11 @@ describe('DrawerToolbar组件测试', () => {
       // 找到可见的Segmented组件
       const rawStringElements = screen.getAllByText('RawString')
       const visibleRawString = rawStringElements.find((el) => {
-        const segmented = el.closest('.ant-segmented')
+        const segmented = el.closest('.see-segmented')
         return segmented && !segmented.closest('[style*="visibility: hidden"]')
       })
-      const segmented = visibleRawString?.closest('.ant-segmented')
-      expect(segmented).not.toHaveClass('ant-segmented-disabled')
+      const segmented = visibleRawString?.closest('.see-segmented')
+      expect(segmented).not.toHaveClass('see-segmented-disabled')
     })
 
     it('应该在Other类型下禁用Segmented并显示提示', () => {
@@ -497,11 +497,11 @@ describe('DrawerToolbar组件测试', () => {
       // 找到可见的Segmented组件
       const astElements = screen.getAllByText('AST')
       const visibleAst = astElements.find((el) => {
-        const segmented = el.closest('.ant-segmented')
+        const segmented = el.closest('.see-segmented')
         return segmented && !segmented.closest('[style*="visibility: hidden"]')
       })
-      const segmented = visibleAst?.closest('.ant-segmented')
-      expect(segmented).toHaveClass('ant-segmented-disabled')
+      const segmented = visibleAst?.closest('.see-segmented')
+      expect(segmented).toHaveClass('see-segmented-disabled')
     })
   })
 

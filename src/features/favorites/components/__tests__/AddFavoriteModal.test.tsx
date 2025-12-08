@@ -15,7 +15,7 @@ vi.mock('@/shared/utils/shadow-root-manager', () => ({
  * 获取 footer 中的添加按钮（primary 按钮）
  */
 const getAddButton = () => {
-  const footer = document.querySelector('.ant-modal-footer')
+  const footer = document.querySelector('.see-modal-footer')
   if (footer) {
     const buttons = footer.querySelectorAll('button')
     return buttons[buttons.length - 1] // primary 按钮通常是最后一个
@@ -27,7 +27,7 @@ const getAddButton = () => {
  * 获取 footer 中的取消按钮
  */
 const getCancelButton = () => {
-  const footer = document.querySelector('.ant-modal-footer')
+  const footer = document.querySelector('.see-modal-footer')
   if (footer) {
     const buttons = footer.querySelectorAll('button')
     return buttons[0]
@@ -70,7 +70,7 @@ describe('AddFavoriteModal组件测试', () => {
     it('应该渲染添加和取消按钮', () => {
       render(<AddFavoriteModal {...defaultProps} />)
 
-      const footer = document.querySelector('.ant-modal-footer')
+      const footer = document.querySelector('.see-modal-footer')
       expect(footer).toBeInTheDocument()
       const buttons = footer?.querySelectorAll('button')
       expect(buttons?.length).toBe(2)
@@ -150,7 +150,7 @@ describe('AddFavoriteModal组件测试', () => {
       const onClose = vi.fn()
       render(<AddFavoriteModal {...defaultProps} onClose={onClose} />)
 
-      const closeButton = document.querySelector('.ant-modal-close')
+      const closeButton = document.querySelector('.see-modal-close')
       if (closeButton) {
         await user.click(closeButton)
         expect(onClose).toHaveBeenCalled()
