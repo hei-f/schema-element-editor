@@ -3,10 +3,10 @@ import { EditorView } from '@codemirror/view'
 import { tags } from '@lezer/highlight'
 
 /**
- * Schema Editor Dark 主题
- * 专为 Schema Editor 定制的深色主题
+ * SEE Dark 主题
+ * 专为 Schema Element Editor 定制的深色主题
  */
-export const schemaEditorDark = EditorView.theme(
+export const seeDark = EditorView.theme(
   {
     '&': {
       color: '#abb2bf',
@@ -162,10 +162,10 @@ export const schemaEditorDark = EditorView.theme(
 )
 
 /**
- * Schema Editor Dark 语法高亮
+ * SEE Dark 语法高亮
  * 专为 JSON 优化的语法高亮
  */
-export const schemaEditorDarkHighlight = HighlightStyle.define([
+export const seeDarkHighlight = HighlightStyle.define([
   // JSON 属性名 - 红色
   { tag: tags.propertyName, color: '#e06c75', fontWeight: 'bold' },
 
@@ -222,4 +222,4 @@ export const schemaEditorDarkHighlight = HighlightStyle.define([
   { tag: tags.regexp, color: '#56b6c2' },
 ])
 
-export const schemaEditorDarkHighlighting = syntaxHighlighting(schemaEditorDarkHighlight)
+export const seeDarkHighlighting = syntaxHighlighting(seeDarkHighlight)

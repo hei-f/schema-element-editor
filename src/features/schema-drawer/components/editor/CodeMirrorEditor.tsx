@@ -37,10 +37,7 @@ import {
   jsonLightHighlight,
   SelectionStats,
 } from '../../styles/editor/codemirror.styles'
-import {
-  schemaEditorDark,
-  schemaEditorDarkHighlighting,
-} from '../../styles/editor/schema-editor-dark-theme'
+import { seeDark, seeDarkHighlighting } from '../../styles/editor/schema-editor-dark-theme'
 import { simpleDark } from '../../styles/editor/simple-dark-theme'
 import { createAstCompletionSource } from '../../utils/ast-completion'
 
@@ -427,8 +424,9 @@ export const CodeMirrorEditor = (props: CodeMirrorEditorProps) => {
       switch (theme) {
         case 'dark':
           return [simpleDark, syntaxHighlighting(jsonDarkHighlight)]
-        case 'schemaEditorDark':
-          return [schemaEditorDark, schemaEditorDarkHighlighting]
+        case 'seeDark':
+        case 'schemaEditorDark': // 兼容旧配置
+          return [seeDark, seeDarkHighlighting]
         case 'light':
         default:
           return [syntaxHighlighting(jsonLightHighlight)]

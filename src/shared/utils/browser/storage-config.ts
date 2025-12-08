@@ -165,7 +165,7 @@ export const SIMPLE_STORAGE_FIELDS = {
     key: STORAGE_KEYS.EDITOR_THEME,
     defaultValue: DEFAULT_VALUES.editorTheme,
     validator: (value: any): value is EditorTheme => {
-      return ['light', 'dark', 'schemaEditorDark'].includes(value)
+      return ['light', 'dark', 'seeDark', 'schemaEditorDark'].includes(value)
     },
   } as StorageFieldConfig<EditorTheme>,
 

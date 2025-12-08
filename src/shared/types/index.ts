@@ -276,7 +276,7 @@ export interface DrawerShortcutsConfig {
 /**
  * 编辑器主题类型
  */
-export type EditorTheme = 'light' | 'dark' | 'schemaEditorDark'
+export type EditorTheme = 'light' | 'dark' | 'seeDark' | 'schemaEditorDark'
 
 /**
  * SchemaDrawer 组件配置

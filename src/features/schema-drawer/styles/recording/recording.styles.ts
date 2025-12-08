@@ -488,7 +488,7 @@ export const DiffInlineRemove = styled.span`
 
 /**
  * 语法高亮 - 键名（属性名）- 红色
- * 参考 schemaEditorDark: tags.propertyName
+ * 参考 seeDark: tags.propertyName
  */
 export const SyntaxKeyword = styled.span`
   color: #e06c75;
@@ -497,7 +497,7 @@ export const SyntaxKeyword = styled.span`
 
 /**
  * 语法高亮 - 字符串 - 绿色
- * 参考 schemaEditorDark: tags.string
+ * 参考 seeDark: tags.string
  */
 export const SyntaxString = styled.span`
   color: #98c379;
@@ -505,7 +505,7 @@ export const SyntaxString = styled.span`
 
 /**
  * 语法高亮 - 数字 - 橙色
- * 参考 schemaEditorDark: tags.number
+ * 参考 seeDark: tags.number
  */
 export const SyntaxNumber = styled.span`
   color: #d19a66;
@@ -513,7 +513,7 @@ export const SyntaxNumber = styled.span`
 
 /**
  * 语法高亮 - 布尔值 - 橙色加粗
- * 参考 schemaEditorDark: tags.bool
+ * 参考 seeDark: tags.bool
  */
 export const SyntaxBoolean = styled.span`
   color: #d19a66;
@@ -522,7 +522,7 @@ export const SyntaxBoolean = styled.span`
 
 /**
  * 语法高亮 - null - 橙色加粗
- * 参考 schemaEditorDark: tags.null
+ * 参考 seeDark: tags.null
  */
 export const SyntaxNull = styled.span`
   color: #d19a66;
@@ -531,7 +531,7 @@ export const SyntaxNull = styled.span`
 
 /**
  * 语法高亮 - 标点符号（逗号、冒号）
- * 参考 schemaEditorDark: tags.separator
+ * 参考 seeDark: tags.separator
  */
 export const SyntaxPunctuation = styled.span`
   color: #abb2bf;
@@ -539,7 +539,7 @@ export const SyntaxPunctuation = styled.span`
 
 /**
  * 语法高亮 - 方括号 - 黄色
- * 参考 schemaEditorDark: tags.squareBracket
+ * 参考 seeDark: tags.squareBracket
  */
 export const SyntaxSquareBracket = styled.span`
   color: #e8ba36;
@@ -548,7 +548,7 @@ export const SyntaxSquareBracket = styled.span`
 
 /**
  * 语法高亮 - 花括号 - 绿色
- * 参考 schemaEditorDark: tags.brace
+ * 参考 seeDark: tags.brace
  */
 export const SyntaxBrace = styled.span`
   color: #54a857;

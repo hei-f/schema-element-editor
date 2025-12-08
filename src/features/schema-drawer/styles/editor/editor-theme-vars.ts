@@ -158,7 +158,7 @@ const lightThemeVars: EditorThemeVars = {
 
 /**
  * 根据编辑器主题获取对应的样式变量
- * schemaEditorDark 和 dark 使用深色样式
+ * seeDark 和 dark 使用深色样式
  * light 使用浅色样式
  */
 export function getEditorThemeVars(theme: EditorTheme): EditorThemeVars {
@@ -166,7 +166,8 @@ export function getEditorThemeVars(theme: EditorTheme): EditorThemeVars {
     case EDITOR_THEMES.LIGHT:
       return lightThemeVars
     case EDITOR_THEMES.DARK:
-    case EDITOR_THEMES.SCHEMA_EDITOR_DARK:
+    case EDITOR_THEMES.SEE_DARK:
+    case EDITOR_THEMES.SCHEMA_EDITOR_DARK: // 兼容旧配置
     default:
       return darkThemeVars
   }
