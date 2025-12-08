@@ -260,7 +260,7 @@ describe('OptionsApp组件测试', () => {
       await user.click(button)
 
       expect(mockChromeTabs.create).toHaveBeenCalledWith({
-        url: 'https://github.com/hei-f/schema-editor/releases/',
+        url: 'https://github.com/hei-f/schema-element-editor/releases',
         active: true,
       })
     })

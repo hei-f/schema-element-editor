@@ -8,7 +8,7 @@ import type { ExternalActions } from './types'
  */
 const openReleasePage = () => {
   chrome.tabs.create({
-    url: 'https://github.com/hei-f/schema-editor/releases/',
+    url: 'https://github.com/hei-f/schema-element-editor/releases',
     active: true,
   })
 }
