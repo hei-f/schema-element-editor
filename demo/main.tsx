@@ -1,13 +1,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { ConfigProvider } from 'antd'
-import zhCN from 'antd/locale/zh_CN'
+// import { ConfigProvider } from 'antd'
+// import zhCN from 'antd/locale/zh_CN'
 import { TestApp } from './App'
 import './styles.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ConfigProvider
+    {/* <ConfigProvider
       locale={zhCN}
       theme={{
         token: {
@@ -15,8 +15,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           borderRadius: 6,
         },
       }}
-    >
-      <TestApp />
-    </ConfigProvider>
+    > */}
+    <TestApp />
+    {/* </ConfigProvider> */}
   </React.StrictMode>
 )
