@@ -160,7 +160,7 @@ describe('Storage工具测试', () => {
           autoStopTimeout: null,
           dataFetchMode: 'polling',
         },
-        editorTheme: 'schemaEditorDark',
+        editorTheme: 'seeDark',
         previewFunctionName: '__getContentPreview',
         apiConfig: {
           communicationMode: 'postMessage',
@@ -269,7 +269,7 @@ describe('Storage工具测试', () => {
           autoStopTimeout: null,
           dataFetchMode: 'polling',
         },
-        editorTheme: 'schemaEditorDark',
+        editorTheme: 'seeDark',
         previewFunctionName: '__getContentPreview',
         apiConfig: {
           communicationMode: 'postMessage',
@@ -368,7 +368,7 @@ describe('Storage工具测试', () => {
           autoStopTimeout: null,
           dataFetchMode: 'polling',
         },
-        editorTheme: 'schemaEditorDark',
+        editorTheme: 'seeDark',
         previewFunctionName: '__getContentPreview',
         apiConfig: {
           communicationMode: 'postMessage',
@@ -647,7 +647,7 @@ describe('Storage工具测试', () => {
           autoStopTimeout: null,
           dataFetchMode: 'polling',
         },
-        editorTheme: 'schemaEditorDark',
+        editorTheme: 'seeDark',
         previewFunctionName: '__getContentPreview',
         apiConfig: {
           communicationMode: 'postMessage',
