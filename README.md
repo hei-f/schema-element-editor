@@ -404,7 +404,7 @@ Agentic UI 已内置 postMessage 通信适配，开发环境下开箱即用。
 // Bubble 需指定 id
 <Bubble
   id="msg-1"
-  originData={{ id: 'msg-1', role: 'assistant', originContent: '# Hello' }}
+  originData={{ id: 'msg-1', role: 'assistant', content: '# Hello' }}
 />
 
 // BubbleList 数据项需包含 id 字段
