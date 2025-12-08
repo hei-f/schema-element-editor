@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Schema Editor",
+  "name": "Schema Element Editor",
   "version": "1.26.0",
   "description": "DOM元素Schema查看和编辑工具",
   "permissions": ["storage", "activeTab", "scripting"],
@@ -23,7 +23,7 @@
       "48": "icons/icon-active-48.png",
       "128": "icons/icon-active-128.png"
     },
-    "default_title": "Schema Editor - 点击激活/停用"
+    "default_title": "SEE - 点击激活/停用"
   },
   "options_page": "src/features/options-page/options.html",
   "icons": {

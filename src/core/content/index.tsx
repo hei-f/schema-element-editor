@@ -1,4 +1,4 @@
-import { SchemaEditorContent } from './core/content-app'
+import { SEEContent } from './core/content-app'
 
 /** 启动 Content Script */
-new SchemaEditorContent()
+new SEEContent()

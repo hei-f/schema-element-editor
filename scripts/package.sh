@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Schema Editor 打包脚本
+# Schema Element Editor (SEE) 打包脚本
 # 用于创建可分发的插件包
 
 set -e  # 遇到错误立即退出
@@ -14,7 +14,7 @@ restore_dev_mode() {
 # 注册退出时的清理函数
 trap restore_dev_mode EXIT
 
-echo "🚀 开始打包 Schema Editor..."
+echo "🚀 开始打包 Schema Element Editor (SEE)..."
 
 # 获取版本号
 VERSION=$(grep '"version"' src/manifest.json | sed 's/.*"version": "\(.*\)".*/\1/')
@@ -36,7 +36,7 @@ RELEASE_DIR="releases"
 mkdir -p "$RELEASE_DIR"
 
 # 打包 dist 目录
-PACKAGE_NAME="SchemaEditor-v${VERSION}"
+PACKAGE_NAME="SEE-v${VERSION}"
 ZIP_FILE="${RELEASE_DIR}/${PACKAGE_NAME}.zip"
 
 # 删除旧的zip文件（避免zip命令的更新模式导致旧文件残留）

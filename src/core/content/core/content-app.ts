@@ -20,8 +20,8 @@ import { createShadowRoot } from './shadow-dom'
 /** 扩展全局类型声明 */
 declare global {
   interface Window {
-    __SCHEMA_EDITOR_INSTANCE__?: SchemaEditorContent
-    __SCHEMA_EDITOR_VERSION__?: string
+    __SEE_INSTANCE__?: SEEContent
+    __SEE_VERSION__?: string
   }
 }
 
@@ -29,10 +29,10 @@ declare global {
 const EXTENSION_VERSION = chrome.runtime.getManifest().version
 
 /**
- * Schema Editor Content Script 主应用类
+ * SEE (Schema Element Editor) Content Script 主应用类
  * 负责管理整个插件的生命周期
  */
-export class SchemaEditorContent {
+export class SEEContent {
   private monitor!: ElementMonitor
   private reactRoot: ReactDOM.Root | null = null
   private container: HTMLDivElement | null = null
@@ -51,27 +51,21 @@ export class SchemaEditorContent {
 
   constructor() {
     // 如果已有旧实例且版本不同，先清理旧实例
-    if (
-      window.__SCHEMA_EDITOR_INSTANCE__ &&
-      window.__SCHEMA_EDITOR_VERSION__ !== EXTENSION_VERSION
-    ) {
-      logger.log(`检测到旧版本实例 (${window.__SCHEMA_EDITOR_VERSION__})，正在清理...`)
-      window.__SCHEMA_EDITOR_INSTANCE__.destroy()
+    if (window.__SEE_INSTANCE__ && window.__SEE_VERSION__ !== EXTENSION_VERSION) {
+      logger.log(`检测到旧版本实例 (${window.__SEE_VERSION__})，正在清理...`)
+      window.__SEE_INSTANCE__.destroy()
     }
 
     // 如果已有相同版本的实例，不重复创建
-    if (
-      window.__SCHEMA_EDITOR_INSTANCE__ &&
-      window.__SCHEMA_EDITOR_VERSION__ === EXTENSION_VERSION
-    ) {
+    if (window.__SEE_INSTANCE__ && window.__SEE_VERSION__ === EXTENSION_VERSION) {
       logger.log('已存在相同版本的实例，跳过创建')
       this.isDestroyed = true // 标记为无效实例
       return
     }
 
     // 注册当前实例
-    window.__SCHEMA_EDITOR_INSTANCE__ = this
-    window.__SCHEMA_EDITOR_VERSION__ = EXTENSION_VERSION
+    window.__SEE_INSTANCE__ = this
+    window.__SEE_VERSION__ = EXTENSION_VERSION
 
     this.monitor = new ElementMonitor()
     this.init()
@@ -84,7 +78,7 @@ export class SchemaEditorContent {
     if (this.isDestroyed) return
     this.isDestroyed = true
 
-    logger.log('销毁 Schema Editor 实例')
+    logger.log('销毁 SEE 实例')
     this.stop()
 
     // 清理 iframe bridge 监听器
@@ -110,7 +104,7 @@ export class SchemaEditorContent {
    * 初始化
    */
   private async init(): Promise<void> {
-    logger.log('[Schema Editor] 初始化开始', {
+    logger.log('[SEE] 初始化开始', {
       isTop: this.isTop,
       isIframe: this.isIframe,
       isSameOrigin: this.isSameOrigin,
@@ -119,31 +113,31 @@ export class SchemaEditorContent {
 
     // 加载 iframe 配置
     this.iframeConfig = await storage.getIframeConfig()
-    logger.log('[Schema Editor] iframe 配置:', this.iframeConfig)
+    logger.log('[SEE] iframe 配置:', this.iframeConfig)
 
     // 检查初始激活状态
     this.isActive = await storage.getActiveState()
-    logger.log('[Schema Editor] 激活状态:', this.isActive)
+    logger.log('[SEE] 激活状态:', this.isActive)
 
     // iframe 内且 iframe 功能未启用时，跳过初始化
     if (this.isIframe && !this.iframeConfig.enabled) {
-      logger.log('[Schema Editor] iframe 内且功能未启用，跳过初始化')
+      logger.log('[SEE] iframe 内且功能未启用，跳过初始化')
       this.isDestroyed = true
       return
     }
 
     // iframe 内且非同源时，跳过初始化（跨域 iframe 不支持）
     if (this.isIframe && !this.isSameOrigin) {
-      logger.log('[Schema Editor] 跨域 iframe，跳过初始化')
+      logger.log('[SEE] 跨域 iframe，跳过初始化')
       this.isDestroyed = true
       return
     }
 
     if (this.isActive) {
-      logger.log('[Schema Editor] 开始启动 monitor...')
+      logger.log('[SEE] 开始启动 monitor...')
       this.start()
     } else {
-      logger.log('[Schema Editor] 插件未激活，跳过启动 monitor')
+      logger.log('[SEE] 插件未激活，跳过启动 monitor')
     }
 
     // 监听来自background的消息
@@ -163,12 +157,12 @@ export class SchemaEditorContent {
 
     // 如果是 top frame 且 iframe 功能启用，初始化 iframe bridge 监听器
     if (this.isTop && this.iframeConfig.enabled) {
-      logger.log('[Schema Editor] top frame: 初始化 iframe bridge 监听器')
+      logger.log('[SEE] top frame: 初始化 iframe bridge 监听器')
       this.initIframeBridge()
     }
 
     const frameInfo = this.isTop ? 'top frame' : `iframe (同源: ${this.isSameOrigin})`
-    logger.log(`[Schema Editor] 初始化完成 [${frameInfo}], 激活状态:`, this.isActive)
+    logger.log(`[SEE] 初始化完成 [${frameInfo}], 激活状态:`, this.isActive)
   }
 
   /**
@@ -254,7 +248,7 @@ export class SchemaEditorContent {
    */
   private async start(): Promise<void> {
     const frameInfo = this.isTop ? 'top frame' : 'iframe'
-    logger.log(`启动Schema Editor [${frameInfo}]`)
+    logger.log(`启动 SEE [${frameInfo}]`)
 
     // 首次激活时执行初始化（仅 top frame 需要注入脚本）
     if (!this.isInitialized && this.isTop) {
@@ -276,7 +270,7 @@ export class SchemaEditorContent {
    * 停止监听
    */
   private stop(): void {
-    logger.log('停止Schema Editor')
+    logger.log('停止 SEE')
     this.monitor.stop()
 
     // 移除UI容器（完全清除DOM元素）

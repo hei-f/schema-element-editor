@@ -1,4 +1,4 @@
-# Schema Editor
+# Schema Element Editor (SEE)
 
 Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 
