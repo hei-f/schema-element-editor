@@ -1,4 +1,4 @@
-import { createSchemaEditorBridge } from '@schema-editor/host-sdk'
+import { createSchemaElementEditorBridge } from '@schema-element-editor/host-sdk'
 import React, { useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 
@@ -26,7 +26,7 @@ function IframeApp() {
 
   useEffect(() => {
     // 使用 SDK 创建桥接
-    const cleanup = createSchemaEditorBridge({
+    const bridge = createSchemaElementEditorBridge({
       getSchema: (params) => {
         const data = schemaStore[params]
         addLog(`getSchema: ${params} => ${JSON.stringify(data)}`)
@@ -42,7 +42,7 @@ function IframeApp() {
     // 使用 setTimeout 避免在 effect 中同步调用 setState
     setTimeout(() => addLog('SDK 桥接已初始化'), 0)
 
-    return cleanup
+    return () => bridge.cleanup()
   }, [])
 
   return (
@@ -72,7 +72,7 @@ function IframeApp() {
           fontSize: 12,
         }}
       >
-        ✅ 使用 <code>@schema-editor/host-sdk</code> 初始化，自动处理 iframe 通信
+        ✅ 使用 <code>@schema-element-editor/host-sdk</code> 初始化，自动处理 iframe 通信
       </div>
 
       <TestElement id="iframe-element-1" title="iframe 元素 1" valid />

@@ -35,6 +35,14 @@ const { Title, Text, Paragraph } = Typography
 /** 通信模式类型 */
 type CommunicationMode = 'postMessage' | 'windowFunction'
 
+/** postMessage 模式消息来源标识 */
+const MESSAGE_SOURCE = {
+  /** 插件端发送的消息 */
+  CONTENT: 'schema-element-editor-content',
+  /** 宿主端响应的消息 */
+  HOST: 'schema-element-editor-host',
+} as const
+
 /** 分类导航侧边栏宽度 */
 const NAV_SIDER_WIDTH = 180
 
@@ -732,7 +740,7 @@ export const SchemaTestPage: React.FC<SchemaTestPageProps> = (props) => {
       // 只处理来自当前窗口的消息
       if (event.source !== window) return
       // 只处理来自插件的消息
-      if (!event.data || event.data.source !== 'schema-editor-content') return
+      if (!event.data || event.data.source !== MESSAGE_SOURCE.CONTENT) return
 
       const { type, payload, requestId } = event.data
       const result = handleRequest(type, payload)
@@ -740,7 +748,7 @@ export const SchemaTestPage: React.FC<SchemaTestPageProps> = (props) => {
       // 发送响应（必须携带 requestId）
       window.postMessage(
         {
-          source: 'schema-editor-host',
+          source: MESSAGE_SOURCE.HOST,
           requestId,
           ...result,
         },
@@ -750,8 +758,8 @@ export const SchemaTestPage: React.FC<SchemaTestPageProps> = (props) => {
 
     window.addEventListener('message', handlePostMessage)
     addLog('info', '🚀 postMessage 模式已启用', {
-      receive: 'source: schema-editor-content',
-      respond: 'source: schema-editor-host',
+      receive: `source: ${MESSAGE_SOURCE.CONTENT}`,
+      respond: `source: ${MESSAGE_SOURCE.HOST}`,
     })
 
     return () => {
@@ -997,7 +1005,7 @@ export const SchemaTestPage: React.FC<SchemaTestPageProps> = (props) => {
             <Row justify="space-between" align="middle">
               <Col>
                 <Title level={3} style={{ color: '#0958d9', margin: 0 }}>
-                  🔧 Schema Editor 功能测试
+                  🔧 Schema Element Editor 功能测试
                 </Title>
               </Col>
               <Col>
@@ -1030,7 +1038,7 @@ export const SchemaTestPage: React.FC<SchemaTestPageProps> = (props) => {
               }
               description={
                 communicationMode === 'postMessage'
-                  ? '监听 source: schema-editor-content → 响应 source: schema-editor-host'
+                  ? `监听 source: ${MESSAGE_SOURCE.CONTENT} → 响应 source: ${MESSAGE_SOURCE.HOST}`
                   : '暴露 __getContentById / __updateContentById / __getContentPreview'
               }
             />

@@ -131,6 +131,12 @@
   </div>
 
   <script>
+    // postMessage 模式消息来源标识
+    const MESSAGE_SOURCE = {
+      CONTENT: 'schema-element-editor-content',
+      HOST: 'schema-element-editor-host',
+    };
+
     // iframe 内部的 Schema 数据
     const schemaStore = {
       'iframe-element-1': {
@@ -148,7 +154,7 @@
     // 监听来自插件的 postMessage
     window.addEventListener('message', (event) => {
       // 只处理来自插件的请求
-      if (!event.data || event.data.source !== 'schema-editor-content') return;
+      if (!event.data || event.data.source !== MESSAGE_SOURCE.CONTENT) return;
 
       const { type, payload, requestId } = event.data;
       let result;
@@ -184,7 +190,7 @@
 
       // 发送响应给 top frame
       window.parent.postMessage({
-        source: 'schema-editor-host',
+        source: MESSAGE_SOURCE.HOST,
         requestId,
         ...result
       }, '*');
