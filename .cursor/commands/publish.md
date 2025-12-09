@@ -46,7 +46,7 @@
   - **关键**：同一文件内的不同功能改动必须拆分到不同的提交组
   - 例如：文件A中的第10-15行是功能X，第50-60行是功能Y，应拆分为两个提交组
   - 避免在一个提交中混合不相关的改动
-- **重要**：暂时忽略版本号相关文件（package.json, src/manifest.json, src/options/OptionsApp.tsx中的版本号），这些将在步骤9中单独提交
+- **重要**：暂时忽略版本号相关文件（package.json, src/manifest.json, src/features/options-page/components/OptionsPageContent.tsx中的版本号），这些将在步骤9中单独提交
 - **输出格式**：对每个提交组，明确列出：
   - 提交组编号
   - 功能描述
@@ -368,7 +368,7 @@ TypeScript 类型检查结果：
 
 **9.1 提交版本号更新（如有版本更新）**
 
-- `git add package.json src/manifest.json src/options/OptionsApp.tsx`
+- `git add package.json src/manifest.json src/features/options-page/components/OptionsPageContent.tsx`
 - `git commit -m "chore: release v{版本号}"`
 
 **9.2 提交README更新（如有README改动）**
