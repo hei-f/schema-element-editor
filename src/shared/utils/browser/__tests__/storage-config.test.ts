@@ -371,46 +371,32 @@ describe('storage-config', () => {
     it('有效配置应该返回 true', () => {
       expect(
         validator?.({
-          communicationMode: 'postMessage',
           requestTimeout: 5,
         })
       ).toBe(true)
 
       expect(
         validator?.({
-          communicationMode: 'windowFunction',
           requestTimeout: 1,
         })
       ).toBe(true)
 
       expect(
         validator?.({
-          communicationMode: 'postMessage',
           requestTimeout: 30,
         })
       ).toBe(true)
     })
 
-    it('communicationMode 无效值应该返回 false', () => {
-      expect(
-        validator?.({
-          communicationMode: 'invalid',
-          requestTimeout: 5,
-        })
-      ).toBe(false)
-    })
-
     it('requestTimeout 超出范围应该返回 false', () => {
       expect(
         validator?.({
-          communicationMode: 'postMessage',
           requestTimeout: 0,
         })
       ).toBe(false)
 
       expect(
         validator?.({
-          communicationMode: 'postMessage',
           requestTimeout: 31,
         })
       ).toBe(false)
@@ -527,11 +513,9 @@ describe('storage-config', () => {
       expect(SIMPLE_STORAGE_FIELDS.previewConfig.defaultValue).toHaveProperty('autoUpdate')
     })
 
-    it('apiConfig 默认值应该包含通信模式', () => {
-      expect(SIMPLE_STORAGE_FIELDS.apiConfig.defaultValue).toHaveProperty('communicationMode')
-      expect(['postMessage', 'windowFunction']).toContain(
-        SIMPLE_STORAGE_FIELDS.apiConfig.defaultValue.communicationMode
-      )
+    it('apiConfig 默认值应该包含请求超时配置', () => {
+      expect(SIMPLE_STORAGE_FIELDS.apiConfig.defaultValue).toHaveProperty('requestTimeout')
+      expect(typeof SIMPLE_STORAGE_FIELDS.apiConfig.defaultValue.requestTimeout).toBe('number')
     })
   })
 
@@ -590,7 +574,6 @@ describe('storage-config', () => {
       // 最小有效值
       expect(
         validator?.({
-          communicationMode: 'postMessage',
           requestTimeout: 1,
         })
       ).toBe(true)
@@ -598,7 +581,6 @@ describe('storage-config', () => {
       // 最大有效值
       expect(
         validator?.({
-          communicationMode: 'postMessage',
           requestTimeout: 30,
         })
       ).toBe(true)
