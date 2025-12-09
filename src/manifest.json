@@ -33,7 +33,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["injected.js", "node_modules/antd/dist/reset.css"],
+      "resources": ["node_modules/antd/dist/reset.css"],
       "matches": ["<all_urls>"]
     }
   ]
