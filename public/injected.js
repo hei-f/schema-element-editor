@@ -1,22 +1,22 @@
 ;(function () {
   /**
    * Injected Script - 仅 windowFunction 模式使用
-   * 
+   *
    * 此脚本运行在页面上下文中，用于调用宿主应用暴露的 window 函数
    * postMessage 模式不需要此脚本，Content Script 直接与宿主通信
    */
-  
+
   // 检测是否已经注入，避免重复注入
-  if (window.__SCHEMA_EDITOR_INJECTED__) {
+  if (window.__SCHEMA_ELEMENT_EDITOR_INJECTED__) {
     return
   }
-  
+
   // 设置全局标记
-  window.__SCHEMA_EDITOR_INJECTED__ = true
+  window.__SCHEMA_ELEMENT_EDITOR_INJECTED__ = true
 
   const MESSAGE_SOURCE = {
-    FROM_CONTENT: 'schema-editor-content',
-    FROM_INJECTED: 'schema-editor-injected'
+    FROM_CONTENT: 'schema-element-editor-content',
+    FROM_INJECTED: 'schema-element-editor-injected',
   }
 
   /**
@@ -24,7 +24,7 @@
    */
   let functionNames = {
     get: '__getContentById',
-    update: '__updateContentById'
+    update: '__updateContentById',
   }
 
   /**
@@ -70,12 +70,12 @@
    * 处理配置同步
    */
   function handleConfigSync(payload) {
-    const { 
-      getFunctionName, 
-      updateFunctionName, 
-      previewFunctionName: previewFnName
+    const {
+      getFunctionName,
+      updateFunctionName,
+      previewFunctionName: previewFnName,
     } = payload || {}
-    
+
     if (getFunctionName) {
       functionNames.get = getFunctionName
     }
@@ -98,7 +98,7 @@
       if (typeof getFn !== 'function') {
         sendResponse('SCHEMA_RESPONSE', {
           success: false,
-          error: `页面未提供 ${functionNames.get} 方法`
+          error: `页面未提供 ${functionNames.get} 方法`,
         })
         return
       }
@@ -106,13 +106,13 @@
       const schema = getFn(params)
       sendResponse('SCHEMA_RESPONSE', {
         success: true,
-        data: schema
+        data: schema,
       })
     } catch (error) {
       console.error('获取Schema失败:', error)
       sendResponse('SCHEMA_RESPONSE', {
         success: false,
-        error: error.message || '获取Schema时发生错误'
+        error: error.message || '获取Schema时发生错误',
       })
     }
   }
@@ -128,7 +128,7 @@
       if (typeof updateFn !== 'function') {
         sendResponse('UPDATE_RESULT', {
           success: false,
-          error: `页面未提供 ${functionNames.update} 方法`
+          error: `页面未提供 ${functionNames.update} 方法`,
         })
         return
       }
@@ -137,13 +137,13 @@
       const success = result !== false
       sendResponse('UPDATE_RESULT', {
         success,
-        message: success ? '更新成功' : '更新失败'
+        message: success ? '更新成功' : '更新失败',
       })
     } catch (error) {
       console.error('更新Schema失败:', error)
       sendResponse('UPDATE_RESULT', {
         success: false,
-        error: error.message || '更新Schema时发生错误'
+        error: error.message || '更新Schema时发生错误',
       })
     }
   }
@@ -154,7 +154,7 @@
   function handleCheckPreviewFunction() {
     const previewFn = window[previewFunctionName]
     sendResponse('PREVIEW_FUNCTION_RESULT', {
-      exists: typeof previewFn === 'function'
+      exists: typeof previewFn === 'function',
     })
   }
 
@@ -173,16 +173,16 @@
       if (typeof previewFn !== 'function') {
         return
       }
-      
+
       // 验证容器存在
       if (!document.getElementById(containerId)) {
         console.error('预览容器不存在:', containerId)
         return
       }
-      
+
       // 统一传递 containerId，宿主自行获取容器
       const result = previewFn(schema, containerId)
-      
+
       // 如果返回清理函数，保存下来
       if (typeof result === 'function') {
         userCleanupFn = result
@@ -228,7 +228,7 @@
       {
         source: MESSAGE_SOURCE.FROM_INJECTED,
         type,
-        payload
+        payload,
       },
       '*'
     )

@@ -78,8 +78,8 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     communicationMode: 'postMessage',
     requestTimeout: 5,
     sourceConfig: {
-      contentSource: 'schema-editor-content',
-      hostSource: 'schema-editor-host',
+      contentSource: 'schema-element-editor-content',
+      hostSource: 'schema-element-editor-host',
     },
     messageTypes: {
       getSchema: 'GET_SCHEMA',

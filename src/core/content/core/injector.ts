@@ -24,7 +24,7 @@ export const injectPageScript = async (): Promise<void> => {
   }
 
   // 检查是否已经注入过
-  if ((window as any).__SCHEMA_EDITOR_INJECTED__) {
+  if ((window as any).__SCHEMA_ELEMENT_EDITOR_INJECTED__) {
     // 即使已注入，也要同步配置（配置可能已更新）
     await syncConfigToInjectedScript()
     return
@@ -59,7 +59,7 @@ export const syncConfigToInjectedScript = async (): Promise<void> => {
 
     window.postMessage(
       {
-        source: 'schema-editor-content',
+        source: 'schema-element-editor-content',
         type: 'CONFIG_SYNC',
         payload: {
           getFunctionName,

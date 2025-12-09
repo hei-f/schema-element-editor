@@ -4,11 +4,11 @@ import { logger } from '@/shared/utils/logger'
 /** 默认消息来源标识（用于 windowFunction 模式的 injected script 通信） */
 export const MESSAGE_SOURCE = {
   /** Content Script 发送的消息（默认值，postMessage 模式可配置） */
-  FROM_CONTENT: 'schema-editor-content',
+  FROM_CONTENT: 'schema-element-editor-content',
   /** 宿主应用响应的消息（默认值，postMessage 模式可配置） */
-  FROM_HOST: 'schema-editor-host',
+  FROM_HOST: 'schema-element-editor-host',
   /** Injected Script 响应的消息（windowFunction 模式专用，不可配置） */
-  FROM_INJECTED: 'schema-editor-injected',
+  FROM_INJECTED: 'schema-element-editor-injected',
 } as const
 
 /** requestId 计数器 */
