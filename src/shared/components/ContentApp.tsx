@@ -1,27 +1,17 @@
 import { SchemaDrawer } from '@/features/schema-drawer'
 import { DEFAULT_VALUES } from '@/shared/constants/defaults'
 import { PLUGIN_EVENTS } from '@/shared/constants/events'
-// import { shadowDomTheme } from '@/shared/constants/theme'
-import { getCommunicationMode } from '@/shared/utils/communication-mode'
 import type {
   DrawerShortcutsConfig,
   ElementAttributes,
   IframeConfig,
   IframeElementClickPayload,
-  Message,
-  PreviewFunctionResultPayload,
   SchemaDrawerConfig,
   SchemaResponsePayload,
   UpdateResultPayload,
 } from '@/shared/types'
-import { MessageType } from '@/shared/types'
 import { logger } from '@/shared/utils/logger'
-import {
-  initHostMessageListener,
-  listenPageMessages,
-  postMessageToPage,
-  sendRequestToHost,
-} from '@/shared/utils/browser/message'
+import { initHostMessageListener, sendRequestToHost } from '@/shared/utils/browser/message'
 import { storage } from '@/shared/utils/browser/storage'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { generate } from '@ant-design/colors'
@@ -40,12 +30,6 @@ interface AppProps {
  * Schema Element Editor主应用
  */
 export const App: React.FC<AppProps> = ({ shadowRoot }) => {
-  /**
-   * 为 Shadow DOM 创建 antd 样式缓存
-   * 确保 antd 的 CSS-in-JS 样式正确注入到 Shadow DOM 中
-   */
-  // const antdCache = useMemo(() => createCache(), [])
-
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [schemaData, setSchemaData] = useState<unknown>(undefined)
   const [currentAttributes, setCurrentAttributes] = useState<ElementAttributes>({ params: [] })
@@ -63,42 +47,12 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
   /** iframe 元素来源的 origin */
   const iframeOriginRef = useRef<string>('')
 
-  const configSyncedRef = useRef(false)
-
   /**
    * 初始化 shadowRoot 全局管理器（只在挂载时执行一次）
    */
   useEffect(() => {
     shadowRootManager.init(shadowRoot)
   }, [shadowRoot])
-
-  /** 通信模式 */
-  const { isPostMessageMode, isWindowFunctionMode } = getCommunicationMode(drawerConfig?.apiConfig)
-
-  /**
-   * 同步配置到注入脚本（仅 windowFunction 模式需要）
-   */
-  const syncConfigToInjected = useCallback(async () => {
-    if (configSyncedRef.current) return
-    if (!isWindowFunctionMode) return
-
-    const [getFunctionName, updateFunctionName, previewFunctionName] = await Promise.all([
-      storage.getGetFunctionName(),
-      storage.getUpdateFunctionName(),
-      storage.getPreviewFunctionName(),
-    ])
-
-    postMessageToPage({
-      type: MessageType.CONFIG_SYNC,
-      payload: {
-        getFunctionName,
-        updateFunctionName,
-        previewFunctionName,
-      },
-    })
-
-    configSyncedRef.current = true
-  }, [isWindowFunctionMode])
 
   /**
    * 初始化：加载配置
@@ -155,35 +109,14 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
   }, [])
 
   /**
-   * 配置加载后，初始化通信
+   * 初始化宿主消息监听器
    */
   useEffect(() => {
     if (!drawerConfig) return
 
-    // windowFunction 模式：同步配置到 injected.js
-    if (isWindowFunctionMode) {
-      syncConfigToInjected()
-    }
-  }, [drawerConfig, syncConfigToInjected, isWindowFunctionMode])
-
-  /**
-   * 初始化宿主消息监听器（postMessage 模式）
-   */
-  useEffect(() => {
-    if (!drawerConfig || !isPostMessageMode) return
-
     const cleanup = initHostMessageListener(drawerConfig.apiConfig.sourceConfig)
     return cleanup
-  }, [drawerConfig, isPostMessageMode])
-
-  /**
-   * 处理更新结果（windowFunction 模式）
-   */
-  const handleUpdateResult = useCallback((payload: UpdateResultPayload) => {
-    if (!payload.success) {
-      antdMessage.error(payload.error || '更新失败')
-    }
-  }, [])
+  }, [drawerConfig])
 
   /**
    * 检测预览函数是否存在
@@ -193,37 +126,22 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
 
     const { apiConfig } = drawerConfig
 
-    if (isPostMessageMode) {
-      try {
-        const messageType =
-          apiConfig.messageTypes?.checkPreview ?? DEFAULT_VALUES.apiConfig.messageTypes.checkPreview
-        const response = await sendRequestToHost<{ exists: boolean }>(
-          messageType,
-          {},
-          apiConfig.requestTimeout,
-          apiConfig.sourceConfig
-        )
-        setHasPreviewFunction(response.exists === true)
-        logger.log('预览函数检测结果:', response.exists)
-      } catch {
-        setHasPreviewFunction(false)
-        logger.log('预览函数检测超时，认为不存在')
-      }
-    } else {
-      const cleanup = listenPageMessages((msg: Message) => {
-        if (msg.type === MessageType.PREVIEW_FUNCTION_RESULT) {
-          const payload = msg.payload as PreviewFunctionResultPayload
-          setHasPreviewFunction(payload.exists)
-          logger.log('预览函数检测结果:', payload.exists)
-          cleanup()
-        }
-      })
-
-      postMessageToPage({
-        type: MessageType.CHECK_PREVIEW_FUNCTION,
-      })
+    try {
+      const messageType =
+        apiConfig.messageTypes?.checkPreview ?? DEFAULT_VALUES.apiConfig.messageTypes.checkPreview
+      const response = await sendRequestToHost<{ exists: boolean }>(
+        messageType,
+        {},
+        apiConfig.requestTimeout,
+        apiConfig.sourceConfig
+      )
+      setHasPreviewFunction(response.exists === true)
+      logger.log('预览函数检测结果:', response.exists)
+    } catch {
+      setHasPreviewFunction(false)
+      logger.log('预览函数检测超时，认为不存在')
     }
-  }, [drawerConfig, isPostMessageMode])
+  }, [drawerConfig])
 
   /**
    * 处理 Schema 响应
@@ -253,30 +171,6 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
       document.body.style.overflow = 'hidden'
     }
   }, [drawerOpen])
-
-  /**
-   * 监听来自 injected script 的消息（windowFunction 模式）
-   */
-  useEffect(() => {
-    if (!drawerConfig || !isWindowFunctionMode) return
-
-    const cleanup = listenPageMessages((msg: Message) => {
-      switch (msg.type) {
-        case MessageType.SCHEMA_RESPONSE:
-          handleSchemaResponse(msg.payload as SchemaResponsePayload)
-          break
-
-        case MessageType.UPDATE_RESULT:
-          handleUpdateResult(msg.payload as UpdateResultPayload)
-          break
-
-        default:
-          break
-      }
-    })
-
-    return cleanup
-  }, [drawerConfig, isWindowFunctionMode, handleSchemaResponse, handleUpdateResult])
 
   /**
    * 向 iframe 发送 postMessage 请求
@@ -340,55 +234,46 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
       const params = attributes.params.join(',')
       const { apiConfig } = drawerConfig
 
-      if (isPostMessageMode) {
-        // postMessage 直连模式
-        try {
-          const messageType =
-            apiConfig.messageTypes?.getSchema ?? DEFAULT_VALUES.apiConfig.messageTypes.getSchema
+      try {
+        const messageType =
+          apiConfig.messageTypes?.getSchema ?? DEFAULT_VALUES.apiConfig.messageTypes.getSchema
 
-          // 判断请求发送目标
-          const shouldSendToIframe =
-            fromIframe && iframeConfig?.schemaTarget === 'iframe' && iframeOrigin
+        // 判断请求发送目标
+        const shouldSendToIframe =
+          fromIframe && iframeConfig?.schemaTarget === 'iframe' && iframeOrigin
 
-          if (shouldSendToIframe) {
-            // 向 iframe 发送请求
-            const response = await sendRequestToIframe<SchemaResponsePayload>(
-              iframeOrigin,
-              messageType,
-              { params },
-              apiConfig.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout
-            )
-            handleSchemaResponse({
-              success: response.success !== false,
-              data: response.data,
-              error: response.error,
-            })
-          } else {
-            // 向 top frame 发送请求
-            const response = await sendRequestToHost<SchemaResponsePayload>(
-              messageType,
-              { params },
-              apiConfig.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout,
-              apiConfig.sourceConfig
-            )
-            handleSchemaResponse({
-              success: response.success !== false,
-              data: response.data,
-              error: response.error,
-            })
-          }
-        } catch (error: any) {
-          antdMessage.error(error.message || '获取Schema失败')
+        if (shouldSendToIframe) {
+          // 向 iframe 发送请求
+          const response = await sendRequestToIframe<SchemaResponsePayload>(
+            iframeOrigin,
+            messageType,
+            { params },
+            apiConfig.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout
+          )
+          handleSchemaResponse({
+            success: response.success !== false,
+            data: response.data,
+            error: response.error,
+          })
+        } else {
+          // 向 top frame 发送请求
+          const response = await sendRequestToHost<SchemaResponsePayload>(
+            messageType,
+            { params },
+            apiConfig.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout,
+            apiConfig.sourceConfig
+          )
+          handleSchemaResponse({
+            success: response.success !== false,
+            data: response.data,
+            error: response.error,
+          })
         }
-      } else {
-        // windowFunction 模式：通过 injected.js
-        postMessageToPage({
-          type: MessageType.GET_SCHEMA,
-          payload: { params },
-        })
+      } catch (error: any) {
+        antdMessage.error(error.message || '获取Schema失败')
       }
     },
-    [drawerConfig, isPostMessageMode, iframeConfig, handleSchemaResponse, sendRequestToIframe]
+    [drawerConfig, iframeConfig, handleSchemaResponse, sendRequestToIframe]
   )
 
   /**
@@ -445,75 +330,40 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
       const params = currentAttributes.params.join(',')
       const { apiConfig } = drawerConfig
 
-      if (isPostMessageMode) {
-        // postMessage 直连模式
-        const messageType =
-          apiConfig.messageTypes?.updateSchema ?? DEFAULT_VALUES.apiConfig.messageTypes.updateSchema
+      const messageType =
+        apiConfig.messageTypes?.updateSchema ?? DEFAULT_VALUES.apiConfig.messageTypes.updateSchema
 
-        // 判断请求发送目标
-        const shouldSendToIframe =
-          isFromIframe && iframeConfig?.schemaTarget === 'iframe' && iframeOriginRef.current
+      // 判断请求发送目标
+      const shouldSendToIframe =
+        isFromIframe && iframeConfig?.schemaTarget === 'iframe' && iframeOriginRef.current
 
-        if (shouldSendToIframe) {
-          // 向 iframe 发送请求
-          const response = await sendRequestToIframe<UpdateResultPayload>(
-            iframeOriginRef.current,
-            messageType,
-            { schema: data, params },
-            apiConfig.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout
-          )
+      if (shouldSendToIframe) {
+        // 向 iframe 发送请求
+        const response = await sendRequestToIframe<UpdateResultPayload>(
+          iframeOriginRef.current,
+          messageType,
+          { schema: data, params },
+          apiConfig.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout
+        )
 
-          if (response.success === false) {
-            throw new Error(response.error || '更新失败')
-          }
-        } else {
-          // 向 top frame 发送请求
-          const response = await sendRequestToHost<UpdateResultPayload>(
-            messageType,
-            { schema: data, params },
-            apiConfig.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout,
-            apiConfig.sourceConfig
-          )
-
-          if (response.success === false) {
-            throw new Error(response.error || '更新失败')
-          }
+        if (response.success === false) {
+          throw new Error(response.error || '更新失败')
         }
       } else {
-        // windowFunction 模式：通过 injected.js
-        return new Promise<void>((resolve, reject) => {
-          postMessageToPage({
-            type: MessageType.UPDATE_SCHEMA,
-            payload: { schema: data, params },
-          })
+        // 向 top frame 发送请求
+        const response = await sendRequestToHost<UpdateResultPayload>(
+          messageType,
+          { schema: data, params },
+          apiConfig.requestTimeout ?? DEFAULT_VALUES.apiConfig.requestTimeout,
+          apiConfig.sourceConfig
+        )
 
-          const timeout = setTimeout(() => {
-            reject(new Error('更新超时'))
-          }, 10000)
-
-          const cleanup = listenPageMessages((msg: Message) => {
-            if (msg.type === MessageType.UPDATE_RESULT) {
-              clearTimeout(timeout)
-              cleanup()
-              const result = msg.payload as UpdateResultPayload
-              if (result.success === false) {
-                reject(new Error(result.error || '更新失败'))
-              } else {
-                resolve()
-              }
-            }
-          })
-        })
+        if (response.success === false) {
+          throw new Error(response.error || '更新失败')
+        }
       }
     },
-    [
-      currentAttributes,
-      drawerConfig,
-      isPostMessageMode,
-      isFromIframe,
-      iframeConfig,
-      sendRequestToIframe,
-    ]
+    [currentAttributes, drawerConfig, isFromIframe, iframeConfig, sendRequestToIframe]
   )
 
   /**
@@ -548,9 +398,7 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
     const primaryTextColor = getLuminance(primaryColor) > 0.5 ? '#000000' : '#ffffff'
 
     return {
-      // ...shadowDomTheme,
       token: {
-        // ...shadowDomTheme.token,
         colorPrimary: primaryColor,
         colorPrimaryHover: hoverColor,
         colorPrimaryActive: activeColor,

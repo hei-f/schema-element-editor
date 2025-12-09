@@ -33,9 +33,12 @@ export const DrawerContent: React.FC<DrawerContentProps> = (props) => {
     return (
       <RecordingModeLayout
         isDiffMode={isDiffMode}
+        previewEnabled={previewEnabled}
+        isClosingPreview={isClosingPreview}
         editorThemeVars={editorThemeVars}
         diffModeProps={diffModeProps}
         recordingModeProps={recordingModeProps}
+        previewModeProps={previewModeProps}
         baseProps={baseProps}
       />
     )
