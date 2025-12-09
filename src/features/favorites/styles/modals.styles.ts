@@ -6,7 +6,6 @@ import styled from 'styled-components'
  */
 export const PreviewEditorContainer = styled.div`
   height: 600px;
-  border: 1px solid #d9d9d9;
 `
 
 /**
@@ -31,9 +30,10 @@ export const EditModalNameInput = styled(Input)`
  * 编辑器容器
  */
 export const EditorContainer = styled.div`
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
+  flex: 1;
   overflow: hidden;
+  position: relative;
+  border-radius: 12px;
 `
 
 /**

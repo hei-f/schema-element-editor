@@ -11,7 +11,7 @@ const EXTENSION_VERSION = chrome.runtime.getManifest().version
 function updateIconState(isActive: boolean) {
   // 更新图标标题
   chrome.action.setTitle({
-    title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
+    title: `Schema Element Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
   })
 
   // 切换图标颜色

@@ -1,6 +1,7 @@
 import type { CodeMirrorEditorHandle } from '@/features/schema-drawer/components/editor/CodeMirrorEditor'
 import { CodeMirrorEditor } from '@/features/schema-drawer/components/editor/CodeMirrorEditor'
 import { MODAL_Z_INDEX } from '@/shared/constants/theme'
+import type { EditorTheme } from '@/shared/types'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { Button, Modal } from 'antd'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -17,6 +18,8 @@ interface FavoriteEditModalProps {
   favoriteId: string | null
   initialName: string
   initialContent: string
+  /** 编辑器主题 */
+  editorTheme: EditorTheme
   onSave: (id: string, name: string, content: string) => Promise<void>
   onClose: () => void
 }
@@ -24,14 +27,8 @@ interface FavoriteEditModalProps {
 /**
  * 收藏编辑模态框组件
  */
-export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = ({
-  visible,
-  favoriteId,
-  initialName,
-  initialContent,
-  onSave,
-  onClose,
-}) => {
+export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = (props) => {
+  const { visible, favoriteId, initialName, initialContent, editorTheme, onSave, onClose } = props
   const [name, setName] = useState('')
   const [content, setContent] = useState('')
   const [nameError, setNameError] = useState<string | null>(null)
@@ -231,7 +228,7 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = ({
                 height="500px"
                 defaultValue={initialContent}
                 onChange={handleContentChange}
-                theme="light"
+                theme={editorTheme}
                 placeholder="在此输入 JSON 内容..."
               />
             </EditorContainer>

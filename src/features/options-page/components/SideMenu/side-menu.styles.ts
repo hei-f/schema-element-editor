@@ -272,7 +272,7 @@ export const MenuHeader = styled.div<{ $collapsed: boolean }>`
   display: flex;
   align-items: center;
   justify-content: ${(props) => (props.$collapsed ? 'center' : 'space-between')};
-  padding: ${(props) => (props.$collapsed ? '12px 0' : '12px 16px')};
+  padding: ${(props) => (props.$collapsed ? '12px 0' : '12px 16px 12px 20px')};
   margin-bottom: 8px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 `
@@ -281,7 +281,7 @@ export const MenuHeader = styled.div<{ $collapsed: boolean }>`
 export const MenuLogoWrapper = styled.div<{ $collapsed: boolean }>`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
   opacity: ${(props) => (props.$collapsed ? 0 : 1)};
   width: ${(props) => (props.$collapsed ? 0 : 'auto')};
   overflow: hidden;
@@ -292,7 +292,7 @@ export const MenuLogoWrapper = styled.div<{ $collapsed: boolean }>`
 
 /** 菜单标题 */
 export const MenuTitle = styled.span<{ $collapsed: boolean }>`
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
   color: #353e5c;
   white-space: nowrap;
@@ -308,7 +308,7 @@ export const CollapseButton = styled(Button)<{ $collapsed: boolean }>`
   height: 24px;
   min-width: 24px;
   padding: 0;
-  border: none;
+  border: none !important;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.6);
   color: #666;

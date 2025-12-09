@@ -1,4 +1,4 @@
-import type { Favorite } from '@/shared/types'
+import type { EditorTheme, Favorite } from '@/shared/types'
 import React from 'react'
 import { AddFavoriteModal } from './AddFavoriteModal'
 import { FavoriteEditModal } from './FavoriteEditModal'
@@ -13,6 +13,8 @@ interface FavoritesManagerProps {
   editingFavoriteId: string | null
   editingName: string
   editingContent: string
+  /** 编辑器主题 */
+  editorTheme: EditorTheme
   onAddFavoriteInputChange: (value: string) => void
   onAddFavorite: () => Promise<void>
   onCloseAddFavoriteModal: () => void
@@ -27,25 +29,27 @@ interface FavoritesManagerProps {
 /**
  * 收藏功能管理器 - 组合所有收藏相关的模态框
  */
-export const FavoritesManager: React.FC<FavoritesManagerProps> = ({
-  addFavoriteModalVisible,
-  favoriteNameInput,
-  favoritesModalVisible,
-  favoritesList,
-  editModalVisible,
-  editingFavoriteId,
-  editingName,
-  editingContent,
-  onAddFavoriteInputChange,
-  onAddFavorite,
-  onCloseAddFavoriteModal,
-  onCloseFavoritesModal,
-  onEditFavorite,
-  onApplyFavorite,
-  onDeleteFavorite,
-  onSaveEdit,
-  onCloseEditModal,
-}) => {
+export const FavoritesManager: React.FC<FavoritesManagerProps> = (props) => {
+  const {
+    addFavoriteModalVisible,
+    favoriteNameInput,
+    favoritesModalVisible,
+    favoritesList,
+    editModalVisible,
+    editingFavoriteId,
+    editingName,
+    editingContent,
+    editorTheme,
+    onAddFavoriteInputChange,
+    onAddFavorite,
+    onCloseAddFavoriteModal,
+    onCloseFavoritesModal,
+    onEditFavorite,
+    onApplyFavorite,
+    onDeleteFavorite,
+    onSaveEdit,
+    onCloseEditModal,
+  } = props
   return (
     <>
       <AddFavoriteModal
@@ -70,6 +74,7 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = ({
         favoriteId={editingFavoriteId}
         initialName={editingName}
         initialContent={editingContent}
+        editorTheme={editorTheme}
         onSave={onSaveEdit}
         onClose={onCloseEditModal}
       />

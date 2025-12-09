@@ -368,17 +368,19 @@ export const IntegrationConfigSection: React.FC<SectionProps> = (props) => {
           <ExampleSection vertical gap={8}>
             <ExampleLabel strong>postMessage 模式 - 宿主页面示例（推荐使用 SDK）：</ExampleLabel>
             <CodeBlock>
-              <span className="comment">{'// 安装: npm install @schema-editor/host-sdk'}</span>
+              <span className="comment">
+                {'// 安装: npm install @schema-element-editor/host-sdk'}
+              </span>
               {'\n'}
-              <span className="keyword">import</span> {'{ useSchemaEditor }'}{' '}
+              <span className="keyword">import</span> {'{ useSchemaElementEditor }'}{' '}
               <span className="keyword">from</span>{' '}
-              <span className="string">'@schema-editor/host-sdk'</span>;{'\n\n'}
+              <span className="string">'@schema-element-editor/host-sdk'</span>;{'\n\n'}
               <span className="keyword">function</span> <span className="function">App</span>(){' '}
               {'{'}
               {'\n'}
               {'  '}
               <span className="keyword">const</span> {'{ pushSchema }'} ={' '}
-              <span className="function">useSchemaEditor</span>({'{'}
+              <span className="function">useSchemaElementEditor</span>({'{'}
               {'\n'}
               {'    '}
               <span className="comment">{'// 获取 schema（必填）'}</span>

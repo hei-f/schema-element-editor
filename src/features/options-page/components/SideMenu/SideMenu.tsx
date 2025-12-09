@@ -163,7 +163,7 @@ export const SideMenu: React.FC<SideMenuProps> = (props) => {
         <MenuHeader $collapsed={collapsed}>
           <MenuLogoWrapper $collapsed={collapsed}>
             <LogoIcon style={{ fontSize: 24 }} />
-            <MenuTitle $collapsed={collapsed}>Schema Editor</MenuTitle>
+            <MenuTitle $collapsed={collapsed}>SEE</MenuTitle>
           </MenuLogoWrapper>
           <CollapseButton
             $collapsed={collapsed}

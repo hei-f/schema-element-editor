@@ -1179,6 +1179,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         editingFavoriteId={editingFavoriteId}
         editingName={editingName}
         editingContent={editingContent}
+        editorTheme={editorTheme}
         onAddFavoriteInputChange={setFavoriteNameInput}
         onAddFavorite={handleAddFavorite}
         onCloseAddFavoriteModal={closeAddFavoriteModal}

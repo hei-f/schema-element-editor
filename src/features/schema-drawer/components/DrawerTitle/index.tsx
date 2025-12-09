@@ -102,7 +102,7 @@ export const DrawerTitle: React.FC<DrawerTitleProps> = (props) => {
   return (
     <DrawerTitleContainer>
       <DrawerTitleLeft>
-        <span>Schema Editor</span>
+        <span>Schema Element Editor</span>
         {toolbarButtons.draft && draftAutoSaveStatus === 'success' && (
           <DraftAutoSaveSuccess>✓ 草稿已自动保存</DraftAutoSaveSuccess>
         )}

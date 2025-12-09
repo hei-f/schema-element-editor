@@ -495,7 +495,7 @@ export const VersionContainer = styled.div`
   display: flex;
   align-items: center;
   height: 30px;
-  gap: 6px;
+  gap: 8px;
   background: rgba(255, 255, 255, 0.45);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.35);
