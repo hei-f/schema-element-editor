@@ -72,6 +72,7 @@ describe('FavoriteEditModal组件测试', () => {
     favoriteId: 'test-id',
     initialName: '测试收藏',
     initialContent: validJson,
+    editorTheme: 'seeDark' as const,
     onSave: vi.fn().mockResolvedValue(undefined),
     onClose: vi.fn(),
   }

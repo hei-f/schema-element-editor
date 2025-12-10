@@ -43,7 +43,7 @@ export const tags = {
   name: createTag('name'),
   color: createTag('color'),
   invalid: createTag('invalid'),
-  // 额外的 schema-editor-dark-theme 使用的标签
+  // 额外的 schema-element-editor-dark-theme 使用的标签
   local: createTag('local'),
   constant: createTag('constant'),
   escape: createTag('escape'),

@@ -1,14 +1,14 @@
 /**
- * Schema Editor Host SDK - Vue
+ * Schema Element Editor Host SDK - Vue
  * Vue 3 Composition API 包装
  */
 
 import { onMounted, onUnmounted, watch, toValue, type MaybeRefOrGetter } from 'vue'
-import { createSchemaEditorBridge } from './core'
+import { createSchemaElementEditorBridge } from './core'
 import type {
-  SchemaEditorConfig,
-  SchemaEditorBridge,
-  SchemaEditorRecording,
+  SchemaElementEditorConfig,
+  SchemaElementEditorBridge,
+  SchemaElementEditorRecording,
   SchemaValue,
   PostMessageSourceConfig,
   PostMessageTypeConfig,
@@ -16,19 +16,19 @@ import type {
 
 // 重新导出类型
 export type {
-  SchemaEditorConfig,
-  SchemaEditorBridge,
-  SchemaEditorRecording,
+  SchemaElementEditorConfig,
+  SchemaElementEditorBridge,
+  SchemaElementEditorRecording,
   SchemaValue,
   PostMessageSourceConfig,
   PostMessageTypeConfig,
 }
 
 /**
- * Vue 版本的 Schema Editor 配置
+ * Vue 版本的 Schema Element Editor 配置
  * 支持响应式值（ref/reactive/getter）
  */
-export interface VueSchemaEditorConfig {
+export interface VueSchemaElementEditorConfig {
   /**
    * 获取 Schema 数据
    */
@@ -61,27 +61,27 @@ export interface VueSchemaEditorConfig {
 }
 
 /** Vue composable 返回值 */
-export interface UseSchemaEditorReturn {
+export interface UseSchemaElementEditorReturn {
   /** 录制相关方法 */
-  recording: SchemaEditorRecording
+  recording: SchemaElementEditorRecording
 }
 
 /**
- * Schema Editor 插件接入 composable（Vue 3）
- * 用于在宿主页面接入 Schema Editor 插件，通过 postMessage 接收插件请求并返回响应
+ * Schema Element Editor 插件接入 composable（Vue 3）
+ * 用于在宿主页面接入 Schema Element Editor 插件，通过 postMessage 接收插件请求并返回响应
  *
- * @param config - Schema Editor 配置（支持响应式值）
+ * @param config - Schema Element Editor 配置（支持响应式值）
  * @returns 桥接器方法，包含 pushSchema
  *
  * @example
  * ```vue
  * <script setup>
- * import { useSchemaEditor } from '@schema-editor/host-sdk/vue'
+ * import { useSchemaElementEditor } from '@schema-element-editor/host-sdk/vue'
  * import { ref } from 'vue'
  *
  * const dataStore = ref({})
  *
- * const { pushSchema } = useSchemaEditor({
+ * const { pushSchema } = useSchemaElementEditor({
  *   getSchema: (params) => dataStore.value[params],
  *   updateSchema: (schema, params) => {
  *     dataStore.value[params] = schema
@@ -94,10 +94,12 @@ export interface UseSchemaEditorReturn {
  * </script>
  * ```
  */
-export function useSchemaEditor(config: VueSchemaEditorConfig): UseSchemaEditorReturn {
+export function useSchemaElementEditor(
+  config: VueSchemaElementEditorConfig
+): UseSchemaElementEditorReturn {
   const { getSchema, updateSchema, renderPreview, sourceConfig, messageTypes, enabled } = config
 
-  let bridge: SchemaEditorBridge | null = null
+  let bridge: SchemaElementEditorBridge | null = null
 
   const destroyBridge = () => {
     if (bridge) {
@@ -116,7 +118,7 @@ export function useSchemaEditor(config: VueSchemaEditorConfig): UseSchemaEditorR
     }
 
     // 创建代理配置，始终使用最新的值
-    const proxyConfig: SchemaEditorConfig = {
+    const proxyConfig: SchemaElementEditorConfig = {
       getSchema: (params) => toValue(getSchema)(params),
       updateSchema: (schema, params) => toValue(updateSchema)(schema, params),
       renderPreview: toValue(renderPreview)
@@ -126,7 +128,7 @@ export function useSchemaEditor(config: VueSchemaEditorConfig): UseSchemaEditorR
       messageTypes,
     }
 
-    bridge = createSchemaEditorBridge(proxyConfig)
+    bridge = createSchemaElementEditorBridge(proxyConfig)
   }
 
   onMounted(() => {
@@ -159,7 +161,7 @@ export function useSchemaEditor(config: VueSchemaEditorConfig): UseSchemaEditorR
   )
 
   // 返回 recording 对象
-  const recording: SchemaEditorRecording = {
+  const recording: SchemaElementEditorRecording = {
     push: (params: string, data: SchemaValue) => {
       bridge?.recording.push(params, data)
     },

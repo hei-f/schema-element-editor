@@ -20,7 +20,7 @@ import { useEffect, useImperativeHandle, useMemo, useRef } from 'react'
 import { jsonDarkHighlight, jsonLightHighlight } from '../../styles/editor/codemirror.styles'
 import { getEditorThemeVars } from '../../styles/editor/editor-theme-vars'
 import { DiffEditorWrapper } from '../../styles/recording/recording.styles'
-import { seeDark, seeDarkHighlighting } from '../../styles/editor/schema-editor-dark-theme'
+import { seeDark, seeDarkHighlighting } from '../../styles/editor/schema-element-editor-dark-theme'
 import { simpleDark } from '../../styles/editor/simple-dark-theme'
 
 /** 占位行 Widget */
@@ -349,7 +349,6 @@ export const DiffEditor = (props: DiffEditorProps) => {
       case EDITOR_THEMES.DARK:
         return [simpleDark, syntaxHighlighting(jsonDarkHighlight)]
       case EDITOR_THEMES.SEE_DARK:
-      case EDITOR_THEMES.SCHEMA_EDITOR_DARK: // 兼容旧配置
         return [seeDark, seeDarkHighlighting]
       case EDITOR_THEMES.LIGHT:
       default:

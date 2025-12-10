@@ -5,7 +5,7 @@
 /** 导出文件的完整结构 */
 export interface ExportFileFormat {
   /** 文件格式标记（固定为 true） */
-  __SCHEMA_EDITOR_EXPORT__: true
+  __SCHEMA_ELEMENT_EDITOR_EXPORT__: true
 
   /** 实际数据内容 */
   content: any

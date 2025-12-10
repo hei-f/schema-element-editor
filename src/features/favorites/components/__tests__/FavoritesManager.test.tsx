@@ -36,6 +36,7 @@ describe('FavoritesManager组件测试', () => {
     editingFavoriteId: null,
     editingName: '',
     editingContent: '',
+    editorTheme: 'seeDark' as const,
     onAddFavoriteInputChange: vi.fn(),
     onAddFavorite: vi.fn(),
     onCloseAddFavoriteModal: vi.fn(),

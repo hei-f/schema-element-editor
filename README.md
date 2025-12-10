@@ -151,16 +151,16 @@ type PreviewFunc<T extends SchemaValue = SchemaValue> = (
 安装 SDK：
 
 ```bash
-npm install @schema-editor/host-sdk
+npm install @schema-element-editor/host-sdk
 ```
 
 **React 项目：**
 
 ```typescript
-import { useSchemaEditor } from '@schema-editor/host-sdk'
+import { useSchemaElementEditor } from '@schema-element-editor/host-sdk'
 
 function App() {
-  useSchemaEditor({
+  useSchemaElementEditor({
     getSchema: (params) => dataStore[params],
     updateSchema: (schema, params) => {
       dataStore[params] = schema
@@ -182,9 +182,9 @@ function App() {
 **Vue 项目：**
 
 ```typescript
-import { useSchemaEditor } from '@schema-editor/host-sdk/vue'
+import { useSchemaElementEditor } from '@schema-element-editor/host-sdk/vue'
 
-useSchemaEditor({
+useSchemaElementEditor({
   getSchema: (params) => dataStore.value[params],
   updateSchema: (schema, params) => {
     dataStore.value[params] = schema
@@ -196,9 +196,9 @@ useSchemaEditor({
 **纯 JS / 其他框架：**
 
 ```typescript
-import { createSchemaEditorBridge } from '@schema-editor/host-sdk/core'
+import { createSchemaElementEditorBridge } from '@schema-element-editor/host-sdk/core'
 
-const cleanup = createSchemaEditorBridge({
+const cleanup = createSchemaElementEditorBridge({
   getSchema: (params) => dataStore[params],
   updateSchema: (schema, params) => {
     dataStore[params] = schema
@@ -226,7 +226,7 @@ cleanup()
 ```typescript
 const [isReady, setIsReady] = useState(false)
 
-useSchemaEditor({
+useSchemaElementEditor({
   enabled: isReady, // 仅在 isReady 为 true 时启用
   getSchema: (params) => dataStore[params],
   updateSchema: (schema, params) => {
@@ -239,7 +239,7 @@ useSchemaEditor({
 **自定义消息配置示例：**
 
 ```typescript
-useSchemaEditor({
+useSchemaElementEditor({
   getSchema: (params) => dataStore[params],
   updateSchema: (schema, params) => {
     dataStore[params] = schema
@@ -247,8 +247,8 @@ useSchemaEditor({
   },
   // 自定义消息标识（需与插件配置页面一致）
   sourceConfig: {
-    content: 'my-app-content', // 插件端标识，默认 'schema-editor-content'
-    host: 'my-app-host', // 宿主端标识，默认 'schema-editor-host'
+    content: 'my-app-content', // 插件端标识，默认 'schema-element-editor-content'
+    host: 'my-app-host', // 宿主端标识，默认 'schema-element-editor-host'
   },
   // 自定义消息类型（需与插件配置页面一致）
   messageTypes: {
@@ -271,7 +271,7 @@ window.addEventListener('message', (event) => {
   // 只处理来自当前窗口的消息
   if (event.source !== window) return
   // 只处理来自插件的消息（source 可在配置页面自定义）
-  if (event.data?.source !== 'schema-editor-content') return
+  if (event.data?.source !== 'schema-element-editor-content') return
 
   const { type, payload, requestId } = event.data
   let result
@@ -306,7 +306,7 @@ window.addEventListener('message', (event) => {
   // 发送响应（必须携带 requestId，source 可在配置页面自定义）
   window.postMessage(
     {
-      source: 'schema-editor-host',
+      source: 'schema-element-editor-host',
       requestId,
       ...result,
     },
@@ -317,8 +317,8 @@ window.addEventListener('message', (event) => {
 
 **可配置项**（在配置页面的【集成配置】中设置）：
 
-- 插件端 source 标识（默认：`schema-editor-content`）
-- 宿主端 source 标识（默认：`schema-editor-host`）
+- 插件端 source 标识（默认：`schema-element-editor-content`）
+- 宿主端 source 标识（默认：`schema-element-editor-host`）
 - 消息类型名称（默认：`GET_SCHEMA`、`UPDATE_SCHEMA`、`CHECK_PREVIEW`、`RENDER_PREVIEW`、`CLEANUP_PREVIEW`）
 - 请求超时时间（默认：5秒）
 
@@ -459,6 +459,6 @@ window.__getContentById = (params: string) => {
 │   ├── features/           # 功能模块（schema-drawer、favorites、options-page）
 │   └── shared/             # 共享资源（components、managers、types、utils）
 ├── packages/
-│   └── host-sdk/           # 宿主接入 SDK（@schema-editor/host-sdk）
+│   └── schema-element-editor-sdk/  # 宿主接入 SDK（@schema-element-editor/host-sdk）
 └── demo/                   # 演示应用
 ```

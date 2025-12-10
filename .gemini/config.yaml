@@ -1,0 +1,45 @@
+# Gemini Code Assist Configuration for ChromeTools
+# Schema Source: Provided by user
+
+# 控制评论风格
+have_fun: true
+
+# 忽略的文件和目录模式
+# 这些文件将被跳过，不进行分析
+ignore_patterns:
+  - "node_modules/**"
+  - "dist/**"       # 构建产物
+  - "coverage/**"   # 测试覆盖率报告
+  - "**/*.lock"     # 锁文件
+  - "**/*.log"      # 日志文件
+  - "**/*.tsbuildinfo"
+
+# 持久化记忆配置
+memory_config:
+  # 是否禁用此仓库的记忆功能
+  disabled: false
+
+code_review:
+  # 是否完全禁用 PR 处理
+  disable: false
+
+  # 代码审查的严重性阈值
+  # 可选值: LOW, MEDIUM, HIGH, CRITICAL
+  comment_severity_threshold: LOW
+
+  # 审查评论的最大数量
+  # -1 表示无限制
+  max_review_comments: -1
+
+  pull_request_opened:
+    # PR 创建时是否显示帮助信息
+    help: true
+    
+    # PR 创建时是否自动生成变更摘要
+    summary: true
+    
+    # PR 创建时是否自动进行代码审查
+    code_review: true
+    
+    # 是否在草稿 PR (Draft PR) 上启用功能
+    include_drafts: true

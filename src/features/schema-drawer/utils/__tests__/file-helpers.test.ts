@@ -31,7 +31,7 @@ describe('file-helpers', () => {
   describe('detectFileFormat', () => {
     it('应该识别带元数据的导出文件', () => {
       const data = {
-        __SCHEMA_EDITOR_EXPORT__: true,
+        __SCHEMA_ELEMENT_EDITOR_EXPORT__: true,
         content: { type: 'card' },
         metadata: {
           params: 'test',
@@ -67,7 +67,7 @@ describe('file-helpers', () => {
 
     it('当标记字段不是 true 时应该识别为普通文件', () => {
       const data = {
-        __SCHEMA_EDITOR_EXPORT__: false,
+        __SCHEMA_ELEMENT_EDITOR_EXPORT__: false,
         content: { type: 'card' },
       }
 
@@ -128,7 +128,7 @@ describe('file-helpers', () => {
       const result = buildExportData(content, metadata)
 
       expect(result).toEqual({
-        __SCHEMA_EDITOR_EXPORT__: true,
+        __SCHEMA_ELEMENT_EDITOR_EXPORT__: true,
         content,
         metadata,
       })

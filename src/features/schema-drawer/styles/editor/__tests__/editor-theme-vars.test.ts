@@ -17,8 +17,8 @@ describe('editor-theme-vars', () => {
       expect(vars.textPrimary).toBe('#e8e8e8')
     })
 
-    it('schemaEditorDark 主题应该返回深色样式变量', () => {
-      const vars = getEditorThemeVars(EDITOR_THEMES.SCHEMA_EDITOR_DARK)
+    it('seeDark 主题应该返回深色样式变量', () => {
+      const vars = getEditorThemeVars(EDITOR_THEMES.SEE_DARK)
 
       expect(vars.isDark).toBe(true)
       expect(vars.textPrimary).toBe('#e8e8e8')
@@ -56,8 +56,8 @@ describe('editor-theme-vars', () => {
       expect(isEditorThemeDark(EDITOR_THEMES.DARK)).toBe(true)
     })
 
-    it('schemaEditorDark 主题应该返回 true', () => {
-      expect(isEditorThemeDark(EDITOR_THEMES.SCHEMA_EDITOR_DARK)).toBe(true)
+    it('seeDark 主题应该返回 true', () => {
+      expect(isEditorThemeDark(EDITOR_THEMES.SEE_DARK)).toBe(true)
     })
   })
 })

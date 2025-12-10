@@ -25,13 +25,7 @@ export type SectionKey = (typeof SECTION_KEYS)[keyof typeof SECTION_KEYS]
  * value: 该区块包含的配置字段名数组
  */
 export const SECTION_DEFAULT_KEYS: Record<SectionKey, readonly string[]> = {
-  [SECTION_KEYS.INTEGRATION_CONFIG]: [
-    'apiConfig',
-    'attributeName',
-    'getFunctionName',
-    'updateFunctionName',
-    'previewFunctionName',
-  ],
+  [SECTION_KEYS.INTEGRATION_CONFIG]: ['apiConfig', 'attributeName'],
   [SECTION_KEYS.ELEMENT_DETECTION]: [
     'searchConfig',
     'highlightColor',
@@ -68,7 +62,6 @@ interface FieldGroup {
 export const FIELD_GROUPS: Record<string, FieldGroup> = {
   apiConfig: {
     fieldPaths: [
-      FORM_PATHS.apiConfig.communicationMode,
       FORM_PATHS.apiConfig.requestTimeout,
       FORM_PATHS.apiConfig.sourceConfig.contentSource,
       FORM_PATHS.apiConfig.sourceConfig.hostSource,
@@ -93,20 +86,6 @@ export const FIELD_GROUPS: Record<string, FieldGroup> = {
     ],
     save: async (allValues: any) => {
       await storage.setSearchConfig(allValues.searchConfig)
-    },
-  },
-  functionNames: {
-    fieldPaths: [
-      FORM_PATHS.getFunctionName,
-      FORM_PATHS.updateFunctionName,
-      FORM_PATHS.previewFunctionName,
-    ],
-    save: async (allValues: any) => {
-      await storage.setFunctionNames(
-        allValues.getFunctionName,
-        allValues.updateFunctionName,
-        allValues.previewFunctionName
-      )
     },
   },
   toolbarButtons: {
@@ -192,9 +171,6 @@ export const DEBOUNCE_FIELD_PATHS: readonly (readonly string[])[] = [
   FORM_PATHS.drawerWidth,
   FORM_PATHS.searchConfig.searchDepthUp,
   FORM_PATHS.searchConfig.throttleInterval,
-  FORM_PATHS.getFunctionName,
-  FORM_PATHS.updateFunctionName,
-  FORM_PATHS.previewFunctionName,
   FORM_PATHS.maxFavoritesCount,
   FORM_PATHS.highlightColor,
   FORM_PATHS.maxHistoryCount,

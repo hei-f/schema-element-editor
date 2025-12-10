@@ -48,9 +48,10 @@ pnpm-debug.log*
 # 测试覆盖率报告
 coverage/
 
-# 文档文件（除了 README 和 cursor commands）
+# 文档文件（除了 README、docs 和 cursor commands）
 *.md
 !README.md
+!docs/**/*.md
 !.cursor/commands/publish.md
 !.cursor/commands/publish-sdk.md
-docs/*.md
+!.gemini/styleguide.md

@@ -1,9 +1,10 @@
 import { DEFAULT_VALUES } from '@/shared/constants/defaults'
+import { UI_ELEMENT_ATTR } from '@/shared/constants/dom'
 import { logger } from '@/shared/utils/logger'
 import ReactDOM from 'react-dom/client'
 
 /** Shadow DOM 容器 ID */
-export const SHADOW_DOM_CONTAINER_ID = 'schema-editor-root'
+export const SHADOW_DOM_CONTAINER_ID = 'schema-element-editor-root'
 
 /**
  * Shadow DOM 容器管理器
@@ -271,7 +272,7 @@ export const createShadowRoot = async (): Promise<{
   // 创建容器
   const container = document.createElement('div')
   container.id = SHADOW_DOM_CONTAINER_ID
-  container.setAttribute('data-schema-editor-ui', 'true')
+  container.setAttribute(UI_ELEMENT_ATTR, 'true')
   container.style.cssText = `
     position: fixed;
     top: 0;

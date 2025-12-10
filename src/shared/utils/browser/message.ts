@@ -1,14 +1,12 @@
 import type { Message, PostMessageSourceConfig } from '@/shared/types'
 import { logger } from '@/shared/utils/logger'
 
-/** 默认消息来源标识（用于 windowFunction 模式的 injected script 通信） */
+/** 默认消息来源标识 */
 export const MESSAGE_SOURCE = {
-  /** Content Script 发送的消息（默认值，postMessage 模式可配置） */
-  FROM_CONTENT: 'schema-editor-content',
-  /** 宿主应用响应的消息（默认值，postMessage 模式可配置） */
-  FROM_HOST: 'schema-editor-host',
-  /** Injected Script 响应的消息（windowFunction 模式专用，不可配置） */
-  FROM_INJECTED: 'schema-editor-injected',
+  /** Content Script 发送的消息（默认值，可配置） */
+  FROM_CONTENT: 'schema-element-editor-content',
+  /** 宿主应用响应的消息（默认值，可配置） */
+  FROM_HOST: 'schema-element-editor-host',
 } as const
 
 /** requestId 计数器 */
@@ -83,41 +81,6 @@ export function listenChromeMessages(
       return false
     }
   )
-}
-
-/**
- * 发送消息到页面上下文（通过postMessage，用于 windowFunction 模式与 injected.js 通信）
- */
-export function postMessageToPage(message: Message): void {
-  const fullMessage = {
-    source: MESSAGE_SOURCE.FROM_CONTENT,
-    type: message.type,
-    payload: message.payload,
-  }
-
-  window.postMessage(fullMessage, '*')
-}
-
-/**
- * 监听来自 injected script 的消息（windowFunction 模式）
- */
-export function listenPageMessages(handler: (message: Message) => void): () => void {
-  const listener = (event: MessageEvent) => {
-    // 只处理来自当前窗口的消息
-    if (event.source !== window) return
-
-    // 只处理来自injected script的消息
-    if (!event.data || event.data.source !== MESSAGE_SOURCE.FROM_INJECTED) return
-
-    handler(event.data)
-  }
-
-  window.addEventListener('message', listener)
-
-  // 返回清理函数
-  return () => {
-    window.removeEventListener('message', listener)
-  }
 }
 
 /**

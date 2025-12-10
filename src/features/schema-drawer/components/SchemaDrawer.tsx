@@ -12,8 +12,8 @@ import type {
   HistoryEntry,
   SchemaDrawerConfig,
 } from '@/shared/types'
-import { ContentType, HistoryEntryType, MessageType } from '@/shared/types'
-import { postMessageToPage, sendRequestToHost } from '@/shared/utils/browser/message'
+import { ContentType, HistoryEntryType } from '@/shared/types'
+import { sendRequestToHost } from '@/shared/utils/browser/message'
 import { storage } from '@/shared/utils/browser/storage'
 import { logger } from '@/shared/utils/logger'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
@@ -23,7 +23,6 @@ import { useResizer } from '../hooks/ui/useResizer'
 import { useSchemaRecording } from '../hooks/schema/useSchemaRecording'
 import { App, Drawer } from 'antd'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { getCommunicationMode } from '@/shared/utils/communication-mode'
 import { useDeferredEffect } from '@/shared/hooks/useDeferredEffect'
 import { useLatest } from '@/shared/hooks/useLatest'
 import { useContentDetection } from '../hooks/schema/useContentDetection'
@@ -93,9 +92,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     autoParseString: autoParseEnabled,
     themeColor,
   } = config
-
-  /** 通信模式 */
-  const { isPostMessageMode } = getCommunicationMode(apiConfig)
 
   // 编辑器主题（支持运行时切换，初始值从 config 获取）
   const [editorTheme, setEditorTheme] = useState(initialEditorTheme)
@@ -270,24 +266,18 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     logger.log('预览容器已清理')
 
     // 异步通知宿主清理其内部状态
-    if (isPostMessageMode) {
-      const messageType =
-        apiConfig?.messageTypes?.cleanupPreview ??
-        DEFAULT_VALUES.apiConfig.messageTypes.cleanupPreview
-      sendRequestToHost(
-        messageType,
-        { containerId: PREVIEW_CONTAINER_ID },
-        2,
-        apiConfig?.sourceConfig
-      ).catch((error) => {
-        logger.warn('预览容器清理请求失败:', error)
-      })
-    } else {
-      postMessageToPage({
-        type: MessageType.CLEAR_PREVIEW,
-      })
-    }
-  }, [apiConfig, isPostMessageMode])
+    const messageType =
+      apiConfig?.messageTypes?.cleanupPreview ??
+      DEFAULT_VALUES.apiConfig.messageTypes.cleanupPreview
+    sendRequestToHost(
+      messageType,
+      { containerId: PREVIEW_CONTAINER_ID },
+      2,
+      apiConfig?.sourceConfig
+    ).catch((error) => {
+      logger.warn('预览容器清理请求失败:', error)
+    })
+  }, [apiConfig])
 
   /**
    * 处理抽屉关闭
@@ -606,35 +596,24 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         if (result.success) {
           const containerId = PREVIEW_CONTAINER_ID
 
-          if (isPostMessageMode) {
-            const messageType =
-              apiConfig?.messageTypes?.renderPreview ??
-              DEFAULT_VALUES.apiConfig.messageTypes.renderPreview
-            await sendRequestToHost(
-              messageType,
-              { schema: result.data, containerId },
-              apiConfig?.requestTimeout ?? 5,
-              apiConfig?.sourceConfig
-            ).catch((error) => {
-              logger.warn('拖拽结束后预览渲染请求失败:', error)
-            })
-          } else {
-            postMessageToPage({
-              type: MessageType.RENDER_PREVIEW,
-              payload: {
-                schema: result.data,
-                containerId,
-                position,
-              },
-            })
-          }
+          const messageType =
+            apiConfig?.messageTypes?.renderPreview ??
+            DEFAULT_VALUES.apiConfig.messageTypes.renderPreview
+          await sendRequestToHost(
+            messageType,
+            { schema: result.data, containerId },
+            apiConfig?.requestTimeout ?? 5,
+            apiConfig?.sourceConfig
+          ).catch((error) => {
+            logger.warn('拖拽结束后预览渲染请求失败:', error)
+          })
         }
 
         // 显示预览容器
         previewContainerManager.show()
       }
     },
-    [previewConfig, editorValue, wasStringData, isPostMessageMode, apiConfig]
+    [previewConfig, editorValue, wasStringData, apiConfig]
   )
 
   /** 拖拽分隔条 Hook */
@@ -804,44 +783,31 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         // 由 Content Script 创建预览容器
         const containerId = previewContainerManager.createContainer(position)
 
-        if (isPostMessageMode) {
-          // postMessage 直连模式：发送 schema 和 containerId 给宿主
-          try {
-            const messageType =
-              apiConfig?.messageTypes?.renderPreview ??
-              DEFAULT_VALUES.apiConfig.messageTypes.renderPreview
-            await sendRequestToHost(
-              messageType,
-              { schema: result.data, containerId },
-              apiConfig?.requestTimeout ?? 5,
-              apiConfig?.sourceConfig
-            )
-            logger.log('预览渲染请求已发送（postMessage 模式）')
-          } catch (error: any) {
-            message.error('预览渲染失败：' + error.message)
-            // 显示错误信息到容器
-            const container = document.getElementById(containerId)
-            if (container) {
-              container.innerHTML = `
-              <div style="color: red; padding: 20px;">
-                <div style="font-weight: bold; margin-bottom: 8px;">预览渲染错误</div>
-                <div style="font-size: 12px;">${error.message || '未知错误'}</div>
-              </div>
-            `
-            }
-            return
+        // 发送 schema 和 containerId 给宿主
+        try {
+          const messageType =
+            apiConfig?.messageTypes?.renderPreview ??
+            DEFAULT_VALUES.apiConfig.messageTypes.renderPreview
+          await sendRequestToHost(
+            messageType,
+            { schema: result.data, containerId },
+            apiConfig?.requestTimeout ?? 5,
+            apiConfig?.sourceConfig
+          )
+          logger.log('预览渲染请求已发送')
+        } catch (error: any) {
+          message.error('预览渲染失败：' + error.message)
+          // 显示错误信息到容器
+          const container = document.getElementById(containerId)
+          if (container) {
+            container.innerHTML = `
+            <div style="color: red; padding: 20px;">
+              <div style="font-weight: bold; margin-bottom: 8px;">预览渲染错误</div>
+              <div style="font-size: 12px;">${error.message || '未知错误'}</div>
+            </div>
+          `
           }
-        } else {
-          // windowFunction 模式：通过 injected.js
-          postMessageToPage({
-            type: MessageType.RENDER_PREVIEW,
-            payload: {
-              schema: result.data,
-              containerId,
-              position,
-            },
-          })
-          logger.log('预览渲染请求已发送（windowFunction 模式）')
+          return
         }
 
         // 如果是自动更新，显示轻量提示
@@ -858,7 +824,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
       hasPreviewFunction,
       editorValue,
       wasStringData,
-      isPostMessageMode,
       apiConfig,
       showLightNotification,
     ]
@@ -1179,6 +1144,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         editingFavoriteId={editingFavoriteId}
         editingName={editingName}
         editingContent={editingContent}
+        editorTheme={editorTheme}
         onAddFavoriteInputChange={setFavoriteNameInput}
         onAddFavorite={handleAddFavorite}
         onCloseAddFavoriteModal={closeAddFavoriteModal}

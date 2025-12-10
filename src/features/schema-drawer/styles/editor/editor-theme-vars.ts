@@ -167,7 +167,6 @@ export function getEditorThemeVars(theme: EditorTheme): EditorThemeVars {
       return lightThemeVars
     case EDITOR_THEMES.DARK:
     case EDITOR_THEMES.SEE_DARK:
-    case EDITOR_THEMES.SCHEMA_EDITOR_DARK: // 兼容旧配置
     default:
       return darkThemeVars
   }

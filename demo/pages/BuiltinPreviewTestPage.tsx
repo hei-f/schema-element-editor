@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import { Card, Typography, Tag, Space, Alert } from 'antd'
 import { EyeOutlined } from '@ant-design/icons'
 import styled from 'styled-components'
-import { useSchemaEditor } from '@schema-editor/host-sdk'
+import { useSchemaElementEditor } from '@schema-element-editor/host-sdk'
 import { parserMarkdownToSlateNode } from '@ant-design/agentic-ui'
 
 const { Title, Text, Paragraph } = Typography
@@ -119,8 +119,8 @@ export const BuiltinPreviewTestPage: React.FC<BuiltinPreviewTestPageProps> = () 
     })
   }, [])
 
-  // 注册 Schema Editor（不提供 renderPreview，触发内置预览器）
-  useSchemaEditor({
+  // 注册 Schema Element Editor（不提供 renderPreview，触发内置预览器）
+  useSchemaElementEditor({
     getSchema: (params) => {
       const data = schemaDataRef.current[params]
       console.log('[BuiltinPreviewTest] getSchema:', params, data)

@@ -1,4 +1,5 @@
+#!/bin/sh
+
 # TypeScript 类型检查
-echo "🔍 Running TypeScript type check..."
-npx tsc --incremental --noEmit
+sh "$(dirname "$0")/../scripts/type-check.sh"
 

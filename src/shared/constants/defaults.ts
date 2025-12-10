@@ -19,9 +19,6 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     searchDepthUp: 5,
     throttleInterval: 16,
   },
-  getFunctionName: '__getContentById',
-  updateFunctionName: '__updateContentById',
-  previewFunctionName: '__getContentPreview',
   autoParseString: true,
   enableDebugLog: false,
   toolbarButtons: {
@@ -75,11 +72,10 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
   },
   editorTheme: DEFAULT_EDITOR_THEME,
   apiConfig: {
-    communicationMode: 'postMessage',
     requestTimeout: 5,
     sourceConfig: {
-      contentSource: 'schema-editor-content',
-      hostSource: 'schema-editor-host',
+      contentSource: 'schema-element-editor-content',
+      hostSource: 'schema-element-editor-host',
     },
     messageTypes: {
       getSchema: 'GET_SCHEMA',
@@ -109,8 +105,6 @@ export const STORAGE_KEYS = {
   DRAWER_WIDTH: 'drawerWidth',
   ATTRIBUTE_NAME: 'attributeName',
   SEARCH_CONFIG: 'searchConfig',
-  GET_FUNCTION_NAME: 'getFunctionName',
-  UPDATE_FUNCTION_NAME: 'updateFunctionName',
   AUTO_PARSE_STRING: 'autoParseString',
   ENABLE_DEBUG_LOG: 'enableDebugLog',
   TOOLBAR_BUTTONS: 'toolbarButtons',
@@ -129,7 +123,6 @@ export const STORAGE_KEYS = {
   ENABLE_AST_TYPE_HINTS: 'enableAstTypeHints',
   EXPORT_CONFIG: 'exportConfig',
   EDITOR_THEME: 'editorTheme',
-  PREVIEW_FUNCTION_NAME: 'previewFunctionName',
   API_CONFIG: 'apiConfig',
   DRAWER_SHORTCUTS: 'drawerShortcuts',
   THEME_COLOR: 'themeColor',

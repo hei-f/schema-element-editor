@@ -124,7 +124,7 @@ describe('dom 工具函数', () => {
 
     it('应该跳过扩展 UI 元素', async () => {
       const uiElement = document.createElement('div')
-      uiElement.setAttribute('data-schema-editor-ui', 'true')
+      uiElement.setAttribute('data-schema-element-editor-ui', 'true')
       uiElement.setAttribute('data-schema-params', 'should-be-skipped')
       document.body.appendChild(uiElement)
 
@@ -227,7 +227,7 @@ describe('dom 工具函数', () => {
 
     it('应该跳过父元素中的扩展 UI 元素', async () => {
       const uiParent = document.createElement('div')
-      uiParent.setAttribute('data-schema-editor-ui', 'true')
+      uiParent.setAttribute('data-schema-element-editor-ui', 'true')
 
       const targetParent = document.createElement('div')
       targetParent.setAttribute('data-schema-params', 'target-param')
@@ -255,7 +255,7 @@ describe('dom 工具函数', () => {
       grandparent.setAttribute('data-schema-params', 'grandparent-param')
 
       const uiParent = document.createElement('div')
-      uiParent.setAttribute('data-schema-editor-ui', 'true')
+      uiParent.setAttribute('data-schema-element-editor-ui', 'true')
       grandparent.appendChild(uiParent)
 
       const parent = document.createElement('div')
@@ -288,7 +288,7 @@ describe('dom 工具函数', () => {
       target.setAttribute('data-schema-params', 'target-param')
 
       const uiMiddle = document.createElement('div')
-      uiMiddle.setAttribute('data-schema-editor-ui', 'true')
+      uiMiddle.setAttribute('data-schema-element-editor-ui', 'true')
       target.appendChild(uiMiddle)
 
       const child = document.createElement('div')
@@ -318,7 +318,7 @@ describe('dom 工具函数', () => {
       grandparent.setAttribute('data-schema-params', 'found-param')
 
       const uiElement = document.createElement('div')
-      uiElement.setAttribute('data-schema-editor-ui', 'true')
+      uiElement.setAttribute('data-schema-element-editor-ui', 'true')
       grandparent.appendChild(uiElement)
 
       const child = document.createElement('div')

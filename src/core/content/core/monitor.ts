@@ -1,3 +1,4 @@
+import { PLUGIN_EVENTS } from '@/shared/constants/events'
 import type {
   ElementAttributes,
   HighlightAllConfig,
@@ -19,6 +20,7 @@ import {
   type AltKeySyncPayload,
 } from '@/shared/utils/iframe-bridge'
 import { logger } from '@/shared/utils/logger'
+import { HIGHLIGHT_CLASS, UI_ELEMENT_ATTR, UI_ELEMENT_SELECTOR } from '@/shared/constants/dom'
 import {
   findElementWithSchemaParams,
   getElementAttributes,
@@ -26,9 +28,6 @@ import {
   hasValidAttributes,
   isVisibleElement,
 } from '@/shared/utils/ui/dom'
-
-/** 扩展UI元素的选择器 */
-const UI_ELEMENT_SELECTOR = '[data-schema-editor-ui]'
 
 /**
  * 元素监听器类
@@ -127,9 +126,9 @@ export class ElementMonitor {
     document.addEventListener('keydown', this.handleKeyDown, true)
     document.addEventListener('keyup', this.handleKeyUp, true)
     document.addEventListener('scroll', this.handleScroll, true)
-    window.addEventListener('schema-editor:clear-highlight', this.handleClearHighlight)
-    window.addEventListener('schema-editor:pause-monitor', this.handlePauseMonitor)
-    window.addEventListener('schema-editor:resume-monitor', this.handleResumeMonitor)
+    window.addEventListener(PLUGIN_EVENTS.CLEAR_HIGHLIGHT, this.handleClearHighlight)
+    window.addEventListener(PLUGIN_EVENTS.PAUSE_MONITOR, this.handlePauseMonitor)
+    window.addEventListener(PLUGIN_EVENTS.RESUME_MONITOR, this.handleResumeMonitor)
 
     // 仅在 top frame 创建 tooltip 元素
     if (!isIframeMode) {
@@ -264,9 +263,9 @@ export class ElementMonitor {
     document.removeEventListener('keydown', this.handleKeyDown, true)
     document.removeEventListener('keyup', this.handleKeyUp, true)
     document.removeEventListener('scroll', this.handleScroll, true)
-    window.removeEventListener('schema-editor:clear-highlight', this.handleClearHighlight)
-    window.removeEventListener('schema-editor:pause-monitor', this.handlePauseMonitor)
-    window.removeEventListener('schema-editor:resume-monitor', this.handleResumeMonitor)
+    window.removeEventListener(PLUGIN_EVENTS.CLEAR_HIGHLIGHT, this.handleClearHighlight)
+    window.removeEventListener(PLUGIN_EVENTS.PAUSE_MONITOR, this.handlePauseMonitor)
+    window.removeEventListener(PLUGIN_EVENTS.RESUME_MONITOR, this.handleResumeMonitor)
 
     // 清理 iframe bridge 监听器
     if (this.iframeBridgeCleanup) {
@@ -456,7 +455,7 @@ export class ElementMonitor {
 
     // 触发录制模式变化事件
     window.dispatchEvent(
-      new CustomEvent('schema-editor:recording-mode-change', {
+      new CustomEvent(PLUGIN_EVENTS.RECORDING_MODE_CHANGE, {
         detail: { isRecordingMode: true },
       })
     )
@@ -484,7 +483,7 @@ export class ElementMonitor {
 
     // 触发录制模式变化事件
     window.dispatchEvent(
-      new CustomEvent('schema-editor:recording-mode-change', {
+      new CustomEvent(PLUGIN_EVENTS.RECORDING_MODE_CHANGE, {
         detail: { isRecordingMode: false },
       })
     )
@@ -585,10 +584,7 @@ export class ElementMonitor {
     const target = event.target as HTMLElement
 
     // 忽略我们自己创建的元素
-    if (
-      target === this.tooltipElement ||
-      (target.closest && target.closest('[data-schema-editor-ui]'))
-    ) {
+    if (target === this.tooltipElement || (target.closest && target.closest(UI_ELEMENT_SELECTOR))) {
       return
     }
 
@@ -708,7 +704,7 @@ export class ElementMonitor {
     // 忽略我们自己创建的元素
     if (
       (event.target as HTMLElement) === this.tooltipElement ||
-      (event.target as HTMLElement).closest('[data-schema-editor-ui]')
+      (event.target as HTMLElement).closest(UI_ELEMENT_SELECTOR)
     ) {
       return
     }
@@ -740,7 +736,7 @@ export class ElementMonitor {
         // 点击后退出录制模式
         this.isRecordingMode = false
         window.dispatchEvent(
-          new CustomEvent('schema-editor:recording-mode-change', {
+          new CustomEvent(PLUGIN_EVENTS.RECORDING_MODE_CHANGE, {
             detail: { isRecordingMode: false },
           })
         )
@@ -954,13 +950,13 @@ export class ElementMonitor {
 
     // 创建高亮框容器
     const container = document.createElement('div')
-    container.className = 'schema-editor-highlight-all'
-    container.setAttribute('data-schema-editor-ui', 'true')
+    container.className = HIGHLIGHT_CLASS.ALL
+    container.setAttribute(UI_ELEMENT_ATTR, 'true')
     container.style.cssText = this.createHighlightBoxStyle(rect, color, true)
 
     // 创建标签
     const label = document.createElement('div')
-    label.className = 'schema-editor-highlight-label'
+    label.className = HIGHLIGHT_CLASS.LABEL
     label.style.cssText = `
       position: absolute;
       top: -26px;
@@ -1067,8 +1063,8 @@ export class ElementMonitor {
 
     // 创建高亮框元素
     const box = document.createElement('div')
-    box.className = 'schema-editor-highlight-hover'
-    box.setAttribute('data-schema-editor-ui', 'true')
+    box.className = HIGHLIGHT_CLASS.HOVER
+    box.setAttribute(UI_ELEMENT_ATTR, 'true')
     box.style.cssText = this.createHighlightBoxStyle(rect, color, true)
 
     document.body.appendChild(box)

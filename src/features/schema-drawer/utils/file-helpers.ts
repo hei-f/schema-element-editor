@@ -20,7 +20,7 @@ export function generateExportFileName(paramsKey: string): string {
  * @returns 检测结果
  */
 export function detectFileFormat(data: any): FileDetectionResult {
-  if (data && data.__SCHEMA_EDITOR_EXPORT__ === true) {
+  if (data && data.__SCHEMA_ELEMENT_EDITOR_EXPORT__ === true) {
     // 带元数据的导出格式
     return {
       hasMetadata: true,
@@ -53,7 +53,7 @@ export function validateFileSize(file: File): boolean {
  */
 export function buildExportData(content: any, metadata: ExportMetadata): ExportFileFormat {
   return {
-    __SCHEMA_EDITOR_EXPORT__: true,
+    __SCHEMA_ELEMENT_EDITOR_EXPORT__: true,
     content,
     metadata,
   }

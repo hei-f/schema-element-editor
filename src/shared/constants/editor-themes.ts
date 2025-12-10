@@ -7,8 +7,6 @@ export const EDITOR_THEMES = {
   SEE_DARK: 'seeDark' as EditorTheme,
   DARK: 'dark' as EditorTheme,
   LIGHT: 'light' as EditorTheme,
-  /** @deprecated 使用 SEE_DARK 代替，保留用于兼容旧配置 */
-  SCHEMA_EDITOR_DARK: 'schemaEditorDark' as EditorTheme,
 } as const
 
 /**

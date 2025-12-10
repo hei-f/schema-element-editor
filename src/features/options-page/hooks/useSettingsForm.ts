@@ -74,9 +74,6 @@ export const useSettingsForm = (props: UseSettingsFormProps): UseSettingsFormRet
     const debounceFields = [
       'attributeName',
       'drawerWidth',
-      'getFunctionName',
-      'updateFunctionName',
-      'previewFunctionName',
       'maxFavoritesCount',
       'highlightColor',
       'maxHistoryCount',

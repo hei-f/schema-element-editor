@@ -1,14 +1,14 @@
 /**
- * Schema Editor Host SDK - React
+ * Schema Element Editor Host SDK - React
  * React hooks 包装
  */
 
 import { useEffect, useRef, useMemo, useCallback } from 'react'
-import { createSchemaEditorBridge } from './core'
+import { createSchemaElementEditorBridge } from './core'
 import type {
-  SchemaEditorConfig,
-  SchemaEditorBridge,
-  SchemaEditorRecording,
+  SchemaElementEditorConfig,
+  SchemaElementEditorBridge,
+  SchemaElementEditorRecording,
   SchemaValue,
   PostMessageSourceConfig,
   PostMessageTypeConfig,
@@ -19,14 +19,14 @@ export type {
   SchemaValue,
   PostMessageSourceConfig,
   PostMessageTypeConfig,
-  SchemaEditorBridge,
-  SchemaEditorRecording,
+  SchemaElementEditorBridge,
+  SchemaElementEditorRecording,
 }
-// 同时导出 SchemaEditorConfig 供需要基础类型的用户使用
-export type { SchemaEditorConfig }
+// 同时导出 SchemaElementEditorConfig 供需要基础类型的用户使用
+export type { SchemaElementEditorConfig }
 
-/** React 版本的 Schema Editor 配置 */
-export interface ReactSchemaEditorConfig extends SchemaEditorConfig {
+/** React 版本的 Schema Element Editor 配置 */
+export interface ReactSchemaElementEditorConfig extends SchemaElementEditorConfig {
   /**
    * 是否启用桥接（默认 true）
    * 设为 false 时不创建桥接器，不监听消息
@@ -35,24 +35,24 @@ export interface ReactSchemaEditorConfig extends SchemaEditorConfig {
 }
 
 /** React hooks 返回值 */
-export interface UseSchemaEditorReturn {
+export interface UseSchemaElementEditorReturn {
   /** 录制相关方法 */
-  recording: SchemaEditorRecording
+  recording: SchemaElementEditorRecording
 }
 
 /**
- * Schema Editor 插件接入 hooks（React）
- * 用于在宿主页面接入 Schema Editor 插件，通过 postMessage 接收插件请求并返回响应
+ * Schema Element Editor 插件接入 hooks（React）
+ * 用于在宿主页面接入 Schema Element Editor 插件，通过 postMessage 接收插件请求并返回响应
  *
- * @param config - Schema Editor 配置
+ * @param config - Schema Element Editor 配置
  * @returns 桥接器方法，包含 recording
  *
  * @example
  * ```tsx
- * import { useSchemaEditor } from '@schema-editor/host-sdk'
+ * import { useSchemaElementEditor } from '@schema-element-editor/host-sdk'
  *
  * function App() {
- *   const { recording } = useSchemaEditor({
+ *   const { recording } = useSchemaElementEditor({
  *     getSchema: (params) => dataStore[params],
  *     updateSchema: (schema, params) => {
  *       dataStore[params] = schema
@@ -70,14 +70,16 @@ export interface UseSchemaEditorReturn {
  * }
  * ```
  */
-export function useSchemaEditor(config: ReactSchemaEditorConfig): UseSchemaEditorReturn {
+export function useSchemaElementEditor(
+  config: ReactSchemaElementEditorConfig
+): UseSchemaElementEditorReturn {
   const { getSchema, updateSchema, renderPreview, sourceConfig, messageTypes, enabled } = config
 
   // 使用 ref 存储最新的配置，避免闭包陷阱
   const configRef = useRef({ getSchema, updateSchema, renderPreview })
 
   // 存储桥接器实例
-  const bridgeRef = useRef<SchemaEditorBridge | null>(null)
+  const bridgeRef = useRef<SchemaElementEditorBridge | null>(null)
 
   // 更新配置 ref（在 effect 中更新以避免渲染期间修改 ref）
   useEffect(() => {
@@ -91,7 +93,7 @@ export function useSchemaEditor(config: ReactSchemaEditorConfig): UseSchemaEdito
     }
 
     // 创建代理配置，始终使用最新的 ref 值
-    const proxyConfig: SchemaEditorConfig = {
+    const proxyConfig: SchemaElementEditorConfig = {
       getSchema: (params) => configRef.current.getSchema(params),
       updateSchema: (schema, params) => configRef.current.updateSchema(schema, params),
       renderPreview: configRef.current.renderPreview
@@ -101,7 +103,7 @@ export function useSchemaEditor(config: ReactSchemaEditorConfig): UseSchemaEdito
       messageTypes,
     }
 
-    const bridge = createSchemaEditorBridge(proxyConfig)
+    const bridge = createSchemaElementEditorBridge(proxyConfig)
     bridgeRef.current = bridge
 
     return () => {
@@ -116,7 +118,7 @@ export function useSchemaEditor(config: ReactSchemaEditorConfig): UseSchemaEdito
   }, [])
 
   // 组合成稳定的 recording 对象
-  const recording = useMemo<SchemaEditorRecording>(() => ({ push }), [push])
+  const recording = useMemo<SchemaElementEditorRecording>(() => ({ push }), [push])
 
   return { recording }
 }

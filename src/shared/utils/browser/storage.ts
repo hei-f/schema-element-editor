@@ -169,39 +169,6 @@ class StorageManager {
   }
 
   /**
-   * 获取获取Schema的函数名
-   */
-  async getGetFunctionName(): Promise<string> {
-    return this.getSimple<string>('getFunctionName')
-  }
-
-  /**
-   * 获取更新Schema的函数名
-   */
-  async getUpdateFunctionName(): Promise<string> {
-    return this.getSimple<string>('updateFunctionName')
-  }
-
-  /**
-   * 设置函数名（核心 API + 扩展 API）
-   */
-  async setFunctionNames(
-    getFunctionName: string,
-    updateFunctionName: string,
-    previewFunctionName: string
-  ): Promise<void> {
-    try {
-      await chrome.storage.local.set({
-        [this.STORAGE_KEYS.GET_FUNCTION_NAME]: getFunctionName,
-        [this.STORAGE_KEYS.UPDATE_FUNCTION_NAME]: updateFunctionName,
-        [this.STORAGE_KEYS.PREVIEW_FUNCTION_NAME]: previewFunctionName,
-      })
-    } catch (error) {
-      console.error('设置函数名失败:', error)
-    }
-  }
-
-  /**
    * 获取字符串自动解析配置
    */
   async getAutoParseString(): Promise<boolean> {
@@ -282,8 +249,6 @@ class StorageManager {
       drawerWidth,
       attributeName,
       searchConfig,
-      getFunctionName,
-      updateFunctionName,
       autoParseString,
       enableDebugLog,
       toolbarButtons,
@@ -299,7 +264,6 @@ class StorageManager {
       iframeConfig,
       enableAstTypeHints,
       editorTheme,
-      previewFunctionName,
       apiConfig,
       drawerShortcuts,
       themeColor,
@@ -308,8 +272,6 @@ class StorageManager {
       this.getDrawerWidth(),
       this.getAttributeName(),
       this.getSearchConfig(),
-      this.getGetFunctionName(),
-      this.getUpdateFunctionName(),
       this.getAutoParseString(),
       this.getEnableDebugLog(),
       this.getToolbarButtons(),
@@ -325,7 +287,6 @@ class StorageManager {
       this.getIframeConfig(),
       this.getEnableAstTypeHints(),
       this.getEditorTheme(),
-      this.getPreviewFunctionName(),
       this.getApiConfig(),
       this.getDrawerShortcuts(),
       this.getThemeColor(),
@@ -336,8 +297,6 @@ class StorageManager {
       drawerWidth,
       attributeName,
       searchConfig,
-      getFunctionName,
-      updateFunctionName,
       autoParseString,
       enableDebugLog,
       toolbarButtons,
@@ -354,7 +313,6 @@ class StorageManager {
       enableAstTypeHints,
       exportConfig,
       editorTheme,
-      previewFunctionName,
       apiConfig,
       drawerShortcuts,
       themeColor,
@@ -749,20 +707,6 @@ class StorageManager {
    */
   async setEditorTheme(theme: EditorTheme): Promise<void> {
     return this.setSimple('editorTheme', theme)
-  }
-
-  /**
-   * 获取预览函数名
-   */
-  async getPreviewFunctionName(): Promise<string> {
-    return this.getSimple<string>('previewFunctionName')
-  }
-
-  /**
-   * 设置预览函数名
-   */
-  async setPreviewFunctionName(name: string): Promise<void> {
-    return this.setSimple('previewFunctionName', name)
   }
 
   /**

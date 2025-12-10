@@ -253,7 +253,7 @@ describe('Background Service Worker', () => {
     it('应该为激活状态设置正确的图标', async () => {
       const updateIconState = async (isActive: boolean) => {
         await chrome.action.setTitle({
-          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
+          title: `Schema Element Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
         })
 
         const iconSuffix = isActive ? 'active' : 'inactive'
@@ -269,7 +269,7 @@ describe('Background Service Worker', () => {
       await updateIconState(true)
 
       expect(chrome.action.setTitle).toHaveBeenCalledWith({
-        title: 'Schema Editor - 已激活 ✓',
+        title: 'Schema Element Editor - 已激活 ✓',
       })
 
       expect(chrome.action.setIcon).toHaveBeenCalledWith({
@@ -284,7 +284,7 @@ describe('Background Service Worker', () => {
     it('应该为未激活状态设置正确的图标', async () => {
       const updateIconState = async (isActive: boolean) => {
         await chrome.action.setTitle({
-          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
+          title: `Schema Element Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
         })
 
         const iconSuffix = isActive ? 'active' : 'inactive'
@@ -300,7 +300,7 @@ describe('Background Service Worker', () => {
       await updateIconState(false)
 
       expect(chrome.action.setTitle).toHaveBeenCalledWith({
-        title: 'Schema Editor - 未激活',
+        title: 'Schema Element Editor - 未激活',
       })
 
       expect(chrome.action.setIcon).toHaveBeenCalledWith({
@@ -334,7 +334,7 @@ describe('Background Service Worker', () => {
         // 2. 更新图标状态
         const iconSuffix = newState ? 'active' : 'inactive'
         await chrome.action.setTitle({
-          title: `Schema Editor - ${newState ? '已激活 ✓' : '未激活'}`,
+          title: `Schema Element Editor - ${newState ? '已激活 ✓' : '未激活'}`,
         })
         await chrome.action.setIcon({
           path: {
@@ -383,7 +383,7 @@ describe('Background Service Worker', () => {
         const isActive = result.isActive ?? false
 
         await chrome.action.setTitle({
-          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
+          title: `Schema Element Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
         })
 
         const iconSuffix = isActive ? 'active' : 'inactive'
@@ -403,7 +403,7 @@ describe('Background Service Worker', () => {
       expect(restoredState).toBe(true)
       expect(chrome.storage.local.get).toHaveBeenCalledWith('isActive')
       expect(chrome.action.setTitle).toHaveBeenCalledWith({
-        title: 'Schema Editor - 已激活 ✓',
+        title: 'Schema Element Editor - 已激活 ✓',
       })
       expect(chrome.action.setIcon).toHaveBeenCalledWith({
         path: {
@@ -422,7 +422,7 @@ describe('Background Service Worker', () => {
         const isActive = result.isActive ?? false
 
         await chrome.action.setTitle({
-          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
+          title: `Schema Element Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
         })
 
         const iconSuffix = isActive ? 'active' : 'inactive'
@@ -442,7 +442,7 @@ describe('Background Service Worker', () => {
       expect(restoredState).toBe(false)
       expect(chrome.storage.local.get).toHaveBeenCalledWith('isActive')
       expect(chrome.action.setTitle).toHaveBeenCalledWith({
-        title: 'Schema Editor - 未激活',
+        title: 'Schema Element Editor - 未激活',
       })
       expect(chrome.action.setIcon).toHaveBeenCalledWith({
         path: {
@@ -462,7 +462,7 @@ describe('Background Service Worker', () => {
         const isActive = result.isActive ?? false
 
         await chrome.action.setTitle({
-          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
+          title: `Schema Element Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
         })
 
         const iconSuffix = isActive ? 'active' : 'inactive'
@@ -481,7 +481,7 @@ describe('Background Service Worker', () => {
 
       expect(restoredState).toBe(false)
       expect(chrome.action.setTitle).toHaveBeenCalledWith({
-        title: 'Schema Editor - 未激活',
+        title: 'Schema Element Editor - 未激活',
       })
       expect(chrome.action.setIcon).toHaveBeenCalledWith({
         path: {
@@ -508,7 +508,7 @@ describe('Background Service Worker', () => {
         }
 
         await chrome.action.setTitle({
-          title: `Schema Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
+          title: `Schema Element Editor - ${isActive ? '已激活 ✓' : '未激活'}`,
         })
 
         const iconSuffix = isActive ? 'active' : 'inactive'
@@ -527,7 +527,7 @@ describe('Background Service Worker', () => {
 
       expect(restoredState).toBe(false)
       expect(chrome.action.setTitle).toHaveBeenCalledWith({
-        title: 'Schema Editor - 未激活',
+        title: 'Schema Element Editor - 未激活',
       })
       expect(chrome.action.setIcon).toHaveBeenCalledWith({
         path: {

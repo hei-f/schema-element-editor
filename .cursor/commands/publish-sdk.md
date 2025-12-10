@@ -1,6 +1,6 @@
 # Host-SDK NPM包发布流程
 
-这是 `@schema-editor/host-sdk` npm包的发布流程，与Chrome插件发布流程独立。
+这是 `@schema-element-editor/host-sdk` npm包的发布流程，与Chrome插件发布流程独立。
 
 你现在需要执行此发布流程。
 
@@ -30,15 +30,15 @@
 
 **1.3 确认发布范围**
 
-- 确认本次发布仅涉及 `packages/host-sdk` 目录下的改动
+- 确认本次发布仅涉及 `packages/schema-element-editor-sdk` 目录下的改动
 - 如果存在插件核心代码改动，提示用户先执行插件发布流程
 
 ### 2. 分析并原子化提交SDK改动
 
 **2.1 分析工作区改动**
 
-- 使用 `git status` 查看 `packages/host-sdk` 目录下的未提交文件
-- 使用 `git diff packages/host-sdk` 分析具体改动内容
+- 使用 `git status` 查看 `packages/schema-element-editor-sdk` 目录下的未提交文件
+- 使用 `git diff packages/schema-element-editor-sdk` 分析具体改动内容
 - 识别改动类型（新功能、bug修复、代码重构、性能优化等）
 
 **2.2 原子化分组**
@@ -46,7 +46,7 @@
 将SDK相关改动按照**原子化提交原则**进行分组：
 
 - **原子化标准**：每组改动应聚焦于单一具体功能或改动点
-- **重要**：暂时忽略版本号文件（packages/host-sdk/package.json中的version字段），版本号将在步骤5中单独提交
+- **重要**：暂时忽略版本号文件（packages/schema-element-editor-sdk/package.json中的version字段），版本号将在步骤5中单独提交
 - **输出格式**：对每个提交组，明确列出：
   - 提交组编号
   - 功能描述
@@ -57,9 +57,9 @@
 按分组顺序，依次提交每组改动：
 
 1. **生成commit message**，遵循以下规范：
-   - **格式**：`{类型前缀}(host-sdk): {具体改动描述}`
+   - **格式**：`{类型前缀}(sdk): {具体改动描述}`
    - **类型前缀**：feat / fix / refactor / perf / docs / style / test / chore
-   - **示例**：`feat(host-sdk): 新增Vue composable支持`
+   - **示例**：`feat(sdk): 新增Vue composable支持`
 
 2. **执行提交**：
    - `git add {文件路径}`
@@ -72,7 +72,7 @@
 
 **3.1 TypeScript 类型检查**
 
-- 进入SDK目录：`cd packages/host-sdk`
+- 进入SDK目录：`cd packages/schema-element-editor-sdk`
 - 执行类型检查：`npx tsc --noEmit`
 - 类型检查必须100%通过
 - 如果发现类型错误，**立即终止发布流程**，修复后重新开始
@@ -81,7 +81,7 @@
 
 - 执行构建命令：`npm run build:sdk`（在项目根目录）
 - 确认构建成功，无错误输出
-- 检查 `packages/host-sdk/dist` 目录下的产物是否完整
+- 检查 `packages/schema-element-editor-sdk/dist` 目录下的产物是否完整
 
 **3.3 完成检查**
 
@@ -96,9 +96,9 @@
 
 **4.1 分析上次SDK版本tag以来的commit历史**
 
-- 获取当前SDK版本号：从 `packages/host-sdk/package.json` 中读取
-- 查找上一个SDK版本tag：执行 `git tag -l "host-sdk-v*" --sort=-v:refname | head -1`
-- 分析commit历史：执行 `git log <上次版本tag>..HEAD --oneline -- packages/host-sdk`
+- 获取当前SDK版本号：从 `packages/schema-element-editor-sdk/package.json` 中读取
+- 查找上一个SDK版本tag：执行 `git tag -l "schema-element-editor-sdk-v*" --sort=-v:refname | head -1`
+- 分析commit历史：执行 `git log <上次版本tag>..HEAD --oneline -- packages/schema-element-editor-sdk`
 - 如果是首次发布或找不到tag，则分析所有SDK相关commit
 
 **4.2 根据commit内容推荐版本更新级别**
@@ -118,7 +118,7 @@
 
 ### 5. 更新版本号（如需要）
 
-更新 `packages/host-sdk/package.json` 中的 `version` 字段：
+更新 `packages/schema-element-editor-sdk/package.json` 中的 `version` 字段：
 
 - 版本号格式：`major.minor.patch`（如 `1.2.3`）
 
@@ -150,7 +150,7 @@
 执行构建命令：`npm run build:sdk`
 
 - 确认构建成功
-- 检查 `packages/host-sdk/dist` 目录产物完整性：
+- 检查 `packages/schema-element-editor-sdk/dist` 目录产物完整性：
   - `index.js`, `index.cjs`, `index.d.ts`
   - `core.js`, `core.cjs`, `core.d.ts`
   - `react.js`, `react.cjs`, `react.d.ts`
@@ -159,15 +159,15 @@
 ### 8. 提交版本号改动
 
 ```bash
-git add packages/host-sdk/package.json
-git commit -m "chore(host-sdk): release v{版本号}"
+git add packages/schema-element-editor-sdk/package.json
+git commit -m "chore(sdk): release v{版本号}"
 ```
 
 如果有CHANGELOG改动：
 
 ```bash
-git add packages/host-sdk/CHANGELOG.md
-git commit -m "docs(host-sdk): 更新CHANGELOG"
+git add packages/schema-element-editor-sdk/CHANGELOG.md
+git commit -m "docs(sdk): 更新CHANGELOG"
 ```
 
 ### 9. 发布到npm
@@ -179,7 +179,7 @@ npm run publish:sdk
 ```
 
 - 该命令会自动执行 `prepublishOnly` 钩子进行构建
-- 发布到npm registry（@schema-editor scope，public access）
+- 发布到npm registry（@schema-element-editor scope，public access）
 - 如果发布失败，检查：
   - npm登录状态
   - 版本号是否已存在
@@ -195,18 +195,18 @@ git push
 
 **10.2 创建并推送Tag**
 
-- Tag命名格式：`host-sdk-v{版本号}`（如 `host-sdk-v1.2.3`）
-- 创建tag：`git tag host-sdk-v{版本号}`
-- 推送tag：`git push origin host-sdk-v{版本号}`
+- Tag命名格式：`schema-element-editor-sdk-v{版本号}`（如 `schema-element-editor-sdk-v1.2.3`）
+- 创建tag：`git tag schema-element-editor-sdk-v{版本号}`
+- 推送tag：`git push origin schema-element-editor-sdk-v{版本号}`
 
 ### 11. 发布总结
 
 向用户展示：
 
 - 本次发布的SDK版本号
-- npm包地址：`https://www.npmjs.com/package/@schema-editor/host-sdk`
+- npm包地址：`https://www.npmjs.com/package/@schema-element-editor/host-sdk`
 - 改动摘要
-- 安装命令：`npm install @schema-editor/host-sdk@{版本号}`
+- 安装命令：`npm install @schema-element-editor/host-sdk@{版本号}`
 
 ## 错误处理
 
@@ -223,4 +223,4 @@ git push
 - 如果SDK改动影响了插件功能，建议先发布SDK，再更新插件依赖后发布插件
 - 两者使用不同的Tag命名空间：
   - 插件：`v{版本号}`（如 `v1.17.0`）
-  - SDK：`host-sdk-v{版本号}`（如 `host-sdk-v1.0.0`）
+  - SDK：`schema-element-editor-sdk-v{版本号}`（如 `schema-element-editor-sdk-v1.0.0`）

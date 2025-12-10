@@ -173,13 +173,6 @@ export interface IframeConfig {
 }
 
 /**
- * 通信模式类型
- * - postMessage: 使用 postMessage 直连通信（推荐）
- * - windowFunction: 使用 window 函数调用（已废弃）
- */
-export type CommunicationMode = 'postMessage' | 'windowFunction'
-
-/**
  * postMessage 模式的消息标识配置
  */
 export interface PostMessageSourceConfig {
@@ -215,13 +208,11 @@ export interface PostMessageTypeConfig {
  * API 配置接口
  */
 export interface ApiConfig {
-  /** 通信模式 */
-  communicationMode: CommunicationMode
   /** 请求超时时间（秒，1-30） */
   requestTimeout: number
-  /** postMessage 模式的消息标识配置 */
+  /** postMessage 消息标识配置 */
   sourceConfig: PostMessageSourceConfig
-  /** postMessage 模式的消息类型名称配置 */
+  /** postMessage 消息类型名称配置 */
   messageTypes: PostMessageTypeConfig
 }
 
@@ -276,7 +267,7 @@ export interface DrawerShortcutsConfig {
 /**
  * 编辑器主题类型
  */
-export type EditorTheme = 'light' | 'dark' | 'seeDark' | 'schemaEditorDark'
+export type EditorTheme = 'light' | 'dark' | 'seeDark'
 
 /**
  * SchemaDrawer 组件配置
@@ -328,16 +319,6 @@ export interface StorageData {
   attributeName: string
   /** 搜索配置 */
   searchConfig: SearchConfig
-  /**
-   * 获取Schema的函数名
-   * @deprecated 请使用 apiConfig.communicationMode = 'customEvent' 模式
-   */
-  getFunctionName: string
-  /**
-   * 更新Schema的函数名
-   * @deprecated 请使用 apiConfig.communicationMode = 'customEvent' 模式
-   */
-  updateFunctionName: string
   /** 字符串自动解析为 Markdown Elements */
   autoParseString: boolean
   /** 启用调试日志 */
@@ -370,11 +351,6 @@ export interface StorageData {
   exportConfig: ExportConfig
   /** 编辑器主题 */
   editorTheme: EditorTheme
-  /**
-   * 预览函数名
-   * @deprecated 请使用 apiConfig.communicationMode = 'customEvent' 模式
-   */
-  previewFunctionName: string
   /** API 配置 */
   apiConfig: ApiConfig
   /** 抽屉快捷键配置 */
@@ -494,27 +470,6 @@ export interface UpdateResultPayload {
   success: boolean
   message?: string
   error?: string
-}
-
-/**
- * 配置同步载荷（仅 windowFunction 模式使用）
- */
-export interface ConfigSyncPayload {
-  /**
-   * 获取Schema的函数名
-   * @deprecated 仅 windowFunction 模式使用
-   */
-  getFunctionName: string
-  /**
-   * 更新Schema的函数名
-   * @deprecated 仅 windowFunction 模式使用
-   */
-  updateFunctionName: string
-  /**
-   * 预览函数名
-   * @deprecated 仅 windowFunction 模式使用
-   */
-  previewFunctionName: string
 }
 
 /**

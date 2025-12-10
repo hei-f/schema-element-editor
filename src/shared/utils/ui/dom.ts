@@ -1,10 +1,6 @@
+import { UI_ELEMENT_ATTR, UI_ELEMENT_SELECTOR } from '@/shared/constants/dom'
 import type { ElementAttributes, ElementPosition } from '@/shared/types'
 import { storage } from '../browser/storage'
-
-/** 扩展UI元素的选择器 */
-const UI_ELEMENT_SELECTOR = '[data-schema-editor-ui]'
-/** 扩展UI元素的属性名 */
-const UI_ELEMENT_ATTR = 'data-schema-editor-ui'
 
 /**
  * 检查元素是否可见

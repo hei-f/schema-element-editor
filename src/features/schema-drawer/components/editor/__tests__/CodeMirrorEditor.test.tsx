@@ -24,7 +24,7 @@ interface MockEditorProps {
   defaultValue: string
   onChange?: (value: string) => void
   height?: string
-  theme?: 'light' | 'dark' | 'schemaEditorDark'
+  theme?: 'light' | 'dark' | 'seeDark'
   readOnly?: boolean
   placeholder?: string
   enableAstHints?: boolean
@@ -252,15 +252,10 @@ describe('CodeMirrorEditor React 19 特性测试', () => {
       expect(getByTestId('mock-codemirror-editor')).toHaveAttribute('data-theme', 'dark')
     })
 
-    it('应该支持 schemaEditorDark 主题', () => {
-      const { getByTestId } = render(
-        <MockCodeMirrorEditor defaultValue="" theme="schemaEditorDark" />
-      )
+    it('应该支持 seeDark 主题', () => {
+      const { getByTestId } = render(<MockCodeMirrorEditor defaultValue="" theme="seeDark" />)
 
-      expect(getByTestId('mock-codemirror-editor')).toHaveAttribute(
-        'data-theme',
-        'schemaEditorDark'
-      )
+      expect(getByTestId('mock-codemirror-editor')).toHaveAttribute('data-theme', 'seeDark')
     })
   })
 })

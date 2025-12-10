@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback } from 'react'
 import styled from 'styled-components'
 import { BubbleList, MarkdownInputField } from '@ant-design/agentic-ui'
 import type { MessageBubbleData } from '@ant-design/agentic-ui'
-import { useSchemaEditor } from '@schema-editor/host-sdk'
+import { useSchemaElementEditor } from '@schema-element-editor/host-sdk'
 import { useLatest } from '@/shared/hooks/useLatest'
 
 /** 页面容器 */
@@ -31,7 +31,7 @@ const InputArea = styled.div`
 
 /** Mock AI 响应列表（使用 Markdown 格式展示编辑器能力） */
 const MOCK_RESPONSES = [
-  '你好！我是 **AI 助手**，有什么可以帮助你的吗？\n\n> 提示：点击任意消息气泡可以使用 Schema Editor 编辑内容',
+  '你好！我是 **AI 助手**，有什么可以帮助你的吗？\n\n> 提示：点击任意消息气泡可以使用 Schema Element Editor 编辑内容',
   '这是一个很好的问题！让我来为你解答：\n\n1. 首先，分析问题背景\n2. 然后，制定解决方案\n3. 最后，验证结果',
   '我理解你的需求，这里是我的建议：\n\n```javascript\nconst solution = "优雅的代码"\nconsole.log(solution)\n```',
   '感谢你的提问！以下是详细的回复内容：\n\n| 步骤 | 描述 |\n|-----|------|\n| 1 | 准备工作 |\n| 2 | 执行操作 |\n| 3 | 检查结果 |',
@@ -43,7 +43,7 @@ const WELCOME_MESSAGE: MessageBubbleData = {
   id: 'welcome',
   role: 'assistant',
   content:
-    '👋 欢迎使用 **Agentic UI Demo**！\n\n这是一个展示 Schema Editor 插件接入的演示页面：\n\n1. 在下方输入框发送消息\n2. **点击任意消息气泡**，使用插件编辑内容\n3. 编辑后保存，消息内容会实时更新\n\n> 试试发送一条消息吧！',
+    '👋 欢迎使用 **Agentic UI Demo**！\n\n这是一个展示 Schema Element Editor 插件接入的演示页面：\n\n1. 在下方输入框发送消息\n2. **点击任意消息气泡**，使用插件编辑内容\n3. 编辑后保存，消息内容会实时更新\n\n> 试试发送一条消息吧！',
   createAt: Date.now(),
   updateAt: Date.now(),
   isFinished: true,
@@ -104,13 +104,13 @@ export const AgenticDemoPage: React.FC<AgenticDemoPageProps> = () => {
    */
   const handleGetSchema = useCallback(
     (params: string): string => {
-      console.log('[SchemaEditor] getSchema:', params)
+      console.log('[SchemaElementEditor] getSchema:', params)
       const message = chatListRef.current.find((msg) => msg.id === params)
       if (message) {
         const content = message.content
         return typeof content === 'string' ? content : String(content ?? '')
       }
-      console.warn('[SchemaEditor] Message not found:', params)
+      console.warn('[SchemaElementEditor] Message not found:', params)
       return ''
     },
     [chatListRef]
@@ -121,11 +121,11 @@ export const AgenticDemoPage: React.FC<AgenticDemoPageProps> = () => {
    * 根据消息 ID 更新 chatList 中对应消息的 content
    */
   const handleUpdateSchema = useCallback((schema: unknown, params: string): boolean => {
-    console.log('[SchemaEditor] updateSchema:', { params, schema })
+    console.log('[SchemaElementEditor] updateSchema:', { params, schema })
     setChatList((prevList) => {
       const index = prevList.findIndex((msg) => msg.id === params)
       if (index === -1) {
-        console.warn('[SchemaEditor] Message not found for update:', params)
+        console.warn('[SchemaElementEditor] Message not found for update:', params)
         return prevList
       }
       const newList = [...prevList]
@@ -143,7 +143,7 @@ export const AgenticDemoPage: React.FC<AgenticDemoPageProps> = () => {
    * 渲染预览
    */
   const handleRenderPreview = useCallback((schema: unknown, containerId: string) => {
-    console.log('[SchemaEditor] renderPreview:', containerId)
+    console.log('[SchemaElementEditor] renderPreview:', containerId)
     const container = document.getElementById(containerId)
     if (container) {
       const content = typeof schema === 'string' ? schema : JSON.stringify(schema, null, 2)
@@ -154,8 +154,8 @@ export const AgenticDemoPage: React.FC<AgenticDemoPageProps> = () => {
     }
   }, [])
 
-  // 接入 Schema Editor 插件
-  useSchemaEditor({
+  // 接入 Schema Element Editor 插件
+  useSchemaElementEditor({
     getSchema: handleGetSchema,
     updateSchema: handleUpdateSchema,
     renderPreview: handleRenderPreview,

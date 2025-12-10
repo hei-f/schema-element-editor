@@ -1,3 +1,4 @@
+import { PLUGIN_EVENTS } from '@/shared/constants/events'
 import type {
   IframeElementHoverPayload,
   IframeElementRect,
@@ -96,12 +97,12 @@ export const IframeHighlightOverlay: React.FC<IframeHighlightOverlayProps> = (pr
       setHoverState(null)
     }
 
-    window.addEventListener('schema-editor:iframe-element-hover', handleHover)
-    window.addEventListener('schema-editor:iframe-clear-highlight', handleClearHighlight)
+    window.addEventListener(PLUGIN_EVENTS.IFRAME_ELEMENT_HOVER, handleHover)
+    window.addEventListener(PLUGIN_EVENTS.IFRAME_CLEAR_HIGHLIGHT, handleClearHighlight)
 
     return () => {
-      window.removeEventListener('schema-editor:iframe-element-hover', handleHover)
-      window.removeEventListener('schema-editor:iframe-clear-highlight', handleClearHighlight)
+      window.removeEventListener(PLUGIN_EVENTS.IFRAME_ELEMENT_HOVER, handleHover)
+      window.removeEventListener(PLUGIN_EVENTS.IFRAME_CLEAR_HIGHLIGHT, handleClearHighlight)
     }
   }, [hoverState, calcTooltipTransform])
 
@@ -116,19 +117,16 @@ export const IframeHighlightOverlay: React.FC<IframeHighlightOverlayProps> = (pr
       setHighlightAllElements([])
     }
 
-    window.addEventListener(
-      'schema-editor:iframe-highlight-all-response',
-      handleHighlightAllResponse
-    )
+    window.addEventListener(PLUGIN_EVENTS.IFRAME_HIGHLIGHT_ALL_RESPONSE, handleHighlightAllResponse)
     // 当 Alt 键释放时，主页面会派发清除事件
-    window.addEventListener('schema-editor:clear-highlight', handleClearAll)
+    window.addEventListener(PLUGIN_EVENTS.CLEAR_HIGHLIGHT, handleClearAll)
 
     return () => {
       window.removeEventListener(
-        'schema-editor:iframe-highlight-all-response',
+        PLUGIN_EVENTS.IFRAME_HIGHLIGHT_ALL_RESPONSE,
         handleHighlightAllResponse
       )
-      window.removeEventListener('schema-editor:clear-highlight', handleClearAll)
+      window.removeEventListener(PLUGIN_EVENTS.CLEAR_HIGHLIGHT, handleClearAll)
     }
   }, [])
 

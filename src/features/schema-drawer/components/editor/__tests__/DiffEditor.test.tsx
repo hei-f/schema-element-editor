@@ -34,7 +34,7 @@ interface MockDiffEditorProps {
   defaultValue: string
   onChange?: (value: string) => void
   onHorizontalScroll?: (scrollLeft: number) => void
-  theme?: 'light' | 'dark' | 'schemaEditorDark'
+  theme?: 'light' | 'dark' | 'seeDark'
   readOnly?: boolean
   diffLines?: DiffLineInfo[]
 }
@@ -44,7 +44,7 @@ interface MockDiffEditorProps {
  * 采用与真实组件相同的 React 19 ref 模式
  */
 const MockDiffEditor = (props: MockDiffEditorProps) => {
-  const { ref, defaultValue, theme = 'schemaEditorDark', diffLines = [] } = props
+  const { ref, defaultValue, theme = 'seeDark', diffLines = [] } = props
   const valueRef = useRef(defaultValue)
   const scrollLeftRef = useRef(0)
   const decorationsRef = useRef<DiffLineInfo[]>(diffLines)
@@ -235,10 +235,10 @@ describe('DiffEditor React 19 特性测试', () => {
       expect(getByTestId('mock-diff-editor')).toHaveAttribute('data-theme', 'dark')
     })
 
-    it('应该支持 schemaEditorDark 主题', () => {
-      const { getByTestId } = render(<MockDiffEditor defaultValue="" theme="schemaEditorDark" />)
+    it('应该支持 seeDark 主题', () => {
+      const { getByTestId } = render(<MockDiffEditor defaultValue="" theme="seeDark" />)
 
-      expect(getByTestId('mock-diff-editor')).toHaveAttribute('data-theme', 'schemaEditorDark')
+      expect(getByTestId('mock-diff-editor')).toHaveAttribute('data-theme', 'seeDark')
     })
   })
 

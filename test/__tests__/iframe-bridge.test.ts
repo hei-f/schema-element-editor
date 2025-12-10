@@ -216,7 +216,7 @@ describe('iframe-bridge', () => {
 
       Object.defineProperty(window, 'top', { value: mockTop, writable: true })
 
-      const IFRAME_BRIDGE_SOURCE = 'schema-editor-iframe-bridge'
+      const IFRAME_BRIDGE_SOURCE = 'schema-element-editor-iframe-bridge'
       const message = {
         source: IFRAME_BRIDGE_SOURCE,
         type: IframeBridgeMessageType.ELEMENT_HOVER,
@@ -240,7 +240,7 @@ describe('iframe-bridge', () => {
 
       document.querySelectorAll = vi.fn(() => [mockIframe1, mockIframe2]) as any
 
-      const IFRAME_BRIDGE_SOURCE = 'schema-editor-iframe-bridge'
+      const IFRAME_BRIDGE_SOURCE = 'schema-element-editor-iframe-bridge'
       const message = {
         source: IFRAME_BRIDGE_SOURCE,
         type: IframeBridgeMessageType.HIGHLIGHT_ALL_REQUEST,
@@ -264,7 +264,7 @@ describe('iframe-bridge', () => {
 
   describe('消息监听', () => {
     it('应正确过滤非 iframe-bridge 消息', () => {
-      const IFRAME_BRIDGE_SOURCE = 'schema-editor-iframe-bridge'
+      const IFRAME_BRIDGE_SOURCE = 'schema-element-editor-iframe-bridge'
       const handlers = {
         onElementHover: vi.fn(),
       }
@@ -293,7 +293,7 @@ describe('iframe-bridge', () => {
     })
 
     it('应正确处理 ELEMENT_CLICK 消息', () => {
-      const IFRAME_BRIDGE_SOURCE = 'schema-editor-iframe-bridge'
+      const IFRAME_BRIDGE_SOURCE = 'schema-element-editor-iframe-bridge'
       const handlers = {
         onElementClick: vi.fn(),
       }
@@ -323,7 +323,7 @@ describe('iframe-bridge', () => {
     })
 
     it('应正确处理 CLEAR_HIGHLIGHT 消息', () => {
-      const IFRAME_BRIDGE_SOURCE = 'schema-editor-iframe-bridge'
+      const IFRAME_BRIDGE_SOURCE = 'schema-element-editor-iframe-bridge'
       const handlers = {
         onClearHighlight: vi.fn(),
       }
@@ -347,7 +347,7 @@ describe('iframe-bridge', () => {
     })
 
     it('应正确处理 SYNC_ALT_KEY 消息', () => {
-      const IFRAME_BRIDGE_SOURCE = 'schema-editor-iframe-bridge'
+      const IFRAME_BRIDGE_SOURCE = 'schema-element-editor-iframe-bridge'
       const handlers = {
         onAltKeySync: vi.fn(),
       }

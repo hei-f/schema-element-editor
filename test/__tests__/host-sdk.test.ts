@@ -1,16 +1,16 @@
 /**
  * Host SDK 单元测试
- * 测试 createSchemaEditorBridge 功能
+ * 测试 createSchemaElementEditorBridge 功能
  */
 
-describe('Host SDK - createSchemaEditorBridge', () => {
+describe('Host SDK - createSchemaElementEditorBridge', () => {
   let postedMessages: any[]
   let messageListeners: Array<(event: MessageEvent) => void>
   let originalTop: Window | null
 
   const DEFAULT_SOURCE_CONFIG = {
-    contentSource: 'schema-editor-content',
-    hostSource: 'schema-editor-host',
+    contentSource: 'schema-element-editor-content',
+    hostSource: 'schema-element-editor-host',
   }
 
   beforeEach(() => {
@@ -49,7 +49,7 @@ describe('Host SDK - createSchemaEditorBridge', () => {
   }
 
   /**
-   * 模拟 createSchemaEditorBridge 核心逻辑
+   * 模拟 createSchemaElementEditorBridge 核心逻辑
    */
   function simulateBridge(config: {
     getSchema: (params: string) => any

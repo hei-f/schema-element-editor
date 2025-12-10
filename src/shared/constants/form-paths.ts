@@ -35,15 +35,6 @@ export const FORM_PATHS = {
     throttleInterval: ['searchConfig', 'throttleInterval'],
   },
 
-  /** 获取函数名 */
-  getFunctionName: ['getFunctionName'],
-
-  /** 更新函数名 */
-  updateFunctionName: ['updateFunctionName'],
-
-  /** 预览函数名 */
-  previewFunctionName: ['previewFunctionName'],
-
   /** 自动解析字符串 */
   autoParseString: ['autoParseString'],
 
@@ -150,8 +141,6 @@ export const FORM_PATHS = {
 
   /** API 配置 */
   apiConfig: {
-    /** 通信模式 */
-    communicationMode: ['apiConfig', 'communicationMode'],
     /** 请求超时时间 */
     requestTimeout: ['apiConfig', 'requestTimeout'],
     /** 消息标识配置 */

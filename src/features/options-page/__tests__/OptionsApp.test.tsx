@@ -9,8 +9,6 @@ vi.mock('@/shared/utils/browser/storage', () => ({
   storage: {
     getAttributeName: vi.fn(),
     getSearchConfig: vi.fn(),
-    getGetFunctionName: vi.fn(),
-    getUpdateFunctionName: vi.fn(),
     getAutoParseString: vi.fn(),
     getEnableDebugLog: vi.fn(),
     getToolbarButtons: vi.fn(),
@@ -25,11 +23,9 @@ vi.mock('@/shared/utils/browser/storage', () => ({
     getEnableAstTypeHints: vi.fn(),
     getExportConfig: vi.fn(),
     getEditorTheme: vi.fn(),
-    getPreviewFunctionName: vi.fn(),
     getApiConfig: vi.fn(),
     setAttributeName: vi.fn(),
     setSearchConfig: vi.fn(),
-    setFunctionNames: vi.fn(),
     setAutoParseString: vi.fn(),
     setEnableDebugLog: vi.fn(),
     setToolbarButtons: vi.fn(),
@@ -76,9 +72,6 @@ describe('OptionsApp组件测试', () => {
   const defaultMockValues = {
     attributeName: 'id',
     searchConfig: { limitUpwardSearch: false, searchDepthUp: 3, throttleInterval: 200 },
-    getFunctionName: '__getContentById',
-    updateFunctionName: '__updateContentById',
-    previewFunctionName: '__getContentPreview',
     autoParseString: true,
     enableDebugLog: false,
     toolbarButtons: {
@@ -126,13 +119,12 @@ describe('OptionsApp组件测试', () => {
     exportConfig: {
       customFileName: false,
     },
-    editorTheme: 'schemaEditorDark' as const,
+    editorTheme: 'seeDark' as const,
     apiConfig: {
-      communicationMode: 'postMessage' as const,
       requestTimeout: 5,
       sourceConfig: {
-        contentSource: 'schema-editor-content',
-        hostSource: 'schema-editor-host',
+        contentSource: 'schema-element-editor-content',
+        hostSource: 'schema-element-editor-host',
       },
       messageTypes: {
         getSchema: 'GET_SCHEMA',
@@ -154,8 +146,6 @@ describe('OptionsApp组件测试', () => {
     // 设置默认的mock返回值
     mockStorage.getAttributeName.mockResolvedValue(defaultMockValues.attributeName)
     mockStorage.getSearchConfig.mockResolvedValue(defaultMockValues.searchConfig)
-    mockStorage.getGetFunctionName.mockResolvedValue(defaultMockValues.getFunctionName)
-    mockStorage.getUpdateFunctionName.mockResolvedValue(defaultMockValues.updateFunctionName)
     mockStorage.getAutoParseString.mockResolvedValue(defaultMockValues.autoParseString)
     mockStorage.getEnableDebugLog.mockResolvedValue(defaultMockValues.enableDebugLog)
     mockStorage.getToolbarButtons.mockResolvedValue(defaultMockValues.toolbarButtons)
@@ -170,7 +160,6 @@ describe('OptionsApp组件测试', () => {
     mockStorage.getEnableAstTypeHints.mockResolvedValue(defaultMockValues.enableAstTypeHints)
     mockStorage.getExportConfig.mockResolvedValue(defaultMockValues.exportConfig)
     mockStorage.getEditorTheme.mockResolvedValue(defaultMockValues.editorTheme)
-    mockStorage.getPreviewFunctionName.mockResolvedValue(defaultMockValues.previewFunctionName)
     mockStorage.getApiConfig.mockResolvedValue(defaultMockValues.apiConfig)
     mockStorage.getThemeColor.mockResolvedValue(defaultMockValues.themeColor)
   })
@@ -213,8 +202,6 @@ describe('OptionsApp组件测试', () => {
       await waitFor(() => {
         expect(mockStorage.getAttributeName).toHaveBeenCalled()
         expect(mockStorage.getSearchConfig).toHaveBeenCalled()
-        expect(mockStorage.getGetFunctionName).toHaveBeenCalled()
-        expect(mockStorage.getUpdateFunctionName).toHaveBeenCalled()
         expect(mockStorage.getAutoParseString).toHaveBeenCalled()
         expect(mockStorage.getEnableDebugLog).toHaveBeenCalled()
         expect(mockStorage.getToolbarButtons).toHaveBeenCalled()
@@ -302,19 +289,19 @@ describe('OptionsApp组件测试', () => {
     })
 
     it('应该处理存储返回undefined值', async () => {
-      mockStorage.getGetFunctionName.mockResolvedValue(undefined as any)
+      mockStorage.getAutoParseString.mockResolvedValue(undefined as any)
 
       render(<OptionsApp />)
 
       await waitFor(() => {
-        expect(mockStorage.getGetFunctionName).toHaveBeenCalled()
+        expect(mockStorage.getAutoParseString).toHaveBeenCalled()
       })
     })
 
     it('应该处理多个存储调用同时失败', async () => {
       mockStorage.getAttributeName.mockRejectedValue(new Error('Error 1'))
       mockStorage.getSearchConfig.mockRejectedValue(new Error('Error 2'))
-      mockStorage.getGetFunctionName.mockRejectedValue(new Error('Error 3'))
+      mockStorage.getAutoParseString.mockRejectedValue(new Error('Error 3'))
 
       render(<OptionsApp />)
 
@@ -388,7 +375,7 @@ describe('OptionsApp组件测试', () => {
 
       await waitFor(() => {
         // 验证 document.title 包含应用名称和版本号
-        expect(document.title).toMatch(/Schema Editor 设置/)
+        expect(document.title).toMatch(/Schema Element Editor 设置/)
         expect(document.title).toMatch(/v\d+\.\d+\.\d+/)
       })
     })
@@ -397,8 +384,8 @@ describe('OptionsApp组件测试', () => {
       render(<OptionsApp />)
 
       await waitFor(() => {
-        // 验证格式为 "Schema Editor 设置 (vX.X.X)"
-        expect(document.title).toMatch(/^Schema Editor 设置 \(v\d+\.\d+\.\d+\)$/)
+        // 验证格式为 "Schema Element Editor 设置 (vX.X.X)"
+        expect(document.title).toMatch(/^Schema Element Editor 设置 \(v\d+\.\d+\.\d+\)$/)
       })
     })
 

@@ -1,12 +1,12 @@
 /**
- * Schema Editor Host SDK - Core
+ * Schema Element Editor Host SDK - Core
  * 纯 JS 核心逻辑，无框架依赖
  */
 
 /** 默认消息标识 */
 const DEFAULT_SOURCE_CONFIG = {
-  contentSource: 'schema-editor-content',
-  hostSource: 'schema-editor-host',
+  contentSource: 'schema-element-editor-content',
+  hostSource: 'schema-element-editor-host',
 } as const
 
 /** 默认消息类型 */
@@ -50,9 +50,9 @@ export interface PostMessageTypeConfig {
 }
 
 /**
- * Schema Editor 配置接口
+ * Schema Element Editor 配置接口
  */
-export interface SchemaEditorConfig {
+export interface SchemaElementEditorConfig {
   /**
    * 获取 Schema 数据
    * @param params - 元素参数（通常是 data-id 的值）
@@ -94,7 +94,7 @@ interface PostMessageRequest {
 /**
  * 录制相关方法
  */
-export interface SchemaEditorRecording {
+export interface SchemaElementEditorRecording {
   /**
    * 推送 Schema 数据（SDK 内部判断是否在录制，未录制时静默忽略）
    * @param params - 元素参数（data-id 的值）
@@ -104,27 +104,27 @@ export interface SchemaEditorRecording {
 }
 
 /**
- * Schema Editor 桥接器返回值
+ * Schema Element Editor 桥接器返回值
  */
-export interface SchemaEditorBridge {
+export interface SchemaElementEditorBridge {
   /** 清理桥接器，移除事件监听 */
   cleanup: () => void
 
   /** 录制相关方法 */
-  recording: SchemaEditorRecording
+  recording: SchemaElementEditorRecording
 }
 
 /**
- * 创建 Schema Editor 桥接器
+ * 创建 Schema Element Editor 桥接器
  * 纯 JS 函数，返回桥接器对象
  *
- * @param config - Schema Editor 配置
+ * @param config - Schema Element Editor 配置
  * @returns 桥接器对象，包含 cleanup 和 pushSchema 方法
  *
  * @example
  * ```js
  * // 最简用法：只需配置基本的 getSchema 和 updateSchema
- * const bridge = createSchemaEditorBridge({
+ * const bridge = createSchemaElementEditorBridge({
  *   getSchema: (params) => dataStore[params],
  *   updateSchema: (schema, params) => {
  *     dataStore[params] = schema
@@ -142,7 +142,9 @@ export interface SchemaEditorBridge {
  * // onStopRecording: (params) => console.log('停止录制:', params),
  * ```
  */
-export function createSchemaEditorBridge(config: SchemaEditorConfig): SchemaEditorBridge {
+export function createSchemaElementEditorBridge(
+  config: SchemaElementEditorConfig
+): SchemaElementEditorBridge {
   const { getSchema, updateSchema, renderPreview, sourceConfig, messageTypes } = config
 
   // 合并配置与默认值

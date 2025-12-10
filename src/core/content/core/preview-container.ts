@@ -2,7 +2,7 @@ import { DEFAULT_VALUES } from '@/shared/constants/defaults'
 import type { PreviewPosition } from '@/shared/types'
 
 /** 预览容器 ID */
-export const PREVIEW_CONTAINER_ID = 'schema-editor-preview-container'
+export const PREVIEW_CONTAINER_ID = 'schema-element-editor-preview-container'
 
 /** 预览容器管理器 */
 class PreviewContainerManager {

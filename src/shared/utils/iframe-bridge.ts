@@ -10,7 +10,7 @@ import { IframeBridgeMessageType as MessageType } from '@/shared/types'
 import { logger } from './logger'
 
 /** iframe bridge 消息来源标识 */
-const IFRAME_BRIDGE_SOURCE = 'schema-editor-iframe-bridge'
+const IFRAME_BRIDGE_SOURCE = 'schema-element-editor-iframe-bridge'
 
 /**
  * iframe bridge 消息结构

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Schema Element Editor",
-  "version": "1.27.0",
+  "version": "2.0.0",
   "description": "DOM元素Schema查看和编辑工具",
   "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": ["<all_urls>"],
@@ -33,7 +33,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["injected.js", "node_modules/antd/dist/reset.css"],
+      "resources": ["node_modules/antd/dist/reset.css"],
       "matches": ["<all_urls>"]
     }
   ]

@@ -1,15 +1,8 @@
-import { FORM_PATHS } from '@/shared/constants/form-paths'
 import { LogoIcon } from '@/shared/icons/optionsPage/Logo'
-import type { CommunicationMode } from '@/shared/types'
 import { RightOutlined } from '@ant-design/icons'
-import { Form, theme } from 'antd'
+import { theme } from 'antd'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import {
-  getIntegrationChildren,
-  MENU_BREAKPOINT,
-  MENU_CONFIG,
-  type MenuItemConfig,
-} from '../../config/menu-config'
+import { MENU_BREAKPOINT, MENU_CONFIG, type MenuItemConfig } from '../../config/menu-config'
 import {
   CollapseButton,
   ExpandArrow,
@@ -57,15 +50,11 @@ export const SideMenu: React.FC<SideMenuProps> = (props) => {
     isReleaseBuild = false,
   } = props
 
-  /** 通过 Form.useWatch 获取通信模式 */
-  const communicationMode = Form.useWatch<CommunicationMode>(FORM_PATHS.apiConfig.communicationMode)
-
   /** 展开的菜单项 */
   const [expandedKeys, setExpandedKeys] = useState<string[]>([])
 
   /**
-   * 根据通信模式动态生成菜单配置
-   * 集成配置的子项根据 communicationMode 动态获取
+   * 根据配置动态生成菜单配置
    * 发布模式下隐藏调试菜单
    */
   const menuConfig = useMemo(() => {
@@ -75,16 +64,8 @@ export const SideMenu: React.FC<SideMenuProps> = (props) => {
         return false
       }
       return true
-    }).map((item) => {
-      if (item.key === 'integration-config') {
-        return {
-          ...item,
-          children: getIntegrationChildren(communicationMode ?? 'postMessage'),
-        }
-      }
-      return item
     })
-  }, [communicationMode, isReleaseBuild])
+  }, [isReleaseBuild])
 
   /**
    * 响应式处理：窗口宽度小于断点时自动折叠
@@ -163,7 +144,7 @@ export const SideMenu: React.FC<SideMenuProps> = (props) => {
         <MenuHeader $collapsed={collapsed}>
           <MenuLogoWrapper $collapsed={collapsed}>
             <LogoIcon style={{ fontSize: 24 }} />
-            <MenuTitle $collapsed={collapsed}>Schema Editor</MenuTitle>
+            <MenuTitle $collapsed={collapsed}>SEE</MenuTitle>
           </MenuLogoWrapper>
           <CollapseButton
             $collapsed={collapsed}

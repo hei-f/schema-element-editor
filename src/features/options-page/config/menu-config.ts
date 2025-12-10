@@ -1,4 +1,3 @@
-import type { CommunicationMode } from '@/shared/types'
 import {
   ApiOutlined,
   BulbOutlined,
@@ -40,31 +39,6 @@ export interface MenuChildConfig {
 }
 
 /**
- * 集成配置的子项配置（按通信模式区分）
- */
-const INTEGRATION_CHILDREN: Record<CommunicationMode, MenuChildConfig[]> = {
-  postMessage: [
-    { key: 'communication-mode', label: '通信方式', anchorId: 'field-communication-mode' },
-    { key: 'attribute-name', label: '元素标记配置', anchorId: 'field-attribute-name' },
-    { key: 'request-timeout', label: 'postMessage 配置', anchorId: 'field-request-timeout' },
-    { key: 'source-config', label: '消息标识配置', anchorId: 'field-source-config' },
-    { key: 'message-types', label: '消息类型配置', anchorId: 'field-message-types' },
-  ],
-  windowFunction: [
-    { key: 'communication-mode', label: '通信方式', anchorId: 'field-communication-mode' },
-    { key: 'attribute-name', label: '元素标记配置', anchorId: 'field-attribute-name' },
-    { key: 'window-functions', label: '核心 API', anchorId: 'field-window-functions' },
-  ],
-}
-
-/**
- * 获取集成配置的子项（根据通信模式）
- */
-export function getIntegrationChildren(mode: CommunicationMode): MenuChildConfig[] {
-  return INTEGRATION_CHILDREN[mode]
-}
-
-/**
  * 菜单配置
  * 定义所有 Section 的菜单结构
  */
@@ -74,7 +48,12 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     label: '集成配置',
     icon: ApiOutlined,
     sectionId: 'section-integration-config',
-    // children 由 SideMenu 根据 communicationMode 动态获取
+    children: [
+      { key: 'attribute-name', label: '元素标记配置', anchorId: 'field-attribute-name' },
+      { key: 'request-timeout', label: 'postMessage 配置', anchorId: 'field-request-timeout' },
+      { key: 'source-config', label: '消息标识配置', anchorId: 'field-source-config' },
+      { key: 'message-types', label: '消息类型配置', anchorId: 'field-message-types' },
+    ],
   },
   {
     key: 'element-detection',

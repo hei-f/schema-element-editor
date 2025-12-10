@@ -40,7 +40,7 @@ import {
 import type { OptionsPageContentProps } from '../types'
 
 /** 当前插件版本 */
-const CURRENT_VERSION = 'v1.27.0'
+const CURRENT_VERSION = 'v2.0.0'
 
 /**
  * 设置页面内容组件（纯UI组件）
@@ -122,7 +122,7 @@ export const OptionsPageContent: React.FC<OptionsPageContentProps> = (props) => 
    */
   useEffect(() => {
     if (shouldSetDocumentTitle) {
-      document.title = `Schema Editor 设置 (${CURRENT_VERSION})`
+      document.title = `Schema Element Editor 设置 (${CURRENT_VERSION})`
     }
   }, [shouldSetDocumentTitle])
 
@@ -232,7 +232,7 @@ export const OptionsPageContent: React.FC<OptionsPageContentProps> = (props) => 
 
               <HeaderToolbar align="center">
                 <VersionContainer>
-                  <VersionText>Schema Editor</VersionText>
+                  <VersionText>Schema Element Editor</VersionText>
                   <VersionTag>{CURRENT_VERSION}</VersionTag>
 
                   <VersionDivider />

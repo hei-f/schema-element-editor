@@ -8,9 +8,6 @@ describe('defaults', () => {
         'drawerWidth',
         'attributeName',
         'searchConfig',
-        'getFunctionName',
-        'updateFunctionName',
-        'previewFunctionName',
         'autoParseString',
         'enableDebugLog',
         'toolbarButtons',
@@ -215,16 +212,9 @@ describe('defaults', () => {
 
   describe('apiConfig 默认值', () => {
     it('应该包含必需的 API 配置', () => {
-      expect(DEFAULT_VALUES.apiConfig).toHaveProperty('communicationMode')
       expect(DEFAULT_VALUES.apiConfig).toHaveProperty('requestTimeout')
       expect(DEFAULT_VALUES.apiConfig).toHaveProperty('sourceConfig')
       expect(DEFAULT_VALUES.apiConfig).toHaveProperty('messageTypes')
-    })
-
-    it('communicationMode 应该是有效的值', () => {
-      expect(['postMessage', 'windowFunction']).toContain(
-        DEFAULT_VALUES.apiConfig.communicationMode
-      )
     })
 
     it('requestTimeout 应该在有效范围内', () => {
@@ -274,8 +264,6 @@ describe('defaults', () => {
         'DRAWER_WIDTH',
         'ATTRIBUTE_NAME',
         'SEARCH_CONFIG',
-        'GET_FUNCTION_NAME',
-        'UPDATE_FUNCTION_NAME',
         'AUTO_PARSE_STRING',
         'ENABLE_DEBUG_LOG',
         'TOOLBAR_BUTTONS',
@@ -294,7 +282,6 @@ describe('defaults', () => {
         'ENABLE_AST_TYPE_HINTS',
         'EXPORT_CONFIG',
         'EDITOR_THEME',
-        'PREVIEW_FUNCTION_NAME',
         'API_CONFIG',
         'DRAWER_SHORTCUTS',
       ]

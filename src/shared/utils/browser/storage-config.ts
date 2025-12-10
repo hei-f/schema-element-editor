@@ -41,16 +41,6 @@ export const SIMPLE_STORAGE_FIELDS = {
     defaultValue: DEFAULT_VALUES.drawerWidth,
   } as StorageFieldConfig<string>,
 
-  getFunctionName: {
-    key: STORAGE_KEYS.GET_FUNCTION_NAME,
-    defaultValue: DEFAULT_VALUES.getFunctionName,
-  } as StorageFieldConfig<string>,
-
-  updateFunctionName: {
-    key: STORAGE_KEYS.UPDATE_FUNCTION_NAME,
-    defaultValue: DEFAULT_VALUES.updateFunctionName,
-  } as StorageFieldConfig<string>,
-
   autoParseString: {
     key: STORAGE_KEYS.AUTO_PARSE_STRING,
     defaultValue: DEFAULT_VALUES.autoParseString,
@@ -165,14 +155,9 @@ export const SIMPLE_STORAGE_FIELDS = {
     key: STORAGE_KEYS.EDITOR_THEME,
     defaultValue: DEFAULT_VALUES.editorTheme,
     validator: (value: any): value is EditorTheme => {
-      return ['light', 'dark', 'seeDark', 'schemaEditorDark'].includes(value)
+      return ['light', 'dark', 'seeDark'].includes(value)
     },
   } as StorageFieldConfig<EditorTheme>,
-
-  previewFunctionName: {
-    key: STORAGE_KEYS.PREVIEW_FUNCTION_NAME,
-    defaultValue: DEFAULT_VALUES.previewFunctionName,
-  } as StorageFieldConfig<string>,
 
   apiConfig: {
     key: STORAGE_KEYS.API_CONFIG,
@@ -180,7 +165,6 @@ export const SIMPLE_STORAGE_FIELDS = {
     validator: (value: any): value is ApiConfig => {
       return (
         value &&
-        ['postMessage', 'windowFunction'].includes(value.communicationMode) &&
         typeof value.requestTimeout === 'number' &&
         value.requestTimeout >= 1 &&
         value.requestTimeout <= 30

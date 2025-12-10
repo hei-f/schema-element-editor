@@ -1,5 +1,4 @@
 import {
-  getIntegrationChildren,
   MENU_CONFIG,
   MENU_EXPANDED_WIDTH,
   MENU_COLLAPSED_WIDTH,
@@ -57,57 +56,6 @@ describe('menu-config', () => {
             expect(child.anchorId).toMatch(/^field-/)
           })
         }
-      })
-    })
-  })
-
-  describe('getIntegrationChildren', () => {
-    it('postMessage 模式应该返回正确的子项', () => {
-      const children = getIntegrationChildren('postMessage')
-
-      expect(Array.isArray(children)).toBe(true)
-      expect(children.length).toBeGreaterThan(0)
-
-      const keys = children.map((child) => child.key)
-      expect(keys).toContain('communication-mode')
-      expect(keys).toContain('attribute-name')
-      expect(keys).toContain('request-timeout')
-      expect(keys).toContain('source-config')
-      expect(keys).toContain('message-types')
-    })
-
-    it('windowFunction 模式应该返回正确的子项', () => {
-      const children = getIntegrationChildren('windowFunction')
-
-      expect(Array.isArray(children)).toBe(true)
-      expect(children.length).toBeGreaterThan(0)
-
-      const keys = children.map((child) => child.key)
-      expect(keys).toContain('communication-mode')
-      expect(keys).toContain('attribute-name')
-      expect(keys).toContain('window-functions')
-    })
-
-    it('postMessage 和 windowFunction 应该有不同的子项', () => {
-      const postMessageChildren = getIntegrationChildren('postMessage')
-      const windowFunctionChildren = getIntegrationChildren('windowFunction')
-
-      expect(postMessageChildren.length).not.toBe(windowFunctionChildren.length)
-
-      // postMessage 特有
-      expect(postMessageChildren.find((c) => c.key === 'message-types')).toBeDefined()
-      // windowFunction 特有
-      expect(windowFunctionChildren.find((c) => c.key === 'window-functions')).toBeDefined()
-    })
-
-    it('每个子项应该有有效的 anchorId', () => {
-      const modes = ['postMessage', 'windowFunction'] as const
-
-      modes.forEach((mode) => {
-        const children = getIntegrationChildren(mode)
-        children.forEach((child) => {
-          expect(child.anchorId).toMatch(/^field-/)
-        })
       })
     })
   })

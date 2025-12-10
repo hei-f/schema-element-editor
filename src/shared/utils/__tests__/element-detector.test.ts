@@ -448,7 +448,7 @@ describe('Element Detector测试', () => {
 
     it('应该忽略扩展UI元素', async () => {
       const uiElement = document.createElement('div')
-      uiElement.setAttribute('data-schema-editor-ui', 'true')
+      uiElement.setAttribute('data-schema-element-editor-ui', 'true')
       uiElement.setAttribute('data-schema-params', 'param1')
       document.body.appendChild(uiElement)
       ;(document.elementsFromPoint as Mock).mockReturnValue([

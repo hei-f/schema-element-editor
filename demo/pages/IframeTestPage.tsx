@@ -5,6 +5,12 @@ import styled from 'styled-components'
 
 const { Title, Text, Paragraph } = Typography
 
+/** postMessage 模式消息来源标识 */
+const MESSAGE_SOURCE = {
+  CONTENT: 'schema-element-editor-content',
+  HOST: 'schema-element-editor-host',
+} as const
+
 interface IframeTestPageProps {
   siderCollapsed?: boolean
 }
@@ -128,7 +134,7 @@ export const IframeTestPage: React.FC<IframeTestPageProps> = () => {
   // 监听来自插件的 postMessage（主页面模式）
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (!event.data || event.data.source !== 'schema-editor-content') return
+      if (!event.data || event.data.source !== MESSAGE_SOURCE.CONTENT) return
 
       const { type, payload, requestId } = event.data
       let result: Record<string, unknown>
@@ -168,7 +174,7 @@ export const IframeTestPage: React.FC<IframeTestPageProps> = () => {
       // 发送响应
       window.postMessage(
         {
-          source: 'schema-editor-host',
+          source: MESSAGE_SOURCE.HOST,
           requestId,
           ...result,
         },

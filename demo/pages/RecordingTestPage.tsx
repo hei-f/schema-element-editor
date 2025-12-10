@@ -7,7 +7,7 @@ import {
   ThunderboltOutlined,
   SyncOutlined,
 } from '@ant-design/icons'
-import { useSchemaEditor } from '@schema-editor/host-sdk'
+import { useSchemaElementEditor } from '@schema-element-editor/host-sdk'
 import { useLatest } from '@/shared/hooks/useLatest'
 
 const { Title, Text, Paragraph } = Typography
@@ -154,13 +154,13 @@ export const RecordingTestPage: React.FC<RecordingTestPageProps> = () => {
   const streamTimerRef = useRef<number | null>(null)
   const streamContentRef = useLatest(streamContent)
   /** 存储 pushSchema 函数的 ref（用于避免循环依赖） */
-  const pushSchemaRef = useRef<typeof pushSchema | null>(null)
+  const pushSchemaRef = useRef<typeof recording.push | null>(null)
 
   /** 当前模拟的 params（对应 data-id） */
   const DATA_ID = 'recording-test'
 
   /** 使用 SDK 接入插件 */
-  const { pushSchema } = useSchemaEditor({
+  const { recording } = useSchemaElementEditor({
     getSchema: (): string => {
       return streamContentRef.current
     },
@@ -188,10 +188,10 @@ export const RecordingTestPage: React.FC<RecordingTestPageProps> = () => {
     setIsRecordingActive(false)
   }
 
-  // 更新 pushSchema ref（在 effect 中更新以避免渲染期间修改 ref）
+  // 更新 recording.push ref（在 effect 中更新以避免渲染期间修改 ref）
   useEffect(() => {
-    pushSchemaRef.current = pushSchema
-  }, [pushSchema])
+    pushSchemaRef.current = recording.push
+  }, [recording.push])
 
   /**
    * SSE 模拟逻辑
@@ -368,10 +368,10 @@ export const RecordingTestPage: React.FC<RecordingTestPageProps> = () => {
             fontSize: 13,
           }}
         >
-          {`import { useSchemaEditor } from '@schema-editor/host-sdk'
+          {`import { useSchemaElementEditor } from '@schema-element-editor/host-sdk'
 
 // 最简配置：只需 getSchema 和 updateSchema
-const { pushSchema } = useSchemaEditor({
+const { recording } = useSchemaElementEditor({
   getSchema: (params) => dataStore[params],
   updateSchema: (schema, params) => {
     dataStore[params] = schema
@@ -379,9 +379,9 @@ const { pushSchema } = useSchemaEditor({
   },
 })
 
-// 数据变化时调用 pushSchema 推送数据（录制功能自动可用）
+// 数据变化时调用 recording.push 推送数据（录制功能自动可用）
 sseHandler.onData = (params, data) => {
-  pushSchema(params, data)
+  recording.push(params, data)
 }`}
         </pre>
       </Card>

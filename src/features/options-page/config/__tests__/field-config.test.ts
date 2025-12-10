@@ -82,12 +82,6 @@ describe('field-config测试', () => {
       expect(result?.save).toBeDefined()
     })
 
-    it('应该找到functionNames字段组', () => {
-      const result = findFieldGroup(['getFunctionName'])
-      expect(result).toBeDefined()
-      expect(result?.save).toBeDefined()
-    })
-
     it('独立字段attributeName应该返回null', () => {
       const result = findFieldGroup(['attributeName'])
       expect(result).toBeNull()
@@ -170,12 +164,6 @@ describe('field-config测试', () => {
       expect(FIELD_GROUPS.previewConfig.save).toBeDefined()
     })
 
-    it('应该包含functionNames组', () => {
-      expect(FIELD_GROUPS.functionNames).toBeDefined()
-      expect(FIELD_GROUPS.functionNames.fieldPaths).toBeDefined()
-      expect(FIELD_GROUPS.functionNames.save).toBeDefined()
-    })
-
     it('每个组都应该有save方法', () => {
       Object.values(FIELD_GROUPS).forEach((group) => {
         expect(group.save).toBeDefined()
@@ -214,22 +202,6 @@ describe('field-config测试', () => {
       await FIELD_GROUPS.searchConfig.save(mockValues)
 
       expect(storage.setSearchConfig).toHaveBeenCalledWith(mockValues.searchConfig)
-    })
-
-    it('functionNames.save 应该调用 storage.setFunctionNames', async () => {
-      const mockValues = {
-        getFunctionName: 'getSchema',
-        updateFunctionName: 'updateSchema',
-        previewFunctionName: 'previewSchema',
-      }
-
-      await FIELD_GROUPS.functionNames.save(mockValues)
-
-      expect(storage.setFunctionNames).toHaveBeenCalledWith(
-        mockValues.getFunctionName,
-        mockValues.updateFunctionName,
-        mockValues.previewFunctionName
-      )
     })
 
     it('toolbarButtons.save 应该调用 storage.setToolbarButtons', async () => {

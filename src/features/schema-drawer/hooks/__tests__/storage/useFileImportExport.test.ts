@@ -311,7 +311,7 @@ describe('useFileImportExport', () => {
       const mockFile = new File(
         [
           JSON.stringify({
-            __SCHEMA_EDITOR_EXPORT__: true,
+            __SCHEMA_ELEMENT_EDITOR_EXPORT__: true,
             content: { type: 'card', title: 'imported' },
             metadata: {
               params: 'test',
@@ -333,7 +333,7 @@ describe('useFileImportExport', () => {
             this.onload({
               target: {
                 result: JSON.stringify({
-                  __SCHEMA_EDITOR_EXPORT__: true,
+                  __SCHEMA_ELEMENT_EDITOR_EXPORT__: true,
                   content: { type: 'card', title: 'imported' },
                   metadata: {
                     params: 'test',
@@ -458,7 +458,7 @@ describe('useFileImportExport', () => {
             this.onload({
               target: {
                 result: JSON.stringify({
-                  __SCHEMA_EDITOR_EXPORT__: true,
+                  __SCHEMA_ELEMENT_EDITOR_EXPORT__: true,
                   content: null,
                   metadata: {
                     params: 'test',

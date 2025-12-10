@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Schema Editor 开发构建脚本
+# Schema Element Editor 开发构建脚本
 # 确保使用开发模式构建（保留 console 和调试开关）
 
 set -e

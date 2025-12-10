@@ -2,8 +2,6 @@ import type { Mock } from 'vitest'
 import { MessageType } from '@/shared/types'
 import {
   listenChromeMessages,
-  listenPageMessages,
-  postMessageToPage,
   sendMessageToBackground,
   sendMessageToContent,
   sendRequestToHost,
@@ -61,74 +59,6 @@ describe('Message工具测试', () => {
     })
   })
 
-  describe('postMessageToPage', () => {
-    it('应该发送消息到页面', () => {
-      const message = {
-        type: MessageType.GET_SCHEMA,
-        payload: { params: 'test-param' },
-      }
-
-      postMessageToPage(message)
-
-      expect(window.postMessage).toHaveBeenCalledWith(
-        {
-          source: 'schema-editor-content',
-          ...message,
-        },
-        '*'
-      )
-    })
-
-    it('应该包含正确的source标识', () => {
-      const message = {
-        type: MessageType.UPDATE_SCHEMA,
-        payload: { schema: { key: 'value' }, params: 'param1' },
-      }
-
-      postMessageToPage(message)
-
-      const call = (window.postMessage as Mock).mock.calls[0]
-      expect(call[0]).toHaveProperty('source', 'schema-editor-content')
-      expect(call[1]).toBe('*')
-    })
-
-    it('应该发送不同类型的消息', () => {
-      const messages = [
-        { type: MessageType.GET_SCHEMA, payload: { params: 'p1' } },
-        { type: MessageType.UPDATE_SCHEMA, payload: { schema: {}, params: 'p2' } },
-        { type: MessageType.SCHEMA_RESPONSE, payload: { success: true, data: {} } },
-      ]
-
-      messages.forEach((msg) => {
-        postMessageToPage(msg)
-      })
-
-      expect(window.postMessage).toHaveBeenCalledTimes(3)
-    })
-
-    it('应该处理复杂的payload', () => {
-      const complexPayload = {
-        schema: {
-          nested: {
-            deep: {
-              value: [1, 2, 3],
-              obj: { key: 'value' },
-            },
-          },
-        },
-        params: 'complex,nested,params',
-      }
-
-      postMessageToPage({
-        type: MessageType.UPDATE_SCHEMA,
-        payload: complexPayload,
-      })
-
-      const call = (window.postMessage as Mock).mock.calls[0]
-      expect(call[0].payload).toEqual(complexPayload)
-    })
-  })
-
   describe('MessageType枚举', () => {
     it('应该包含所有必要的消息类型', () => {
       expect(MessageType.GET_SCHEMA).toBeDefined()
@@ -143,52 +73,6 @@ describe('Message工具测试', () => {
       const uniqueTypes = new Set(types)
 
       expect(uniqueTypes.size).toBe(types.length)
-    })
-  })
-
-  describe('消息格式验证', () => {
-    it('GET_SCHEMA消息应该包含params', () => {
-      const message = {
-        type: MessageType.GET_SCHEMA,
-        payload: { params: 'test' },
-      }
-
-      postMessageToPage(message)
-
-      const call = (window.postMessage as Mock).mock.calls[0]
-      expect(call[0].payload).toHaveProperty('params')
-    })
-
-    it('UPDATE_SCHEMA消息应该包含schema和params', () => {
-      const message = {
-        type: MessageType.UPDATE_SCHEMA,
-        payload: {
-          schema: { key: 'value' },
-          params: 'param1',
-        },
-      }
-
-      postMessageToPage(message)
-
-      const call = (window.postMessage as Mock).mock.calls[0]
-      expect(call[0].payload).toHaveProperty('schema')
-      expect(call[0].payload).toHaveProperty('params')
-    })
-
-    it('SCHEMA_RESPONSE消息应该包含success和data', () => {
-      const message = {
-        type: MessageType.SCHEMA_RESPONSE,
-        payload: {
-          success: true,
-          data: { result: 'test' },
-        },
-      }
-
-      postMessageToPage(message)
-
-      const call = (window.postMessage as Mock).mock.calls[0]
-      expect(call[0].payload).toHaveProperty('success')
-      expect(call[0].payload).toHaveProperty('data')
     })
   })
 
@@ -283,92 +167,6 @@ describe('Message工具测试', () => {
 
       expect(handler).toHaveBeenCalledWith(message, sender, sendResponse)
       expect(result).toBe(true) // 返回true保持通道开启
-    })
-  })
-
-  describe('listenPageMessages', () => {
-    it('应该监听来自页面的消息', () => {
-      const handler = vi.fn()
-      const cleanup = listenPageMessages(handler)
-
-      const event = new MessageEvent('message', {
-        data: {
-          source: 'schema-editor-injected',
-          type: MessageType.GET_SCHEMA,
-          payload: {},
-        },
-        source: window,
-      })
-
-      window.dispatchEvent(event)
-
-      expect(handler).toHaveBeenCalledWith({
-        source: 'schema-editor-injected',
-        type: MessageType.GET_SCHEMA,
-        payload: {},
-      })
-
-      cleanup()
-    })
-
-    it('应该忽略非当前窗口的消息', () => {
-      const handler = vi.fn()
-      const cleanup = listenPageMessages(handler)
-
-      const event = new MessageEvent('message', {
-        data: {
-          source: 'schema-editor-injected',
-          type: MessageType.GET_SCHEMA,
-          payload: {},
-        },
-        source: {} as Window,
-      })
-
-      window.dispatchEvent(event)
-
-      expect(handler).not.toHaveBeenCalled()
-
-      cleanup()
-    })
-
-    it('应该忽略非injected script的消息', () => {
-      const handler = vi.fn()
-      const cleanup = listenPageMessages(handler)
-
-      const event = new MessageEvent('message', {
-        data: {
-          source: 'other-source',
-          type: MessageType.GET_SCHEMA,
-          payload: {},
-        },
-        source: window,
-      })
-
-      window.dispatchEvent(event)
-
-      expect(handler).not.toHaveBeenCalled()
-
-      cleanup()
-    })
-
-    it('应该正确清理监听器', () => {
-      const handler = vi.fn()
-      const cleanup = listenPageMessages(handler)
-
-      cleanup()
-
-      const event = new MessageEvent('message', {
-        data: {
-          source: 'schema-editor-injected',
-          type: MessageType.GET_SCHEMA,
-          payload: {},
-        },
-        source: window,
-      })
-
-      window.dispatchEvent(event)
-
-      expect(handler).not.toHaveBeenCalled()
     })
   })
 
@@ -535,20 +333,6 @@ describe('Message工具测试', () => {
     })
   })
 
-  describe('性能测试', () => {
-    it('应该能快速发送多条消息', () => {
-      for (let i = 0; i < 100; i++) {
-        postMessageToPage({
-          type: MessageType.GET_SCHEMA,
-          payload: { params: `param${i}` },
-        })
-      }
-
-      // 验证所有消息都被发送
-      expect(window.postMessage).toHaveBeenCalledTimes(100)
-    })
-  })
-
   describe('边界情况测试', () => {
     it('应该处理非常长的params字符串', async () => {
       const longParams = 'a'.repeat(10000)
@@ -560,91 +344,6 @@ describe('Message工具测试', () => {
       })
 
       expect(chrome.runtime.sendMessage).toHaveBeenCalled()
-    })
-
-    it('应该处理大型schema对象', () => {
-      const largeSchema = {
-        data: Array.from({ length: 1000 }, (_, i) => ({
-          id: i,
-          name: `Item ${i}`,
-          values: [1, 2, 3, 4, 5],
-        })),
-      }
-
-      postMessageToPage({
-        type: MessageType.UPDATE_SCHEMA,
-        payload: { schema: largeSchema, params: 'test' },
-      })
-
-      expect(window.postMessage).toHaveBeenCalled()
-    })
-
-    it('应该处理包含特殊字符的payload', () => {
-      const specialPayload = {
-        params: '<script>alert("xss")</script>',
-        schema: { key: '\'"\n\r\t' },
-      }
-
-      postMessageToPage({
-        type: MessageType.UPDATE_SCHEMA,
-        payload: specialPayload,
-      })
-
-      const call = (window.postMessage as Mock).mock.calls[0]
-      expect(call[0].payload).toEqual(specialPayload)
-    })
-
-    it('应该处理Unicode字符', () => {
-      const unicodePayload = {
-        params: '参数名称,🎉,👍,测试',
-      }
-
-      postMessageToPage({
-        type: MessageType.GET_SCHEMA,
-        payload: unicodePayload,
-      })
-
-      expect(window.postMessage).toHaveBeenCalled()
-    })
-
-    it('应该处理null payload', () => {
-      postMessageToPage({
-        type: MessageType.SCHEMA_RESPONSE,
-        payload: null as any,
-      })
-
-      expect(window.postMessage).toHaveBeenCalled()
-    })
-
-    it('应该处理undefined payload', () => {
-      postMessageToPage({
-        type: MessageType.TOGGLE_ACTIVE,
-      } as any)
-
-      expect(window.postMessage).toHaveBeenCalled()
-    })
-  })
-
-  describe('消息类型完整性测试', () => {
-    it('应该支持所有定义的MessageType', () => {
-      const allTypes = [
-        MessageType.TOGGLE_ACTIVE,
-        MessageType.GET_SCHEMA,
-        MessageType.UPDATE_SCHEMA,
-        MessageType.SCHEMA_RESPONSE,
-        MessageType.UPDATE_RESULT,
-        MessageType.ELEMENT_CLICKED,
-        MessageType.ACTIVE_STATE_CHANGED,
-      ]
-
-      allTypes.forEach((type) => {
-        postMessageToPage({
-          type,
-          payload: {},
-        })
-      })
-
-      expect(window.postMessage).toHaveBeenCalledTimes(allTypes.length)
     })
   })
 })

@@ -260,7 +260,7 @@ export const TestApp: React.FC = () => {
             <Logo>
               <BugOutlined className="logo-icon" />
               <Title level={4} style={{ margin: 0, color: '#fff' }}>
-                Schema Editor 测试工具
+                Schema Element Editor 测试工具
               </Title>
             </Logo>
           </HeaderLeft>
