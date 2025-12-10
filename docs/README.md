@@ -74,12 +74,6 @@
 - Ant Design 6 + CodeMirror 6
 - Chrome Extension Manifest V3
 
-## 📋 浏览器兼容性
-
-- Chrome 90+
-- Edge 90+
-- 其他基于 Chromium 的浏览器
-
 ## 🤝 获取帮助
 
 如果您在使用过程中遇到问题：
