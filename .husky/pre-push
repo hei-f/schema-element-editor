@@ -1,13 +1,5 @@
 #!/bin/sh
 
 # TypeScript 类型检查
-echo "🔍 Running TypeScript type check..."
-OUTPUT=$(npx tsgo --incremental --noEmit 2>&1)
-EXIT_CODE=$?
-if [ $EXIT_CODE -ne 0 ]; then
-  echo "$OUTPUT"
-  echo ""
-  echo "❌ TypeScript type check failed. Please fix the errors above before pushing."
-  exit 1
-fi
+sh "$(dirname "$0")/../scripts/type-check.sh"
 
