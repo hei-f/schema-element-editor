@@ -1,4 +1,9 @@
+#!/bin/sh
+
 # TypeScript 类型检查
 echo "🔍 Running TypeScript type check..."
-npx tsgo --incremental --noEmit
+if ! npx tsgo --incremental --noEmit; then
+  echo "❌ TypeScript type check failed. Please fix the errors above before pushing."
+  exit 1
+fi
 
