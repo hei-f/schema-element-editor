@@ -5,15 +5,46 @@ import {
   EditorToolbar as StyledEditorToolbar,
   ToolbarSegmented,
 } from '../../styles/toolbar/toolbar.styles'
-import { DIFF_DISPLAY_MODE_OPTIONS, type DiffDisplayMode } from '../editor/SchemaDiffView'
 import { ResponsiveButtonGroup, type ToolbarButtonConfig } from './ResponsiveButtonGroup'
 import { ScrollableParams } from './ScrollableParams'
+
+/**
+ * Diff 模式下的内容类型
+ * 用于 AST/RawString Segment 切换
+ * - ast: AST 格式
+ * - rawstring: RawString 格式
+ * - other: 无效 JSON，禁用切换
+ */
+export type DiffContentType = 'ast' | 'rawstring' | 'other'
 
 /** 工具栏模式类型 */
 export type ToolbarMode = 'diff' | 'recording' | 'preview' | 'normal'
 
 /** 参数区域隐藏的容器最小宽度阈值（px） */
 const PARAMS_HIDE_THRESHOLD = 300
+
+/**
+ * Diff 模式专用工具栏回调
+ * 这些回调会同时对 Diff 视图的左右两侧内容进行操作
+ */
+export interface DiffToolbarActions {
+  /** Diff 模式下的 AST/RawString 切换 */
+  onDiffSegmentChange?: (value: DiffContentType) => void
+  /** Diff 模式下的格式化 */
+  onDiffFormat?: () => void
+  /** Diff 模式下的转义 */
+  onDiffEscape?: () => void
+  /** Diff 模式下的去转义 */
+  onDiffUnescape?: () => void
+  /** Diff 模式下的压缩 */
+  onDiffCompact?: () => void
+  /** Diff 模式下的解析 */
+  onDiffParse?: () => void
+  /** Diff 模式当前内容类型 */
+  diffContentType?: DiffContentType
+  /** Diff 模式是否可以解析 */
+  diffCanParse?: boolean
+}
 
 interface DrawerToolbarProps {
   /** 工具栏模式，用于控制按钮显示 */
@@ -29,10 +60,8 @@ interface DrawerToolbarProps {
   showDiffButton?: boolean
   /** 是否处于 Diff 模式 */
   isDiffMode?: boolean
-  /** 当前对比显示模式 */
-  diffDisplayMode?: DiffDisplayMode
-  /** 对比显示模式变化回调 */
-  onDiffDisplayModeChange?: (mode: DiffDisplayMode) => void
+  /** Diff 模式专用工具栏回调 */
+  diffToolbarActions?: DiffToolbarActions
   onFormat: () => void
   onEscape: () => void
   onUnescape: () => void
@@ -74,8 +103,7 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = (props) => {
     isRecording = false,
     showDiffButton = false,
     isDiffMode = false,
-    diffDisplayMode = 'raw',
-    onDiffDisplayModeChange,
+    diffToolbarActions,
     onFormat,
     onEscape,
     onUnescape,
@@ -242,7 +270,7 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = (props) => {
       }
     }
 
-    // Diff 模式下的按钮
+    // Diff 模式下的按钮（复用普通模式的工具栏按钮）
     if (isInDiffMode) {
       // 修复确认按钮
       if (hasPendingRepair && onApplyRepair && onCancelRepair) {
@@ -262,18 +290,87 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = (props) => {
         })
       }
 
-      // 对比显示模式选择器（原始组件）
-      configs.push({
-        key: 'diff-display-mode',
-        label: (
-          <ToolbarSegmented
-            value={diffDisplayMode}
-            onChange={(value) => onDiffDisplayModeChange?.(value as DiffDisplayMode)}
-            options={DIFF_DISPLAY_MODE_OPTIONS}
-          />
-        ),
-        isRawComponent: true,
-      })
+      // AST/RawString 切换（Diff 模式专用）
+      if (toolbarButtons.astRawStringToggle && diffToolbarActions?.onDiffSegmentChange) {
+        const segmentValue = diffToolbarActions.diffContentType
+        // other 类型时禁用切换，且不选中任何选项
+        const isOther = segmentValue === 'other'
+        configs.push({
+          key: 'diff-ast-rawstring-toggle',
+          label: (
+            <ToolbarSegmented
+              key={`diff-segment-${segmentValue}`}
+              options={[
+                { label: 'AST', value: 'ast' as DiffContentType },
+                { label: 'RawString', value: 'rawstring' as DiffContentType },
+              ]}
+              value={isOther ? undefined : segmentValue}
+              onChange={(value) =>
+                diffToolbarActions.onDiffSegmentChange?.(value as DiffContentType)
+              }
+              disabled={isOther}
+            />
+          ),
+          isRawComponent: true,
+        })
+      }
+
+      // 转义/去转义按钮（Diff 模式）
+      if (toolbarButtons.escape && diffToolbarActions) {
+        if (diffToolbarActions.onDiffEscape) {
+          configs.push({
+            key: 'diff-escape',
+            label: '转义',
+            onClick: diffToolbarActions.onDiffEscape,
+            tooltip: '将左右两侧内容包装成字符串值',
+          })
+        }
+
+        if (diffToolbarActions.onDiffUnescape) {
+          configs.push({
+            key: 'diff-unescape',
+            label: '去转义',
+            onClick: diffToolbarActions.onDiffUnescape,
+            tooltip: '将左右两侧字符串值还原',
+          })
+        }
+      }
+
+      // 压缩按钮（Diff 模式）
+      if (toolbarButtons.serialize && diffToolbarActions?.onDiffCompact) {
+        configs.push({
+          key: 'diff-compact',
+          label: '压缩',
+          onClick: diffToolbarActions.onDiffCompact,
+          tooltip: '将左右两侧 JSON 压缩成一行',
+        })
+      }
+
+      // 解析按钮（Diff 模式）
+      if (toolbarButtons.deserialize && diffToolbarActions?.onDiffParse) {
+        const diffCanParse = diffToolbarActions.diffCanParse ?? true
+        configs.push({
+          key: 'diff-parse',
+          label: '解析',
+          onClick: diffToolbarActions.onDiffParse,
+          disabled: !diffCanParse,
+          tooltip: !diffCanParse
+            ? '当前内容不是有效的 JSON 格式'
+            : '解析左右两侧多层嵌套/转义的 JSON',
+        })
+      }
+
+      // 格式化按钮（Diff 模式）
+      if (toolbarButtons.format && diffToolbarActions?.onDiffFormat) {
+        const diffCanParse = diffToolbarActions.diffCanParse ?? true
+        configs.push({
+          key: 'diff-format',
+          label: '格式化',
+          onClick: diffToolbarActions.onDiffFormat,
+          disabled: !diffCanParse,
+          tooltip: !diffCanParse ? '当前内容不是有效的 JSON 格式' : '格式化左右两侧 JSON',
+        })
+      }
     }
 
     // Diff 按钮（固定显示）
@@ -307,8 +404,7 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = (props) => {
     hasPendingRepair,
     onApplyRepair,
     onCancelRepair,
-    diffDisplayMode,
-    onDiffDisplayModeChange,
+    diffToolbarActions,
     showDiffButton,
     handleDiffButtonClick,
   ])

@@ -132,11 +132,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   // 录制模式相关状态
   const [isInRecordingMode, setIsInRecordingMode] = useState(initialRecordingMode)
 
-  // Diff 显示模式状态
-  const [diffDisplayMode, setDiffDisplayMode] = useState<
-    'raw' | 'deserialize' | 'unescape' | 'ast'
-  >('raw')
-
   /**
    * 同步外部传入的录制模式状态
    * 当抽屉打开时立即设置，避免等待 afterOpenChange 动画完成后才切换
@@ -1102,8 +1097,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
             repairOriginalValue,
             pendingRepairedValue,
             editorValue,
-            diffDisplayMode,
-            onDiffDisplayModeChange: setDiffDisplayMode,
             onApplyRepair: handleApplyRepair,
             onCancelRepair: handleCancelRepair,
           }}

@@ -577,13 +577,24 @@ describe('DrawerToolbar组件测试', () => {
   })
 
   describe('Diff模式', () => {
+    const mockDiffToolbarActions = {
+      onDiffSegmentChange: vi.fn(),
+      onDiffFormat: vi.fn(),
+      onDiffEscape: vi.fn(),
+      onDiffUnescape: vi.fn(),
+      onDiffCompact: vi.fn(),
+      onDiffParse: vi.fn(),
+      diffContentType: 'rawstring' as const,
+      diffCanParse: true,
+    }
+
     const diffModeHandlers = {
       ...mockHandlers,
       onExitDiffMode: vi.fn(),
-      onDiffDisplayModeChange: vi.fn(),
+      diffToolbarActions: mockDiffToolbarActions,
     }
 
-    it('在Diff模式下应该显示简化工具栏', () => {
+    it('在Diff模式下应该显示复用的工具栏按钮', () => {
       render(
         <DrawerToolbar
           attributes={mockAttributes}
@@ -591,16 +602,15 @@ describe('DrawerToolbar组件测试', () => {
           canParse={true}
           toolbarButtons={defaultToolbarButtons}
           isDiffMode={true}
-          diffDisplayMode="raw"
           showDiffButton={true}
           {...diffModeHandlers}
         />
       )
 
-      // Diff模式下应该显示退出按钮，不显示格式化等按钮
+      // Diff模式下应该显示 Diff 按钮和复用的工具栏按钮
       expect(screen.getAllByText('Diff').length).toBeGreaterThan(0)
-      expect(screen.queryByText('格式化')).not.toBeInTheDocument()
-      expect(screen.queryByText(/压\s*缩/)).not.toBeInTheDocument()
+      expect(screen.getAllByText('格式化').length).toBeGreaterThan(0)
+      expect(screen.getAllByText(/转\s*义/).length).toBeGreaterThan(0)
     })
 
     it('有待确认修复时应该显示应用和取消按钮', () => {
@@ -614,7 +624,6 @@ describe('DrawerToolbar组件测试', () => {
           canParse={true}
           toolbarButtons={defaultToolbarButtons}
           isDiffMode={true}
-          diffDisplayMode="raw"
           hasPendingRepair={true}
           onApplyRepair={onApplyRepair}
           onCancelRepair={onCancelRepair}
@@ -639,7 +648,6 @@ describe('DrawerToolbar组件测试', () => {
           canParse={true}
           toolbarButtons={defaultToolbarButtons}
           isDiffMode={true}
-          diffDisplayMode="raw"
           hasPendingRepair={true}
           onApplyRepair={onApplyRepair}
           onCancelRepair={onCancelRepair}
@@ -666,7 +674,6 @@ describe('DrawerToolbar组件测试', () => {
           canParse={true}
           toolbarButtons={defaultToolbarButtons}
           isDiffMode={true}
-          diffDisplayMode="raw"
           hasPendingRepair={true}
           onApplyRepair={onApplyRepair}
           onCancelRepair={onCancelRepair}
@@ -689,7 +696,6 @@ describe('DrawerToolbar组件测试', () => {
           canParse={true}
           toolbarButtons={defaultToolbarButtons}
           isDiffMode={true}
-          diffDisplayMode="raw"
           hasPendingRepair={false}
           {...diffModeHandlers}
         />
@@ -709,7 +715,6 @@ describe('DrawerToolbar组件测试', () => {
           canParse={true}
           toolbarButtons={defaultToolbarButtons}
           isDiffMode={true}
-          diffDisplayMode="raw"
           showDiffButton={true}
           {...diffModeHandlers}
         />
@@ -720,6 +725,28 @@ describe('DrawerToolbar组件测试', () => {
         await user.click(diffButton)
       }
       expect(diffModeHandlers.onExitDiffMode).toHaveBeenCalled()
+    })
+
+    it('点击Diff模式格式化按钮应该触发回调', async () => {
+      const user = userEvent.setup()
+
+      render(
+        <DrawerToolbar
+          attributes={mockAttributes}
+          contentType={ContentType.Ast}
+          canParse={true}
+          toolbarButtons={defaultToolbarButtons}
+          isDiffMode={true}
+          showDiffButton={true}
+          {...diffModeHandlers}
+        />
+      )
+
+      const formatButton = getVisibleButton('格式化')
+      if (formatButton) {
+        await user.click(formatButton)
+      }
+      expect(mockDiffToolbarActions.onDiffFormat).toHaveBeenCalled()
     })
   })
 })

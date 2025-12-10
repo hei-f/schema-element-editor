@@ -7,6 +7,7 @@ import type {
 } from '@/shared/types'
 import type { EditorThemeVars } from '../../styles/editor/editor-theme-vars'
 import type { CodeMirrorEditorHandle } from '../editor/CodeMirrorEditor'
+import type { DiffToolbarActions, DiffContentType } from '../toolbar/DrawerToolbar'
 
 /**
  * 轻量通知类型
@@ -77,15 +78,20 @@ export interface DiffModeContentProps extends BaseContentProps {
   repairOriginalValue: string
   pendingRepairedValue: string
   editorValue: string
-  /** Diff 显示模式 */
-  diffDisplayMode: 'raw' | 'deserialize' | 'unescape' | 'ast'
-  /** Diff 显示模式变化回调 */
-  onDiffDisplayModeChange: (mode: 'raw' | 'deserialize' | 'unescape' | 'ast') => void
+  /** Diff 视图左侧转换后的内容 */
+  diffLeftContent?: string
+  /** Diff 视图右侧转换后的内容 */
+  diffRightContent?: string
+  /** Diff 模式专用工具栏回调 */
+  diffToolbarActions?: DiffToolbarActions
   onApplyRepair: () => void
   onCancelRepair: () => void
   /** 是否隐藏工具栏（由父组件统一管理时使用） */
   hideToolbar?: boolean
 }
+
+// 导出 DiffToolbarActions 和 DiffContentType 类型以便其他模块使用
+export type { DiffToolbarActions, DiffContentType }
 
 /**
  * 录制模式 props

@@ -15,36 +15,18 @@ import {
   DiffEditorsRow,
   DiffEditorPanel,
 } from '../../styles/recording/recording.styles'
-import { schemaTransformer } from '../../services/schema-transformer'
 import type { DiffEditorHandle, DiffLineInfo, InlineDiffSegment } from './DiffEditor'
 import { DiffEditor } from './DiffEditor'
 import { useDiffSync } from '../../hooks/diff/useDiffSync'
 import type { DiffRow } from '../../utils/diff-algorithm'
 
-/** 对比模式类型 */
-export type DiffDisplayMode = 'raw' | 'deserialize' | 'unescape' | 'ast'
-
-/** 对比显示模式常量 */
-const DIFF_DISPLAY_MODES = {
-  RAW: 'raw',
-  DESERIALIZE: 'deserialize',
-  UNESCAPE: 'unescape',
-  AST: 'ast',
-} as const
-
-/** 对比显示模式选项（导出供 DrawerToolbar 使用） */
-export const DIFF_DISPLAY_MODE_OPTIONS: Array<{ label: string; value: DiffDisplayMode }> = [
-  { label: '原始', value: DIFF_DISPLAY_MODES.RAW },
-  { label: '反序列化', value: DIFF_DISPLAY_MODES.DESERIALIZE },
-  { label: '去转义', value: DIFF_DISPLAY_MODES.UNESCAPE },
-  { label: 'AST', value: DIFF_DISPLAY_MODES.AST },
-]
-
 interface SchemaDiffViewProps {
   /** 快照列表 */
   snapshots: SchemaSnapshot[]
-  /** 当前对比显示模式 */
-  displayMode: DiffDisplayMode
+  /** 转换后的左侧内容（由父组件提供） */
+  transformedLeftContent?: string
+  /** 转换后的右侧内容（由父组件提供） */
+  transformedRightContent?: string
   /** 编辑器主题 */
   theme?: EditorTheme
 }
@@ -58,55 +40,6 @@ function formatTimestamp(ms: number): string {
   }
   const seconds = (ms / 1000).toFixed(1)
   return `${seconds}s`
-}
-
-/**
- * 尝试将内容转换为可处理的 JSON 字符串
- */
-function ensureJsonString(content: string): string {
-  try {
-    JSON.parse(content)
-    return content
-  } catch {
-    return JSON.stringify(content)
-  }
-}
-
-/**
- * 转换内容到指定显示模式
- */
-function transformContent(content: string, mode: DiffDisplayMode): string {
-  if (!content) return ''
-
-  switch (mode) {
-    case 'raw':
-      return content
-
-    case 'deserialize': {
-      const jsonContent = ensureJsonString(content)
-      const result = schemaTransformer.parseNestedJson(jsonContent)
-      if (result.success && result.data) {
-        try {
-          return JSON.stringify(JSON.parse(result.data), null, 2)
-        } catch {
-          return result.data
-        }
-      }
-      return content
-    }
-
-    case 'ast': {
-      const jsonContent = ensureJsonString(content)
-      const result = schemaTransformer.convertToAST(jsonContent)
-      if (result.success && result.data) {
-        return result.data
-      }
-      return content
-    }
-
-    default:
-      return content
-  }
 }
 
 /**
@@ -251,7 +184,12 @@ function convertToRightDiffLines(rows: DiffRow[]): DiffLineInfo[] {
  * Schema Diff 视图组件（可编辑版）
  */
 export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
-  const { snapshots, displayMode, theme = DEFAULT_EDITOR_THEME } = props
+  const {
+    snapshots,
+    transformedLeftContent,
+    transformedRightContent,
+    theme = DEFAULT_EDITOR_THEME,
+  } = props
 
   /**
    * 用户主动选择的版本 ID
@@ -294,14 +232,14 @@ export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
     return snapshot?.content || ''
   }, [snapshots, rightVersionId])
 
-  // 转换后的内容
+  // 转换后的内容（优先使用父组件提供的转换内容）
   const leftTransformed = useMemo(() => {
-    return transformContent(leftRawContent, displayMode)
-  }, [leftRawContent, displayMode])
+    return transformedLeftContent ?? leftRawContent
+  }, [transformedLeftContent, leftRawContent])
 
   const rightTransformed = useMemo(() => {
-    return transformContent(rightRawContent, displayMode)
-  }, [rightRawContent, displayMode])
+    return transformedRightContent ?? rightRawContent
+  }, [transformedRightContent, rightRawContent])
 
   // Diff 同步
   const { setLeftContent, setRightContent, diffRows, isComputing } = useDiffSync({
