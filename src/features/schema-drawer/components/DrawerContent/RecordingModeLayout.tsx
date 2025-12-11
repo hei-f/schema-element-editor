@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useLayoutEffect, useRef } from 'react'
+import React from 'react'
 import { ThemeProvider } from 'styled-components'
 import {
   ContentAreaContainer,
@@ -27,7 +27,8 @@ import { VersionHistoryPanel } from '../recording/VersionHistoryPanel'
 import { BuiltinPreview } from '../preview/BuiltinPreview'
 import { DiffModeContent } from './modes'
 import { ToolbarSection } from './shared/ToolbarSection'
-import type { ToolbarMode, DiffContentType } from '../toolbar/DrawerToolbar'
+import { useDiffContentTransform } from '../../hooks/diff/useDiffContentTransform'
+import { TOOLBAR_MODE, type ToolbarMode } from '@/shared/constants/ui-modes'
 import type {
   BaseContentProps,
   DiffModeContentProps,
@@ -36,7 +37,6 @@ import type {
 } from './types'
 import type { EditorThemeVars } from '../../styles/editor/editor-theme-vars'
 import { ContentType } from '@/shared/types'
-import { schemaTransformer } from '../../services/schema-transformer'
 
 /**
  * 录制模式布局 Props
@@ -61,70 +61,9 @@ function getToolbarMode(
   previewEnabled: boolean,
   isClosingPreview: boolean
 ): ToolbarMode {
-  if (isDiffMode) return 'diff'
-  if (previewEnabled || isClosingPreview) return 'preview'
-  return 'recording'
-}
-
-/**
- * 对内容应用格式化
- */
-function formatContent(content: string): string {
-  try {
-    const parsed = JSON.parse(content)
-    return JSON.stringify(parsed, null, 2)
-  } catch {
-    return content
-  }
-}
-
-/**
- * 对内容应用转义
- */
-function escapeContent(content: string): string {
-  return JSON.stringify(content)
-}
-
-/**
- * 对内容应用去转义
- */
-function unescapeContent(content: string): string {
-  try {
-    const result = JSON.parse(content)
-    if (typeof result === 'string') {
-      return result
-    }
-    return content
-  } catch {
-    return content
-  }
-}
-
-/**
- * 对内容应用压缩
- */
-function compactContent(content: string): string {
-  try {
-    const parsed = JSON.parse(content)
-    return JSON.stringify(parsed)
-  } catch {
-    return content
-  }
-}
-
-/**
- * 对内容应用解析
- */
-function parseContent(content: string): string {
-  const result = schemaTransformer.parseNestedJson(content)
-  if (result.success && result.data) {
-    try {
-      return JSON.stringify(JSON.parse(result.data), null, 2)
-    } catch {
-      return result.data
-    }
-  }
-  return content
+  if (isDiffMode) return TOOLBAR_MODE.DIFF
+  if (previewEnabled || isClosingPreview) return TOOLBAR_MODE.PREVIEW
+  return TOOLBAR_MODE.RECORDING
 }
 
 /**
@@ -158,117 +97,13 @@ export const RecordingModeLayout: React.FC<RecordingModeLayoutProps> = (props) =
   // 录制模式相关
   const { isRecording, snapshots, selectedSnapshotId, onSelectSnapshot } = recordingModeProps
 
-  // Diff 模式下的内容转换状态
-  const [diffContentType, setDiffContentType] = useState<DiffContentType>('rawstring')
-  const [diffLeftContent, setDiffLeftContent] = useState<string>('')
-  const [diffRightContent, setDiffRightContent] = useState<string>('')
-
-  // 获取原始 Diff 内容
-  const rawLeftContent = useMemo(() => {
-    return diffModeProps.repairOriginalValue || diffModeProps.originalValue
-  }, [diffModeProps.repairOriginalValue, diffModeProps.originalValue])
-
-  const rawRightContent = useMemo(() => {
-    return diffModeProps.pendingRepairedValue || diffModeProps.editorValue
-  }, [diffModeProps.pendingRepairedValue, diffModeProps.editorValue])
-
-  // 进入 Diff 模式时初始化（直接赋值，不做转换）
-  // 使用 useLayoutEffect 确保在渲染前同步完成状态初始化
-  const prevIsDiffModeRef = useRef(false)
-  useLayoutEffect(() => {
-    if (isDiffMode && !prevIsDiffModeRef.current) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- 模式切换时同步初始化状态是合理的用例
-      setDiffContentType('rawstring')
-      setDiffLeftContent(rawLeftContent)
-      setDiffRightContent(rawRightContent)
-    }
-    prevIsDiffModeRef.current = isDiffMode
-  }, [isDiffMode, rawLeftContent, rawRightContent])
-
-  // Diff 模式 AST/RawString 切换（基于当前内容转换）
-  const handleDiffSegmentChange = useCallback((value: DiffContentType) => {
-    setDiffContentType(value)
-    // 基于当前内容直接转换
-    const transform = (prev: string): string => {
-      if (value === 'ast') {
-        // RawString → AST
-        const result = schemaTransformer.convertToAST(prev)
-        return result.success && result.data ? result.data : prev
-      } else if (value === 'rawstring') {
-        // AST → RawString（convertToMarkdown 返回的 data 已经是序列化后的字符串）
-        const result = schemaTransformer.convertToMarkdown(prev)
-        return result.success && result.data ? result.data : prev
-      }
-      return prev
-    }
-    setDiffLeftContent(transform)
-    setDiffRightContent(transform)
-  }, [])
-
-  // Diff 模式格式化
-  const handleDiffFormat = useCallback(() => {
-    setDiffLeftContent((prev) => formatContent(prev))
-    setDiffRightContent((prev) => formatContent(prev))
-  }, [])
-
-  // Diff 模式转义
-  const handleDiffEscape = useCallback(() => {
-    setDiffLeftContent((prev) => escapeContent(prev))
-    setDiffRightContent((prev) => escapeContent(prev))
-  }, [])
-
-  // Diff 模式去转义
-  const handleDiffUnescape = useCallback(() => {
-    setDiffLeftContent((prev) => unescapeContent(prev))
-    setDiffRightContent((prev) => unescapeContent(prev))
-  }, [])
-
-  // Diff 模式压缩
-  const handleDiffCompact = useCallback(() => {
-    setDiffLeftContent((prev) => compactContent(prev))
-    setDiffRightContent((prev) => compactContent(prev))
-  }, [])
-
-  // Diff 模式解析
-  const handleDiffParse = useCallback(() => {
-    setDiffLeftContent((prev) => parseContent(prev))
-    setDiffRightContent((prev) => parseContent(prev))
-  }, [])
-
-  // 检查 Diff 内容是否可解析
-  const diffCanParse = useMemo(() => {
-    try {
-      JSON.parse(diffLeftContent)
-      JSON.parse(diffRightContent)
-      return true
-    } catch {
-      return false
-    }
-  }, [diffLeftContent, diffRightContent])
-
-  // Diff 模式工具栏回调
-  const diffToolbarActions = useMemo(
-    () => ({
-      onDiffSegmentChange: handleDiffSegmentChange,
-      onDiffFormat: handleDiffFormat,
-      onDiffEscape: handleDiffEscape,
-      onDiffUnescape: handleDiffUnescape,
-      onDiffCompact: handleDiffCompact,
-      onDiffParse: handleDiffParse,
-      diffContentType,
-      diffCanParse,
-    }),
-    [
-      handleDiffSegmentChange,
-      handleDiffFormat,
-      handleDiffEscape,
-      handleDiffUnescape,
-      handleDiffCompact,
-      handleDiffParse,
-      diffContentType,
-      diffCanParse,
-    ]
-  )
+  // Diff 模式内容转换
+  const { diffLeftContent, diffRightContent, diffToolbarActions } = useDiffContentTransform({
+    isDiffMode,
+    originalLeftContent: diffModeProps.repairOriginalValue || diffModeProps.originalValue,
+    originalRightContent: diffModeProps.pendingRepairedValue || diffModeProps.editorValue,
+    transformBothSides: true,
+  })
 
   // 预览模式相关
   const {

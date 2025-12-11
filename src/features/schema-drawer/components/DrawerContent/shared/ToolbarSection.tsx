@@ -1,9 +1,6 @@
 import React from 'react'
-import {
-  DrawerToolbar,
-  type ToolbarMode,
-  type DiffToolbarActions,
-} from '../../toolbar/DrawerToolbar'
+import { DrawerToolbar, type DiffToolbarActions } from '../../toolbar/DrawerToolbar'
+import type { ToolbarMode } from '@/shared/constants/ui-modes'
 import type { BaseContentProps } from '../types'
 
 interface ToolbarSectionProps {

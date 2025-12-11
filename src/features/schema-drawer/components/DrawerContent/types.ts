@@ -7,7 +7,7 @@ import type {
 } from '@/shared/types'
 import type { EditorThemeVars } from '../../styles/editor/editor-theme-vars'
 import type { CodeMirrorEditorHandle } from '../editor/CodeMirrorEditor'
-import type { DiffToolbarActions, DiffContentType } from '../toolbar/DrawerToolbar'
+import type { DiffToolbarActions } from '../toolbar/DrawerToolbar'
 
 /**
  * 轻量通知类型
@@ -89,9 +89,6 @@ export interface DiffModeContentProps extends BaseContentProps {
   /** 是否隐藏工具栏（由父组件统一管理时使用） */
   hideToolbar?: boolean
 }
-
-// 导出 DiffToolbarActions 和 DiffContentType 类型以便其他模块使用
-export type { DiffToolbarActions, DiffContentType }
 
 /**
  * 录制模式 props
