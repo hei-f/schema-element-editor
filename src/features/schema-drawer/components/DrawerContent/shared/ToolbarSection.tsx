@@ -1,6 +1,7 @@
 import React from 'react'
-import { DrawerToolbar, type ToolbarMode } from '../../toolbar/DrawerToolbar'
-import type { BaseContentProps, DiffModeContentProps } from '../types'
+import { DrawerToolbar, type DiffToolbarActions } from '../../toolbar/DrawerToolbar'
+import type { ToolbarMode } from '@/shared/constants/ui-modes'
+import type { BaseContentProps } from '../types'
 
 interface ToolbarSectionProps {
   mode: ToolbarMode
@@ -9,8 +10,8 @@ interface ToolbarSectionProps {
   isRecording: boolean
   showDiffButton: boolean
   isDiffMode: boolean
-  diffDisplayMode: DiffModeContentProps['diffDisplayMode']
-  onDiffDisplayModeChange: DiffModeContentProps['onDiffDisplayModeChange']
+  /** Diff 模式专用工具栏回调 */
+  diffToolbarActions?: DiffToolbarActions
   hasPendingRepair: boolean
   onApplyRepair: () => void
   onCancelRepair: () => void
@@ -28,8 +29,7 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = (props) => {
     isRecording,
     showDiffButton,
     isDiffMode,
-    diffDisplayMode,
-    onDiffDisplayModeChange,
+    diffToolbarActions,
     hasPendingRepair,
     onApplyRepair,
     onCancelRepair,
@@ -46,8 +46,7 @@ export const ToolbarSection: React.FC<ToolbarSectionProps> = (props) => {
       isRecording={isRecording}
       showDiffButton={showDiffButton}
       isDiffMode={isDiffMode}
-      diffDisplayMode={diffDisplayMode}
-      onDiffDisplayModeChange={onDiffDisplayModeChange}
+      diffToolbarActions={diffToolbarActions}
       onFormat={baseProps.toolbarActions.onFormat}
       onEscape={baseProps.toolbarActions.onEscape}
       onUnescape={baseProps.toolbarActions.onUnescape}

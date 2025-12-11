@@ -73,7 +73,7 @@
 **3.1 TypeScript 类型检查**
 
 - 进入SDK目录：`cd packages/schema-element-editor-sdk`
-- 执行类型检查：`npx tsc --noEmit`
+- 执行类型检查：`npx tsgo --noEmit`
 - 类型检查必须100%通过
 - 如果发现类型错误，**立即终止发布流程**，修复后重新开始
 

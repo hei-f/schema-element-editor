@@ -27,10 +27,12 @@ export const FooterButton = styled(Button)`
 
     &:hover {
       background: color-mix(in srgb, var(--drawer-theme-color, #1677ff) 85%, #ffffff);
+      color: #ffffff;
     }
 
     &:active {
       background: color-mix(in srgb, var(--drawer-theme-color, #1677ff) 85%, #000000);
+      color: #ffffff;
     }
   }
 `

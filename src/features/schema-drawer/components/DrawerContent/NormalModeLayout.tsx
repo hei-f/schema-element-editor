@@ -20,7 +20,8 @@ import { CodeMirrorEditor } from '../editor/CodeMirrorEditor'
 import { DiffModeContent } from './modes'
 import { ToolbarSection } from './shared/ToolbarSection'
 import { BuiltinPreview } from '../preview/BuiltinPreview'
-import type { ToolbarMode } from '../toolbar/DrawerToolbar'
+import { useDiffContentTransform } from '../../hooks/diff/useDiffContentTransform'
+import { TOOLBAR_MODE, type ToolbarMode } from '@/shared/constants/ui-modes'
 import type { BaseContentProps, DiffModeContentProps, PreviewModeContentProps } from './types'
 import type { EditorThemeVars } from '../../styles/editor/editor-theme-vars'
 import { ContentType } from '@/shared/types'
@@ -47,9 +48,9 @@ function getToolbarMode(
   previewEnabled: boolean,
   isClosingPreview: boolean
 ): ToolbarMode {
-  if (isDiffMode) return 'diff'
-  if (previewEnabled || isClosingPreview) return 'preview'
-  return 'normal'
+  if (isDiffMode) return TOOLBAR_MODE.DIFF
+  if (previewEnabled || isClosingPreview) return TOOLBAR_MODE.PREVIEW
+  return TOOLBAR_MODE.NORMAL
 }
 
 /**
@@ -72,6 +73,15 @@ export const NormalModeLayout: React.FC<NormalModeLayoutProps> = (props) => {
   } = props
 
   const toolbarMode = getToolbarMode(isDiffMode, previewEnabled, isClosingPreview)
+
+  // Diff 模式内容转换
+  const { diffLeftContent, diffRightContent, diffToolbarActions } = useDiffContentTransform({
+    isDiffMode,
+    originalLeftContent: diffModeProps.repairOriginalValue || diffModeProps.originalValue,
+    originalRightContent: diffModeProps.pendingRepairedValue || diffModeProps.editorValue,
+    initialContentType: baseProps.contentType,
+    transformBothSides: false,
+  })
 
   // 编辑器相关 props
   const { editorProps, notificationProps } = baseProps
@@ -131,8 +141,7 @@ export const NormalModeLayout: React.FC<NormalModeLayoutProps> = (props) => {
       isRecording={false}
       showDiffButton={true}
       isDiffMode={isDiffMode}
-      diffDisplayMode={diffModeProps.diffDisplayMode}
-      onDiffDisplayModeChange={diffModeProps.onDiffDisplayModeChange}
+      diffToolbarActions={diffToolbarActions}
       hasPendingRepair={!!diffModeProps.pendingRepairedValue}
       onApplyRepair={diffModeProps.onApplyRepair}
       onCancelRepair={diffModeProps.onCancelRepair}
@@ -155,7 +164,13 @@ export const NormalModeLayout: React.FC<NormalModeLayoutProps> = (props) => {
       {/* Diff 内容 - Diff 时显示 */}
       <ModeContentWrapper $active={isDiffMode}>
         <ContentAreaContainer>
-          <DiffModeContent {...baseProps} {...diffModeProps} />
+          <DiffModeContent
+            {...baseProps}
+            {...diffModeProps}
+            diffLeftContent={diffLeftContent}
+            diffRightContent={diffRightContent}
+            diffToolbarActions={diffToolbarActions}
+          />
         </ContentAreaContainer>
       </ModeContentWrapper>
     </ModeSwitchContainer>

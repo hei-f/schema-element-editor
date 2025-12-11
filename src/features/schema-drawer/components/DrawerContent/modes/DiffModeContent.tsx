@@ -1,5 +1,5 @@
 import React from 'react'
-import { SchemaDiffView, type DiffDisplayMode } from '../../editor/SchemaDiffView'
+import { SchemaDiffView } from '../../editor/SchemaDiffView'
 import { FullScreenModeWrapper } from '../../../styles/layout/drawer.styles'
 import type { DiffModeContentProps } from '../types'
 
@@ -17,7 +17,8 @@ export const DiffModeContent: React.FC<DiffModeContentProps> = (props) => {
     pendingRepairedValue,
     editorValue,
     editorProps,
-    diffDisplayMode,
+    diffLeftContent,
+    diffRightContent,
   } = props
 
   return (
@@ -39,7 +40,8 @@ export const DiffModeContent: React.FC<DiffModeContentProps> = (props) => {
                 },
               ]
         }
-        displayMode={diffDisplayMode as DiffDisplayMode}
+        transformedLeftContent={diffLeftContent}
+        transformedRightContent={diffRightContent}
         theme={editorProps.editorTheme}
       />
     </FullScreenModeWrapper>

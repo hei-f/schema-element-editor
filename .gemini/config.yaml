@@ -25,7 +25,7 @@ code_review:
 
   # 代码审查的严重性阈值
   # 可选值: LOW, MEDIUM, HIGH, CRITICAL
-  comment_severity_threshold: LOW
+  comment_severity_threshold: MEDIUM
 
   # 审查评论的最大数量
   # -1 表示无限制

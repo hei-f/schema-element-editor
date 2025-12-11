@@ -27,7 +27,8 @@ import { VersionHistoryPanel } from '../recording/VersionHistoryPanel'
 import { BuiltinPreview } from '../preview/BuiltinPreview'
 import { DiffModeContent } from './modes'
 import { ToolbarSection } from './shared/ToolbarSection'
-import type { ToolbarMode } from '../toolbar/DrawerToolbar'
+import { useDiffContentTransform } from '../../hooks/diff/useDiffContentTransform'
+import { TOOLBAR_MODE, type ToolbarMode } from '@/shared/constants/ui-modes'
 import type {
   BaseContentProps,
   DiffModeContentProps,
@@ -60,9 +61,9 @@ function getToolbarMode(
   previewEnabled: boolean,
   isClosingPreview: boolean
 ): ToolbarMode {
-  if (isDiffMode) return 'diff'
-  if (previewEnabled || isClosingPreview) return 'preview'
-  return 'recording'
+  if (isDiffMode) return TOOLBAR_MODE.DIFF
+  if (previewEnabled || isClosingPreview) return TOOLBAR_MODE.PREVIEW
+  return TOOLBAR_MODE.RECORDING
 }
 
 /**
@@ -95,6 +96,14 @@ export const RecordingModeLayout: React.FC<RecordingModeLayoutProps> = (props) =
 
   // 录制模式相关
   const { isRecording, snapshots, selectedSnapshotId, onSelectSnapshot } = recordingModeProps
+
+  // Diff 模式内容转换
+  const { diffLeftContent, diffRightContent, diffToolbarActions } = useDiffContentTransform({
+    isDiffMode,
+    originalLeftContent: diffModeProps.repairOriginalValue || diffModeProps.originalValue,
+    originalRightContent: diffModeProps.pendingRepairedValue || diffModeProps.editorValue,
+    transformBothSides: true,
+  })
 
   // 预览模式相关
   const {
@@ -148,8 +157,7 @@ export const RecordingModeLayout: React.FC<RecordingModeLayoutProps> = (props) =
       isRecording={isRecording}
       showDiffButton={isDiffMode}
       isDiffMode={isDiffMode}
-      diffDisplayMode={diffModeProps.diffDisplayMode}
-      onDiffDisplayModeChange={diffModeProps.onDiffDisplayModeChange}
+      diffToolbarActions={diffToolbarActions}
       hasPendingRepair={!!diffModeProps.pendingRepairedValue}
       onApplyRepair={diffModeProps.onApplyRepair}
       onCancelRepair={diffModeProps.onCancelRepair}
@@ -189,7 +197,13 @@ export const RecordingModeLayout: React.FC<RecordingModeLayoutProps> = (props) =
       {/* Diff 内容 - Diff 时显示 */}
       <ModeContentWrapper $active={isDiffMode}>
         <ContentAreaContainer>
-          <DiffModeContent {...baseProps} {...diffModeProps} />
+          <DiffModeContent
+            {...baseProps}
+            {...diffModeProps}
+            diffLeftContent={diffLeftContent}
+            diffRightContent={diffRightContent}
+            diffToolbarActions={diffToolbarActions}
+          />
         </ContentAreaContainer>
       </ModeContentWrapper>
     </ModeSwitchContainer>
