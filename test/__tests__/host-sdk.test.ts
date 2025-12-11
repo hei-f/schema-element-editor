@@ -67,9 +67,8 @@ describe('Host SDK - createSchemaElementEditorBridge', () => {
 
     let previewCleanupFn: (() => void) | null = null
 
-    // 检测是否在 iframe 中
-    const isInIframe = window !== window.top
-    const targetWindow = isInIframe ? window.parent : window
+    // 使用 window.top 支持多层 iframe 嵌套
+    const targetWindow = window.top ?? window
 
     const sendResponse = (requestId: string, result: Record<string, unknown>) => {
       targetWindow.postMessage(
@@ -315,22 +314,22 @@ describe('Host SDK - createSchemaElementEditorBridge', () => {
   })
 
   describe('iframe 场景', () => {
-    it('在 iframe 中应向 parent 发送响应', () => {
+    it('在 iframe 中应向 top 发送响应', () => {
       // 模拟在 iframe 中
-      const mockTop = {} as Window
-      const mockParent = {
+      const mockTop = {
         postMessage: vi.fn(),
       } as unknown as Window
+      const mockParent = {} as Window
 
       Object.defineProperty(window, 'top', { value: mockTop, writable: true })
       Object.defineProperty(window, 'parent', { value: mockParent, writable: true })
 
-      // 重新定义 postMessage 以检测目标
+      // 验证使用 window.top 发送响应（支持多层嵌套）
       const isInIframe = window !== window.top
       expect(isInIframe).toBe(true)
 
-      const targetWindow = isInIframe ? window.parent : window
-      expect(targetWindow).toBe(mockParent)
+      const targetWindow = window.top ?? window
+      expect(targetWindow).toBe(mockTop)
     })
 
     it('应接受来自 parent 窗口的消息', () => {
