@@ -47,6 +47,7 @@ pnpm-debug.log*
 
 # 测试覆盖率报告
 coverage/
+playwright-report/
 
 # 文档文件（除了 README、docs 和 cursor commands）
 *.md
@@ -56,3 +57,4 @@ coverage/
 !.cursor/commands/publish-sdk.md
 !.gemini/styleguide.md
 !.cursor/commands/commit-and-push.md
+test-results/.last-run.json
