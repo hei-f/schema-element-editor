@@ -6,10 +6,30 @@ import type { Favorite } from '@/shared/types'
  */
 export class FavoritesManager {
   /**
-   * 获取收藏列表
+   * 获取收藏列表（按Pin状态和LRU排序）
    */
   async getFavorites(storageGetter: () => Promise<Favorite[]>): Promise<Favorite[]> {
-    return await storageGetter()
+    const favorites = await storageGetter()
+    return this.sortFavorites(favorites)
+  }
+
+  /**
+   * 对收藏列表排序：Pin的在前，然后按LRU排序
+   */
+  private sortFavorites(favorites: Favorite[]): Favorite[] {
+    return [...favorites].sort((a, b) => {
+      // Pin的优先级最高
+      if (a.isPinned && !b.isPinned) return -1
+      if (!a.isPinned && b.isPinned) return 1
+
+      // 都是Pin或都不是Pin，按LRU排序
+      // Pin的按pinnedTime排序，非Pin的按lastUsedTime排序
+      if (a.isPinned && b.isPinned) {
+        return (b.pinnedTime || b.timestamp) - (a.pinnedTime || a.timestamp)
+      }
+
+      return (b.lastUsedTime || b.timestamp) - (a.lastUsedTime || a.timestamp)
+    })
   }
 
   /**
@@ -94,6 +114,40 @@ export class FavoritesManager {
       favorite.lastUsedTime = Date.now()
       await saveFavorites(favorites)
     }
+  }
+
+  /**
+   * 切换收藏的固定状态
+   * @param maxPinned 最大固定数量
+   */
+  async togglePin(
+    id: string,
+    maxPinned: number,
+    getFavorites: () => Promise<Favorite[]>,
+    saveFavorites: (favorites: Favorite[]) => Promise<void>
+  ): Promise<void> {
+    const favorites = await getFavorites()
+    const favorite = favorites.find((fav) => fav.id === id)
+
+    if (!favorite) {
+      throw new Error('收藏不存在')
+    }
+
+    // 如果当前是未固定状态，需要检查是否超过最大固定数量
+    if (!favorite.isPinned) {
+      const pinnedCount = favorites.filter((fav) => fav.isPinned).length
+      if (pinnedCount >= maxPinned) {
+        throw new Error(`最多只能固定 ${maxPinned} 个收藏`)
+      }
+      favorite.isPinned = true
+      favorite.pinnedTime = Date.now()
+    } else {
+      // 取消固定
+      favorite.isPinned = false
+      favorite.pinnedTime = undefined
+    }
+
+    await saveFavorites(favorites)
   }
 
   /**

@@ -329,6 +329,8 @@ export interface StorageData {
   highlightColor: string
   /** 最大收藏数量 */
   maxFavoritesCount: number
+  /** 最大固定收藏数量 */
+  maxPinnedFavorites: number
   /** 草稿保留天数 */
   draftRetentionDays: number
   /** 草稿自动保存开关 */
@@ -370,6 +372,16 @@ export interface Draft {
 }
 
 /**
+ * 收藏标签接口
+ */
+export interface FavoriteTag {
+  /** 标签文本 */
+  label: string
+  /** 标签颜色（使用antd预设颜色或hex） */
+  color: string
+}
+
+/**
  * 收藏数据接口
  */
 export interface Favorite {
@@ -383,6 +395,12 @@ export interface Favorite {
   timestamp: number
   /** 最后使用时间（用于LRU算法） */
   lastUsedTime: number
+  /** 是否固定（Pin） */
+  isPinned?: boolean
+  /** 固定时间（用于多个Pin之间的排序） */
+  pinnedTime?: number
+  /** 标签列表 */
+  tags?: FavoriteTag[]
 }
 
 /**

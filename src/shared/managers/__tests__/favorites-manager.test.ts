@@ -24,13 +24,14 @@ describe('FavoritesManager 测试', () => {
 
   describe('getFavorites 获取收藏列表', () => {
     it('应该调用storage获取收藏', async () => {
-      const mockFavorites = [createMockFavorite('1'), createMockFavorite('2')]
+      const mockFavorites = [createMockFavorite('1', 100), createMockFavorite('2', 200)]
       const mockGetter = vi.fn().mockResolvedValue(mockFavorites)
 
       const result = await manager.getFavorites(mockGetter)
 
       expect(mockGetter).toHaveBeenCalled()
-      expect(result).toEqual(mockFavorites)
+      // 结果应该按照lastUsedTime倒序排列,所以2在前,1在后
+      expect(result).toEqual([mockFavorites[1], mockFavorites[0]])
     })
 
     it('空列表应该返回空数组', async () => {
@@ -138,6 +139,102 @@ describe('FavoritesManager 测试', () => {
       ).rejects.toThrow('收藏不存在')
 
       expect(mockSaver).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('togglePin 切换固定状态', () => {
+    it('应该固定未固定的收藏', async () => {
+      const favorite = createMockFavorite('1', 100)
+      const mockGetter = vi.fn().mockResolvedValue([favorite])
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
+
+      await manager.togglePin('1', 10, mockGetter, mockSaver)
+
+      const saved = mockSaver.mock.calls[0][0] as Favorite[]
+      expect(saved[0].isPinned).toBe(true)
+      expect(saved[0].pinnedTime).toBeDefined()
+    })
+
+    it('应该取消已固定的收藏', async () => {
+      const favorite = { ...createMockFavorite('1', 100), isPinned: true, pinnedTime: 100 }
+      const mockGetter = vi.fn().mockResolvedValue([favorite])
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
+
+      await manager.togglePin('1', 10, mockGetter, mockSaver)
+
+      const saved = mockSaver.mock.calls[0][0] as Favorite[]
+      expect(saved[0].isPinned).toBe(false)
+      expect(saved[0].pinnedTime).toBeUndefined()
+    })
+
+    it('应该在固定数量超过上限时抛出错误', async () => {
+      const favorites = [
+        { ...createMockFavorite('1'), isPinned: true },
+        { ...createMockFavorite('2'), isPinned: true },
+        createMockFavorite('3'),
+      ]
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
+
+      await expect(manager.togglePin('3', 2, mockGetter, mockSaver)).rejects.toThrow(
+        '最多只能固定 2 个收藏'
+      )
+    })
+
+    it('应该在收藏不存在时抛出错误', async () => {
+      const mockGetter = vi.fn().mockResolvedValue([])
+      const mockSaver = vi.fn().mockResolvedValue(undefined)
+
+      await expect(manager.togglePin('nonexistent', 10, mockGetter, mockSaver)).rejects.toThrow(
+        '收藏不存在'
+      )
+    })
+  })
+
+  describe('sortFavorites 排序功能', () => {
+    it('应该将固定的收藏排在前面', async () => {
+      const favorites = [
+        createMockFavorite('1', 300),
+        { ...createMockFavorite('2', 200), isPinned: true, pinnedTime: 200 },
+        createMockFavorite('3', 100),
+      ]
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+
+      const result = await manager.getFavorites(mockGetter)
+
+      expect(result[0].id).toBe('2') // pinned
+      expect(result[1].id).toBe('1') // lastUsedTime 300
+      expect(result[2].id).toBe('3') // lastUsedTime 100
+    })
+
+    it('应该在多个固定收藏之间按pinnedTime排序', async () => {
+      const favorites = [
+        { ...createMockFavorite('1'), isPinned: true, pinnedTime: 100 },
+        { ...createMockFavorite('2'), isPinned: true, pinnedTime: 300 },
+        { ...createMockFavorite('3'), isPinned: true, pinnedTime: 200 },
+      ]
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+
+      const result = await manager.getFavorites(mockGetter)
+
+      expect(result[0].id).toBe('2') // pinnedTime 300
+      expect(result[1].id).toBe('3') // pinnedTime 200
+      expect(result[2].id).toBe('1') // pinnedTime 100
+    })
+
+    it('应该在未固定收藏之间按lastUsedTime排序', async () => {
+      const favorites = [
+        createMockFavorite('1', 100),
+        createMockFavorite('2', 300),
+        createMockFavorite('3', 200),
+      ]
+      const mockGetter = vi.fn().mockResolvedValue(favorites)
+
+      const result = await manager.getFavorites(mockGetter)
+
+      expect(result[0].id).toBe('2') // lastUsedTime 300
+      expect(result[1].id).toBe('3') // lastUsedTime 200
+      expect(result[2].id).toBe('1') // lastUsedTime 100
     })
   })
 

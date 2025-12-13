@@ -64,6 +64,14 @@ export const SIMPLE_STORAGE_FIELDS = {
     defaultValue: DEFAULT_VALUES.maxFavoritesCount,
   } as StorageFieldConfig<number>,
 
+  maxPinnedFavorites: {
+    key: STORAGE_KEYS.MAX_PINNED_FAVORITES,
+    defaultValue: DEFAULT_VALUES.maxPinnedFavorites,
+    validator: (value: any): value is number => {
+      return typeof value === 'number' && value >= 1 && value <= 50
+    },
+  } as StorageFieldConfig<number>,
+
   draftRetentionDays: {
     key: STORAGE_KEYS.DRAFT_RETENTION_DAYS,
     defaultValue: DEFAULT_VALUES.draftRetentionDays,

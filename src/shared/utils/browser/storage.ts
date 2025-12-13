@@ -8,6 +8,7 @@ import type {
   EditorTheme,
   ExportConfig,
   Favorite,
+  FavoriteTag,
   HighlightAllConfig,
   IframeConfig,
   PreviewConfig,
@@ -254,6 +255,7 @@ class StorageManager {
       toolbarButtons,
       highlightColor,
       maxFavoritesCount,
+      maxPinnedFavorites,
       draftRetentionDays,
       autoSaveDraft,
       draftAutoSaveDebounce,
@@ -277,6 +279,7 @@ class StorageManager {
       this.getToolbarButtons(),
       this.getHighlightColor(),
       this.getMaxFavoritesCount(),
+      this.getMaxPinnedFavorites(),
       this.getDraftRetentionDays(),
       this.getAutoSaveDraft(),
       this.getDraftAutoSaveDebounce(),
@@ -302,6 +305,7 @@ class StorageManager {
       toolbarButtons,
       highlightColor,
       maxFavoritesCount,
+      maxPinnedFavorites,
       draftRetentionDays,
       autoSaveDraft,
       draftAutoSaveDebounce,
@@ -331,6 +335,20 @@ class StorageManager {
    */
   async setMaxFavoritesCount(count: number): Promise<void> {
     return this.setSimple('maxFavoritesCount', count)
+  }
+
+  /**
+   * 获取最大固定收藏数量
+   */
+  async getMaxPinnedFavorites(): Promise<number> {
+    return this.getSimple<number>('maxPinnedFavorites')
+  }
+
+  /**
+   * 设置最大固定收藏数量
+   */
+  async setMaxPinnedFavorites(count: number): Promise<void> {
+    return this.setSimple('maxPinnedFavorites', count)
   }
 
   /**
@@ -571,6 +589,44 @@ class StorageManager {
       }
     } catch (error) {
       console.error('清理收藏失败:', error)
+    }
+  }
+
+  /**
+   * 切换收藏的固定状态
+   */
+  async togglePinFavorite(id: string): Promise<void> {
+    try {
+      const maxPinned = await this.getMaxPinnedFavorites()
+      await favoritesManager.togglePin(
+        id,
+        maxPinned,
+        () => this.getFavorites(),
+        (favorites) => this.saveFavorites(favorites)
+      )
+    } catch (error) {
+      console.error('切换收藏固定状态失败:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 更新收藏的标签
+   */
+  async updateFavoriteTags(id: string, tags: FavoriteTag[]): Promise<void> {
+    try {
+      const favorites = await this.getFavorites()
+      const favorite = favorites.find((fav) => fav.id === id)
+
+      if (favorite) {
+        favorite.tags = tags
+        await this.saveFavorites(favorites)
+      } else {
+        throw new Error('收藏不存在')
+      }
+    } catch (error) {
+      console.error('更新收藏标签失败:', error)
+      throw error
     }
   }
 

@@ -77,6 +77,25 @@ export const DataManagementSection: React.FC<SectionProps> = (props) => {
           >
             <FixedWidthInputNumber min={10} max={200} step={10} placeholder="50" $width={120} />
           </Form.Item>
+          <Form.Item
+            label={
+              <Space>
+                最大固定收藏数量
+                <Tooltip
+                  title={`可以固定的收藏数量上限，固定的收藏会始终显示在列表顶部，默认值为 ${DEFAULT_VALUES.maxPinnedFavorites}`}
+                >
+                  <HelpTooltipIcon />
+                </Tooltip>
+              </Space>
+            }
+            name={FORM_PATHS.maxPinnedFavorites}
+            rules={[
+              { required: true, message: '请输入最大固定收藏数量' },
+              { type: 'number', min: 1, max: 50, message: '最大固定收藏数量必须在1-50之间' },
+            ]}
+          >
+            <FixedWidthInputNumber min={1} max={50} step={1} placeholder="10" $width={120} />
+          </Form.Item>
         </FormContent>
       </FormSection>
 

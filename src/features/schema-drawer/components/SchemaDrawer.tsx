@@ -6,6 +6,7 @@ import { shadowDomContainerManager } from '@/core/content/core/shadow-dom'
 import { DEFAULT_VALUES, RECORDING_PANEL_WIDTH } from '@/shared/constants/defaults'
 import { FULL_SCREEN_MODE, type FullScreenMode } from '@/shared/constants/ui-modes'
 import { FavoritesManager } from '@/features/favorites/components/FavoritesManager'
+import { AddTagModal } from '@/features/favorites/components/AddTagModal'
 import type {
   DrawerShortcutsConfig,
   ElementAttributes,
@@ -404,12 +405,19 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     editingFavoriteId,
     editingName,
     editingContent,
+    addTagModalVisible,
+    currentFavoriteForTag,
     setFavoriteNameInput,
     handleOpenAddFavorite,
     handleAddFavorite,
     handleOpenFavorites,
     handleApplyFavorite,
     handleDeleteFavorite,
+    handlePinFavorite,
+    handleOpenAddTag,
+    handleAddTag,
+    handleRemoveTag,
+    closeAddTagModal,
     handleEditFavorite,
     handleSaveEdit,
     closeFavoritesModal,
@@ -422,6 +430,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     onShowLightNotification: showLightNotification,
     onWarning: (msg) => message.warning(msg),
     onError: (msg) => message.error(msg),
+    onSuccess: (msg) => message.success(msg, 1.5),
   })
 
   /**
@@ -1138,6 +1147,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         editingName={editingName}
         editingContent={editingContent}
         editorTheme={editorTheme}
+        themeColor={config.themeColor}
         onAddFavoriteInputChange={setFavoriteNameInput}
         onAddFavorite={handleAddFavorite}
         onCloseAddFavoriteModal={closeAddFavoriteModal}
@@ -1145,8 +1155,19 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         onEditFavorite={handleEditFavorite}
         onApplyFavorite={handleApplyFavorite}
         onDeleteFavorite={handleDeleteFavorite}
+        onPinFavorite={handlePinFavorite}
+        onAddTag={handleOpenAddTag}
+        onRemoveTag={handleRemoveTag}
         onSaveEdit={handleSaveEdit}
         onCloseEditModal={closeEditModal}
+      />
+
+      <AddTagModal
+        visible={addTagModalVisible}
+        existingTags={currentFavoriteForTag?.tags}
+        themeColor={config.themeColor}
+        onAdd={handleAddTag}
+        onClose={closeAddTagModal}
       />
     </>
   )

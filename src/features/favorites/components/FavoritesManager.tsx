@@ -15,6 +15,8 @@ interface FavoritesManagerProps {
   editingContent: string
   /** 编辑器主题 */
   editorTheme: EditorTheme
+  /** 主题颜色 */
+  themeColor: string
   onAddFavoriteInputChange: (value: string) => void
   onAddFavorite: () => Promise<void>
   onCloseAddFavoriteModal: () => void
@@ -22,6 +24,9 @@ interface FavoritesManagerProps {
   onEditFavorite: (favorite: Favorite) => void
   onApplyFavorite: (favorite: Favorite) => void
   onDeleteFavorite: (id: string) => Promise<void>
+  onPinFavorite: (id: string) => Promise<void>
+  onAddTag: (id: string) => Promise<void>
+  onRemoveTag: (id: string, tagLabel: string) => Promise<void>
   onSaveEdit: (id: string, name: string, content: string) => Promise<void>
   onCloseEditModal: () => void
 }
@@ -40,6 +45,7 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = (props) => {
     editingName,
     editingContent,
     editorTheme,
+    themeColor,
     onAddFavoriteInputChange,
     onAddFavorite,
     onCloseAddFavoriteModal,
@@ -47,6 +53,9 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = (props) => {
     onEditFavorite,
     onApplyFavorite,
     onDeleteFavorite,
+    onPinFavorite,
+    onAddTag,
+    onRemoveTag,
     onSaveEdit,
     onCloseEditModal,
   } = props
@@ -55,6 +64,7 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = (props) => {
       <AddFavoriteModal
         visible={addFavoriteModalVisible}
         favoriteNameInput={favoriteNameInput}
+        themeColor={themeColor}
         onInputChange={onAddFavoriteInputChange}
         onAdd={onAddFavorite}
         onClose={onCloseAddFavoriteModal}
@@ -66,6 +76,9 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = (props) => {
         onEdit={onEditFavorite}
         onApply={onApplyFavorite}
         onDelete={onDeleteFavorite}
+        onPin={onPinFavorite}
+        onAddTag={onAddTag}
+        onRemoveTag={onRemoveTag}
         onClose={onCloseFavoritesModal}
       />
 
