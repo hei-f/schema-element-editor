@@ -110,7 +110,7 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
   onClose,
 }) => {
   const [label, setLabel] = useState('')
-  const [color, setColor] = useState<string>(TAG_COLORS[0])
+  const [color, setColor] = useState<(typeof TAG_COLORS)[number]>(TAG_COLORS[0])
   const [error, setError] = useState('')
 
   const { modalTheme, primaryColor, hoverColor, activeColor } = useMemo(() => {
