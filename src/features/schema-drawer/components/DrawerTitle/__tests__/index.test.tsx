@@ -36,11 +36,6 @@ vi.mock('@/shared/utils/shadow-root-manager', () => ({
 describe('DrawerTitle', () => {
   const defaultProps = {
     toolbarButtons: {
-      showFormatButton: true,
-      showEscapeButton: true,
-      showUnescapeButton: true,
-      showCompactButton: true,
-      showParseButton: true,
       astRawStringToggle: true,
       escape: true,
       deserialize: true,
@@ -414,11 +409,6 @@ describe('DrawerTitle', () => {
         <DrawerTitle
           {...defaultProps}
           toolbarButtons={{
-            showFormatButton: false,
-            showEscapeButton: false,
-            showUnescapeButton: false,
-            showCompactButton: false,
-            showParseButton: false,
             astRawStringToggle: false,
             escape: false,
             deserialize: false,

@@ -42,15 +42,20 @@ vi.mock('../../shared', () => ({
 
 describe('RecordingModeContent', () => {
   const createBaseProps = (): BaseContentProps => ({
-    attributes: {},
-    contentType: ContentType.Json,
+    attributes: { params: [] },
+    contentType: ContentType.Other,
     canParse: true,
     toolbarButtons: {
-      showFormatButton: true,
-      showEscapeButton: true,
-      showUnescapeButton: true,
-      showCompactButton: true,
-      showParseButton: true,
+      astRawStringToggle: false,
+      escape: true,
+      deserialize: true,
+      serialize: true,
+      format: true,
+      preview: false,
+      importExport: false,
+      draft: false,
+      favorites: false,
+      history: false,
     },
     toolbarActions: {
       onFormat: vi.fn(),
@@ -65,7 +70,7 @@ describe('RecordingModeContent', () => {
       editorValue: '{"test": "value"}',
       editorTheme: 'light',
       enableAstTypeHints: false,
-      contentType: ContentType.Json,
+      contentType: ContentType.Other,
       onChange: vi.fn(),
     },
     notificationProps: {

@@ -50,7 +50,7 @@ describe('EditorSection', () => {
     editorValue: '{"test": "value"}',
     editorTheme: 'light',
     enableAstTypeHints: false,
-    contentType: ContentType.Json,
+    contentType: ContentType.Other,
     onChange: vi.fn(),
     ...overrides,
   })
@@ -148,7 +148,7 @@ describe('EditorSection', () => {
 
     it('contentType 为 Json 时 isAstContent 应该返回 false', () => {
       const editorProps = createEditorProps({
-        contentType: ContentType.Json,
+        contentType: ContentType.Other,
       })
       const notificationProps = createNotificationProps()
 

@@ -7,6 +7,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { DrawerContent } from '../index'
 import { ContentType, EditorTheme } from '@/shared/types'
 import type { DrawerContentProps } from '../types'
+import { getEditorThemeVars } from '../../../styles/editor/editor-theme-vars'
 
 // Mock 子组件
 vi.mock('../NormalModeLayout', () => ({
@@ -37,16 +38,7 @@ describe('DrawerContent', () => {
       isInRecordingMode: false,
       previewEnabled: false,
       isClosingPreview: false,
-      editorThemeVars: {
-        background: '#fff',
-        foreground: '#000',
-        caret: '#000',
-        selection: '#ccc',
-        selectionMatch: '#ddd',
-        lineHighlight: '#eee',
-        gutterBackground: '#f0f0f0',
-        gutterForeground: '#666',
-      },
+      editorThemeVars: getEditorThemeVars('light'),
       diffModeProps: {
         isFullScreenTransition: false,
         isInRecordingMode: false,
@@ -83,15 +75,10 @@ describe('DrawerContent', () => {
         previewEnabled: false,
       },
       baseProps: {
-        attributes: { id: 'test-element' },
+        attributes: { params: ['test-element'] },
         contentType: 'json' as ContentType,
         canParse: true,
         toolbarButtons: {
-          showFormatButton: true,
-          showEscapeButton: true,
-          showUnescapeButton: true,
-          showCompactButton: true,
-          showParseButton: true,
           astRawStringToggle: true,
           escape: true,
           deserialize: true,
@@ -191,16 +178,7 @@ describe('DrawerContent', () => {
     })
 
     it('应该传递 editorThemeVars 到子组件', () => {
-      const customThemeVars = {
-        background: '#123456',
-        foreground: '#abcdef',
-        caret: '#ffffff',
-        selection: '#ff0000',
-        selectionMatch: '#00ff00',
-        lineHighlight: '#0000ff',
-        gutterBackground: '#cccccc',
-        gutterForeground: '#333333',
-      }
+      const customThemeVars = getEditorThemeVars('dark')
 
       const props = createMockProps({
         editorThemeVars: customThemeVars,
@@ -218,13 +196,8 @@ describe('DrawerContent', () => {
       const props = createMockProps({
         baseProps: {
           ...createMockProps().baseProps,
-          attributes: {},
+          attributes: { params: [] },
           toolbarButtons: {
-            showFormatButton: false,
-            showEscapeButton: false,
-            showUnescapeButton: false,
-            showCompactButton: false,
-            showParseButton: false,
             astRawStringToggle: false,
             escape: false,
             deserialize: false,

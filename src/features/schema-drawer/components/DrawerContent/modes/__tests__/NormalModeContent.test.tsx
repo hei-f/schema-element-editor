@@ -23,15 +23,20 @@ describe('NormalModeContent', () => {
   const createMockProps = (
     overrides?: Partial<NormalModeContentProps>
   ): NormalModeContentProps => ({
-    attributes: {},
-    contentType: ContentType.Json,
+    attributes: { params: [] },
+    contentType: ContentType.Other,
     canParse: true,
     toolbarButtons: {
-      showFormatButton: true,
-      showEscapeButton: true,
-      showUnescapeButton: true,
-      showCompactButton: true,
-      showParseButton: true,
+      astRawStringToggle: false,
+      escape: true,
+      deserialize: true,
+      serialize: true,
+      format: true,
+      preview: false,
+      importExport: false,
+      draft: false,
+      favorites: false,
+      history: false,
     },
     toolbarActions: {
       onFormat: vi.fn(),
@@ -46,7 +51,7 @@ describe('NormalModeContent', () => {
       editorValue: '{"test": "value"}',
       editorTheme: 'light',
       enableAstTypeHints: false,
-      contentType: ContentType.Json,
+      contentType: ContentType.Other,
       onChange: vi.fn(),
     },
     notificationProps: {
@@ -137,10 +142,10 @@ describe('NormalModeContent', () => {
   describe('不同内容类型', () => {
     it('应该支持 JSON 内容类型', () => {
       const props = createMockProps({
-        contentType: ContentType.Json,
+        contentType: ContentType.Other,
         editorProps: {
           ...createMockProps().editorProps,
-          contentType: ContentType.Json,
+          contentType: ContentType.Other,
         },
       })
       render(<NormalModeContent {...props} />)

@@ -39,6 +39,7 @@ describe('AddFavoriteModal组件测试', () => {
   const defaultProps = {
     visible: true,
     favoriteNameInput: '',
+    themeColor: '#1890ff',
     onInputChange: vi.fn(),
     onAdd: vi.fn().mockResolvedValue(undefined),
     onClose: vi.fn(),
