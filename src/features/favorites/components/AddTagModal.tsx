@@ -220,7 +220,12 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
           </div>
           <ColorGrid>
             {TAG_COLORS.map((c) => (
-              <ColorBox key={c} $selected={color === c} onClick={() => setColor(c)}>
+              <ColorBox
+                key={c}
+                $selected={color === c}
+                onClick={() => setColor(c)}
+                data-testid={`color-box-${c}`}
+              >
                 <StyledTag color={c}>示例</StyledTag>
               </ColorBox>
             ))}

@@ -12,30 +12,6 @@ vi.mock('@/shared/utils/shadow-root-manager', () => ({
   },
 }))
 
-/**
- * 获取 footer 中的确定按钮（primary 按钮）
- */
-const getConfirmButton = () => {
-  const footer = document.querySelector('.see-modal-footer')
-  if (footer) {
-    const buttons = footer.querySelectorAll('button')
-    return buttons[buttons.length - 1]
-  }
-  return null
-}
-
-/**
- * 获取 footer 中的取消按钮
- */
-const getCancelButton = () => {
-  const footer = document.querySelector('.see-modal-footer')
-  if (footer) {
-    const buttons = footer.querySelectorAll('button')
-    return buttons[0]
-  }
-  return null
-}
-
 describe('AddTagModal组件测试', () => {
   const defaultProps = {
     visible: true,
@@ -85,10 +61,8 @@ describe('AddTagModal组件测试', () => {
     it('应该渲染确定和取消按钮', () => {
       render(<AddTagModal {...defaultProps} />)
 
-      const footer = document.querySelector('.see-modal-footer')
-      expect(footer).toBeInTheDocument()
-      const buttons = footer?.querySelectorAll('button')
-      expect(buttons?.length).toBe(2)
+      expect(screen.getByRole('button', { name: /确\s*定/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /取\s*消/ })).toBeInTheDocument()
     })
   })
 
@@ -114,10 +88,8 @@ describe('AddTagModal组件测试', () => {
       const user = userEvent.setup()
       render(<AddTagModal {...defaultProps} />)
 
-      const confirmButton = getConfirmButton()
-      if (confirmButton) {
-        await user.click(confirmButton)
-      }
+      const confirmButton = screen.getByRole('button', { name: /确\s*定/ })
+      await user.click(confirmButton)
 
       await waitFor(() => {
         expect(screen.getByText('请输入标签名称')).toBeInTheDocument()
@@ -156,12 +128,9 @@ describe('AddTagModal组件测试', () => {
       const user = userEvent.setup()
       render(<AddTagModal {...defaultProps} />)
 
-      const exampleTags = screen.getAllByText('示例')
       // 点击第二个颜色块（red）
-      const secondColorBox = exampleTags[1].parentElement
-      if (secondColorBox) {
-        await user.click(secondColorBox)
-      }
+      const secondColorBox = screen.getByTestId('color-box-red')
+      await user.click(secondColorBox)
 
       // 验证预览区域的标签颜色已更新
       const previewSection = screen.getByText('预览效果：').parentElement
@@ -176,11 +145,8 @@ describe('AddTagModal组件测试', () => {
       const input = screen.getByPlaceholderText('请输入标签名称（最多10个字符）')
       await user.type(input, '测试')
 
-      const exampleTags = screen.getAllByText('示例')
-      const secondColorBox = exampleTags[1].parentElement
-      if (secondColorBox) {
-        await user.click(secondColorBox)
-      }
+      const secondColorBox = screen.getByTestId('color-box-red')
+      await user.click(secondColorBox)
 
       const previewSection = screen.getByText('预览效果：').parentElement
       const previewTag = previewSection?.querySelector('.see-tag')
@@ -194,10 +160,8 @@ describe('AddTagModal组件测试', () => {
       const user = userEvent.setup()
       render(<AddTagModal {...defaultProps} />)
 
-      const confirmButton = getConfirmButton()
-      if (confirmButton) {
-        await user.click(confirmButton)
-      }
+      const confirmButton = screen.getByRole('button', { name: /确\s*定/ })
+      await user.click(confirmButton)
 
       await waitFor(() => {
         expect(screen.getByText('请输入标签名称')).toBeInTheDocument()
@@ -211,10 +175,8 @@ describe('AddTagModal组件测试', () => {
       const input = screen.getByPlaceholderText('请输入标签名称（最多10个字符）')
       await user.type(input, '   ')
 
-      const confirmButton = getConfirmButton()
-      if (confirmButton) {
-        await user.click(confirmButton)
-      }
+      const confirmButton = screen.getByRole('button', { name: /确\s*定/ })
+      await user.click(confirmButton)
 
       await waitFor(() => {
         expect(screen.getByText('请输入标签名称')).toBeInTheDocument()
@@ -242,10 +204,8 @@ describe('AddTagModal组件测试', () => {
       const input = screen.getByPlaceholderText('请输入标签名称（最多10个字符）')
       await user.type(input, '已存在标签')
 
-      const confirmButton = getConfirmButton()
-      if (confirmButton) {
-        await user.click(confirmButton)
-      }
+      const confirmButton = screen.getByRole('button', { name: /确\s*定/ })
+      await user.click(confirmButton)
 
       await waitFor(() => {
         expect(screen.getByText('标签名称已存在')).toBeInTheDocument()
@@ -260,10 +220,8 @@ describe('AddTagModal组件测试', () => {
       const input = screen.getByPlaceholderText('请输入标签名称（最多10个字符）')
       await user.type(input, '  测试标签  ')
 
-      const confirmButton = getConfirmButton()
-      if (confirmButton) {
-        await user.click(confirmButton)
-      }
+      const confirmButton = screen.getByRole('button', { name: /确\s*定/ })
+      await user.click(confirmButton)
 
       await waitFor(() => {
         expect(screen.getByText('标签名称已存在')).toBeInTheDocument()
@@ -280,10 +238,8 @@ describe('AddTagModal组件测试', () => {
       const input = screen.getByPlaceholderText('请输入标签名称（最多10个字符）')
       await user.type(input, '新标签')
 
-      const confirmButton = getConfirmButton()
-      if (confirmButton) {
-        await user.click(confirmButton)
-      }
+      const confirmButton = screen.getByRole('button', { name: /确\s*定/ })
+      await user.click(confirmButton)
 
       await waitFor(() => {
         expect(onAdd).toHaveBeenCalledWith({
@@ -301,10 +257,8 @@ describe('AddTagModal组件测试', () => {
       const input = screen.getByPlaceholderText('请输入标签名称（最多10个字符）')
       await user.type(input, '新标签')
 
-      const confirmButton = getConfirmButton()
-      if (confirmButton) {
-        await user.click(confirmButton)
-      }
+      const confirmButton = screen.getByRole('button', { name: /确\s*定/ })
+      await user.click(confirmButton)
 
       await waitFor(() => {
         expect(onClose).toHaveBeenCalled()
@@ -316,10 +270,8 @@ describe('AddTagModal组件测试', () => {
       const onClose = vi.fn()
       render(<AddTagModal {...defaultProps} onClose={onClose} />)
 
-      const cancelButton = getCancelButton()
-      if (cancelButton) {
-        await user.click(cancelButton)
-      }
+      const cancelButton = screen.getByRole('button', { name: /取\s*消/ })
+      await user.click(cancelButton)
 
       await waitFor(() => {
         expect(onClose).toHaveBeenCalled()
@@ -365,10 +317,8 @@ describe('AddTagModal组件测试', () => {
       const input = screen.getByPlaceholderText('请输入标签名称（最多10个字符）')
       await user.type(input, '测试标签')
 
-      const confirmButton = getConfirmButton()
-      if (confirmButton) {
-        await user.click(confirmButton)
-      }
+      const confirmButton = screen.getByRole('button', { name: /确\s*定/ })
+      await user.click(confirmButton)
 
       // 添加成功后会调用handleClose，清空状态
       // 需要重新渲染来验证
@@ -383,16 +333,11 @@ describe('AddTagModal组件测试', () => {
       const onClose = vi.fn()
       const { rerender } = render(<AddTagModal {...defaultProps} onClose={onClose} />)
 
-      const exampleTags = screen.getAllByText('示例')
-      const thirdColorBox = exampleTags[2].parentElement
-      if (thirdColorBox) {
-        await user.click(thirdColorBox)
-      }
+      const thirdColorBox = screen.getByTestId('color-box-volcano')
+      await user.click(thirdColorBox)
 
-      const cancelButton = getCancelButton()
-      if (cancelButton) {
-        await user.click(cancelButton)
-      }
+      const cancelButton = screen.getByRole('button', { name: /取\s*消/ })
+      await user.click(cancelButton)
 
       rerender(<AddTagModal {...defaultProps} visible={false} onClose={onClose} />)
       rerender(<AddTagModal {...defaultProps} visible={true} onClose={onClose} />)
@@ -407,19 +352,15 @@ describe('AddTagModal组件测试', () => {
       const onClose = vi.fn()
       const { rerender } = render(<AddTagModal {...defaultProps} onClose={onClose} />)
 
-      const confirmButton = getConfirmButton()
-      if (confirmButton) {
-        await user.click(confirmButton)
-      }
+      const confirmButton = screen.getByRole('button', { name: /确\s*定/ })
+      await user.click(confirmButton)
 
       await waitFor(() => {
         expect(screen.getByText('请输入标签名称')).toBeInTheDocument()
       })
 
-      const cancelButton = getCancelButton()
-      if (cancelButton) {
-        await user.click(cancelButton)
-      }
+      const cancelButton = screen.getByRole('button', { name: /取\s*消/ })
+      await user.click(cancelButton)
 
       rerender(<AddTagModal {...defaultProps} visible={false} onClose={onClose} />)
       rerender(<AddTagModal {...defaultProps} visible={true} onClose={onClose} />)
@@ -433,8 +374,7 @@ describe('AddTagModal组件测试', () => {
       const customThemeColor = '#52c41a'
       render(<AddTagModal {...defaultProps} themeColor={customThemeColor} />)
 
-      const confirmButton = getConfirmButton()
-      expect(confirmButton).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /确\s*定/ })).toBeInTheDocument()
     })
 
     it('应该响应主题色变化', () => {
@@ -442,8 +382,7 @@ describe('AddTagModal组件测试', () => {
 
       rerender(<AddTagModal {...defaultProps} themeColor="#52c41a" />)
 
-      const confirmButton = getConfirmButton()
-      expect(confirmButton).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /确\s*定/ })).toBeInTheDocument()
     })
   })
 
@@ -456,10 +395,8 @@ describe('AddTagModal组件测试', () => {
       const input = screen.getByPlaceholderText('请输入标签名称（最多10个字符）')
       await user.type(input, '<script>')
 
-      const confirmButton = getConfirmButton()
-      if (confirmButton) {
-        await user.click(confirmButton)
-      }
+      const confirmButton = screen.getByRole('button', { name: /确\s*定/ })
+      await user.click(confirmButton)
 
       await waitFor(() => {
         expect(onAdd).toHaveBeenCalledWith({
@@ -477,10 +414,8 @@ describe('AddTagModal组件测试', () => {
       const input = screen.getByPlaceholderText('请输入标签名称（最多10个字符）')
       await user.type(input, '😀标签')
 
-      const confirmButton = getConfirmButton()
-      if (confirmButton) {
-        await user.click(confirmButton)
-      }
+      const confirmButton = screen.getByRole('button', { name: /确\s*定/ })
+      await user.click(confirmButton)
 
       await waitFor(() => {
         expect(onAdd).toHaveBeenCalledWith({
