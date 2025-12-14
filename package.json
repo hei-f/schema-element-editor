@@ -8,7 +8,8 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "bash scripts/build.sh",
+    "build": "vite build",
+    "build:dev": "bash scripts/build.sh",
     "preview": "vite preview",
     "package": "bash scripts/package.sh",
     "test": "vitest run",
@@ -60,7 +61,7 @@
     "@types/styled-components": "^5.1.36",
     "@typescript-eslint/eslint-plugin": "^8.49.0",
     "@typescript-eslint/parser": "^8.49.0",
-    "@typescript/native-preview": "^7.0.0-dev.20251212.1",
+    "@typescript/native-preview": "^7.0.0-dev.20251213.1",
     "@vitejs/plugin-react": "^5.1.2",
     "@vitest/coverage-v8": "^4.0.15",
     "@vitest/ui": "^4.0.15",

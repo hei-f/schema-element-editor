@@ -15,6 +15,7 @@ vi.mock('@/shared/utils/browser/storage', () => ({
 vi.mock('../../../services/schema-transformer', () => ({
   schemaTransformer: {
     prepareSaveData: vi.fn(),
+    convertToMarkdown: vi.fn(),
   },
 }))
 
@@ -238,6 +239,139 @@ describe('useSchemaSave', () => {
       })
 
       expect(storage.deleteDraft).toHaveBeenCalledWith('new-key')
+    })
+  })
+
+  describe('录制模式', () => {
+    it('应该在录制模式下将AST转换为RawString', async () => {
+      const astData = '[{"type":"paragraph","children":[{"text":"Hello"}]}]'
+      const rawStringData = 'Hello'
+
+      ;(schemaTransformer.convertToMarkdown as Mock).mockReturnValue({
+        success: true,
+        data: rawStringData,
+      })
+      mockOnSave.mockResolvedValue(undefined)
+
+      const recordingProps = {
+        ...defaultProps,
+        editorValue: astData,
+        wasStringData: true,
+        isRecordingMode: true,
+        contentType: 'ast' as any,
+      }
+
+      const { result } = renderHook(() => useSchemaSave(recordingProps))
+
+      await act(async () => {
+        await result.current.handleSave()
+      })
+
+      expect(schemaTransformer.convertToMarkdown).toHaveBeenCalledWith(astData)
+      expect(mockOnSave).toHaveBeenCalledWith(rawStringData)
+      expect(storage.deleteDraft).toHaveBeenCalledWith(defaultProps.paramsKey)
+      expect(mockOnSaveSuccess).toHaveBeenCalled()
+    })
+
+    it('应该处理录制模式下AST转RawString失败', async () => {
+      ;(schemaTransformer.convertToMarkdown as Mock).mockReturnValue({
+        success: false,
+        error: '转换失败',
+      })
+
+      const recordingProps = {
+        ...defaultProps,
+        wasStringData: true,
+        isRecordingMode: true,
+        contentType: 'ast' as any,
+      }
+
+      const { result } = renderHook(() => useSchemaSave(recordingProps))
+
+      await expect(
+        act(async () => {
+          await result.current.handleSave()
+        })
+      ).rejects.toThrow('保存失败: 转换失败')
+
+      expect(mockOnSave).not.toHaveBeenCalled()
+      expect(result.current.isSaving).toBe(false)
+    })
+
+    it('应该处理录制模式下转换成功但无数据', async () => {
+      ;(schemaTransformer.convertToMarkdown as Mock).mockReturnValue({
+        success: true,
+        data: null,
+      })
+
+      const recordingProps = {
+        ...defaultProps,
+        wasStringData: true,
+        isRecordingMode: true,
+        contentType: 'ast' as any,
+      }
+
+      const { result } = renderHook(() => useSchemaSave(recordingProps))
+
+      await expect(
+        act(async () => {
+          await result.current.handleSave()
+        })
+      ).rejects.toThrow('保存失败: 转换为 RawString 失败')
+
+      expect(mockOnSave).not.toHaveBeenCalled()
+    })
+
+    it('应该在录制模式下保持RawString格式不变', async () => {
+      const rawStringData = 'Plain text content'
+      mockOnSave.mockResolvedValue(undefined)
+
+      const recordingProps = {
+        ...defaultProps,
+        editorValue: rawStringData,
+        wasStringData: true,
+        isRecordingMode: true,
+        contentType: 'rawString' as any,
+      }
+
+      const { result } = renderHook(() => useSchemaSave(recordingProps))
+
+      await act(async () => {
+        await result.current.handleSave()
+      })
+
+      // 不应该调用转换函数
+      expect(schemaTransformer.convertToMarkdown).not.toHaveBeenCalled()
+      expect(schemaTransformer.prepareSaveData).not.toHaveBeenCalled()
+      // 直接保存原始内容
+      expect(mockOnSave).toHaveBeenCalledWith(rawStringData)
+      expect(mockOnSaveSuccess).toHaveBeenCalled()
+    })
+
+    it('应该在录制模式下保持非字符串数据不变', async () => {
+      const jsonData = '{"type":"paragraph"}'
+      mockOnSave.mockResolvedValue(undefined)
+
+      const recordingProps = {
+        ...defaultProps,
+        editorValue: jsonData,
+        wasStringData: false,
+        isRecordingMode: true,
+        contentType: 'ast' as any,
+      }
+
+      const { result } = renderHook(() => useSchemaSave(recordingProps))
+
+      await act(async () => {
+        await result.current.handleSave()
+      })
+
+      // 不应该调用转换函数（因为wasStringData=false）
+      expect(schemaTransformer.convertToMarkdown).not.toHaveBeenCalled()
+      expect(schemaTransformer.prepareSaveData).not.toHaveBeenCalled()
+      // 直接保存原始内容
+      expect(mockOnSave).toHaveBeenCalledWith(jsonData)
+      expect(mockOnSaveSuccess).toHaveBeenCalled()
     })
   })
 })

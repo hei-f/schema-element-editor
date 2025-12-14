@@ -1,0 +1,566 @@
+/**
+ * NormalModeLayout 组件单元测试
+ */
+
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import React from 'react'
+import { NormalModeLayout } from '../NormalModeLayout'
+import { ContentType, EditorTheme } from '@/shared/types'
+import type { CodeMirrorEditorHandle } from '../../editor/CodeMirrorEditor'
+
+// Mock styled-components
+vi.mock('styled-components', () => ({
+  ThemeProvider: ({ children }: any) => children,
+  keyframes: () => '',
+  default: () => () => null,
+}))
+
+// Mock 子组件
+vi.mock('../../editor/CodeMirrorEditor', () => {
+  const MockCodeMirrorEditor = React.forwardRef((props: any, _ref: any) => {
+    return (
+      <div data-testid="code-mirror-editor">
+        <div data-testid="editor-value">{props.defaultValue}</div>
+        <div data-testid="editor-theme">{props.theme}</div>
+        <div data-testid="editor-placeholder">{props.placeholder}</div>
+        <div data-testid="enable-ast-hints">{String(props.enableAstHints)}</div>
+      </div>
+    )
+  })
+  MockCodeMirrorEditor.displayName = 'MockCodeMirrorEditor'
+  return { CodeMirrorEditor: MockCodeMirrorEditor }
+})
+
+vi.mock('./modes/DiffModeContent', () => ({
+  DiffModeContent: (props: any) => (
+    <div data-testid="diff-mode-content">
+      <div data-testid="diff-left">{props.diffLeftContent}</div>
+      <div data-testid="diff-right">{props.diffRightContent}</div>
+    </div>
+  ),
+}))
+
+vi.mock('./shared/ToolbarSection', () => ({
+  ToolbarSection: (props: any) => (
+    <div data-testid="toolbar-section">
+      <div data-testid="toolbar-mode">{props.mode}</div>
+      <div data-testid="preview-enabled">{String(props.previewEnabled)}</div>
+      <div data-testid="is-diff-mode">{String(props.isDiffMode)}</div>
+      <div data-testid="show-diff-button">{String(props.showDiffButton)}</div>
+    </div>
+  ),
+}))
+
+vi.mock('../preview/BuiltinPreview', () => ({
+  BuiltinPreview: (props: any) => (
+    <div data-testid="builtin-preview">
+      <div data-testid="preview-value">{props.editorValue}</div>
+      <div data-testid="preview-content-type">{props.contentType}</div>
+    </div>
+  ),
+}))
+
+// Mock useDiffContentTransform hook
+vi.mock('../../hooks/diff/useDiffContentTransform', () => ({
+  useDiffContentTransform: vi.fn(() => ({
+    diffLeftContent: 'left-content',
+    diffRightContent: 'right-content',
+    diffToolbarActions: {
+      onApplyLeftToRight: vi.fn(),
+      onApplyRightToLeft: vi.fn(),
+    },
+  })),
+}))
+
+describe('NormalModeLayout', () => {
+  const editorRef = { current: null as CodeMirrorEditorHandle | null }
+
+  const createMockProps = (overrides?: any) => ({
+    isDiffMode: false,
+    previewEnabled: false,
+    isClosingPreview: false,
+    editorThemeVars: {
+      background: '#fff',
+      foreground: '#000',
+      caret: '#000',
+      selection: '#ccc',
+      selectionMatch: '#ddd',
+      lineHighlight: '#eee',
+      gutterBackground: '#f0f0f0',
+      gutterForeground: '#666',
+    },
+    diffModeProps: {
+      isFullScreenTransition: false,
+      isInRecordingMode: false,
+      snapshots: [],
+      originalValue: 'original',
+      repairOriginalValue: '',
+      pendingRepairedValue: '',
+      editorValue: 'current',
+      onApplyRepair: vi.fn(),
+      onCancelRepair: vi.fn(),
+    },
+    previewModeProps: {
+      isFullScreenTransition: false,
+      previewEnabled: false,
+      previewWidth: 50,
+      isDragging: false,
+      previewContainerRef: { current: null },
+      previewPlaceholderRef: { current: null },
+      onResizeStart: vi.fn(),
+      isClosingTransition: false,
+      isOpeningInitial: false,
+      isOpeningTransition: false,
+      useBuiltinPreview: false,
+    },
+    baseProps: {
+      attributes: { id: 'test-element' },
+      contentType: 'json' as ContentType,
+      canParse: true,
+      toolbarButtons: {
+        showFormatButton: true,
+        showEscapeButton: true,
+        showUnescapeButton: true,
+        showCompactButton: true,
+        showParseButton: true,
+        astRawStringToggle: true,
+        escape: true,
+        deserialize: true,
+        serialize: true,
+        format: true,
+        preview: true,
+        importExport: true,
+        draft: true,
+        favorites: true,
+        history: true,
+      },
+      toolbarActions: {
+        onFormat: vi.fn(),
+        onEscape: vi.fn(),
+        onUnescape: vi.fn(),
+        onCompact: vi.fn(),
+        onParse: vi.fn(),
+        onSegmentChange: vi.fn(),
+      },
+      editorProps: {
+        editorRef,
+        editorValue: '{"test": "value"}',
+        editorTheme: 'oneDark' as EditorTheme,
+        enableAstTypeHints: false,
+        contentType: 'json' as ContentType,
+        onChange: vi.fn(),
+      },
+      notificationProps: {
+        lightNotifications: [],
+      },
+    },
+    ...overrides,
+  })
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  describe('默认模式渲染', () => {
+    it('应该渲染编辑器和工具栏', () => {
+      const props = createMockProps()
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByTestId('code-mirror-editor')).toBeInTheDocument()
+      expect(screen.getByTestId('toolbar-section')).toBeInTheDocument()
+    })
+
+    it('应该显示正确的编辑器内容', () => {
+      const props = createMockProps()
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByTestId('editor-value')).toHaveTextContent('{"test": "value"}')
+      expect(screen.getByTestId('editor-theme')).toHaveTextContent('oneDark')
+    })
+
+    it('工具栏模式应该是NORMAL', () => {
+      const props = createMockProps()
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByTestId('toolbar-mode')).toHaveTextContent('normal')
+    })
+
+    it('应该正确传递enableAstTypeHints到编辑器', () => {
+      const props = createMockProps({
+        baseProps: {
+          ...createMockProps().baseProps,
+          editorProps: {
+            ...createMockProps().baseProps.editorProps,
+            enableAstTypeHints: true,
+          },
+        },
+      })
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByTestId('enable-ast-hints')).toHaveTextContent('true')
+    })
+  })
+
+  describe('Diff 模式渲染', () => {
+    it('Diff模式下应该渲染DiffModeContent', () => {
+      const props = createMockProps({
+        isDiffMode: true,
+      })
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByTestId('diff-mode-content')).toBeInTheDocument()
+    })
+
+    it('Diff模式下工具栏模式应该是DIFF', () => {
+      const props = createMockProps({
+        isDiffMode: true,
+      })
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByTestId('toolbar-mode')).toHaveTextContent('diff')
+    })
+
+    it('Diff模式下应该显示转换后的内容', () => {
+      const props = createMockProps({
+        isDiffMode: true,
+      })
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByTestId('diff-left')).toHaveTextContent('left-content')
+      expect(screen.getByTestId('diff-right')).toHaveTextContent('right-content')
+    })
+
+    it('Diff模式下不应该显示预览区域', () => {
+      const props = createMockProps({
+        isDiffMode: true,
+        previewEnabled: true,
+      })
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.queryByTestId('builtin-preview')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('预览模式渲染', () => {
+    it('预览模式下应该渲染预览占位区域', () => {
+      const props = createMockProps({
+        previewEnabled: true,
+        previewModeProps: {
+          ...createMockProps().previewModeProps,
+          previewWidth: 40,
+        },
+      })
+
+      const { container } = render(<NormalModeLayout {...props} />)
+
+      const placeholder = container.querySelector('[class*="PreviewPlaceholder"]')
+      expect(placeholder).toBeInTheDocument()
+    })
+
+    it('预览模式下工具栏模式应该是PREVIEW', () => {
+      const props = createMockProps({
+        previewEnabled: true,
+      })
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByTestId('toolbar-mode')).toHaveTextContent('preview')
+    })
+
+    it('预览模式下应该渲染拖拽条', () => {
+      const props = createMockProps({
+        previewEnabled: true,
+        previewModeProps: {
+          ...createMockProps().previewModeProps,
+          isClosingTransition: false,
+          isOpeningTransition: false,
+        },
+      })
+
+      const { container } = render(<NormalModeLayout {...props} />)
+
+      const resizer = container.querySelector('[class*="PreviewResizer"]')
+      expect(resizer).toBeInTheDocument()
+    })
+
+    it('过渡状态下不应该显示拖拽条', () => {
+      const props = createMockProps({
+        previewEnabled: true,
+        previewModeProps: {
+          ...createMockProps().previewModeProps,
+          isClosingTransition: true,
+        },
+      })
+
+      const { container } = render(<NormalModeLayout {...props} />)
+
+      const resizer = container.querySelector('[class*="PreviewResizer"]')
+      expect(resizer).not.toBeInTheDocument()
+    })
+
+    it('拖拽时应该显示拖拽蒙层（非内置预览模式）', () => {
+      const props = createMockProps({
+        previewEnabled: true,
+        previewModeProps: {
+          ...createMockProps().previewModeProps,
+          isDragging: true,
+          useBuiltinPreview: false,
+        },
+      })
+
+      const { container } = render(<NormalModeLayout {...props} />)
+
+      const overlay = container.querySelector('[class*="DragOverlay"]')
+      expect(overlay).toBeInTheDocument()
+    })
+
+    it('内置预览模式下拖拽时不应该显示蒙层', () => {
+      const props = createMockProps({
+        previewEnabled: true,
+        previewModeProps: {
+          ...createMockProps().previewModeProps,
+          isDragging: true,
+          useBuiltinPreview: true,
+        },
+      })
+
+      const { container } = render(<NormalModeLayout {...props} />)
+
+      const overlay = container.querySelector('[class*="DragOverlay"]')
+      expect(overlay).not.toBeInTheDocument()
+    })
+  })
+
+  describe('内置预览器', () => {
+    it('useBuiltinPreview为true时应该渲染BuiltinPreview', () => {
+      const props = createMockProps({
+        previewEnabled: true,
+        previewModeProps: {
+          ...createMockProps().previewModeProps,
+          useBuiltinPreview: true,
+          isClosingTransition: false,
+          isOpeningInitial: false,
+        },
+      })
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByTestId('builtin-preview')).toBeInTheDocument()
+    })
+
+    it('关闭过渡状态下不应该渲染BuiltinPreview', () => {
+      const props = createMockProps({
+        previewEnabled: true,
+        previewModeProps: {
+          ...createMockProps().previewModeProps,
+          useBuiltinPreview: true,
+          isClosingTransition: true,
+        },
+      })
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.queryByTestId('builtin-preview')).not.toBeInTheDocument()
+    })
+
+    it('打开初始状态下不应该渲染BuiltinPreview', () => {
+      const props = createMockProps({
+        previewEnabled: true,
+        previewModeProps: {
+          ...createMockProps().previewModeProps,
+          useBuiltinPreview: true,
+          isOpeningInitial: true,
+        },
+      })
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.queryByTestId('builtin-preview')).not.toBeInTheDocument()
+    })
+
+    it('BuiltinPreview应该接收正确的props', () => {
+      const props = createMockProps({
+        previewEnabled: true,
+        baseProps: {
+          ...createMockProps().baseProps,
+          editorProps: {
+            ...createMockProps().baseProps.editorProps,
+            editorValue: '{"preview": "test"}',
+            contentType: 'ast' as ContentType,
+          },
+        },
+        previewModeProps: {
+          ...createMockProps().previewModeProps,
+          useBuiltinPreview: true,
+        },
+      })
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByTestId('preview-value')).toHaveTextContent('{"preview": "test"}')
+      expect(screen.getByTestId('preview-content-type')).toHaveTextContent('ast')
+    })
+  })
+
+  describe('预览关闭过渡', () => {
+    it('isClosingPreview为true时应该保持预览布局', () => {
+      const props = createMockProps({
+        previewEnabled: false,
+        isClosingPreview: true,
+      })
+
+      const { container } = render(<NormalModeLayout {...props} />)
+
+      const placeholder = container.querySelector('[class*="PreviewPlaceholder"]')
+      expect(placeholder).toBeInTheDocument()
+    })
+
+    it('isClosingPreview为true时工具栏模式应该是PREVIEW', () => {
+      const props = createMockProps({
+        previewEnabled: false,
+        isClosingPreview: true,
+      })
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByTestId('toolbar-mode')).toHaveTextContent('preview')
+    })
+  })
+
+  describe('轻量通知', () => {
+    it('应该渲染轻量通知列表', () => {
+      const props = createMockProps({
+        baseProps: {
+          ...createMockProps().baseProps,
+          notificationProps: {
+            lightNotifications: [
+              { id: '1', text: '通知1' },
+              { id: '2', text: '通知2' },
+            ],
+          },
+        },
+      })
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByText('✓ 通知1')).toBeInTheDocument()
+      expect(screen.getByText('✓ 通知2')).toBeInTheDocument()
+    })
+
+    it('空通知列表不应该渲染任何通知', () => {
+      const props = createMockProps()
+
+      const { container } = render(<NormalModeLayout {...props} />)
+
+      const notifications = container.querySelectorAll('[class*="LightSuccessNotification"]')
+      expect(notifications).toHaveLength(0)
+    })
+
+    it('通知应该有正确的位置偏移', () => {
+      const props = createMockProps({
+        baseProps: {
+          ...createMockProps().baseProps,
+          notificationProps: {
+            lightNotifications: [
+              { id: '1', text: '通知1' },
+              { id: '2', text: '通知2' },
+            ],
+          },
+        },
+      })
+
+      const { container } = render(<NormalModeLayout {...props} />)
+
+      const notifications = container.querySelectorAll('[class*="LightSuccessNotification"]')
+      expect(notifications[0]).toHaveStyle({ top: '16px' })
+      expect(notifications[1]).toHaveStyle({ top: '64px' })
+    })
+  })
+
+  describe('工具栏Props传递', () => {
+    it('应该传递正确的isDiffMode到工具栏', () => {
+      const props = createMockProps({
+        isDiffMode: true,
+      })
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByTestId('is-diff-mode')).toHaveTextContent('true')
+    })
+
+    it('应该传递正确的previewEnabled到工具栏', () => {
+      const props = createMockProps({
+        previewEnabled: true,
+      })
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByTestId('preview-enabled')).toHaveTextContent('true')
+    })
+
+    it('应该传递showDiffButton=true到工具栏', () => {
+      const props = createMockProps()
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByTestId('show-diff-button')).toHaveTextContent('true')
+    })
+  })
+
+  describe('边界情况', () => {
+    it('应该处理空的editorValue', () => {
+      const props = createMockProps({
+        baseProps: {
+          ...createMockProps().baseProps,
+          editorProps: {
+            ...createMockProps().baseProps.editorProps,
+            editorValue: '',
+          },
+        },
+      })
+
+      render(<NormalModeLayout {...props} />)
+
+      expect(screen.getByTestId('editor-value')).toHaveTextContent('')
+    })
+
+    it('应该处理previewWidth为0的情况', () => {
+      const props = createMockProps({
+        previewEnabled: true,
+        previewModeProps: {
+          ...createMockProps().previewModeProps,
+          previewWidth: 0,
+        },
+      })
+
+      const { container } = render(<NormalModeLayout {...props} />)
+
+      const placeholder = container.querySelector('[class*="PreviewPlaceholder"]')
+      expect(placeholder).toBeInTheDocument()
+    })
+
+    it('应该处理previewWidth为100的情况', () => {
+      const props = createMockProps({
+        previewEnabled: true,
+        previewModeProps: {
+          ...createMockProps().previewModeProps,
+          previewWidth: 100,
+        },
+      })
+
+      const { container } = render(<NormalModeLayout {...props} />)
+
+      const placeholder = container.querySelector('[class*="PreviewPlaceholder"]')
+      expect(placeholder).toBeInTheDocument()
+    })
+  })
+})

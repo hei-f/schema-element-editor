@@ -43,6 +43,9 @@ describe('FavoritesListModal组件测试', () => {
     onEdit: vi.fn(),
     onApply: vi.fn(),
     onDelete: vi.fn().mockResolvedValue(undefined),
+    onPin: vi.fn().mockResolvedValue(undefined),
+    onAddTag: vi.fn().mockResolvedValue(undefined),
+    onRemoveTag: vi.fn().mockResolvedValue(undefined),
     onClose: vi.fn(),
   }
 

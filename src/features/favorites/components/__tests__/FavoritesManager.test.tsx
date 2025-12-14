@@ -37,6 +37,7 @@ describe('FavoritesManager组件测试', () => {
     editingName: '',
     editingContent: '',
     editorTheme: 'seeDark' as const,
+    themeColor: '#1890ff',
     onAddFavoriteInputChange: vi.fn(),
     onAddFavorite: vi.fn(),
     onCloseAddFavoriteModal: vi.fn(),
@@ -44,6 +45,9 @@ describe('FavoritesManager组件测试', () => {
     onEditFavorite: vi.fn(),
     onApplyFavorite: vi.fn(),
     onDeleteFavorite: vi.fn(),
+    onPinFavorite: vi.fn(),
+    onAddTag: vi.fn(),
+    onRemoveTag: vi.fn(),
     onSaveEdit: vi.fn(),
     onCloseEditModal: vi.fn(),
   }
