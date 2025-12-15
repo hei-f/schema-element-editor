@@ -42,6 +42,8 @@ global.chrome = {
 describe('useFileImportExport', () => {
   const mockOnImportSuccess = vi.fn()
   const mockShowLightNotification = vi.fn()
+  const mockOnError = vi.fn()
+  const mockOnWarning = vi.fn()
 
   const defaultProps = {
     editorValue: '{"type": "card", "title": "test"}',
@@ -51,6 +53,8 @@ describe('useFileImportExport', () => {
     customFileName: false,
     onImportSuccess: mockOnImportSuccess,
     showLightNotification: mockShowLightNotification,
+    onError: mockOnError,
+    onWarning: mockOnWarning,
   }
 
   beforeEach(() => {
