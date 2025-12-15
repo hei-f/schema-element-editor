@@ -2,7 +2,7 @@ import type { Mocked } from 'vitest'
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { storage } from '@/shared/utils/browser/storage'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
-import { Modal } from 'antd'
+import { Modal, message } from 'antd'
 import { useFavoritesManagement } from '../../storage/useFavoritesManagement'
 import type { Favorite } from '@/shared/types'
 
@@ -12,14 +12,19 @@ vi.mock('antd', () => ({
   Modal: {
     confirm: vi.fn(),
   },
+  message: {
+    success: vi.fn(),
+    warning: vi.fn(),
+    error: vi.fn(),
+  },
 }))
 
 const mockStorage = storage as Mocked<typeof storage>
 const mockModal = Modal as Mocked<typeof Modal>
+const mockMessage = message as Mocked<typeof message>
 
 describe('useFavoritesManagement Hook 测试', () => {
   const mockOnApplyFavorite = vi.fn()
-  const mockOnShowLightNotification = vi.fn()
   const mockOnWarning = vi.fn()
   const mockOnError = vi.fn()
 
@@ -27,7 +32,6 @@ describe('useFavoritesManagement Hook 测试', () => {
     editorValue: 'test content',
     isModified: false,
     onApplyFavorite: mockOnApplyFavorite,
-    onShowLightNotification: mockOnShowLightNotification,
     onWarning: mockOnWarning,
     onError: mockOnError,
   }
@@ -144,7 +148,7 @@ describe('useFavoritesManagement Hook 测试', () => {
       })
 
       expect(mockStorage.addFavorite).toHaveBeenCalledWith('My Favorite', 'test content')
-      expect(mockOnShowLightNotification).toHaveBeenCalledWith('已添加到收藏')
+      expect(mockMessage.success).toHaveBeenCalledWith('已添加到收藏')
       expect(result.current.addFavoriteModalVisible).toBe(false)
       expect(result.current.favoriteNameInput).toBe('')
     })
@@ -221,7 +225,7 @@ describe('useFavoritesManagement Hook 测试', () => {
       await waitFor(() => {
         expect(mockOnApplyFavorite).toHaveBeenCalledWith('{"test": "data"}')
         expect(mockStorage.updateFavoriteUsedTime).toHaveBeenCalledWith('fav_1')
-        expect(mockOnShowLightNotification).toHaveBeenCalledWith('已应用收藏内容')
+        expect(mockMessage.success).toHaveBeenCalledWith('已应用收藏内容')
         expect(result.current.favoritesModalVisible).toBe(false)
       })
     })
@@ -272,7 +276,7 @@ describe('useFavoritesManagement Hook 测试', () => {
       expect(mockStorage.deleteFavorite).toHaveBeenCalledWith('fav_1')
       expect(mockStorage.getFavorites).toHaveBeenCalled()
       expect(result.current.favoritesList).toEqual(updatedFavorites)
-      expect(mockOnShowLightNotification).toHaveBeenCalledWith('收藏已删除')
+      expect(mockMessage.success).toHaveBeenCalledWith('收藏已删除')
     })
 
     it('删除失败时应该显示错误', async () => {
