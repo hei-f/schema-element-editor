@@ -1,6 +1,6 @@
 {
   "name": "schema-element-editor",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "DOM元素Schema查看和编辑工具",
   "type": "module",
   "workspaces": [
