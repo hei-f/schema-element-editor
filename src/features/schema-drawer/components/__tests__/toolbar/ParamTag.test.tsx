@@ -77,8 +77,8 @@ describe('ParamTag', () => {
       render(<ParamTag {...defaultProps} />)
 
       // 查找包含 CopyIcon 的容器
-      const copyIconWrapper = screen.getByText('params 1').parentElement?.querySelector('svg')
-      expect(copyIconWrapper).toBeTruthy()
+      const copyIconWrapper = screen.getByTestId('param-copy-icon')
+      expect(copyIconWrapper).toBeInTheDocument()
     })
   })
 
@@ -106,12 +106,8 @@ describe('ParamTag', () => {
       render(<ParamTag {...defaultProps} value="copy-value" />)
 
       // 找到复制图标的容器并点击
-      const copyIcon = screen
-        .getByText('params 1')
-        .parentElement?.querySelector('[class*="bnUORx"]')
-      if (copyIcon) {
-        await user.click(copyIcon as HTMLElement)
-      }
+      const copyIcon = screen.getByTestId('param-copy-icon')
+      await user.click(copyIcon)
 
       await waitFor(() => {
         expect(mockWriteText).toHaveBeenCalledWith('copy-value')
@@ -144,12 +140,8 @@ describe('ParamTag', () => {
 
       render(<ParamTag {...defaultProps} value="fallback-value" />)
 
-      const copyIcon = screen
-        .getByText('params 1')
-        .parentElement?.querySelector('[class*="bnUORx"]')
-      if (copyIcon) {
-        await user.click(copyIcon as HTMLElement)
-      }
+      const copyIcon = screen.getByTestId('param-copy-icon')
+      await user.click(copyIcon)
 
       await waitFor(() => {
         expect(mockWriteText).toHaveBeenCalled()
@@ -183,12 +175,8 @@ describe('ParamTag', () => {
 
       render(<ParamTag {...defaultProps} value="insecure-context-value" />)
 
-      const copyIcon = screen
-        .getByText('params 1')
-        .parentElement?.querySelector('[class*="bnUORx"]')
-      if (copyIcon) {
-        await user.click(copyIcon as HTMLElement)
-      }
+      const copyIcon = screen.getByTestId('param-copy-icon')
+      await user.click(copyIcon)
 
       await waitFor(() => {
         expect(mockExecCommand).toHaveBeenCalledWith('copy')
@@ -212,12 +200,8 @@ describe('ParamTag', () => {
 
       render(<ParamTag {...defaultProps} value="no-clipboard-value" />)
 
-      const copyIcon = screen
-        .getByText('params 1')
-        .parentElement?.querySelector('[class*="bnUORx"]')
-      if (copyIcon) {
-        await user.click(copyIcon as HTMLElement)
-      }
+      const copyIcon = screen.getByTestId('param-copy-icon')
+      await user.click(copyIcon)
 
       await waitFor(() => {
         expect(mockExecCommand).toHaveBeenCalledWith('copy')
@@ -243,12 +227,8 @@ describe('ParamTag', () => {
 
       render(<ParamTag {...defaultProps} value="exec-success" />)
 
-      const copyIcon = screen
-        .getByText('params 1')
-        .parentElement?.querySelector('[class*="bnUORx"]')
-      if (copyIcon) {
-        await user.click(copyIcon as HTMLElement)
-      }
+      const copyIcon = screen.getByTestId('param-copy-icon')
+      await user.click(copyIcon)
 
       await waitFor(() => {
         expect(mockExecCommand).toHaveBeenCalledWith('copy')
@@ -275,12 +255,8 @@ describe('ParamTag', () => {
 
       render(<ParamTag {...defaultProps} value="exec-fail" />)
 
-      const copyIcon = screen
-        .getByText('params 1')
-        .parentElement?.querySelector('[class*="bnUORx"]')
-      if (copyIcon) {
-        await user.click(copyIcon as HTMLElement)
-      }
+      const copyIcon = screen.getByTestId('param-copy-icon')
+      await user.click(copyIcon)
 
       await waitFor(() => {
         expect(mockExecCommand).toHaveBeenCalledWith('copy')
@@ -308,12 +284,8 @@ describe('ParamTag', () => {
 
       render(<ParamTag {...defaultProps} value="exec-throw" />)
 
-      const copyIcon = screen
-        .getByText('params 1')
-        .parentElement?.querySelector('[class*="bnUORx"]')
-      if (copyIcon) {
-        await user.click(copyIcon as HTMLElement)
-      }
+      const copyIcon = screen.getByTestId('param-copy-icon')
+      await user.click(copyIcon)
 
       await waitFor(() => {
         expect(mockExecCommand).toHaveBeenCalledWith('copy')
@@ -349,12 +321,8 @@ describe('ParamTag', () => {
         </div>
       )
 
-      const copyIcon = screen
-        .getByText('params 1')
-        .parentElement?.querySelector('[class*="bnUORx"]')
-      if (copyIcon) {
-        await user.click(copyIcon as HTMLElement)
-      }
+      const copyIcon = screen.getByTestId('param-copy-icon')
+      await user.click(copyIcon)
 
       await waitFor(() => {
         // onCopy 应该被调用
@@ -384,12 +352,8 @@ describe('ParamTag', () => {
 
       render(<ParamTag value="no-callback" index={0} />)
 
-      const copyIcon = screen
-        .getByText('params 1')
-        .parentElement?.querySelector('[class*="bnUORx"]')
-      if (copyIcon) {
-        await user.click(copyIcon as HTMLElement)
-      }
+      const copyIcon = screen.getByTestId('param-copy-icon')
+      await user.click(copyIcon)
 
       // 不应该抛出错误
       await waitFor(() => {
@@ -419,12 +383,8 @@ describe('ParamTag', () => {
 
       render(<ParamTag {...defaultProps} value="" />)
 
-      const copyIcon = screen
-        .getByText('params 1')
-        .parentElement?.querySelector('[class*="bnUORx"]')
-      if (copyIcon) {
-        await user.click(copyIcon as HTMLElement)
-      }
+      const copyIcon = screen.getByTestId('param-copy-icon')
+      await user.click(copyIcon)
 
       await waitFor(() => {
         expect(mockWriteText).toHaveBeenCalledWith('')
@@ -453,12 +413,8 @@ describe('ParamTag', () => {
 
       render(<ParamTag {...defaultProps} value={longValue} />)
 
-      const copyIcon = screen
-        .getByText('params 1')
-        .parentElement?.querySelector('[class*="bnUORx"]')
-      if (copyIcon) {
-        await user.click(copyIcon as HTMLElement)
-      }
+      const copyIcon = screen.getByTestId('param-copy-icon')
+      await user.click(copyIcon)
 
       await waitFor(() => {
         expect(mockWriteText).toHaveBeenCalledWith(longValue)
@@ -487,12 +443,8 @@ describe('ParamTag', () => {
 
       render(<ParamTag {...defaultProps} value={specialValue} />)
 
-      const copyIcon = screen
-        .getByText('params 1')
-        .parentElement?.querySelector('[class*="bnUORx"]')
-      if (copyIcon) {
-        await user.click(copyIcon as HTMLElement)
-      }
+      const copyIcon = screen.getByTestId('param-copy-icon')
+      await user.click(copyIcon)
 
       await waitFor(() => {
         expect(mockWriteText).toHaveBeenCalledWith(specialValue)

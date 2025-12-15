@@ -12,27 +12,17 @@ vi.mock('@/shared/utils/shadow-root-manager', () => ({
 }))
 
 /**
- * 获取 footer 中的添加按钮（primary 按钮）
+ * 获取添加按钮
  */
 const getAddButton = () => {
-  const footer = document.querySelector('.see-modal-footer')
-  if (footer) {
-    const buttons = footer.querySelectorAll('button')
-    return buttons[buttons.length - 1] // primary 按钮通常是最后一个
-  }
-  return null
+  return screen.getByRole('button', { name: /添\s*加/ })
 }
 
 /**
- * 获取 footer 中的取消按钮
+ * 获取取消按钮
  */
 const getCancelButton = () => {
-  const footer = document.querySelector('.see-modal-footer')
-  if (footer) {
-    const buttons = footer.querySelectorAll('button')
-    return buttons[0]
-  }
-  return null
+  return screen.getByRole('button', { name: /取\s*消/ })
 }
 
 describe('AddFavoriteModal组件测试', () => {
@@ -71,10 +61,8 @@ describe('AddFavoriteModal组件测试', () => {
     it('应该渲染添加和取消按钮', () => {
       render(<AddFavoriteModal {...defaultProps} />)
 
-      const footer = document.querySelector('.see-modal-footer')
-      expect(footer).toBeInTheDocument()
-      const buttons = footer?.querySelectorAll('button')
-      expect(buttons?.length).toBe(2)
+      expect(screen.getByRole('button', { name: /添\s*加/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /取\s*消/ })).toBeInTheDocument()
     })
   })
 
@@ -114,9 +102,7 @@ describe('AddFavoriteModal组件测试', () => {
       render(<AddFavoriteModal {...defaultProps} onAdd={onAdd} />)
 
       const addButton = getAddButton()
-      if (addButton) {
-        await user.click(addButton)
-      }
+      await user.click(addButton)
 
       expect(onAdd).toHaveBeenCalled()
     })
@@ -127,9 +113,7 @@ describe('AddFavoriteModal组件测试', () => {
       render(<AddFavoriteModal {...defaultProps} onClose={onClose} />)
 
       const cancelButton = getCancelButton()
-      if (cancelButton) {
-        await user.click(cancelButton)
-      }
+      await user.click(cancelButton)
 
       expect(onClose).toHaveBeenCalled()
     })
@@ -151,11 +135,9 @@ describe('AddFavoriteModal组件测试', () => {
       const onClose = vi.fn()
       render(<AddFavoriteModal {...defaultProps} onClose={onClose} />)
 
-      const closeButton = document.querySelector('.see-modal-close')
-      if (closeButton) {
-        await user.click(closeButton)
-        expect(onClose).toHaveBeenCalled()
-      }
+      const closeButton = screen.getByRole('button', { name: /close/i })
+      await user.click(closeButton)
+      expect(onClose).toHaveBeenCalled()
     })
   })
 

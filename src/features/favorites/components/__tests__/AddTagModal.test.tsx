@@ -110,8 +110,8 @@ describe('AddTagModal组件测试', () => {
       const input = screen.getByPlaceholderText('请输入标签名称（最多10个字符）')
       await user.type(input, '测试')
 
-      const previewSection = screen.getByText('预览效果：').parentElement
-      expect(previewSection?.textContent).toContain('测试')
+      const previewTag = screen.getByTestId('preview-tag')
+      expect(previewTag).toHaveTextContent('测试')
     })
   })
 
@@ -132,10 +132,10 @@ describe('AddTagModal组件测试', () => {
       const secondColorBox = screen.getByTestId('color-box-red')
       await user.click(secondColorBox)
 
-      // 验证预览区域的标签颜色已更新
-      const previewSection = screen.getByText('预览效果：').parentElement
-      const previewTag = previewSection?.querySelector('.see-tag')
+      // 验证预览区域的标签已渲染且颜色已切换
+      const previewTag = screen.getByTestId('preview-tag')
       expect(previewTag).toBeInTheDocument()
+      expect(previewTag).toHaveClass('see-tag-red')
     })
 
     it('应该在预览区域显示选中的颜色', async () => {
@@ -148,8 +148,7 @@ describe('AddTagModal组件测试', () => {
       const secondColorBox = screen.getByTestId('color-box-red')
       await user.click(secondColorBox)
 
-      const previewSection = screen.getByText('预览效果：').parentElement
-      const previewTag = previewSection?.querySelector('.see-tag')
+      const previewTag = screen.getByTestId('preview-tag')
       expect(previewTag).toBeInTheDocument()
       expect(previewTag).toHaveClass('see-tag')
     })
@@ -283,10 +282,8 @@ describe('AddTagModal组件测试', () => {
       const onClose = vi.fn()
       render(<AddTagModal {...defaultProps} onClose={onClose} />)
 
-      const closeButton = document.querySelector('.see-modal-close')
-      if (closeButton) {
-        await user.click(closeButton)
-      }
+      const closeButton = screen.getByRole('button', { name: /close/i })
+      await user.click(closeButton)
 
       await waitFor(() => {
         expect(onClose).toHaveBeenCalled()

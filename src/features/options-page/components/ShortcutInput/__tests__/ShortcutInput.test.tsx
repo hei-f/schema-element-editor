@@ -90,7 +90,7 @@ describe('ShortcutInput组件测试', () => {
       await user.click(displayBox)
 
       // 录入状态下应该显示确认和取消按钮
-      const buttons = document.querySelectorAll('button')
+      const buttons = screen.getAllByRole('button')
       expect(buttons.length).toBeGreaterThanOrEqual(2)
     })
 
@@ -102,7 +102,7 @@ describe('ShortcutInput组件测试', () => {
       await user.click(displayBox)
 
       // 检查按钮存在
-      const buttons = document.querySelectorAll('button')
+      const buttons = screen.getAllByRole('button')
       expect(buttons.length).toBeGreaterThanOrEqual(2)
     })
 
@@ -114,7 +114,7 @@ describe('ShortcutInput组件测试', () => {
       await user.click(displayBox)
 
       // 禁用时不应该显示操作按钮
-      const buttons = document.querySelectorAll('button')
+      const buttons = screen.queryAllByRole('button')
       // 禁用时可能只有重置按钮或没有按钮
       expect(buttons.length).toBeLessThan(2)
     })
@@ -184,14 +184,9 @@ describe('ShortcutInput组件测试', () => {
 
       expect(screen.getByText('按下快捷键...')).toBeInTheDocument()
 
-      // 找到取消按钮并点击（有 close aria-label 的按钮）
-      const cancelButton =
-        document.querySelector('[aria-label="close"]')?.closest('button') ??
-        document.querySelectorAll('button')[1]
-
-      if (cancelButton) {
-        await user.click(cancelButton)
-      }
+      // 找到取消按钮并点击
+      const cancelButton = screen.getByTestId('shortcut-cancel-button')
+      await user.click(cancelButton)
 
       // 应该回到原来状态（占位符）
       expect(screen.getByText('点击录入快捷键')).toBeInTheDocument()
@@ -210,14 +205,9 @@ describe('ShortcutInput组件测试', () => {
       // 先录入一个快捷键
       fireEvent.keyDown(document, { key: 'k', ctrlKey: true })
 
-      // 找到确认按钮并点击（有 check aria-label 的按钮）
-      const confirmButton =
-        document.querySelector('[aria-label="check"]')?.closest('button') ??
-        document.querySelectorAll('button')[0]
-
-      if (confirmButton) {
-        await user.click(confirmButton)
-      }
+      // 找到确认按钮并点击
+      const confirmButton = screen.getByTestId('shortcut-confirm-button')
+      await user.click(confirmButton)
 
       expect(onChange).toHaveBeenCalled()
     })
@@ -230,7 +220,7 @@ describe('ShortcutInput组件测试', () => {
       await user.click(displayBox)
 
       // 确认按钮应该被禁用
-      const buttons = document.querySelectorAll('button')
+      const buttons = screen.getAllByRole('button')
       const confirmButton = buttons[0]
       expect(confirmButton).toBeDisabled()
     })
@@ -247,9 +237,8 @@ describe('ShortcutInput组件测试', () => {
       )
 
       // 应该存在重置按钮
-      const resetButton =
-        document.querySelector('[aria-label="undo"]')?.closest('button') ??
-        document.querySelectorAll('button')[0]
+      const resetIcon = screen.getByLabelText(/undo/i)
+      const resetButton = resetIcon.closest('button')
       expect(resetButton).toBeInTheDocument()
     })
 
@@ -265,10 +254,8 @@ describe('ShortcutInput组件测试', () => {
         />
       )
 
-      const resetButton =
-        document.querySelector('[aria-label="undo"]')?.closest('button') ??
-        document.querySelectorAll('button')[0]
-
+      const resetIcon = screen.getByLabelText(/undo/i)
+      const resetButton = resetIcon.closest('button')
       if (resetButton) {
         await user.click(resetButton)
       }
@@ -280,10 +267,8 @@ describe('ShortcutInput组件测试', () => {
       const sameValue = { key: 's', ctrlOrCmd: true, shift: false, alt: false }
       render(<ShortcutInput value={sameValue} defaultValue={sameValue} />)
 
-      const resetButton =
-        document.querySelector('[aria-label="undo"]')?.closest('button') ??
-        document.querySelectorAll('button')[0]
-
+      const resetIcon = screen.getByLabelText(/undo/i)
+      const resetButton = resetIcon.closest('button')
       if (resetButton) {
         expect(resetButton).toBeDisabled()
       }
@@ -316,7 +301,7 @@ describe('ShortcutInput组件测试', () => {
       fireEvent.keyDown(document, { key: 'w', ctrlKey: true })
 
       // 确认按钮应该被禁用
-      const buttons = document.querySelectorAll('button')
+      const buttons = screen.getAllByRole('button')
       const confirmButton = buttons[0]
       expect(confirmButton).toBeDisabled()
     })
