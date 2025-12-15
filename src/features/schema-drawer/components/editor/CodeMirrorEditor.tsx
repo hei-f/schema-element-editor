@@ -308,6 +308,8 @@ export const CodeMirrorEditor = (props: CodeMirrorEditorProps) => {
   const isAstContentRef = useRef(isAstContent)
   /** 初始值 ref（仅用于首次创建编辑器，不触发重新创建） */
   const initialValueRef = useRef(defaultValue)
+  /** 保存的内容 ref（在编辑器销毁前保存内容，用于重建时恢复） */
+  const savedContentRef = useRef<string | null>(null)
 
   // 选中文本统计状态
   const [selectionStats, setSelectionStats] = useState({
@@ -336,6 +338,20 @@ export const CodeMirrorEditor = (props: CodeMirrorEditorProps) => {
       effects: hideErrorEffect.of(null),
     })
   }
+
+  /**
+   * 在编辑器重建前保存内容
+   * 当 theme/readOnly/placeholder 变化时，主 useEffect 会重新创建编辑器
+   * 在重建前，这个 useEffect 的 cleanup 先执行，保存当前内容
+   */
+  useEffect(() => {
+    return () => {
+      if (viewRef.current) {
+        const currentContent = viewRef.current.state.doc.toString()
+        savedContentRef.current = currentContent
+      }
+    }
+  }, [theme, readOnly, placeholderText])
 
   // 暴露命令式 API
   useImperativeHandle(
@@ -419,6 +435,10 @@ export const CodeMirrorEditor = (props: CodeMirrorEditorProps) => {
   useEffect(() => {
     if (!editorRef.current) return
 
+    // 保存当前编辑器内容（优先使用 savedContent，然后是 viewRef，最后是初始值）
+    const currentContent =
+      savedContentRef.current ?? viewRef.current?.state.doc.toString() ?? initialValueRef.current
+
     // 根据主题选择语法高亮和基础主题
     const getThemeExtensions = () => {
       switch (theme) {
@@ -434,7 +454,7 @@ export const CodeMirrorEditor = (props: CodeMirrorEditorProps) => {
 
     // 创建编辑器状态
     const state = EditorState.create({
-      doc: initialValueRef.current,
+      doc: currentContent,
       extensions: [
         // 基础设置
         lineNumbers(),
@@ -589,8 +609,10 @@ export const CodeMirrorEditor = (props: CodeMirrorEditorProps) => {
     })
 
     viewRef.current = view
+    // 清空保存的内容，因为已经创建了新编辑器
+    savedContentRef.current = null
 
-    // 清理函数
+    // 清理函数：仅负责销毁编辑器（内容保存已由专门的 useEffect 处理）
     return () => {
       view.destroy()
       viewRef.current = null
@@ -598,13 +620,7 @@ export const CodeMirrorEditor = (props: CodeMirrorEditorProps) => {
   }, [theme, readOnly, placeholderText])
 
   // 不再需要监听 value 的 useEffect！
-
-  // 处理主题变化
-  useEffect(() => {
-    if (!viewRef.current) return
-
-    // 主题切换通过重新创建编辑器实现（在上面的 useEffect 中）
-  }, [theme])
+  // 主题切换通过重新创建编辑器实现（在上面的 useEffect 中）
 
   // 处理只读状态变化
   useEffect(() => {
