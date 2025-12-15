@@ -49,9 +49,11 @@ const ColorBox = styled.div<{ $selected: boolean }>`
 `
 
 const StyledTag = styled(Tag)`
-  display: inline-flex;
-  align-items: center;
-  margin: 0;
+  && {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+  }
 `
 
 const PreviewSection = styled.div`

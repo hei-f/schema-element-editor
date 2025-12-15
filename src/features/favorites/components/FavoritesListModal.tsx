@@ -9,26 +9,30 @@ import styled from 'styled-components'
 import { FullWidthSearchInput, ListSearchContainer } from '../styles/modals.styles'
 
 const StyledTag = styled(Tag)`
-  display: inline-flex;
-  align-items: center;
-  margin: 0;
+  && {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+  }
 `
 
 const PinButton = styled(Button)<{ $pinned: boolean }>`
-  font-size: 16px !important;
-  transition: all 0.2s;
+  && {
+    font-size: 16px !important;
+    transition: all 0.2s;
 
-  ${(props) =>
-    props.$pinned
-      ? `
-    color: #faad14 !important;
-  `
-      : `
-    color: #d9d9d9 !important;
-    &:hover {
+    ${(props) =>
+      props.$pinned
+        ? `
       color: #faad14 !important;
-    }
-  `}
+    `
+        : `
+      color: #d9d9d9 !important;
+      &:hover {
+        color: #faad14 !important;
+      }
+    `}
+  }
 `
 
 interface FavoritesListModalProps {
@@ -131,7 +135,6 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
                 e.preventDefault()
                 onRemoveTag(record.id, tag.label)
               }}
-              style={{ marginRight: 0 }}
             >
               {tag.label}
             </StyledTag>
@@ -140,7 +143,7 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
             <StyledTag
               icon={<PlusOutlined />}
               onClick={() => onAddTag(record.id)}
-              style={{ cursor: 'pointer', marginRight: 0 }}
+              style={{ cursor: 'pointer' }}
             >
               添加
             </StyledTag>

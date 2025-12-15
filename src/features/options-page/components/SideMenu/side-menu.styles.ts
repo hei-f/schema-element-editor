@@ -301,29 +301,31 @@ export const MenuTitle = styled.span<{ $collapsed: boolean }>`
 
 /** 折叠按钮 */
 export const CollapseButton = styled(Button)<{ $collapsed: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
-  padding: 0;
-  border: none !important;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.6);
-  color: #666;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
+  && {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    padding: 0;
+    border: none !important;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.6);
+    color: #666;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
 
-  &:hover {
-    background: rgba(255, 255, 255, 0.9) !important;
-    color: var(--menu-theme-color) !important;
-    /* transform: scale(1.05); */
+    &:hover {
+      background: rgba(255, 255, 255, 0.9) !important;
+      color: var(--menu-theme-color) !important;
+      /* transform: scale(1.05); */
+    }
+
+    /* &:active {
+      transform: scale(0.95);
+    } */
   }
-
-  /* &:active {
-    transform: scale(0.95);
-  } */
 
   svg {
     transition: transform 0.3s ease;

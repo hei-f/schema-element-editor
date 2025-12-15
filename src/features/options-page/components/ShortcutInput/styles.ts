@@ -59,6 +59,8 @@ export const ActionButtonGroup = styled.div`
 `
 
 export const WarningTag = styled(Tag)`
-  margin: 0;
-  font-size: 12px;
+  && {
+    margin: 0;
+    font-size: 12px;
+  }
 `

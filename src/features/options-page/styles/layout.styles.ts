@@ -401,8 +401,10 @@ export const Container = styled.div`
 `
 
 export const StyledCard = styled(Card)`
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  && {
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
 `
 
 export const CodeBlock = styled.pre`
@@ -522,17 +524,19 @@ export const VersionDivider = styled.div`
 
 /** 检查更新按钮 */
 export const CheckUpdateButton = styled(Button)`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 8px;
-  height: 24px;
-  background: #ffffff;
-  border-radius: 16px;
-  font-size: 12px;
-  color: #666f8d;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  && {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 8px;
+    height: 24px;
+    background: #ffffff;
+    border-radius: 16px;
+    font-size: 12px;
+    color: #666f8d;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
 `
 
 /** 提示信息容器（圆点 + 提示文字 + 恢复默认按钮） */
@@ -633,29 +637,31 @@ interface PanelActionButtonProps {
 }
 
 export const PanelActionButton = styled(Button)<PanelActionButtonProps>`
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 12px;
-  height: auto;
-  font-size: 12px;
-  font-weight: 500;
-  border-radius: 16px;
-  transition: all 0.2s ease;
-  background: #ffffff;
-  color: #666f8d;
-  border: 1px solid #e6ecf4;
+  && {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    height: auto;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 16px;
+    transition: all 0.2s ease;
+    background: #ffffff;
+    color: #666f8d;
+    border: 1px solid #e6ecf4;
 
-  &:hover {
-    color: ${(props) => props.$colorPrimaryHover || props.$colorPrimary || '#39c5bb'} !important;
-    border-color: ${(props) =>
-      props.$colorPrimaryHover || props.$colorPrimary || '#39c5bb'} !important;
-    background: #ffffff !important;
-  }
+    &:hover {
+      color: ${(props) => props.$colorPrimaryHover || props.$colorPrimary || '#39c5bb'} !important;
+      border-color: ${(props) =>
+        props.$colorPrimaryHover || props.$colorPrimary || '#39c5bb'} !important;
+      background: #ffffff !important;
+    }
 
-  &:active {
-    color: ${(props) => props.$colorPrimaryActive || '#2ba89f'} !important;
-    border-color: ${(props) => props.$colorPrimaryActive || '#2ba89f'} !important;
+    &:active {
+      color: ${(props) => props.$colorPrimaryActive || '#2ba89f'} !important;
+      border-color: ${(props) => props.$colorPrimaryActive || '#2ba89f'} !important;
+    }
   }
 `
 
@@ -732,7 +738,7 @@ export const AutoSaveHintIcon = styled.span`
  * AutoSaveHint 链接按钮样式
  */
 export const AutoSaveHintLinkButton = styled(Button)`
-  &.ant-btn-link {
+  && {
     margin-left: auto;
     padding: 0;
     height: auto;
@@ -1060,7 +1066,9 @@ export const HelpTooltipIcon = styled(QuestionCircleOutlined)`
  * 支持通过 $width 属性自定义宽度
  */
 export const FixedWidthInput = styled(Input)<{ $width?: number }>`
-  width: ${(props) => props.$width || 100}px;
+  && {
+    width: ${(props) => props.$width || 100}px;
+  }
 `
 
 /**
@@ -1069,7 +1077,9 @@ export const FixedWidthInput = styled(Input)<{ $width?: number }>`
  * 支持 suffix 和 addonAfter 属性显示单位
  */
 export const FixedWidthInputNumber = styled(InputNumber)<{ $width?: number }>`
-  width: ${(props) => props.$width || 100}px;
+  && {
+    width: ${(props) => props.$width || 100}px;
+  }
 `
 
 /**
@@ -1077,6 +1087,8 @@ export const FixedWidthInputNumber = styled(InputNumber)<{ $width?: number }>`
  * 支持通过 $marginTop 和 $marginBottom 属性自定义上下间距
  */
 export const SpacedAlert = styled(Alert)<{ $marginTop?: number; $marginBottom?: number }>`
-  ${(props) => (props.$marginTop ? `margin-top: ${props.$marginTop}px;` : '')}
-  ${(props) => (props.$marginBottom ? `margin-bottom: ${props.$marginBottom}px;` : '')}
+  && {
+    ${(props) => (props.$marginTop ? `margin-top: ${props.$marginTop}px;` : '')}
+    ${(props) => (props.$marginBottom ? `margin-bottom: ${props.$marginBottom}px;` : '')}
+  }
 `
