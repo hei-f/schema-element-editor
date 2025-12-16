@@ -1,15 +1,10 @@
 import { renderHook, act } from '@testing-library/react'
-import { message, Modal } from 'antd'
+import { Modal } from 'antd'
 import { useFileImportExport } from '../../storage/useFileImportExport'
 import { logger } from '@/shared/utils/logger'
 
 // Mock dependencies
 vi.mock('antd', () => ({
-  message: {
-    error: vi.fn(),
-    success: vi.fn(),
-    warning: vi.fn(),
-  },
   Modal: {
     confirm: vi.fn(),
     destroyAll: vi.fn(),
@@ -99,7 +94,7 @@ describe('useFileImportExport', () => {
         result.current.handleExport()
       })
 
-      expect(message.error).toHaveBeenCalledWith('导出失败：JSON 格式错误')
+      expect(mockOnError).toHaveBeenCalledWith('导出失败：JSON 格式错误')
       expect(mockShowLightNotification).not.toHaveBeenCalled()
     })
 
@@ -130,7 +125,7 @@ describe('useFileImportExport', () => {
         result.current.handleExport()
       })
 
-      expect(message.error).toHaveBeenCalledWith('导出失败：数据处理错误')
+      expect(mockOnError).toHaveBeenCalledWith('导出失败：数据处理错误')
       expect(logger.error).toHaveBeenCalledWith('Export failed:', expect.any(Error))
     })
 
@@ -209,7 +204,7 @@ describe('useFileImportExport', () => {
       // 调用 onOk 时文件名为空
       const onOkResult = capturedConfig.onOk()
 
-      expect(message.warning).toHaveBeenCalledWith('文件名不能为空')
+      expect(mockOnWarning).toHaveBeenCalledWith('文件名不能为空')
       await expect(onOkResult).rejects.toBeUndefined()
     })
 
@@ -274,7 +269,7 @@ describe('useFileImportExport', () => {
         inputProps.onKeyDown({ key: 'Enter' })
       })
 
-      expect(message.warning).toHaveBeenCalledWith('文件名不能为空')
+      expect(mockOnWarning).toHaveBeenCalledWith('文件名不能为空')
       expect(mockedModalDestroyAll).not.toHaveBeenCalled()
     })
 
@@ -423,7 +418,7 @@ describe('useFileImportExport', () => {
       const returnValue = result.current.handleImport(largeFile)
 
       expect(returnValue).toBe(false)
-      expect(message.error).toHaveBeenCalledWith('文件过大，最大支持 10MB')
+      expect(mockOnError).toHaveBeenCalledWith('文件过大，最大支持 10MB')
       expect(mockOnImportSuccess).not.toHaveBeenCalled()
     })
 
@@ -455,7 +450,7 @@ describe('useFileImportExport', () => {
         await new Promise((resolve) => setTimeout(resolve, 10))
       })
 
-      expect(message.error).toHaveBeenCalledWith('导入失败：文件格式错误或非法 JSON')
+      expect(mockOnError).toHaveBeenCalledWith('导入失败：文件格式错误或非法 JSON')
       expect(logger.error).toHaveBeenCalled()
     })
 
@@ -499,7 +494,7 @@ describe('useFileImportExport', () => {
         await new Promise((resolve) => setTimeout(resolve, 10))
       })
 
-      expect(message.error).toHaveBeenCalledWith('导入失败：文件内容为空')
+      expect(mockOnError).toHaveBeenCalledWith('导入失败：文件内容为空')
       expect(mockOnImportSuccess).not.toHaveBeenCalled()
     })
 
@@ -529,7 +524,7 @@ describe('useFileImportExport', () => {
         await new Promise((resolve) => setTimeout(resolve, 10))
       })
 
-      expect(message.error).toHaveBeenCalledWith('文件读取失败')
+      expect(mockOnError).toHaveBeenCalledWith('文件读取失败')
       expect(logger.error).toHaveBeenCalledWith('FileReader error')
     })
 
