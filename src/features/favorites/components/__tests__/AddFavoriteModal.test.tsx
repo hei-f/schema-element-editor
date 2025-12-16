@@ -15,14 +15,14 @@ vi.mock('@/shared/utils/shadow-root-manager', () => ({
  * 获取添加按钮
  */
 const getAddButton = () => {
-  return screen.getByRole('button', { name: /^添加$/ })
+  return screen.getByRole('button', { name: /添\s*加/ })
 }
 
 /**
  * 获取取消按钮
  */
 const getCancelButton = () => {
-  return screen.getByRole('button', { name: /^取消$/ })
+  return screen.getByRole('button', { name: /取\s*消/ })
 }
 
 describe('AddFavoriteModal组件测试', () => {
@@ -61,8 +61,8 @@ describe('AddFavoriteModal组件测试', () => {
     it('应该渲染添加和取消按钮', () => {
       render(<AddFavoriteModal {...defaultProps} />)
 
-      expect(screen.getByRole('button', { name: /^添加$/ })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: /^取消$/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /添\s*加/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /取\s*消/ })).toBeInTheDocument()
     })
   })
 
