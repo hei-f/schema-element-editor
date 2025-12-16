@@ -33,13 +33,4 @@ export default defineConfig({
     /** 发布模式移除所有 console 和 debugger */
     drop: IS_RELEASE_BUILD ? ['console', 'debugger'] : [],
   },
-  /** 构建优化配置 */
-  build: {
-    /** 关闭源码映射以加快构建速度 */
-    sourcemap: false,
-    /** 使用 esbuild 压缩以提升构建速度 */
-    minify: 'esbuild',
-    /** 目标环境 */
-    target: 'esnext',
-  },
 })
