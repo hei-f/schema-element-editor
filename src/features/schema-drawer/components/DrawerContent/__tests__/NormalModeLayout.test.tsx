@@ -8,7 +8,7 @@ import React from 'react'
 import { NormalModeLayout } from '../NormalModeLayout'
 import { ContentType, EditorTheme } from '@/shared/types'
 import type { CodeMirrorEditorHandle } from '../../editor/CodeMirrorEditor'
-import { styledComponentsMock } from '@/../../test/__mocks__/styled-components'
+import { styledComponentsMock } from '../../../../../../test/__mocks__/styled-components'
 
 // Mock styled-components
 vi.mock('styled-components', () => styledComponentsMock)
