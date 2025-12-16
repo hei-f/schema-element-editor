@@ -23,7 +23,15 @@ const renderTooltip = (description: string, defaultShortcut: ShortcutKey) => (
  * 配置 Schema 编辑器抽屉内的快捷键
  */
 export const KeyboardShortcutsSection: React.FC<SectionProps> = (props) => {
-  const { sectionId, isActive, onActiveChange, onResetDefault } = props
+  const {
+    sectionId,
+    isActive,
+    onActiveChange,
+    onResetDefault,
+    themeColor,
+    hoverColor,
+    activeColor,
+  } = props
 
   return (
     <SectionCard
@@ -57,6 +65,9 @@ export const KeyboardShortcutsSection: React.FC<SectionProps> = (props) => {
             <ShortcutInput
               placeholder="录入保存快捷键"
               defaultValue={DEFAULT_VALUES.drawerShortcuts.save}
+              themeColor={themeColor}
+              hoverColor={hoverColor}
+              activeColor={activeColor}
             />
           </Form.Item>
           <Form.Item
@@ -75,6 +86,9 @@ export const KeyboardShortcutsSection: React.FC<SectionProps> = (props) => {
             <ShortcutInput
               placeholder="录入格式化快捷键"
               defaultValue={DEFAULT_VALUES.drawerShortcuts.format}
+              themeColor={themeColor}
+              hoverColor={hoverColor}
+              activeColor={activeColor}
             />
           </Form.Item>
           <Form.Item
@@ -96,6 +110,9 @@ export const KeyboardShortcutsSection: React.FC<SectionProps> = (props) => {
             <ShortcutInput
               placeholder="录入打开/更新预览快捷键"
               defaultValue={DEFAULT_VALUES.drawerShortcuts.openOrUpdatePreview}
+              themeColor={themeColor}
+              hoverColor={hoverColor}
+              activeColor={activeColor}
             />
           </Form.Item>
           <Form.Item
@@ -114,6 +131,9 @@ export const KeyboardShortcutsSection: React.FC<SectionProps> = (props) => {
             <ShortcutInput
               placeholder="录入关闭预览快捷键"
               defaultValue={DEFAULT_VALUES.drawerShortcuts.closePreview}
+              themeColor={themeColor}
+              hoverColor={hoverColor}
+              activeColor={activeColor}
             />
           </Form.Item>
           <Alert
