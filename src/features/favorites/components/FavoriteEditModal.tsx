@@ -11,6 +11,7 @@ import {
   EditorContainer,
   ErrorAlert,
   FullWidthVerticalSpace,
+  ThemedPrimaryButton,
 } from '../styles/modals.styles'
 
 interface FavoriteEditModalProps {
@@ -20,6 +21,12 @@ interface FavoriteEditModalProps {
   initialContent: string
   /** 编辑器主题 */
   editorTheme: EditorTheme
+  /** 主题色 */
+  themeColor: string
+  /** 悬浮态颜色 */
+  hoverColor: string
+  /** 激活态颜色 */
+  activeColor: string
   onSave: (id: string, name: string, content: string) => Promise<void>
   onClose: () => void
 }
@@ -28,7 +35,18 @@ interface FavoriteEditModalProps {
  * 收藏编辑模态框组件
  */
 export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = (props) => {
-  const { visible, favoriteId, initialName, initialContent, editorTheme, onSave, onClose } = props
+  const {
+    visible,
+    favoriteId,
+    initialName,
+    initialContent,
+    editorTheme,
+    themeColor,
+    hoverColor,
+    activeColor,
+    onSave,
+    onClose,
+  } = props
   const [name, setName] = useState('')
   const [content, setContent] = useState('')
   const [nameError, setNameError] = useState<string | null>(null)
@@ -191,15 +209,18 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = (props) => {
         <Button key="cancel" onClick={handleClose} disabled={isSaving}>
           取消
         </Button>,
-        <Button
+        <ThemedPrimaryButton
           key="save"
           type="primary"
           onClick={handleSave}
           disabled={isSaveDisabled}
           loading={isSaving}
+          $themeColor={themeColor}
+          $hoverColor={hoverColor}
+          $activeColor={activeColor}
         >
           保存
-        </Button>,
+        </ThemedPrimaryButton>,
       ]}
       styles={{
         body: { padding: '16px' },

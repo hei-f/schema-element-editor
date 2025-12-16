@@ -1,6 +1,8 @@
 import type { EditorTheme, Favorite } from '@/shared/types'
-import React from 'react'
+import { generate } from '@ant-design/colors'
+import React, { useMemo } from 'react'
 import { AddFavoriteModal } from './AddFavoriteModal'
+import { ApplyFavoriteConfirmModal } from './ApplyFavoriteConfirmModal'
 import { FavoriteEditModal } from './FavoriteEditModal'
 import { FavoritesListModal } from './FavoritesListModal'
 
@@ -13,6 +15,7 @@ interface FavoritesManagerProps {
   editingFavoriteId: string | null
   editingName: string
   editingContent: string
+  applyConfirmModalVisible: boolean
   /** 编辑器主题 */
   editorTheme: EditorTheme
   /** 主题颜色 */
@@ -23,6 +26,8 @@ interface FavoritesManagerProps {
   onCloseFavoritesModal: () => void
   onEditFavorite: (favorite: Favorite) => void
   onApplyFavorite: (favorite: Favorite) => void
+  onConfirmApply: () => void
+  onCancelApply: () => void
   onDeleteFavorite: (id: string) => Promise<void>
   onPinFavorite: (id: string) => Promise<void>
   onAddTag: (id: string) => Promise<void>
@@ -44,6 +49,7 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = (props) => {
     editingFavoriteId,
     editingName,
     editingContent,
+    applyConfirmModalVisible,
     editorTheme,
     themeColor,
     onAddFavoriteInputChange,
@@ -52,6 +58,8 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = (props) => {
     onCloseFavoritesModal,
     onEditFavorite,
     onApplyFavorite,
+    onConfirmApply,
+    onCancelApply,
     onDeleteFavorite,
     onPinFavorite,
     onAddTag,
@@ -59,6 +67,17 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = (props) => {
     onSaveEdit,
     onCloseEditModal,
   } = props
+
+  // 计算主题色梯度
+  const themeColors = useMemo(() => {
+    const colors = generate(themeColor)
+    return {
+      primaryColor: colors[5],
+      hoverColor: colors[4],
+      activeColor: colors[6],
+    }
+  }, [themeColor])
+
   return (
     <>
       <AddFavoriteModal
@@ -82,12 +101,22 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = (props) => {
         onClose={onCloseFavoritesModal}
       />
 
+      <ApplyFavoriteConfirmModal
+        visible={applyConfirmModalVisible}
+        themeColor={themeColor}
+        onConfirm={onConfirmApply}
+        onCancel={onCancelApply}
+      />
+
       <FavoriteEditModal
         visible={editModalVisible}
         favoriteId={editingFavoriteId}
         initialName={editingName}
         initialContent={editingContent}
         editorTheme={editorTheme}
+        themeColor={themeColors.primaryColor}
+        hoverColor={themeColors.hoverColor}
+        activeColor={themeColors.activeColor}
         onSave={onSaveEdit}
         onClose={onCloseEditModal}
       />

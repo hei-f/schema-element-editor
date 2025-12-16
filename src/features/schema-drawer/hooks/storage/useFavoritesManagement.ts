@@ -1,8 +1,5 @@
-import { MODAL_Z_INDEX } from '@/shared/constants/theme'
 import type { Favorite, FavoriteTag } from '@/shared/types'
 import { storage } from '@/shared/utils/browser/storage'
-import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
-import { Modal } from 'antd'
 import { useCallback, useState } from 'react'
 
 interface UseFavoritesManagementProps {
@@ -28,11 +25,15 @@ interface UseFavoritesManagementReturn {
   editingContent: string
   addTagModalVisible: boolean
   currentFavoriteForTag: Favorite | null
+  applyConfirmModalVisible: boolean
+  pendingApplyFavorite: Favorite | null
   setFavoriteNameInput: (value: string) => void
   handleOpenAddFavorite: () => void
   handleAddFavorite: () => Promise<void>
   handleOpenFavorites: () => Promise<void>
   handleApplyFavorite: (favorite: Favorite) => void
+  handleConfirmApply: () => void
+  handleCancelApply: () => void
   handleDeleteFavorite: (id: string) => Promise<void>
   handlePinFavorite: (id: string) => Promise<void>
   handleOpenAddTag: (id: string) => Promise<void>
@@ -67,6 +68,8 @@ export const useFavoritesManagement = ({
   const [editingContent, setEditingContent] = useState('')
   const [addTagModalVisible, setAddTagModalVisible] = useState(false)
   const [currentFavoriteForTag, setCurrentFavoriteForTag] = useState<Favorite | null>(null)
+  const [applyConfirmModalVisible, setApplyConfirmModalVisible] = useState(false)
+  const [pendingApplyFavorite, setPendingApplyFavorite] = useState<Favorite | null>(null)
 
   /**
    * 打开添加收藏对话框
@@ -136,23 +139,33 @@ export const useFavoritesManagement = ({
   const handleApplyFavorite = useCallback(
     (favorite: Favorite) => {
       if (isModified) {
-        Modal.confirm({
-          title: '确认应用收藏',
-          content: '当前内容未保存，应用收藏将替换当前内容，确认吗？',
-          okText: '应用',
-          cancelText: '取消',
-          getContainer: shadowRootManager.getContainer,
-          zIndex: MODAL_Z_INDEX,
-          onOk: () => {
-            applyFavoriteContent(favorite)
-          },
-        })
+        setPendingApplyFavorite(favorite)
+        setApplyConfirmModalVisible(true)
       } else {
         applyFavoriteContent(favorite)
       }
     },
     [isModified, applyFavoriteContent]
   )
+
+  /**
+   * 确认应用收藏
+   */
+  const handleConfirmApply = useCallback(() => {
+    if (pendingApplyFavorite) {
+      applyFavoriteContent(pendingApplyFavorite)
+      setApplyConfirmModalVisible(false)
+      setPendingApplyFavorite(null)
+    }
+  }, [pendingApplyFavorite, applyFavoriteContent])
+
+  /**
+   * 取消应用收藏
+   */
+  const handleCancelApply = useCallback(() => {
+    setApplyConfirmModalVisible(false)
+    setPendingApplyFavorite(null)
+  }, [])
 
   /**
    * 删除收藏
@@ -314,11 +327,15 @@ export const useFavoritesManagement = ({
     editingContent,
     addTagModalVisible,
     currentFavoriteForTag,
+    applyConfirmModalVisible,
+    pendingApplyFavorite,
     setFavoriteNameInput,
     handleOpenAddFavorite,
     handleAddFavorite,
     handleOpenFavorites,
     handleApplyFavorite,
+    handleConfirmApply,
+    handleCancelApply,
     handleDeleteFavorite,
     handlePinFavorite,
     handleOpenAddTag,

@@ -5,6 +5,7 @@
 
 // 导出组件
 export { AddFavoriteModal } from './components/AddFavoriteModal'
+export { ApplyFavoriteConfirmModal } from './components/ApplyFavoriteConfirmModal'
 export { FavoriteEditModal } from './components/FavoriteEditModal'
 export { FavoritesListModal } from './components/FavoritesListModal'
 export { FavoritesManager } from './components/FavoritesManager'
