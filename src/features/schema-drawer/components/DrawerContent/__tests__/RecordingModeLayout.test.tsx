@@ -8,10 +8,30 @@ import React from 'react'
 import { RecordingModeLayout } from '../RecordingModeLayout'
 import { ContentType, EditorTheme } from '@/shared/types'
 import type { CodeMirrorEditorHandle } from '../../editor/CodeMirrorEditor'
-import { styledComponentsMock } from '../../../../../../test/__mocks__/styled-components'
 
 // Mock styled-components
-vi.mock('styled-components', () => styledComponentsMock)
+vi.mock('styled-components', () => {
+  const mockStyled = (tag: string) => (_styles: any) => {
+    const Component = ({ children, ...props }: any) => React.createElement(tag, props, children)
+    Component.displayName = `styled.${tag}`
+    return Component
+  }
+  const styledProxy = new Proxy(mockStyled, {
+    get: (target, prop) => {
+      if (typeof prop === 'string') {
+        return target(prop)
+      }
+      return target
+    },
+  })
+  return {
+    ThemeProvider: ({ children }: any) => children,
+    keyframes: () => '',
+    css: () => '',
+    styled: styledProxy,
+    default: styledProxy,
+  }
+})
 
 // Mock 子组件
 vi.mock('../../editor/CodeMirrorEditor', () => {
