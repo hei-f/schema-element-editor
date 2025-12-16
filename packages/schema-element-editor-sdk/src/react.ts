@@ -89,11 +89,6 @@ export function useSchemaElementEditor(
   useEffect(() => {
     // enabled 明确为 false 时不创建桥接
     if (enabled === false) {
-      // 清理可能存在的遗留 bridge 实例
-      if (bridgeRef.current && typeof bridgeRef.current.cleanup === 'function') {
-        bridgeRef.current.cleanup()
-        bridgeRef.current = null
-      }
       return
     }
 
