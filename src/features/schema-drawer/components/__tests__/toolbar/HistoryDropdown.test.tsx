@@ -22,6 +22,8 @@ describe('HistoryDropdown组件测试', () => {
     onLoadVersion: vi.fn(),
     onClearHistory: vi.fn(),
     disabled: false,
+    themeColor: '#1677FF',
+    editorTheme: 'light',
   }
 
   beforeEach(() => {
