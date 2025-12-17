@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import { FULL_SCREEN_MODE, type FullScreenMode } from '@/shared/constants/ui-modes'
+import { useLatest } from '@/shared/hooks/useLatest'
 import { schemaTransformer } from '../../services/schema-transformer'
 import { getJsonError, repairJson } from '../../utils/json-repair'
 import type { CodeMirrorEditorHandle } from '../../components/editor/CodeMirrorEditor'
@@ -37,26 +38,30 @@ interface UseJsonRepairReturn {
  * 提供错误定位、智能修复、diff 对比等功能
  */
 export const useJsonRepair = (props: UseJsonRepairProps): UseJsonRepairReturn => {
-  const {
-    editorValue,
-    editorRef,
-    getContentToAnalyze,
-    updateEditorContent,
-    switchFullScreenMode,
-    showLightNotification,
-    showError,
-    showWarning,
-  } = props
-
   /** 修复前的原始内容 */
   const [repairOriginalValue, setRepairOriginalValue] = useState<string>('')
   /** 待确认的修复内容 */
   const [pendingRepairedValue, setPendingRepairedValue] = useState<string>('')
 
   /**
+   * 使用 useLatest 保持最新的 props 引用
+   * 这样 useCallback 不需要依赖这些 props，避免要求使用者必须缓存传入的函数
+   */
+  const propsRef = useLatest(props)
+
+  /**
    * 定位错误
    */
   const handleLocateError = useCallback(() => {
+    const {
+      editorValue,
+      editorRef,
+      getContentToAnalyze,
+      updateEditorContent,
+      showLightNotification,
+      showWarning,
+    } = propsRef.current
+
     const { content, isInnerContent } = getContentToAnalyze(editorValue)
 
     // 先尝试直接解析
@@ -88,19 +93,20 @@ export const useJsonRepair = (props: UseJsonRepairProps): UseJsonRepairReturn =>
     } else {
       showLightNotification('JSON 格式正确，无语法错误')
     }
-  }, [
-    editorValue,
-    editorRef,
-    getContentToAnalyze,
-    updateEditorContent,
-    showLightNotification,
-    showWarning,
-  ])
+  }, [propsRef])
 
   /**
    * 修复 JSON
    */
   const handleRepairJson = useCallback(() => {
+    const {
+      editorValue,
+      getContentToAnalyze,
+      switchFullScreenMode,
+      showLightNotification,
+      showError,
+    } = propsRef.current
+
     const { content, isInnerContent } = getContentToAnalyze(editorValue)
     const result = repairJson(content)
 
@@ -128,12 +134,14 @@ export const useJsonRepair = (props: UseJsonRepairProps): UseJsonRepairReturn =>
         showError(result.error || '无法修复此 JSON，请手动检查')
       }
     }
-  }, [editorValue, getContentToAnalyze, switchFullScreenMode, showLightNotification, showError])
+  }, [propsRef])
 
   /**
    * 应用修复
    */
   const handleApplyRepair = useCallback(() => {
+    const { updateEditorContent, showLightNotification, switchFullScreenMode } = propsRef.current
+
     if (pendingRepairedValue) {
       updateEditorContent(pendingRepairedValue, { markModified: true })
       showLightNotification('已应用修复')
@@ -142,27 +150,31 @@ export const useJsonRepair = (props: UseJsonRepairProps): UseJsonRepairReturn =>
     setPendingRepairedValue('')
     setRepairOriginalValue('')
     switchFullScreenMode(FULL_SCREEN_MODE.NONE)
-  }, [pendingRepairedValue, updateEditorContent, showLightNotification, switchFullScreenMode])
+  }, [propsRef, pendingRepairedValue])
 
   /**
    * 取消修复
    */
   const handleCancelRepair = useCallback(() => {
+    const { switchFullScreenMode, showLightNotification } = propsRef.current
+
     // 清理状态并退出 diff 模式
     setPendingRepairedValue('')
     setRepairOriginalValue('')
     switchFullScreenMode(FULL_SCREEN_MODE.NONE)
     showLightNotification('已取消修复')
-  }, [switchFullScreenMode, showLightNotification])
+  }, [propsRef])
 
   /**
    * 返回编辑模式（从 Diff 模式）
    */
   const handleBackToEditor = useCallback(() => {
+    const { switchFullScreenMode } = propsRef.current
+
     switchFullScreenMode(FULL_SCREEN_MODE.NONE)
     // 清除修复对比的原始值
     setRepairOriginalValue('')
-  }, [switchFullScreenMode])
+  }, [propsRef])
 
   return {
     repairOriginalValue,
