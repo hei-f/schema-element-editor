@@ -2,9 +2,10 @@ import { MODAL_Z_INDEX } from '@/shared/constants/theme'
 import type { Favorite, FavoriteTag } from '@/shared/types'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import type { TableColumnsType } from 'antd'
-import { Button, Modal, Space, Flex } from 'antd'
+import { Modal, Space, Flex } from 'antd'
 import { PlusOutlined, PushpinFilled, PushpinOutlined } from '@ant-design/icons'
 import React, { useEffect, useMemo, useState } from 'react'
+import { ModalFooterButton } from '@/shared/styles/modal-button.styles'
 import {
   ClickableFavoriteModalTag,
   FavoriteModalTag,
@@ -140,15 +141,15 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
       width: 160,
       render: (_: any, record: Favorite) => (
         <Space size="small">
-          <Button type="link" size="small" onClick={() => onEdit(record)}>
+          <ModalFooterButton type="link" size="small" onClick={() => onEdit(record)}>
             编辑
-          </Button>
-          <Button type="link" size="small" onClick={() => onApply(record)}>
+          </ModalFooterButton>
+          <ModalFooterButton type="link" size="small" onClick={() => onApply(record)}>
             应用
-          </Button>
-          <Button type="link" size="small" danger onClick={() => onDelete(record.id)}>
+          </ModalFooterButton>
+          <ModalFooterButton type="link" size="small" danger onClick={() => onDelete(record.id)}>
             删除
-          </Button>
+          </ModalFooterButton>
         </Space>
       ),
     },

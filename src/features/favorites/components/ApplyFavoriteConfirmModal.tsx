@@ -1,9 +1,9 @@
 import { MODAL_Z_INDEX } from '@/shared/constants/theme'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { generate } from '@ant-design/colors'
-import { Button, ConfigProvider, Modal, Space } from 'antd'
+import { ConfigProvider, Modal, Space } from 'antd'
 import React, { useMemo } from 'react'
-import { ThemedPrimaryButton } from '../styles/modals.styles'
+import { ModalFooterButton } from '@/shared/styles/modal-button.styles'
 
 interface ApplyFavoriteConfirmModalProps {
   visible: boolean
@@ -61,8 +61,8 @@ export const ApplyFavoriteConfirmModal: React.FC<ApplyFavoriteConfirmModalProps>
         onCancel={onCancel}
         footer={
           <Space>
-            <Button onClick={onCancel}>取消</Button>
-            <ThemedPrimaryButton
+            <ModalFooterButton onClick={onCancel}>取消</ModalFooterButton>
+            <ModalFooterButton
               type="primary"
               onClick={onConfirm}
               $themeColor={primaryColor}
@@ -70,7 +70,7 @@ export const ApplyFavoriteConfirmModal: React.FC<ApplyFavoriteConfirmModalProps>
               $activeColor={activeColor}
             >
               应用
-            </ThemedPrimaryButton>
+            </ModalFooterButton>
           </Space>
         }
         getContainer={shadowRootManager.getContainer}
