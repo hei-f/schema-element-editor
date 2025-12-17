@@ -1,5 +1,5 @@
 import { HistoryIcon } from '@/shared/icons/drawer/title/HistoryIcon'
-import type { HistoryEntry, HistoryEntryType } from '@/shared/types'
+import type { HistoryEntry } from '@/shared/types'
 import { ClearOutlined } from '@ant-design/icons'
 import { Button, Dropdown, Tooltip } from 'antd'
 import React from 'react'
@@ -11,7 +11,6 @@ import {
   HistoryDropdownDesc,
   HistoryDropdownEmptyIcon,
   HistoryDropdownEmptyState,
-  HistoryDropdownIcon,
   HistoryDropdownInfo,
   HistoryDropdownItem,
   HistoryDropdownList,
@@ -26,18 +25,8 @@ interface HistoryDropdownProps {
   onClearHistory: () => void
   disabled: boolean
   showText?: boolean
-}
-
-/**
- * 历史类型图标映射
- */
-const HISTORY_ICONS: Record<HistoryEntryType, string> = {
-  initial: '📄',
-  auto: '✏️',
-  save: '💾',
-  draft: '📝',
-  favorite: '⭐',
-  manual: '🔄',
+  themeColor?: string
+  editorTheme?: string
 }
 
 /**
@@ -62,8 +51,11 @@ export const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
   onClearHistory,
   disabled,
   showText = false,
+  themeColor = '#0066ff',
+  editorTheme = 'light',
 }) => {
   const [open, setOpen] = React.useState(false)
+  const isDark = editorTheme !== 'light'
 
   const handleItemClick = (index: number) => {
     onLoadVersion(index)
@@ -76,7 +68,7 @@ export const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
   }
 
   const dropdownContent = (
-    <HistoryDropdownContainer>
+    <HistoryDropdownContainer $isDark={isDark}>
       <HistoryDropdownList>
         {history.length === 0 ? (
           <HistoryDropdownEmptyState>
@@ -87,11 +79,12 @@ export const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
           history.map((entry, index) => (
             <HistoryDropdownItem
               key={index}
+              $isDark={isDark}
               $isActive={index === currentIndex}
+              $themeColor={themeColor}
               onClick={() => handleItemClick(index)}
             >
               <HistoryDropdownMenuItemContent>
-                <HistoryDropdownIcon>{HISTORY_ICONS[entry.type]}</HistoryDropdownIcon>
                 <HistoryDropdownInfo>
                   <HistoryDropdownDesc $isActive={index === currentIndex}>
                     {entry.description || '内容变更'}
@@ -107,7 +100,7 @@ export const HistoryDropdown: React.FC<HistoryDropdownProps> = ({
         )}
       </HistoryDropdownList>
       {history.length > 0 && (
-        <HistoryDropdownClearButtonWrapper>
+        <HistoryDropdownClearButtonWrapper $isDark={isDark}>
           <Button
             block
             size="small"
