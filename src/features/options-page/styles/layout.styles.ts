@@ -179,7 +179,7 @@ export const PageRoot = styled.div`
     animation-delay: var(--glow-delay-2), var(--glow-delay-2);
   }
 
-  .ant-form-item {
+  .see-form-item {
     margin-bottom: 0;
   }
 `
@@ -458,9 +458,11 @@ export const CodeBlock = styled.pre`
 `
 
 export const HeaderSection = styled(Flex)`
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: stretch;
+  && {
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: stretch;
+    }
   }
 `
 
@@ -469,7 +471,9 @@ export const HeaderContent = styled.div`
 `
 
 export const HeaderActions = styled(Flex)`
-  flex-shrink: 0;
+  && {
+    flex-shrink: 0;
+  }
 `
 
 export const VersionTag = styled.span`
@@ -489,7 +493,9 @@ export const VersionTag = styled.span`
 
 /** 顶部操作栏容器 */
 export const HeaderToolbar = styled(Flex)`
-  gap: 8px;
+  && {
+    gap: 8px;
+  }
 `
 
 /** 版本信息容器（版本号 + 分隔线 + 检查更新按钮） */
@@ -536,6 +542,7 @@ export const CheckUpdateButton = styled(Button)`
     color: #666f8d;
     cursor: pointer;
     transition: all 0.2s ease;
+    border: 1px solid transparent !important;
   }
 `
 
@@ -591,7 +598,9 @@ export const ResetDefaultButton = styled.button`
 
 /** SectionCard 面板标题容器 */
 export const PanelHeader = styled(Flex)`
-  width: 100%;
+  && {
+    width: 100%;
+  }
 `
 
 /** SectionCard 面板图标 */
@@ -605,9 +614,11 @@ export const PanelIcon = styled.span`
 
 /** SectionCard 面板标题文本 */
 export const PanelTitle = styled(Typography.Text)`
-  font-weight: 500;
-  font-size: 16px;
-  color: #353e5c;
+  && {
+    font-weight: 500;
+    font-size: 16px;
+    color: #353e5c;
+  }
 `
 
 /** SectionCard 标题容器（包含标题和帮助图标） */
@@ -615,13 +626,15 @@ export const PanelTitleWrapper = styled(Flex)``
 
 /** SectionCard 标题帮助图标 */
 export const PanelTitleHelpIcon = styled(QuestionCircleOutlined)`
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.45);
-  cursor: help;
-  transition: color 0.2s;
+  && {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.45);
+    cursor: help;
+    transition: color 0.2s;
 
-  &:hover {
-    color: rgba(0, 0, 0, 0.65);
+    &:hover {
+      color: rgba(0, 0, 0, 0.65);
+    }
   }
 `
 
@@ -715,13 +728,15 @@ export const SurpriseButton = styled(NativePanelActionButton).attrs({
 })``
 
 export const AutoSaveHint = styled(Flex)`
-  padding: 12px 16px;
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  border-left: 3px solid #3b82f6;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  font-size: 13px;
-  color: #1e40af;
+  && {
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-left: 3px solid #3b82f6;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #1e40af;
+  }
 `
 
 /**
@@ -746,56 +761,28 @@ export const AutoSaveHintLinkButton = styled(Button)`
 `
 
 export const PageTitle = styled(Title)`
-  &.ant-typography {
+  &.see-typography {
     margin: 0;
   }
 `
 
 export const PageDescription = styled(Paragraph)`
-  &.ant-typography {
+  &.see-typography {
     margin-bottom: 0;
   }
 `
 
 export const SectionTitle = styled(Title)<{ $noMarginTop?: boolean }>`
-  &.ant-typography {
+  &.see-typography {
     margin-top: ${(props) => (props.$noMarginTop ? '0' : '24px')};
     margin-bottom: 16px;
   }
 `
 
 export const SectionSubTitle = styled(Title)`
-  &.ant-typography {
+  &.see-typography {
     margin-top: 24px;
     margin-bottom: 16px;
-  }
-`
-
-/** 基础折叠面板样式 */
-const baseCollapseStyles = `
-  /* 折叠面板头部样式 */
-  .ant-collapse-header {
-    /* 防止标题被选中 */
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-
-    /* 确保箭头图标和标题垂直居中对齐 */
-    align-items: center !important;
-  }
-
-  /* 确保箭头图标垂直居中 */
-  .ant-collapse-expand-icon {
-    display: flex;
-    align-items: center;
-    height: auto !important;
-    padding-inline-end: 12px !important;
-  }
-
-  /* 确保 header 内容区域占满剩余空间 */
-  .ant-collapse-header-text {
-    flex: 1;
   }
 `
 
@@ -804,12 +791,12 @@ const baseCollapseStyles = `
  * 设计理念：简洁现代，强调排版和留白，底部边框作为视觉锚点
  */
 export const StyledCollapseModern = styled(Collapse)<{ id?: string }>`
-  ${baseCollapseStyles}
+  && {
+    border: none;
+    background: transparent;
+  }
 
-  border: none;
-  background: transparent;
-
-  .ant-collapse-item {
+  .see-collapse-item {
     border: none;
     border-radius: 12px !important;
     margin-bottom: 8px;
@@ -842,27 +829,39 @@ export const StyledCollapseModern = styled(Collapse)<{ id?: string }>`
     }
   }
 
-  .ant-collapse-header {
+  .see-collapse-header {
     padding: 16px 20px;
     background: transparent;
+    /* 防止标题被选中 */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    /* 确保箭头图标和标题垂直居中对齐 */
+    align-items: center !important;
 
-    .ant-collapse-header-text {
+    .see-collapse-header-text {
+      flex: 1;
       color: #262626;
       font-weight: 700;
       font-size: 15px;
     }
 
-    .ant-collapse-expand-icon {
+    .see-collapse-expand-icon {
+      display: flex;
+      align-items: center;
+      height: auto !important;
+      padding-inline-end: 12px !important;
       color: #8c8c8c;
     }
   }
 
-  .ant-collapse-content {
+  .see-collapse-content {
     border-top: 1px solid #f0f0f0;
     background: transparent;
   }
 
-  .ant-collapse-content-box {
+  .see-collapse-content-box {
     padding: 24px;
     display: flex;
     flex-direction: column;
@@ -870,7 +869,7 @@ export const StyledCollapseModern = styled(Collapse)<{ id?: string }>`
   }
 
   /* 悬停效果 */
-  .ant-collapse-item:hover {
+  .see-collapse-item:hover {
     box-shadow:
       0 4px 12px rgba(0, 0, 0, 0.06),
       0 8px 24px color-mix(in srgb, var(--see-color-primary, #1677ff) 10%, transparent);
@@ -881,7 +880,7 @@ export const StyledCollapseModern = styled(Collapse)<{ id?: string }>`
   }
 
   /* 展开状态 */
-  .ant-collapse-item-active {
+  .see-collapse-item-active {
     background: rgba(255, 255, 255, 0.45);
     box-shadow:
       0 4px 12px rgba(0, 0, 0, 0.05),
@@ -891,7 +890,7 @@ export const StyledCollapseModern = styled(Collapse)<{ id?: string }>`
       opacity: 1;
     }
 
-    .ant-collapse-header .ant-collapse-expand-icon {
+    .see-collapse-header .see-collapse-expand-icon {
       color: var(--see-color-primary, #1677ff);
     }
   }
@@ -901,14 +900,16 @@ export const StyledCollapseModern = styled(Collapse)<{ id?: string }>`
 export const StyledCollapse = StyledCollapseModern
 
 export const HelpIcon = styled(InfoCircleOutlined)`
-  color: #1890ff;
-  cursor: help;
+  && {
+    color: #1890ff;
+    cursor: help;
+  }
 `
 
 export const ExampleSection = styled(Flex)``
 
 export const ExampleLabel = styled(Text)`
-  &.ant-typography {
+  &.see-typography {
     display: block;
   }
 `
@@ -917,7 +918,7 @@ export const ExampleLabel = styled(Text)`
  * 配置卡片副标题
  */
 export const CardSubtitle = styled(Text)`
-  &.ant-typography {
+  &.see-typography {
     display: block;
     font-size: 14px;
     color: #8c8c8c;
@@ -929,8 +930,10 @@ export const CardSubtitle = styled(Text)`
  * 卡片标题容器（带 emoji）
  */
 export const CardTitleContainer = styled(Flex)`
-  font-size: 16px;
-  font-weight: 600;
+  && {
+    font-size: 16px;
+    font-weight: 600;
+  }
 `
 
 /**
@@ -1042,7 +1045,7 @@ export const FormLabel = styled.span`
  * 用于内联表单项，移除默认的下边距
  */
 export const ZeroMarginFormItem = styled(Form.Item)`
-  &.ant-form-item {
+  &.see-form-item {
     margin-bottom: 0;
   }
 `
@@ -1052,12 +1055,14 @@ export const ZeroMarginFormItem = styled(Form.Item)`
  * 用于表单项旁的帮助说明，带悬停效果
  */
 export const HelpTooltipIcon = styled(QuestionCircleOutlined)`
-  color: rgba(0, 0, 0, 0.45);
-  cursor: help;
-  font-size: 14px;
+  && {
+    color: rgba(0, 0, 0, 0.45);
+    cursor: help;
+    font-size: 14px;
 
-  &:hover {
-    color: rgba(0, 0, 0, 0.65);
+    &:hover {
+      color: rgba(0, 0, 0, 0.65);
+    }
   }
 `
 
@@ -1098,9 +1103,7 @@ export const SpacedAlert = styled(Alert)<{ $marginTop?: number; $marginBottom?: 
  * 用于表单下方的次要提示信息
  */
 export const SecondaryHintText = styled(Text)`
-  &.ant-typography {
+  /* && {
     display: block;
-    margin-top: -8px;
-    margin-bottom: 16px;
-  }
+  } */
 `

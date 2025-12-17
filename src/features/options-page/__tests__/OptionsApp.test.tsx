@@ -272,7 +272,7 @@ describe.skip('OptionsApp组件测试', () => {
       const { container } = render(<OptionsApp />)
 
       await waitFor(() => {
-        expect(container.querySelector('.ant-collapse')).toBeInTheDocument()
+        expect(container.querySelector('.see-collapse')).toBeInTheDocument()
       })
     })
   })
@@ -325,7 +325,7 @@ describe.skip('OptionsApp组件测试', () => {
       const { container } = render(<OptionsApp />)
 
       await waitFor(() => {
-        const collapse = container.querySelector('.ant-collapse')
+        const collapse = container.querySelector('.see-collapse')
         expect(collapse).toBeInTheDocument()
       })
     })
@@ -346,11 +346,11 @@ describe.skip('OptionsApp组件测试', () => {
 
       // 等待组件加载完成
       await waitFor(() => {
-        expect(container.querySelector('.ant-collapse')).toBeInTheDocument()
+        expect(container.querySelector('.see-collapse')).toBeInTheDocument()
       })
 
       // 点击第一个折叠面板头部来展开
-      const collapseHeader = container.querySelector('.ant-collapse-header')
+      const collapseHeader = container.querySelector('.see-collapse-header')
       expect(collapseHeader).toBeInTheDocument()
 
       if (collapseHeader) {
@@ -359,7 +359,7 @@ describe.skip('OptionsApp组件测试', () => {
 
       // 验证展开后能看到表单元素
       await waitFor(() => {
-        const formItems = container.querySelectorAll('.ant-form-item')
+        const formItems = container.querySelectorAll('.see-form-item')
         expect(formItems.length).toBeGreaterThan(0)
       })
     })
