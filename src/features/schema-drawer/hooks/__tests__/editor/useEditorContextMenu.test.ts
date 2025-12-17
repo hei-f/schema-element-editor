@@ -225,7 +225,7 @@ describe('useEditorContextMenu', () => {
       })
 
       // 现在将ref设为null并调用save
-      refWithEditor.current = null
+      ;(refWithEditor as any).current = null
 
       act(() => {
         result.current.handleModalSave('new content')
