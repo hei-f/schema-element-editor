@@ -275,10 +275,6 @@ export type EditorTheme = 'light' | 'dark' | 'seeDark'
 export interface EditorContextMenuConfig {
   /** 是否启用右键菜单 */
   enabled: boolean
-  /** 是否显示定位错误选项 */
-  locateError: boolean
-  /** 是否显示JSON修复选项 */
-  repairJson: boolean
 }
 
 /**

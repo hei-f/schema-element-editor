@@ -182,14 +182,9 @@ export const QuickEditModal: React.FC<QuickEditModalProps> = (props) => {
   React.useEffect(() => {
     if (visible && content) {
       setEditorValue(content)
-      // 检测内容类型
       detectContentType(content)
-      // 使用 setTimeout 确保编辑器已经渲染
-      setTimeout(() => {
-        if (editorRef.current) {
-          editorRef.current.setValue(content)
-        }
-      }, 50)
+      // useEffect 已确保 DOM 更新完成,ref 已赋值,可直接设置编辑器内容
+      editorRef.current?.setValue(content)
     }
   }, [visible, content, detectContentType])
 

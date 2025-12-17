@@ -98,8 +98,6 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
   themeColor: '#1677FF',
   contextMenuConfig: {
     enabled: true,
-    locateError: false,
-    repairJson: false,
   },
 } as const
 

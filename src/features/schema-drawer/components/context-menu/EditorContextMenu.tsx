@@ -65,8 +65,6 @@ export const EditorContextMenu: React.FC<EditorContextMenuProps> = (props) => {
 
   if (!visible) return null
 
-  const shadowRoot = shadowRootManager.get()
-
   return createPortal(
     <ContextMenuContainer ref={menuRef} $x={position.x} $y={position.y} $isDark={isDark}>
       {menuItems
@@ -83,6 +81,6 @@ export const EditorContextMenu: React.FC<EditorContextMenuProps> = (props) => {
           </ContextMenuItem>
         ))}
     </ContextMenuContainer>,
-    shadowRoot as unknown as Element
+    shadowRootManager.getContainer()
   )
 }

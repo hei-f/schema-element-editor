@@ -44,13 +44,6 @@ export const HistoryDropdownMenuItemContent = styled(ModernDropdownItemContent)`
 `
 
 /**
- * 历史图标（已弃用，保留接口兼容性）
- */
-export const HistoryDropdownIcon = styled.span`
-  display: none;
-`
-
-/**
  * 历史信息容器
  * 水平布局：描述文本居左，时间居右
  */
