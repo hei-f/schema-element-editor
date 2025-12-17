@@ -522,8 +522,8 @@ describe('NormalModeLayout', () => {
 
       render(<NormalModeLayout {...props} />)
 
-      expect(screen.getByText('✓ 通知1')).toBeInTheDocument()
-      expect(screen.getByText('✓ 通知2')).toBeInTheDocument()
+      expect(screen.getByText('通知1')).toBeInTheDocument()
+      expect(screen.getByText('通知2')).toBeInTheDocument()
     })
 
     it('空通知列表不应该渲染任何通知', () => {
@@ -551,8 +551,8 @@ describe('NormalModeLayout', () => {
       render(<NormalModeLayout {...props} />)
 
       // 验证两条通知都被渲染
-      expect(screen.getByText('✓ 通知1')).toBeInTheDocument()
-      expect(screen.getByText('✓ 通知2')).toBeInTheDocument()
+      expect(screen.getByText('通知1')).toBeInTheDocument()
+      expect(screen.getByText('通知2')).toBeInTheDocument()
     })
   })
 

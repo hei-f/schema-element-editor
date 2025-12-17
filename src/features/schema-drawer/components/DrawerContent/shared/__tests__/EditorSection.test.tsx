@@ -173,9 +173,9 @@ describe('EditorSection', () => {
 
       const notifications = screen.getAllByTestId('light-notification')
       expect(notifications).toHaveLength(3)
-      expect(notifications[0]).toHaveTextContent('✓ 已保存')
-      expect(notifications[1]).toHaveTextContent('✓ 已格式化')
-      expect(notifications[2]).toHaveTextContent('✓ 已复制')
+      expect(notifications[0]).toHaveTextContent('已保存')
+      expect(notifications[1]).toHaveTextContent('已格式化')
+      expect(notifications[2]).toHaveTextContent('已复制')
     })
 
     it('通知应该按索引计算正确的 top 位置', () => {
