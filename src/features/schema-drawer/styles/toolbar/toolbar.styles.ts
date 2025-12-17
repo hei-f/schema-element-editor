@@ -236,10 +236,14 @@ export const MoreMenuItem = styled.div<{ $disabled?: boolean }>`
 
 /**
  * 工具栏按钮
- * 普通按钮使用固定样式，primary 按钮使用 CSS 变量 --drawer-theme-color 作为主题色
+ * 普通按钮使用固定样式，primary 按钮通过props传递主题色
  * 使用固定高度避免 hover 时高度变化
  */
-export const ToolbarButton = styled(Button)`
+export const ToolbarButton = styled(Button)<{
+  $themeColor?: string
+  $hoverColor?: string
+  $activeColor?: string
+}>`
   &.see-btn {
     border-radius: 16px;
     padding: 2px 12px;
@@ -255,18 +259,21 @@ export const ToolbarButton = styled(Button)`
 
   /* primary 按钮使用主题色（仅非禁用状态） */
   &.see-btn-primary:not(:disabled):not(.see-btn-disabled) {
-    border: 1px solid transparent;
-    background: var(--see-color-primary, #1677ff);
-    color: #ffffff;
+    border: 1px solid transparent !important;
+    background: ${(props) => props.$themeColor || '#1677ff'} !important;
+    border-color: ${(props) => props.$themeColor || '#1677ff'} !important;
+    color: #ffffff !important;
 
     &:hover {
-      background: color-mix(in srgb, var(--see-color-primary, #1677ff) 85%, #ffffff);
-      color: #ffffff;
+      background: ${(props) => props.$hoverColor || '#4096ff'} !important;
+      border-color: ${(props) => props.$hoverColor || '#4096ff'} !important;
+      color: #ffffff !important;
     }
 
     &:active {
-      background: color-mix(in srgb, var(--see-color-primary, #1677ff) 85%, #000000);
-      color: #ffffff;
+      background: ${(props) => props.$activeColor || '#0958d9'} !important;
+      border-color: ${(props) => props.$activeColor || '#0958d9'} !important;
+      color: #ffffff !important;
     }
   }
 `

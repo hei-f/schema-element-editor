@@ -40,6 +40,12 @@ interface ResponsiveButtonGroupProps {
   buttons: ToolbarButtonConfig[]
   /** 获取 tooltip/dropdown 挂载容器 */
   getPopupContainer?: () => HTMLElement
+  /** 主题色 */
+  themeColor?: string
+  /** 悬浮态颜色 */
+  hoverColor?: string
+  /** 激活态颜色 */
+  activeColor?: string
 }
 
 /** 按钮之间的间距 */
@@ -50,7 +56,7 @@ const BUTTON_GAP = 8
  * 使用 IntersectionObserver 检测按钮可见性，将被截断的按钮收入"更多"下拉菜单
  */
 export const ResponsiveButtonGroup: React.FC<ResponsiveButtonGroupProps> = (props) => {
-  const { buttons, getPopupContainer } = props
+  const { buttons, getPopupContainer, themeColor, hoverColor, activeColor } = props
 
   const containerRef = useRef<HTMLDivElement>(null)
   const measureContainerRef = useRef<HTMLDivElement>(null)
@@ -194,7 +200,15 @@ export const ResponsiveButtonGroup: React.FC<ResponsiveButtonGroupProps> = (prop
     }
 
     return (
-      <ToolbarButton size="small" type={type} onClick={onClick} disabled={disabled}>
+      <ToolbarButton
+        size="small"
+        type={type}
+        onClick={onClick}
+        disabled={disabled}
+        $themeColor={themeColor}
+        $hoverColor={hoverColor}
+        $activeColor={activeColor}
+      >
         {label}
       </ToolbarButton>
     )

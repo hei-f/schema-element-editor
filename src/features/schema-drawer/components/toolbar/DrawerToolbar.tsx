@@ -77,6 +77,12 @@ interface DrawerToolbarProps {
   onCancelRepair?: () => void
   /** 复制参数成功回调 */
   onCopyParam?: (value: string, index: number) => void
+  /** 主题色 */
+  themeColor?: string
+  /** 悬浮态颜色 */
+  hoverColor?: string
+  /** 激活态颜色 */
+  activeColor?: string
 }
 
 /**
@@ -111,6 +117,9 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = (props) => {
     onApplyRepair,
     onCancelRepair,
     onCopyParam,
+    themeColor,
+    hoverColor,
+    activeColor,
   } = props
 
   const toolbarRef = useRef<HTMLDivElement>(null)
@@ -409,7 +418,13 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = (props) => {
       )}
 
       {/* 响应式按钮组 */}
-      <ResponsiveButtonGroup buttons={buttonConfigs} getPopupContainer={getPopupContainer} />
+      <ResponsiveButtonGroup
+        buttons={buttonConfigs}
+        getPopupContainer={getPopupContainer}
+        themeColor={themeColor}
+        hoverColor={hoverColor}
+        activeColor={activeColor}
+      />
     </StyledEditorToolbar>
   )
 }

@@ -86,9 +86,13 @@ export const DraftAutoSaveSuccess = styled.span`
 
 /**
  * 抽屉标题工具栏按钮
- * primary 按钮使用 CSS 变量 --drawer-theme-color 作为主题色
+ * primary 按钮通过props传递主题色
  */
-export const DrawerTitleButton = styled(Button)`
+export const DrawerTitleButton = styled(Button)<{
+  $themeColor?: string
+  $hoverColor?: string
+  $activeColor?: string
+}>`
   &.see-btn {
     border-radius: 6px;
     color: rgba(102, 111, 141, 1);
@@ -100,16 +104,20 @@ export const DrawerTitleButton = styled(Button)`
 
   /* primary 按钮使用主题色（仅非禁用状态） */
   &.see-btn-primary:not(:disabled):not(.see-btn-disabled) {
-    background: var(--see-color-primary, #1677ff);
-    color: #fff;
+    background: ${(props) => props.$themeColor || '#1677ff'} !important;
+    border-color: ${(props) => props.$themeColor || '#1677ff'} !important;
+    color: #fff !important;
 
     &:hover {
-      background: color-mix(in srgb, var(--see-color-primary, #1677ff) 85%, #ffffff);
-      color: #fff;
+      background: ${(props) => props.$hoverColor || '#4096ff'} !important;
+      border-color: ${(props) => props.$hoverColor || '#4096ff'} !important;
+      color: #fff !important;
     }
 
     &:active {
-      background: color-mix(in srgb, var(--see-color-primary, #1677ff) 85%, #000000);
+      background: ${(props) => props.$activeColor || '#0958d9'} !important;
+      border-color: ${(props) => props.$activeColor || '#0958d9'} !important;
+      color: #fff !important;
     }
   }
 
