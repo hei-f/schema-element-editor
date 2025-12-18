@@ -22,7 +22,7 @@ import {
   FeatureContent,
   FeatureTitle,
   FeatureDescription,
-} from './index.styles'
+} from './_index.styles'
 
 type FeatureItem = {
   title: string

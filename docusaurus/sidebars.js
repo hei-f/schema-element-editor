@@ -17,6 +17,11 @@ const sidebars = {
   tutorialSidebar: [
     {
       type: 'doc',
+      id: 'intro',
+      label: '文档介绍',
+    },
+    {
+      type: 'doc',
       id: 'guides/快速入门',
       label: '快速入门',
     },
