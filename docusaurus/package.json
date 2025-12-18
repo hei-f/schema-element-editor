@@ -28,7 +28,8 @@
     "@docusaurus/module-type-aliases": "^3.8.0",
     "@docusaurus/tsconfig": "^3.8.0",
     "@docusaurus/types": "^3.8.0",
-    "@types/styled-components": "^5.1.36"
+    "@types/styled-components": "^5.1.36",
+    "babel-plugin-styled-components": "^2.1.4"
   },
   "packageManager": "pnpm@9.0.0",
   "browserslist": {
