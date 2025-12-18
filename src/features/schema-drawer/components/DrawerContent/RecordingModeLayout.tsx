@@ -23,8 +23,8 @@ import {
   RecordingModeContainer,
 } from '../../styles/recording/recording.styles'
 import { CodeMirrorEditor } from '../editor/CodeMirrorEditor'
-import { RecordingStatusBar } from '../recording/RecordingStatusBar'
-import { VersionHistoryPanel } from '../recording/VersionHistoryPanel'
+import { RecordingStatusBar } from '../recording/RecordingStatusBar.lazy'
+import { VersionHistoryPanel } from '../recording/VersionHistoryPanel.lazy'
 import { BuiltinPreview } from '../preview/BuiltinPreview.lazy'
 import { DiffModeContent } from './modes'
 import { ToolbarSection } from './shared/ToolbarSection'
@@ -204,12 +204,14 @@ export const RecordingModeLayout: React.FC<RecordingModeLayoutProps> = (props) =
   const renderRecordingContentArea = () => (
     <RecordingModeContainer>
       <RecordingContentArea>
-        <VersionHistoryPanel
-          isRecording={isRecording}
-          snapshots={snapshots}
-          selectedSnapshotId={selectedSnapshotId}
-          onSelectSnapshot={onSelectSnapshot}
-        />
+        <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>加载中...</div>}>
+          <VersionHistoryPanel
+            isRecording={isRecording}
+            snapshots={snapshots}
+            selectedSnapshotId={selectedSnapshotId}
+            onSelectSnapshot={onSelectSnapshot}
+          />
+        </Suspense>
         <RecordingEditorArea>
           <EditorContainer>{renderEditor()}</EditorContainer>
         </RecordingEditorArea>
@@ -312,12 +314,14 @@ export const RecordingModeLayout: React.FC<RecordingModeLayoutProps> = (props) =
       <DrawerContentContainer>
         {/* 录制状态栏：Diff 模式和预览模式下隐藏 */}
         {!isDiffMode && !showPreviewArea && (
-          <RecordingStatusBar
-            isRecording={isRecording}
-            snapshots={snapshots}
-            onStopRecording={recordingModeProps.onStopRecording}
-            onEnterDiffMode={recordingModeProps.onEnterDiffMode}
-          />
+          <Suspense fallback={null}>
+            <RecordingStatusBar
+              isRecording={isRecording}
+              snapshots={snapshots}
+              onStopRecording={recordingModeProps.onStopRecording}
+              onEnterDiffMode={recordingModeProps.onEnterDiffMode}
+            />
+          </Suspense>
         )}
 
         {/* 录制模式内容（预览/默认） */}

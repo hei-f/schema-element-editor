@@ -1,7 +1,7 @@
 import { DEFAULT_EDITOR_THEME } from '@/shared/constants/editor-themes'
 import type { EditorTheme, SchemaSnapshot } from '@/shared/types'
 import { Select } from 'antd'
-import React, { useMemo, useState, useRef, useCallback, useEffect } from 'react'
+import React, { Suspense, useMemo, useState, useRef, useCallback, useEffect } from 'react'
 import { diffChars } from 'diff'
 import {
   DiffModeContainer,
@@ -16,7 +16,7 @@ import {
   DiffEditorPanel,
 } from '../../styles/recording/recording.styles'
 import type { DiffEditorHandle, DiffLineInfo, InlineDiffSegment } from './DiffEditor'
-import { DiffEditor } from './DiffEditor'
+import { DiffEditor } from './DiffEditor.lazy'
 import { useDiffSync } from '../../hooks/diff/useDiffSync'
 import type { DiffRow } from '../../utils/diff-algorithm'
 
@@ -382,26 +382,34 @@ export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
           <DiffEditorsRow>
             {/* 左侧编辑器 */}
             <DiffEditorPanel $isLeft>
-              <DiffEditor
-                ref={leftEditorRef}
-                defaultValue={leftTransformed}
-                onChange={handleLeftChange}
-                onHorizontalScroll={handleLeftHorizontalScroll}
-                theme={theme}
-                diffLines={leftDiffLines}
-              />
+              <Suspense
+                fallback={<div style={{ padding: '20px', textAlign: 'center' }}>加载中...</div>}
+              >
+                <DiffEditor
+                  ref={leftEditorRef}
+                  defaultValue={leftTransformed}
+                  onChange={handleLeftChange}
+                  onHorizontalScroll={handleLeftHorizontalScroll}
+                  theme={theme}
+                  diffLines={leftDiffLines}
+                />
+              </Suspense>
             </DiffEditorPanel>
 
             {/* 右侧编辑器 */}
             <DiffEditorPanel>
-              <DiffEditor
-                ref={rightEditorRef}
-                defaultValue={rightTransformed}
-                onChange={handleRightChange}
-                onHorizontalScroll={handleRightHorizontalScroll}
-                theme={theme}
-                diffLines={rightDiffLines}
-              />
+              <Suspense
+                fallback={<div style={{ padding: '20px', textAlign: 'center' }}>加载中...</div>}
+              >
+                <DiffEditor
+                  ref={rightEditorRef}
+                  defaultValue={rightTransformed}
+                  onChange={handleRightChange}
+                  onHorizontalScroll={handleRightHorizontalScroll}
+                  theme={theme}
+                  diffLines={rightDiffLines}
+                />
+              </Suspense>
             </DiffEditorPanel>
           </DiffEditorsRow>
         </SharedScrollContainer>
