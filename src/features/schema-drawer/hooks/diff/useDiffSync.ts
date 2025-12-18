@@ -56,13 +56,22 @@ export function useDiffSync(options: UseDiffSyncOptions): UseDiffSyncReturn {
   const [isComputing, setIsComputing] = useState(false)
 
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  /** 标记是否是首次内容变化（或新的变化序列开始） */
+  const isFirstChangeRef = useRef(true)
 
   // 计算 diff（带防抖）
   useEffect(() => {
+    // 检查是否有正在运行的防抖定时器
+    const hasActiveDebounce = debounceTimerRef.current !== null
+
     // 清除之前的 timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current)
     }
+
+    // 如果是首次变化或新的变化序列（没有活跃的防抖定时器），立即计算；否则使用防抖
+    const delay = isFirstChangeRef.current || !hasActiveDebounce ? 0 : debounceMs
+    isFirstChangeRef.current = false
 
     // 标记开始计算 - 使用 setTimeout 0 避免同步 setState
     const markComputingTimer = setTimeout(() => setIsComputing(true), 0)
@@ -71,7 +80,9 @@ export function useDiffSync(options: UseDiffSyncOptions): UseDiffSyncReturn {
       const result = computeLineDiff(leftContent, rightContent)
       setDiffResult(result)
       setIsComputing(false)
-    }, debounceMs)
+      // 计算完成后清空定时器引用，标记变化序列结束
+      debounceTimerRef.current = null
+    }, delay)
 
     return () => {
       clearTimeout(markComputingTimer)

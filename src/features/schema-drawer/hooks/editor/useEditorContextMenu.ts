@@ -1,5 +1,5 @@
 import type { EditorView } from '@codemirror/view'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import {
   ContextMenuAction,
   type MenuPosition,
@@ -55,9 +55,6 @@ export const useEditorContextMenu = (
   const [modalVisible, setModalVisible] = useState(false)
   const [modalContent, setModalContent] = useState<string>('')
 
-  // 保存 EditorView 的引用，用于后续替换内容
-  const editorViewRef = useRef<EditorView | null>(null)
-
   /**
    * 处理右键菜单事件
    */
@@ -66,9 +63,6 @@ export const useEditorContextMenu = (
       if (!enabled) return
 
       event.preventDefault()
-
-      // 保存 EditorView 引用
-      editorViewRef.current = view
 
       // 获取选中内容
       const { selection } = view.state

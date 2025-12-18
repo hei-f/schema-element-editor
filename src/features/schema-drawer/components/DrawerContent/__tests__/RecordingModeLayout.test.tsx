@@ -549,8 +549,8 @@ describe('RecordingModeLayout', () => {
 
       render(<RecordingModeLayout {...props} />)
 
-      expect(screen.getByText('✓ 录制通知1')).toBeInTheDocument()
-      expect(screen.getByText('✓ 录制通知2')).toBeInTheDocument()
+      expect(screen.getByText('录制通知1')).toBeInTheDocument()
+      expect(screen.getByText('录制通知2')).toBeInTheDocument()
     })
   })
 

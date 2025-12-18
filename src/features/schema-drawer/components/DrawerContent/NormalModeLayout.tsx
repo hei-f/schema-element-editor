@@ -128,27 +128,34 @@ export const NormalModeLayout: React.FC<NormalModeLayoutProps> = (props) => {
   /**
    * 渲染编辑器
    */
-  const renderEditor = () => (
-    <>
-      {lightNotifications.map((notification, index) => (
-        <LightSuccessNotification key={notification.id} style={{ top: `${16 + index * 48}px` }}>
-          ✓ {notification.text}
-        </LightSuccessNotification>
-      ))}
-      <CodeMirrorEditor
-        ref={editorRef}
-        height="100%"
-        defaultValue={editorValue}
-        onChange={onChange}
-        theme={editorTheme}
-        placeholder="在此输入 JSON Schema..."
-        enableAstHints={enableAstTypeHints}
-        isAstContent={() => contentType === ContentType.Ast}
-        enableContextMenu={enableContextMenu}
-        onContextMenuAction={onContextMenuAction}
-      />
-    </>
-  )
+  const renderEditor = () => {
+    const isDark = editorTheme === 'dark' || editorTheme === 'seeDark'
+    return (
+      <>
+        {lightNotifications.map((notification, index) => (
+          <LightSuccessNotification
+            key={notification.id}
+            style={{ top: `${16 + index * 48}px` }}
+            $isDark={isDark}
+          >
+            {notification.text}
+          </LightSuccessNotification>
+        ))}
+        <CodeMirrorEditor
+          ref={editorRef}
+          height="100%"
+          defaultValue={editorValue}
+          onChange={onChange}
+          theme={editorTheme}
+          placeholder="在此输入 JSON Schema..."
+          enableAstHints={enableAstTypeHints}
+          isAstContent={() => contentType === ContentType.Ast}
+          enableContextMenu={enableContextMenu}
+          onContextMenuAction={onContextMenuAction}
+        />
+      </>
+    )
+  }
 
   /**
    * 渲染工具栏

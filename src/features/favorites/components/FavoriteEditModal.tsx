@@ -3,15 +3,15 @@ import { CodeMirrorEditor } from '@/features/schema-drawer/components/editor/Cod
 import { MODAL_Z_INDEX } from '@/shared/constants/theme'
 import type { EditorTheme } from '@/shared/types'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
-import { Button, Modal } from 'antd'
+import { Modal } from 'antd'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { ModalFooterButton } from '@/shared/styles/modal-button.styles'
 import {
   EditModalContent,
   EditModalNameInput,
   EditorContainer,
   ErrorAlert,
   FullWidthVerticalSpace,
-  ThemedPrimaryButton,
 } from '../styles/modals.styles'
 
 interface FavoriteEditModalProps {
@@ -206,10 +206,10 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = (props) => {
       getContainer={shadowRootManager.getContainer}
       zIndex={MODAL_Z_INDEX}
       footer={[
-        <Button key="cancel" onClick={handleClose} disabled={isSaving}>
+        <ModalFooterButton key="cancel" onClick={handleClose} disabled={isSaving}>
           取消
-        </Button>,
-        <ThemedPrimaryButton
+        </ModalFooterButton>,
+        <ModalFooterButton
           key="save"
           type="primary"
           onClick={handleSave}
@@ -220,7 +220,7 @@ export const FavoriteEditModal: React.FC<FavoriteEditModalProps> = (props) => {
           $activeColor={activeColor}
         >
           保存
-        </ThemedPrimaryButton>,
+        </ModalFooterButton>,
       ]}
       styles={{
         body: { padding: '16px' },

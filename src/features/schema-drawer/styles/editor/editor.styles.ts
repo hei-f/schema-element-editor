@@ -5,7 +5,7 @@ import styled from 'styled-components'
  */
 export const EditorContainer = styled.div`
   flex: 1;
-  overflow: hidden;
+  overflow: visible; /* 允许轻量提示的光晕效果溢出 */
   position: relative;
   border-radius: 12px;
 `

@@ -2,8 +2,9 @@ import { MODAL_Z_INDEX } from '@/shared/constants/theme'
 import type { FavoriteTag } from '@/shared/types'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { generate } from '@ant-design/colors'
-import { Button, ConfigProvider, Input, Modal, Space } from 'antd'
+import { ConfigProvider, Input, Modal, Space } from 'antd'
 import React, { useMemo, useState } from 'react'
+import { ModalFooterButton } from '@/shared/styles/modal-button.styles'
 import {
   ErrorText,
   FavoriteModalTag,
@@ -14,7 +15,6 @@ import {
   TagColorGrid,
   TagPreviewLabel,
   TagPreviewSection,
-  ThemedPrimaryButton,
 } from '../styles/modals.styles'
 
 const TAG_COLORS = [
@@ -125,8 +125,8 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
         onCancel={handleClose}
         footer={
           <Space>
-            <Button onClick={handleClose}>取消</Button>
-            <ThemedPrimaryButton
+            <ModalFooterButton onClick={handleClose}>取消</ModalFooterButton>
+            <ModalFooterButton
               type="primary"
               onClick={handleAdd}
               $themeColor={primaryColor}
@@ -134,7 +134,7 @@ export const AddTagModal: React.FC<AddTagModalProps> = ({
               $activeColor={activeColor}
             >
               确定
-            </ThemedPrimaryButton>
+            </ModalFooterButton>
           </Space>
         }
         width={400}

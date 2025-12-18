@@ -41,6 +41,8 @@ export const PreviewModeContent: React.FC<PreviewModeContentProps> = (props) => 
   const { lightNotifications } = notificationProps
   const { editorRef, editorValue, editorTheme, enableAstTypeHints, onChange } = editorProps
 
+  const isDark = editorTheme === 'dark' || editorTheme === 'seeDark'
+
   /** 是否显示拖动条：过渡期间（打开或关闭）不显示 */
   const showResizer = !isClosingTransition && !isOpeningTransition
 
@@ -83,8 +85,9 @@ export const PreviewModeContent: React.FC<PreviewModeContentProps> = (props) => 
                 <LightSuccessNotification
                   key={notification.id}
                   style={{ top: `${16 + index * 48}px` }}
+                  $isDark={isDark}
                 >
-                  ✓ {notification.text}
+                  {notification.text}
                 </LightSuccessNotification>
               ))}
               <CodeMirrorEditor

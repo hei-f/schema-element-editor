@@ -28,11 +28,17 @@ export const EditorSection: React.FC<EditorSectionProps> = (props) => {
   } = editorProps
   const { lightNotifications } = notificationProps
 
+  const isDark = editorTheme === 'dark' || editorTheme === 'seeDark'
+
   return (
     <EditorContainer>
       {lightNotifications.map((notification, index) => (
-        <LightSuccessNotification key={notification.id} style={{ top: `${16 + index * 48}px` }}>
-          ✓ {notification.text}
+        <LightSuccessNotification
+          key={notification.id}
+          style={{ top: `${16 + index * 48}px` }}
+          $isDark={isDark}
+        >
+          {notification.text}
         </LightSuccessNotification>
       ))}
       <CodeMirrorEditor

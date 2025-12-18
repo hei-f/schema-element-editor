@@ -1,3 +1,5 @@
+import type { EditorTheme } from '@/shared/types'
+
 /**
  * 编辑器右键菜单配置
  */
@@ -48,7 +50,7 @@ export interface EditorContextMenuProps {
   /** 主题色 */
   themeColor: string
   /** 编辑器主题 */
-  editorTheme: string
+  editorTheme: EditorTheme
   /** 选择菜单项回调 */
   onSelect: (action: ContextMenuAction) => void
   /** 关闭菜单回调 */
@@ -64,7 +66,7 @@ export interface QuickEditModalProps {
   /** 编辑内容 */
   content: string
   /** 编辑器主题 */
-  editorTheme: string
+  editorTheme: EditorTheme
   /** 主题色 */
   themeColor: string
   /** 保存回调 */

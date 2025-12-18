@@ -186,8 +186,6 @@ describe('Storage工具测试', () => {
         themeColor: '#1677FF',
         contextMenuConfig: {
           enabled: true,
-          locateError: false,
-          repairJson: false,
         },
       })
     })
@@ -295,8 +293,6 @@ describe('Storage工具测试', () => {
         themeColor: '#1677FF',
         contextMenuConfig: {
           enabled: true,
-          locateError: false,
-          repairJson: false,
         },
       })
     })
@@ -396,8 +392,6 @@ describe('Storage工具测试', () => {
         themeColor: '#1677FF',
         contextMenuConfig: {
           enabled: true,
-          locateError: false,
-          repairJson: false,
         },
       })
     })
@@ -631,8 +625,6 @@ describe('Storage工具测试', () => {
         themeColor: '#1677FF',
         contextMenuConfig: {
           enabled: true,
-          locateError: false,
-          repairJson: false,
         },
       })
     })
