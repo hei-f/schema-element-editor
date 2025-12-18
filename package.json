@@ -3,6 +3,7 @@
   "version": "2.3.1",
   "description": "DOM元素Schema查看和编辑工具",
   "type": "module",
+  "packageManager": "pnpm@9.0.0",
   "workspaces": [
     "packages/*"
   ],
@@ -23,8 +24,11 @@
     "format": "prettier --write \"src/**/*.{ts,tsx}\" \"test/**/*.{ts,tsx}\" \"demo/**/*.{ts,tsx}\" \"packages/**/*.{ts,tsx}\"",
     "typecheck": "tsgo --noEmit",
     "prepare": "husky",
-    "build:sdk": "npm run build -w @schema-element-editor/host-sdk",
-    "publish:sdk": "npm publish -w @schema-element-editor/host-sdk --access public"
+    "build:sdk": "pnpm --filter @schema-element-editor/host-sdk build",
+    "publish:sdk": "pnpm --filter @schema-element-editor/host-sdk publish --access public",
+    "docs:dev": "cd docusaurus && pnpm run start",
+    "docs:build": "cd docusaurus && pnpm run build",
+    "docs:serve": "cd docusaurus && pnpm run serve"
   },
   "dependencies": {
     "@ant-design/agentic-ui": "^2.28.8",
