@@ -21,15 +21,13 @@
     "clsx": "^2.1.1",
     "prism-react-renderer": "^2.4.0",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "styled-components": "^6.1.19"
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.8.0",
     "@docusaurus/tsconfig": "^3.8.0",
     "@docusaurus/types": "^3.8.0",
-    "@types/styled-components": "^5.1.36",
-    "babel-plugin-styled-components": "^2.1.4"
+    "@types/styled-components": "^5.1.36"
   },
   "packageManager": "pnpm@9.0.0",
   "browserslist": {
