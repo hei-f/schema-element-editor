@@ -1,28 +1,8 @@
 import React from 'react'
+import Link from '@docusaurus/Link'
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
 import Layout from '@theme/Layout'
-import {
-  PageContainer,
-  ScrollSection,
-  BackgroundLayer,
-  GlowOrb1,
-  GlowOrb2,
-  GlowOrb3,
-  GlowOrb4,
-  HeroSection,
-  HeroContent,
-  HeroTitle,
-  HeroSubtitle,
-  HeroButton,
-  FeaturesSection,
-  FeaturesSectionTitle,
-  FeatureList,
-  FeatureCard,
-  FeatureNumber,
-  FeatureContent,
-  FeatureTitle,
-  FeatureDescription,
-} from './_index.styles'
+import styles from './index.module.css'
 
 type FeatureItem = {
   title: string
@@ -58,43 +38,45 @@ const FeatureItems: FeatureItem[] = [
 
 function Feature({ title, description, index }: FeatureItem & { index: number }) {
   return (
-    <FeatureCard $index={index}>
-      <FeatureNumber>{String(index + 1).padStart(2, '0')}</FeatureNumber>
-      <FeatureContent>
-        <FeatureTitle>{title}</FeatureTitle>
-        <FeatureDescription>{description}</FeatureDescription>
-      </FeatureContent>
-    </FeatureCard>
+    <div className={styles.featureCard}>
+      <div className={styles.featureNumber}>{String(index + 1).padStart(2, '0')}</div>
+      <div className={styles.featureContent}>
+        <h3 className={styles.featureTitle}>{title}</h3>
+        <p className={styles.featureDescription}>{description}</p>
+      </div>
+    </div>
   )
 }
 
 function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext()
   return (
-    <ScrollSection>
-      <HeroSection>
-        <HeroContent>
-          <HeroTitle>{siteConfig.title}</HeroTitle>
-          <HeroSubtitle>{siteConfig.tagline}</HeroSubtitle>
-          <HeroButton to="/docs/guides/快速入门">快速入门 →</HeroButton>
-        </HeroContent>
-      </HeroSection>
-    </ScrollSection>
+    <div className={styles.scrollSection}>
+      <div className={styles.heroSection}>
+        <div className={styles.heroContent}>
+          <h1 className={styles.heroTitle}>{siteConfig.title}</h1>
+          <p className={styles.heroSubtitle}>{siteConfig.tagline}</p>
+          <Link className={styles.heroButton} to="/docs/guides/快速入门">
+            快速入门 →
+          </Link>
+        </div>
+      </div>
+    </div>
   )
 }
 
 function HomepageFeatures() {
   return (
-    <ScrollSection>
-      <FeaturesSection>
-        <FeaturesSectionTitle>核心功能</FeaturesSectionTitle>
-        <FeatureList>
+    <div className={styles.scrollSection}>
+      <div className={styles.featuresSection}>
+        <h2 className={styles.featuresSectionTitle}>核心功能</h2>
+        <div className={styles.featureList}>
           {FeatureItems.map((props, idx) => (
             <Feature key={idx} index={idx} {...props} />
           ))}
-        </FeatureList>
-      </FeaturesSection>
-    </ScrollSection>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -105,15 +87,15 @@ export default function Home(): React.ReactElement {
       title={`${siteConfig.title} - 文档`}
       description="Schema Element Editor 是一款 Chrome 浏览器扩展插件，用于实时查看和编辑 DOM 元素的 Schema 数据"
     >
-      <PageContainer className="homepage-container">
-        <BackgroundLayer />
-        <GlowOrb1 />
-        <GlowOrb2 />
-        <GlowOrb3 />
-        <GlowOrb4 />
+      <div className={styles.pageContainer}>
+        <div className={styles.backgroundLayer} />
+        <div className={styles.glowOrb1} />
+        <div className={styles.glowOrb2} />
+        <div className={styles.glowOrb3} />
+        <div className={styles.glowOrb4} />
         <HomepageHeader />
         <HomepageFeatures />
-      </PageContainer>
+      </div>
     </Layout>
   )
 }
