@@ -323,11 +323,11 @@
 .featureCard:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12), 0 16px 60px rgba(57, 197, 187, 0.2);
-  border-color: #39c5bb;
+  border-color: rgba(57, 197, 187, 0.5);
 }
 
 [data-theme='dark'] .featureCard:hover {
-  border-color: #4dd4cb;
+  border-color: rgba(77, 212, 203, 0.5);
 }
 
 .featureNumber {
