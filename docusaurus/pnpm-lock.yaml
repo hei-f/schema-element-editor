@@ -42,9 +42,6 @@ importers:
       '@docusaurus/types':
         specifier: ^3.8.0
         version: 3.9.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@types/styled-components':
-        specifier: ^5.1.36
-        version: 5.1.36
 
 packages:
 
@@ -1626,11 +1623,6 @@ packages:
   '@types/history@4.7.11':
     resolution: {integrity: sha512-qjDJRrmvBMiTx+jyLxvLfJU7UznFuokDv4f3WRuriHKERccVpFU+8XMQUAbDzoiJCsmexxRExQeMwwCdamSKDA==}
 
-  '@types/hoist-non-react-statics@3.3.7':
-    resolution: {integrity: sha512-PQTyIulDkIDro8P+IHbKCsw7U2xxBYflVzW/FgWdCAePD9xGSidgA76/GeJ6lBKoblyhf9pBY763gbrN+1dI8g==}
-    peerDependencies:
-      '@types/react': '*'
-
   '@types/html-minifier-terser@6.1.0':
     resolution: {integrity: sha512-oh/6byDPnL1zeNXFrDXFLyZjkr1MsBG667IM792caf1L2UPOOMf65NFzjUH/ltyfwjAGfs1rsX1eftK0jC/KIg==}
 
@@ -1717,9 +1709,6 @@ packages:
 
   '@types/sockjs@0.3.36':
     resolution: {integrity: sha512-MK9V6NzAS1+Ud7JV9lJLFqW85VbC9dq3LmwZCuBe4wBDgKC0Kj/jd8Xl+nSviU+Qc3+m7umHHyHg//2KSa0a0Q==}
-
-  '@types/styled-components@5.1.36':
-    resolution: {integrity: sha512-pGMRNY5G2rNDKEv2DOiFYa7Ft1r0jrhmgBwHhOMzPTgCjO76bCot0/4uEfqj7K0Jf1KdQmDtAuaDk9EAs9foSw==}
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
@@ -7893,11 +7882,6 @@ snapshots:
 
   '@types/history@4.7.11': {}
 
-  '@types/hoist-non-react-statics@3.3.7(@types/react@19.2.7)':
-    dependencies:
-      '@types/react': 19.2.7
-      hoist-non-react-statics: 3.3.2
-
   '@types/html-minifier-terser@6.1.0': {}
 
   '@types/http-cache-semantics@4.0.4': {}
@@ -7995,12 +7979,6 @@ snapshots:
   '@types/sockjs@0.3.36':
     dependencies:
       '@types/node': 25.0.3
-
-  '@types/styled-components@5.1.36':
-    dependencies:
-      '@types/hoist-non-react-statics': 3.3.7(@types/react@19.2.7)
-      '@types/react': 19.2.7
-      csstype: 3.2.3
 
   '@types/trusted-types@2.0.7':
     optional: true
