@@ -93,7 +93,7 @@ npm run demo
 
 ## 页面集成
 
-页面需提供 API 接口和 DOM 标记，插件支持两种通信模式。
+页面需提供 API 接口和 DOM 标记，插件使用 postMessage 通信模式。
 
 ### 核心 API 类型定义
 
@@ -119,7 +119,7 @@ type UpdateSchemaFunc<T extends SchemaValue = SchemaValue> = (schema: T, params:
 
 ```typescript
 /**
- * 预览函数类型（两种模式统一）
+ * 预览函数类型
  * @param schema - 当前编辑的 Schema 数据（支持所有 JSON 类型）
  * @param containerId - 预览容器 ID，通过 document.getElementById() 获取
  * @returns 可选的清理函数，插件关闭预览时自动调用
@@ -129,19 +129,6 @@ type PreviewFunc<T extends SchemaValue = SchemaValue> = (
   containerId: string
 ) => (() => void) | void
 ```
-
-### 通信模式对比
-
-插件支持两种通信模式，各有优劣：
-
-| 特性           | postMessage 模式            | Window 函数模式          |
-| -------------- | --------------------------- | ------------------------ |
-| **接入复杂度** | 需要实现消息监听和响应      | 简单，只需暴露全局函数   |
-| **命名空间**   | 不污染 window，方法不会暴露 | 需要在 window 上挂载函数 |
-| **安全性**     | 更高，减少全局暴露          | 全局函数可被外部访问     |
-| **可定制性**   | 支持自定义消息标识和类型    | 支持自定义函数名         |
-| **健壮性**     | 内置超时机制和错误处理      | 依赖页面实现             |
-| **可调试性**   | requestId 便于追踪          | 无内置追踪机制           |
 
 ### postMessage 模式
 
@@ -379,34 +366,6 @@ window.addEventListener('message', (event) => {
 - 消息类型名称（默认：`GET_SCHEMA`、`UPDATE_SCHEMA`、`CHECK_PREVIEW`、`RENDER_PREVIEW`、`CLEANUP_PREVIEW`）
 - 请求超时时间（默认：5秒）
 
-### Window 函数模式
-
-接入简单，宿主应用只需在 window 上暴露方法即可：
-
-```typescript
-// 获取Schema（必需）
-window.__getContentById = (params: string) => {
-  return { /* Schema对象 */ }
-}
-
-// 更新Schema（必需）
-window.__updateContentById = (schema, params: string) => {
-  return true
-}
-
-// 预览函数（可选）
-window.__getContentPreview = (data, containerId: string) => {
-  const container = document.getElementById(containerId)
-  const root = ReactDOM.createRoot(container)
-  root.render(<Preview data={data} />)
-  return () => root.unmount()
-}
-```
-
-函数名可在配置页面自定义。
-
-> ⚠️ **注意**：Window 函数模式会将方法暴露在全局 window 对象上，可能被页面其他脚本访问。如果对安全性有要求，建议使用 postMessage 模式。
-
 ### 预览功能 (v1.2.0+)
 
 使用方式：
@@ -470,19 +429,21 @@ Agentic UI 已内置 postMessage 通信适配，开发环境下开箱即用。
 
 ### Markdown 字符串自动解析 (v1.0.6+)
 
-插件支持智能体对话场景，当 `__getContentById` 返回字符串类型时，会自动将其解析为 Markdown Elements 结构：
+插件支持智能体对话场景，当 `getSchema` 返回字符串类型时，会自动将其解析为 Markdown Elements 结构：
 
 ```typescript
 // AI 智能体返回 Markdown 字符串
-window.__getContentById = (params: string) => {
-  return `# 智能体回复
+useSchemaElementEditor({
+  getSchema: (params: string) => {
+    return `# 智能体回复
 
 这是智能体生成的内容...
 
 - 支持列表
 - 支持代码块
 - 支持各种 Markdown 语法`
-}
+  },
+})
 ```
 
 插件会自动将 Markdown 字符串解析为结构化的 Elements 数组进行编辑，保存时自动转换回 Markdown 字符串。该功能默认开启，符合 Agentic UI 的数据规范，可在配置页面【高级】选项中关闭。
