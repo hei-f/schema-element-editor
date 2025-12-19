@@ -4,26 +4,16 @@
  */
 
 import { useEffect, useRef, useMemo, useCallback } from 'react'
-import { createSchemaElementEditorBridge } from './core'
+import { createSchemaElementEditorBridge } from './bridge'
 import type {
   SchemaElementEditorConfig,
   SchemaElementEditorBridge,
   SchemaElementEditorRecording,
   SchemaValue,
-  PostMessageSourceConfig,
-  PostMessageTypeConfig,
-} from './core'
+} from './types'
 
-// 重新导出类型
-export type {
-  SchemaValue,
-  PostMessageSourceConfig,
-  PostMessageTypeConfig,
-  SchemaElementEditorBridge,
-  SchemaElementEditorRecording,
-}
-// 同时导出 SchemaElementEditorConfig 供需要基础类型的用户使用
-export type { SchemaElementEditorConfig }
+// 注意：类型从主入口 (@schema-element-editor/host-sdk) 导出
+// 如需类型，请从主入口导入：import type { ... } from '@schema-element-editor/host-sdk'
 
 /** React 版本的 Schema Element Editor 配置 */
 export interface ReactSchemaElementEditorConfig extends SchemaElementEditorConfig {
@@ -73,7 +63,17 @@ export interface UseSchemaElementEditorReturn {
 export function useSchemaElementEditor(
   config: ReactSchemaElementEditorConfig
 ): UseSchemaElementEditorReturn {
-  const { getSchema, updateSchema, renderPreview, sourceConfig, messageTypes, enabled } = config
+  const {
+    getSchema,
+    updateSchema,
+    renderPreview,
+    sourceConfig,
+    messageTypes,
+    enabled,
+    sdkId,
+    level,
+    methodLevels,
+  } = config
 
   // 使用 ref 存储最新的配置，避免闭包陷阱
   const configRef = useRef({ getSchema, updateSchema, renderPreview })
@@ -92,15 +92,24 @@ export function useSchemaElementEditor(
       return
     }
 
-    // 创建代理配置，始终使用最新的 ref 值
+    // 创建代理配置，始终使用最新的 ref 值（避免频繁重建 bridge）
     const proxyConfig: SchemaElementEditorConfig = {
-      getSchema: (params) => configRef.current.getSchema(params),
-      updateSchema: (schema, params) => configRef.current.updateSchema(schema, params),
+      // 外层检查确保初始时函数存在才创建代理
+      // 内层使用可选链安全访问，配合类型断言确保类型正确
+      getSchema: configRef.current.getSchema
+        ? (params) => configRef.current.getSchema?.(params) as SchemaValue
+        : undefined,
+      updateSchema: configRef.current.updateSchema
+        ? (schema, params) => configRef.current.updateSchema?.(schema, params) as boolean
+        : undefined,
       renderPreview: configRef.current.renderPreview
         ? (schema, containerId) => configRef.current.renderPreview?.(schema, containerId)
         : undefined,
       sourceConfig,
       messageTypes,
+      sdkId,
+      level,
+      methodLevels,
     }
 
     const bridge = createSchemaElementEditorBridge(proxyConfig)
@@ -110,7 +119,7 @@ export function useSchemaElementEditor(
       bridge.cleanup()
       bridgeRef.current = null
     }
-  }, [enabled, configRef, sourceConfig, messageTypes])
+  }, [enabled, configRef, sourceConfig, messageTypes, sdkId, level, methodLevels])
 
   // 返回稳定的 recording 方法
   const push = useCallback((params: string, data: SchemaValue) => {
