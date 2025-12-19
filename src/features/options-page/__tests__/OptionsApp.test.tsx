@@ -79,7 +79,7 @@ describe.skip('OptionsApp组件测试', () => {
       astRawStringToggle: true,
       escape: true,
       deserialize: false,
-      serialize: false,
+      compact: false,
       format: true,
       preview: true,
       importExport: true,

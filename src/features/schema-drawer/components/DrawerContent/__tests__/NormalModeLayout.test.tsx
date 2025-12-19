@@ -172,7 +172,7 @@ describe('NormalModeLayout', () => {
         astRawStringToggle: true,
         escape: true,
         deserialize: true,
-        serialize: true,
+        compact: true,
         format: true,
         preview: true,
         importExport: true,

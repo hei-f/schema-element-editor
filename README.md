@@ -2,7 +2,7 @@
 
 Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 
-![Version](https://img.shields.io/badge/version-2.3.1-blue)
+![Version](https://img.shields.io/badge/version-2.3.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 ## 功能
@@ -93,7 +93,7 @@ npm run demo
 
 ## 页面集成
 
-页面需提供 API 接口和 DOM 标记，插件支持两种通信模式。
+页面需提供 API 接口和 DOM 标记，插件使用 postMessage 通信模式。
 
 ### 核心 API 类型定义
 
@@ -119,7 +119,7 @@ type UpdateSchemaFunc<T extends SchemaValue = SchemaValue> = (schema: T, params:
 
 ```typescript
 /**
- * 预览函数类型（两种模式统一）
+ * 预览函数类型
  * @param schema - 当前编辑的 Schema 数据（支持所有 JSON 类型）
  * @param containerId - 预览容器 ID，通过 document.getElementById() 获取
  * @returns 可选的清理函数，插件关闭预览时自动调用
@@ -129,19 +129,6 @@ type PreviewFunc<T extends SchemaValue = SchemaValue> = (
   containerId: string
 ) => (() => void) | void
 ```
-
-### 通信模式对比
-
-插件支持两种通信模式，各有优劣：
-
-| 特性           | postMessage 模式            | Window 函数模式          |
-| -------------- | --------------------------- | ------------------------ |
-| **接入复杂度** | 需要实现消息监听和响应      | 简单，只需暴露全局函数   |
-| **命名空间**   | 不污染 window，方法不会暴露 | 需要在 window 上挂载函数 |
-| **安全性**     | 更高，减少全局暴露          | 全局函数可被外部访问     |
-| **可定制性**   | 支持自定义消息标识和类型    | 支持自定义函数名         |
-| **健壮性**     | 内置超时机制和错误处理      | 依赖页面实现             |
-| **可调试性**   | requestId 便于追踪          | 无内置追踪机制           |
 
 ### postMessage 模式
 
@@ -215,12 +202,15 @@ cleanup()
 
 | 配置项          | 类型                                                                 | 必需 | 说明                                                   |
 | --------------- | -------------------------------------------------------------------- | ---- | ------------------------------------------------------ |
-| `getSchema`     | `(params: string) => SchemaValue`                                    | ✅   | 获取 Schema 数据                                       |
-| `updateSchema`  | `(schema: SchemaValue, params: string) => boolean`                   | ✅   | 更新 Schema 数据                                       |
+| `getSchema`     | `(params: string) => SchemaValue`                                    | ❌   | 获取 Schema 数据（可选，通常需要提供）                 |
+| `updateSchema`  | `(schema: SchemaValue, params: string) => boolean`                   | ❌   | 更新 Schema 数据（可选，通常需要提供）                 |
 | `renderPreview` | `(schema: SchemaValue, containerId: string) => (() => void) \| void` | ❌   | 渲染预览，可返回清理函数                               |
 | `enabled`       | `boolean`（React）/ `MaybeRefOrGetter<boolean>`（Vue）               | ❌   | 是否启用桥接，默认 `true`。仅当明确设为 `false` 时禁用 |
 | `sourceConfig`  | `Partial<PostMessageSourceConfig>`                                   | ❌   | 自定义消息标识                                         |
 | `messageTypes`  | `Partial<PostMessageTypeConfig>`                                     | ❌   | 自定义消息类型                                         |
+| `sdkId`         | `string`                                                             | ❌   | SDK 实例唯一标识，用于多实例协调（自动生成）           |
+| `level`         | `number`                                                             | ❌   | SDK 优先级（默认 0），数值越大优先级越高               |
+| `methodLevels`  | `MethodLevelConfig`                                                  | ❌   | 方法级别优先级配置，可为每个方法单独配置优先级         |
 
 **条件启用示例（React）：**
 
@@ -261,6 +251,59 @@ useSchemaElementEditor({
   },
 })
 ```
+
+**多 SDK 实例共存示例：**
+
+当基础组件库和用户应用都使用 SDK 时，通过优先级配置确保正确的 SDK 响应：
+
+```typescript
+// 用户应用层 - 高优先级
+useSchemaElementEditor({
+  level: 100, // 高优先级
+  getSchema: (params) => myDataStore[params],
+  updateSchema: (schema, params) => {
+    myDataStore[params] = schema
+    return true
+  },
+})
+
+// 基础组件库 - 低优先级（或默认优先级 0）
+useSchemaElementEditor({
+  level: 10,
+  getSchema: (params) => componentDataStore[params],
+  updateSchema: (schema, params) => {
+    componentDataStore[params] = schema
+    return true
+  },
+})
+```
+
+插件请求会优先由高优先级（`level: 100`）的 SDK 响应。
+
+**只添加特定功能的示例：**
+
+```typescript
+// 基础库提供数据管理
+useSchemaElementEditor({
+  level: 10,
+  getSchema: (params) => componentData[params],
+  updateSchema: (schema, params) => {
+    componentData[params] = schema
+    return true
+  },
+})
+
+// 用户应用只添加预览功能
+useSchemaElementEditor({
+  level: 100,
+  // 不提供 getSchema 和 updateSchema，让基础库处理
+  renderPreview: (schema, containerId) => {
+    renderMyCustomPreview(schema, containerId)
+  },
+})
+```
+
+数据管理由基础库 SDK 处理，预览功能由用户 SDK 处理。详见 [SDK 使用指南 - 多实例共存](./docusaurus/docs/integration/SDK使用指南.md#多-sdk-实例共存)。
 
 #### 手动实现 postMessage 监听
 
@@ -322,34 +365,6 @@ window.addEventListener('message', (event) => {
 - 宿主端 source 标识（默认：`schema-element-editor-host`）
 - 消息类型名称（默认：`GET_SCHEMA`、`UPDATE_SCHEMA`、`CHECK_PREVIEW`、`RENDER_PREVIEW`、`CLEANUP_PREVIEW`）
 - 请求超时时间（默认：5秒）
-
-### Window 函数模式
-
-接入简单，宿主应用只需在 window 上暴露方法即可：
-
-```typescript
-// 获取Schema（必需）
-window.__getContentById = (params: string) => {
-  return { /* Schema对象 */ }
-}
-
-// 更新Schema（必需）
-window.__updateContentById = (schema, params: string) => {
-  return true
-}
-
-// 预览函数（可选）
-window.__getContentPreview = (data, containerId: string) => {
-  const container = document.getElementById(containerId)
-  const root = ReactDOM.createRoot(container)
-  root.render(<Preview data={data} />)
-  return () => root.unmount()
-}
-```
-
-函数名可在配置页面自定义。
-
-> ⚠️ **注意**：Window 函数模式会将方法暴露在全局 window 对象上，可能被页面其他脚本访问。如果对安全性有要求，建议使用 postMessage 模式。
 
 ### 预览功能 (v1.2.0+)
 
@@ -414,19 +429,21 @@ Agentic UI 已内置 postMessage 通信适配，开发环境下开箱即用。
 
 ### Markdown 字符串自动解析 (v1.0.6+)
 
-插件支持智能体对话场景，当 `__getContentById` 返回字符串类型时，会自动将其解析为 Markdown Elements 结构：
+插件支持智能体对话场景，当 `getSchema` 返回字符串类型时，会自动将其解析为 Markdown Elements 结构：
 
 ```typescript
 // AI 智能体返回 Markdown 字符串
-window.__getContentById = (params: string) => {
-  return `# 智能体回复
+useSchemaElementEditor({
+  getSchema: (params: string) => {
+    return `# 智能体回复
 
 这是智能体生成的内容...
 
 - 支持列表
 - 支持代码块
 - 支持各种 Markdown 语法`
-}
+  },
+})
 ```
 
 插件会自动将 Markdown 字符串解析为结构化的 Elements 数组进行编辑，保存时自动转换回 Markdown 字符串。该功能默认开启，符合 Agentic UI 的数据规范，可在配置页面【高级】选项中关闭。

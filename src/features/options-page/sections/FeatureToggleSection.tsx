@@ -32,7 +32,7 @@ export const FeatureToggleSection: React.FC<SectionProps> = (props) => {
       astRawStringToggle: false,
       escape: false,
       deserialize: false,
-      serialize: false,
+      compact: false,
       format: false,
       preview: false,
       importExport: false,
@@ -147,10 +147,7 @@ export const FeatureToggleSection: React.FC<SectionProps> = (props) => {
 
             <InlineFormRow align="center" gap={8}>
               <FormLabel>压缩:</FormLabel>
-              <ZeroMarginFormItem
-                name={FORM_PATHS.toolbarButtons.serialize}
-                valuePropName="checked"
-              >
+              <ZeroMarginFormItem name={FORM_PATHS.toolbarButtons.compact} valuePropName="checked">
                 <Switch />
               </ZeroMarginFormItem>
               <Tooltip title="将 JSON 压缩成一行">

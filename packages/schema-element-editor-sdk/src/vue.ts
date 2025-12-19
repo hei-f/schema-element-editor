@@ -4,7 +4,7 @@
  */
 
 import { onMounted, onUnmounted, watch, toValue, type MaybeRefOrGetter } from 'vue'
-import { createSchemaElementEditorBridge } from './core'
+import { createSchemaElementEditorBridge } from './bridge'
 import type {
   SchemaElementEditorConfig,
   SchemaElementEditorBridge,
@@ -12,17 +12,11 @@ import type {
   SchemaValue,
   PostMessageSourceConfig,
   PostMessageTypeConfig,
-} from './core'
+  MethodLevelConfig,
+} from './types'
 
-// 重新导出类型
-export type {
-  SchemaElementEditorConfig,
-  SchemaElementEditorBridge,
-  SchemaElementEditorRecording,
-  SchemaValue,
-  PostMessageSourceConfig,
-  PostMessageTypeConfig,
-}
+// 注意：类型从主入口 (@schema-element-editor/host-sdk) 导出
+// 如需类型，请从主入口导入：import type { ... } from '@schema-element-editor/host-sdk'
 
 /**
  * Vue 版本的 Schema Element Editor 配置
@@ -58,6 +52,24 @@ export interface VueSchemaElementEditorConfig {
 
   /** 消息类型配置（可选，有默认值） */
   messageTypes?: Partial<PostMessageTypeConfig>
+
+  /**
+   * SDK 实例唯一标识（可选，自动生成）
+   * 用于多 SDK 实例协调
+   */
+  sdkId?: string
+
+  /**
+   * SDK 优先级（可选，默认 0）
+   * 数值越大优先级越高，当多个 SDK 实例共存时，优先级高的响应请求
+   */
+  level?: number
+
+  /**
+   * 方法级别优先级配置（可选）
+   * 可以为每个方法单独配置优先级，未配置的方法使用 level 作为优先级
+   */
+  methodLevels?: MethodLevelConfig
 }
 
 /** Vue composable 返回值 */
@@ -97,7 +109,17 @@ export interface UseSchemaElementEditorReturn {
 export function useSchemaElementEditor(
   config: VueSchemaElementEditorConfig
 ): UseSchemaElementEditorReturn {
-  const { getSchema, updateSchema, renderPreview, sourceConfig, messageTypes, enabled } = config
+  const {
+    getSchema,
+    updateSchema,
+    renderPreview,
+    sourceConfig,
+    messageTypes,
+    enabled,
+    sdkId,
+    level,
+    methodLevels,
+  } = config
 
   let bridge: SchemaElementEditorBridge | null = null
 
@@ -126,6 +148,9 @@ export function useSchemaElementEditor(
         : undefined,
       sourceConfig,
       messageTypes,
+      sdkId,
+      level,
+      methodLevels,
     }
 
     bridge = createSchemaElementEditorBridge(proxyConfig)
@@ -153,6 +178,9 @@ export function useSchemaElementEditor(
       messageTypes?.startRecording,
       messageTypes?.stopRecording,
       messageTypes?.schemaPush,
+      sdkId,
+      level,
+      methodLevels,
     ],
     () => {
       createBridgeInstance()

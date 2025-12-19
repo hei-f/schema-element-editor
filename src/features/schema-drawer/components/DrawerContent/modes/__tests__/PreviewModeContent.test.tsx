@@ -89,7 +89,7 @@ describe('PreviewModeContent', () => {
       astRawStringToggle: false,
       escape: true,
       deserialize: true,
-      serialize: true,
+      compact: true,
       format: true,
       preview: false,
       importExport: false,

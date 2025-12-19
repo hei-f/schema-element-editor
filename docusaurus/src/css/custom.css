@@ -445,3 +445,98 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* ========== 侧边栏折叠按钮样式 ========== */
+.theme-doc-sidebar-container button[title="折叠侧边栏"],
+.theme-doc-sidebar-container button[title="Collapse sidebar"],
+.theme-doc-sidebar-container .thin-scrollbar + button {
+  position: relative;
+  width: 100%;
+  height: 48px;
+  margin-top: 12px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px var(--glass-shadow);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.theme-doc-sidebar-container button[title="折叠侧边栏"]::before,
+.theme-doc-sidebar-container button[title="Collapse sidebar"]::before,
+.theme-doc-sidebar-container .thin-scrollbar + button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-accent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.theme-doc-sidebar-container button[title="折叠侧边栏"]:hover,
+.theme-doc-sidebar-container button[title="Collapse sidebar"]:hover,
+.theme-doc-sidebar-container .thin-scrollbar + button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(57, 197, 187, 0.5);
+  box-shadow: 0 4px 16px rgba(57, 197, 187, 0.2), 0 2px 8px var(--glass-shadow);
+  color: var(--ifm-color-primary-dark);
+}
+
+.theme-doc-sidebar-container button[title="折叠侧边栏"]:hover::before,
+.theme-doc-sidebar-container button[title="Collapse sidebar"]:hover::before,
+.theme-doc-sidebar-container .thin-scrollbar + button:hover::before {
+  opacity: 1;
+}
+
+.theme-doc-sidebar-container button[title="折叠侧边栏"]:active,
+.theme-doc-sidebar-container button[title="Collapse sidebar"]:active,
+.theme-doc-sidebar-container .thin-scrollbar + button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px var(--glass-shadow);
+}
+
+/* 暗色模式下的折叠按钮 */
+[data-theme='dark'] .theme-doc-sidebar-container button[title="折叠侧边栏"],
+[data-theme='dark'] .theme-doc-sidebar-container button[title="Collapse sidebar"],
+[data-theme='dark'] .theme-doc-sidebar-container .thin-scrollbar + button {
+  background: rgba(37, 37, 38, 0.65);
+  border-color: rgba(77, 212, 203, 0.2);
+}
+
+[data-theme='dark'] .theme-doc-sidebar-container button[title="折叠侧边栏"]:hover,
+[data-theme='dark'] .theme-doc-sidebar-container button[title="Collapse sidebar"]:hover,
+[data-theme='dark'] .theme-doc-sidebar-container .thin-scrollbar + button:hover {
+  border-color: rgba(77, 212, 203, 0.5);
+  box-shadow: 0 4px 16px rgba(77, 212, 203, 0.25), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ========== 侧边栏分类折叠箭头样式优化 ========== */
+.menu__list-item-collapsible {
+  transition: all 0.2s ease;
+}
+
+.menu__caret::before {
+  background: var(--ifm-menu-link-sublist-icon) 50% / 1.5rem 1.5rem;
+  filter: brightness(0.9);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu__list-item-collapsible:hover .menu__caret::before {
+  filter: brightness(1);
+  transform: scale(1.1);
+}
+
+.menu__list-item-collapsible--active .menu__caret::before {
+  transform: rotate(90deg);
+}
+
+.menu__list-item-collapsible--active:hover .menu__caret::before {
+  transform: rotate(90deg) scale(1.1);
+}

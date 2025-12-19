@@ -132,6 +132,16 @@ const config = {
         darkTheme: prismThemes.dracula,
         additionalLanguages: ['bash', 'json', 'typescript', 'javascript'],
       },
+      tableOfContents: {
+        minHeadingLevel: 2,
+        maxHeadingLevel: 4,
+      },
+      docs: {
+        sidebar: {
+          hideable: true,
+          autoCollapseCategories: false,
+        },
+      },
     }),
 
   markdown: {

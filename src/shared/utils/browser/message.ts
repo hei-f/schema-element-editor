@@ -104,7 +104,12 @@ export function sendRequestToHost<T = any>(
 
     const timeoutId = setTimeout(() => {
       pendingRequests.delete(requestId)
-      reject(new Error(`请求超时（${timeoutSeconds}秒），请检查宿主应用是否正确监听了 postMessage`))
+      reject(
+        new Error(
+          `请求超时（${timeoutSeconds}秒）。` +
+            `可能原因：1.宿主应用未正确监听 postMessage；2.多个同级SDK均未返回有效数据`
+        )
+      )
     }, timeoutMs)
 
     // 存储待处理请求

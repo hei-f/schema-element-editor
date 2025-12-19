@@ -11,6 +11,7 @@ import {
   SettingOutlined,
   EyeOutlined,
   VideoCameraOutlined,
+  AppstoreOutlined,
 } from '@ant-design/icons'
 import { AstTestPage } from './pages/AstTestPage'
 import { SchemaTestPage } from './pages/SchemaTestPage'
@@ -19,6 +20,12 @@ import { IframeTestPage } from './pages/IframeTestPage'
 import { OptionsTestPage } from './pages/OptionsTestPage'
 import { BuiltinPreviewTestPage } from './pages/BuiltinPreviewTestPage'
 import { RecordingTestPage } from './pages/RecordingTestPage'
+import { MultiSdkTestIndex } from './pages/multi-sdk-tests/index'
+import { SameLevelTest } from './pages/multi-sdk-tests/SameLevelTest'
+import { PriorityOverrideTest } from './pages/multi-sdk-tests/PriorityOverrideTest'
+import { PriorityBlockingTest } from './pages/multi-sdk-tests/PriorityBlockingTest'
+import { MethodLevelTest } from './pages/multi-sdk-tests/MethodLevelTest'
+import { PartialImplementationTest } from './pages/multi-sdk-tests/PartialImplementationTest'
 import styled from 'styled-components'
 
 const { Header, Content, Sider } = Layout
@@ -114,6 +121,12 @@ type PageKey =
   | 'options-test'
   | 'builtin-preview-test'
   | 'recording-test'
+  | 'multi-sdk-test'
+  | 'multi-sdk-test-same-level'
+  | 'multi-sdk-test-priority-override'
+  | 'multi-sdk-test-priority-blocking'
+  | 'multi-sdk-test-method-level'
+  | 'multi-sdk-test-partial-implementation'
 
 /** 默认页面 */
 const DEFAULT_PAGE: PageKey = 'schema-test'
@@ -131,6 +144,12 @@ const getPageFromHash = (): PageKey => {
     'options-test',
     'builtin-preview-test',
     'recording-test',
+    'multi-sdk-test',
+    'multi-sdk-test-same-level',
+    'multi-sdk-test-priority-override',
+    'multi-sdk-test-priority-blocking',
+    'multi-sdk-test-method-level',
+    'multi-sdk-test-partial-implementation',
   ]
   return validPages.includes(hash as PageKey) ? (hash as PageKey) : DEFAULT_PAGE
 }
@@ -208,6 +227,11 @@ export const TestApp: React.FC = () => {
       label: '录制模式测试',
     },
     {
+      key: 'multi-sdk-test',
+      icon: <AppstoreOutlined />,
+      label: '多 SDK 实例测试',
+    },
+    {
       key: 'iframe-test',
       icon: <BlockOutlined />,
       label: 'iframe 测试',
@@ -234,6 +258,22 @@ export const TestApp: React.FC = () => {
         return <AgenticDemoPage siderCollapsed={siderCollapsed} />
       case 'recording-test':
         return <RecordingTestPage siderCollapsed={siderCollapsed} />
+      case 'multi-sdk-test':
+        return (
+          <MultiSdkTestIndex
+            onNavigate={(testKey) => handlePageChange(`multi-sdk-test-${testKey}` as PageKey)}
+          />
+        )
+      case 'multi-sdk-test-same-level':
+        return <SameLevelTest onBack={() => handlePageChange('multi-sdk-test')} />
+      case 'multi-sdk-test-priority-override':
+        return <PriorityOverrideTest onBack={() => handlePageChange('multi-sdk-test')} />
+      case 'multi-sdk-test-priority-blocking':
+        return <PriorityBlockingTest onBack={() => handlePageChange('multi-sdk-test')} />
+      case 'multi-sdk-test-method-level':
+        return <MethodLevelTest onBack={() => handlePageChange('multi-sdk-test')} />
+      case 'multi-sdk-test-partial-implementation':
+        return <PartialImplementationTest onBack={() => handlePageChange('multi-sdk-test')} />
       case 'iframe-test':
         return <IframeTestPage siderCollapsed={siderCollapsed} />
       case 'builtin-preview-test':

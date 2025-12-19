@@ -4,6 +4,7 @@ title: postMessage 模式
 sidebar_position: 2
 ---
 
+
 postMessage 模式是 Schema Element Editor 推荐的集成方式，使用 `window.postMessage` 进行通信，不污染全局对象。
 
 ## 优势
@@ -16,7 +17,7 @@ postMessage 模式是 Schema Element Editor 推荐的集成方式，使用 `wind
 
 ## 使用官方 SDK（推荐）
 
-最简单的集成方式是使用官方 SDK。详细说明请参阅 [SDK 使用指南](./SDK使用指南)。
+最简单的集成方式是使用官方 SDK。详细说明请参阅 [SDK 使用指南](./SDK使用指南.md)。
 
 ```bash
 npm install @schema-element-editor/host-sdk

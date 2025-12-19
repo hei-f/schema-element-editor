@@ -38,13 +38,13 @@ const FeatureItems: FeatureItem[] = [
 
 function Feature({ title, description, index }: FeatureItem & { index: number }) {
   return (
-    <div className={styles.featureCard}>
+    <li className={styles.featureCard}>
       <div className={styles.featureNumber}>{String(index + 1).padStart(2, '0')}</div>
       <div className={styles.featureContent}>
         <h3 className={styles.featureTitle}>{title}</h3>
         <p className={styles.featureDescription}>{description}</p>
       </div>
-    </div>
+    </li>
   )
 }
 
@@ -70,11 +70,11 @@ function HomepageFeatures() {
     <div className={styles.scrollSection}>
       <div className={styles.featuresSection}>
         <h2 className={styles.featuresSectionTitle}>核心功能</h2>
-        <div className={styles.featureList}>
+        <ul className={styles.featureList}>
           {FeatureItems.map((props, idx) => (
             <Feature key={idx} index={idx} {...props} />
           ))}
-        </div>
+        </ul>
       </div>
     </div>
   )

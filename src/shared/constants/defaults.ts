@@ -26,7 +26,7 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     astRawStringToggle: true,
     escape: true,
     deserialize: false,
-    serialize: false,
+    compact: false,
     format: true,
     preview: true,
     importExport: true,

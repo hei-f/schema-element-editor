@@ -76,8 +76,8 @@ export interface ToolbarButtonsConfig {
   escape: boolean
   /** 解析按钮（原反序列化） */
   deserialize: boolean
-  /** 压缩按钮（原序列化） */
-  serialize: boolean
+  /** 压缩按钮 */
+  compact: boolean
   /** 格式化按钮 */
   format: boolean
   /** 预览按钮 */

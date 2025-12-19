@@ -1,6 +1,6 @@
 {
   "name": "@schema-element-editor/host-sdk",
-  "version": "2.0.3",
+  "version": "2.1.0",
   "description": "Schema Element Editor (SEE) 插件宿主接入 SDK，支持 React/Vue/纯 JS",
   "type": "module",
   "packageManager": "pnpm@9.0.0",

@@ -52,8 +52,8 @@ export const FORM_PATHS = {
     escape: ['toolbarButtons', 'escape'],
     /** 解析按钮（原反序列化） */
     deserialize: ['toolbarButtons', 'deserialize'],
-    /** 压缩按钮（原序列化） */
-    serialize: ['toolbarButtons', 'serialize'],
+    /** 压缩按钮 */
+    compact: ['toolbarButtons', 'compact'],
     /** 格式化按钮 */
     format: ['toolbarButtons', 'format'],
     /** 预览按钮 */

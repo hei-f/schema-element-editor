@@ -356,7 +356,7 @@ describe('ChromeStorageAdapter', () => {
           astRawStringToggle: true,
           escape: false,
           deserialize: true,
-          serialize: false,
+          compact: false,
           format: true,
           preview: true,
           importExport: false,

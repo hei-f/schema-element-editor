@@ -96,7 +96,7 @@ describe('defaults', () => {
         'astRawStringToggle',
         'escape',
         'deserialize',
-        'serialize',
+        'compact',
         'format',
         'preview',
         'importExport',

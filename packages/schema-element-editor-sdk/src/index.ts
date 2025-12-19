@@ -18,14 +18,16 @@
 // 默认导出 React 版本
 export { useSchemaElementEditor } from './react'
 
-// 导出纯 JS 版本
+// 也导出纯 JS 版本的函数
 export { createSchemaElementEditorBridge } from './core'
 
-// 重新导出类型
+// 导出类型（直接从 types 导出，避免重复）
 export type {
-  SchemaElementEditorConfig,
-  SchemaElementEditorBridge,
   SchemaValue,
   PostMessageSourceConfig,
   PostMessageTypeConfig,
-} from './core'
+  MethodLevelConfig,
+  SchemaElementEditorConfig,
+  SchemaElementEditorBridge,
+  SchemaElementEditorRecording,
+} from './types'

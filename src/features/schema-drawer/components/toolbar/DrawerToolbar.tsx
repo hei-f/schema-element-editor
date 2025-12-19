@@ -219,7 +219,7 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = (props) => {
       }
 
       // 压缩按钮
-      if (toolbarButtons.serialize) {
+      if (toolbarButtons.compact) {
         configs.push({
           key: 'compact',
           label: '压缩',
@@ -336,7 +336,7 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = (props) => {
       }
 
       // 压缩按钮（Diff 模式）
-      if (toolbarButtons.serialize && diffToolbarActions?.onDiffCompact) {
+      if (toolbarButtons.compact && diffToolbarActions?.onDiffCompact) {
         configs.push({
           key: 'diff-compact',
           label: '压缩',
