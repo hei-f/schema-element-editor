@@ -2,7 +2,7 @@
 
 Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 
-![Version](https://img.shields.io/badge/version-2.3.1-blue)
+![Version](https://img.shields.io/badge/version-2.3.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 ## 功能
@@ -215,12 +215,15 @@ cleanup()
 
 | 配置项          | 类型                                                                 | 必需 | 说明                                                   |
 | --------------- | -------------------------------------------------------------------- | ---- | ------------------------------------------------------ |
-| `getSchema`     | `(params: string) => SchemaValue`                                    | ✅   | 获取 Schema 数据                                       |
-| `updateSchema`  | `(schema: SchemaValue, params: string) => boolean`                   | ✅   | 更新 Schema 数据                                       |
+| `getSchema`     | `(params: string) => SchemaValue`                                    | ❌   | 获取 Schema 数据（可选，通常需要提供）                 |
+| `updateSchema`  | `(schema: SchemaValue, params: string) => boolean`                   | ❌   | 更新 Schema 数据（可选，通常需要提供）                 |
 | `renderPreview` | `(schema: SchemaValue, containerId: string) => (() => void) \| void` | ❌   | 渲染预览，可返回清理函数                               |
 | `enabled`       | `boolean`（React）/ `MaybeRefOrGetter<boolean>`（Vue）               | ❌   | 是否启用桥接，默认 `true`。仅当明确设为 `false` 时禁用 |
 | `sourceConfig`  | `Partial<PostMessageSourceConfig>`                                   | ❌   | 自定义消息标识                                         |
 | `messageTypes`  | `Partial<PostMessageTypeConfig>`                                     | ❌   | 自定义消息类型                                         |
+| `sdkId`         | `string`                                                             | ❌   | SDK 实例唯一标识，用于多实例协调（自动生成）           |
+| `level`         | `number`                                                             | ❌   | SDK 优先级（默认 0），数值越大优先级越高               |
+| `methodLevels`  | `MethodLevelConfig`                                                  | ❌   | 方法级别优先级配置，可为每个方法单独配置优先级         |
 
 **条件启用示例（React）：**
 
@@ -261,6 +264,59 @@ useSchemaElementEditor({
   },
 })
 ```
+
+**多 SDK 实例共存示例：**
+
+当基础组件库和用户应用都使用 SDK 时，通过优先级配置确保正确的 SDK 响应：
+
+```typescript
+// 用户应用层 - 高优先级
+useSchemaElementEditor({
+  level: 100, // 高优先级
+  getSchema: (params) => myDataStore[params],
+  updateSchema: (schema, params) => {
+    myDataStore[params] = schema
+    return true
+  },
+})
+
+// 基础组件库 - 低优先级（或默认优先级 0）
+useSchemaElementEditor({
+  level: 10,
+  getSchema: (params) => componentDataStore[params],
+  updateSchema: (schema, params) => {
+    componentDataStore[params] = schema
+    return true
+  },
+})
+```
+
+插件请求会优先由高优先级（`level: 100`）的 SDK 响应。
+
+**只添加特定功能的示例：**
+
+```typescript
+// 基础库提供数据管理
+useSchemaElementEditor({
+  level: 10,
+  getSchema: (params) => componentData[params],
+  updateSchema: (schema, params) => {
+    componentData[params] = schema
+    return true
+  },
+})
+
+// 用户应用只添加预览功能
+useSchemaElementEditor({
+  level: 100,
+  // 不提供 getSchema 和 updateSchema，让基础库处理
+  renderPreview: (schema, containerId) => {
+    renderMyCustomPreview(schema, containerId)
+  },
+})
+```
+
+数据管理由基础库 SDK 处理，预览功能由用户 SDK 处理。详见 [SDK 使用指南 - 多实例共存](./docusaurus/docs/integration/SDK使用指南.md#多-sdk-实例共存)。
 
 #### 手动实现 postMessage 监听
 
