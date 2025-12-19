@@ -12,6 +12,20 @@ import type {
 } from './types'
 
 /**
+ * 生成唯一的 SDK ID
+ *
+ * 优先使用 Web Crypto API 的 randomUUID()（Chrome 92+, Firefox 95+, Safari 15.4+）
+ * 如果不支持则降级到时间戳 + 随机数方案
+ */
+function generateSdkId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  // 降级方案：时间戳 + 随机字符串
+  return `sdk-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
+}
+
+/**
  * SDK 协调器
  * 负责管理多个 SDK 实例的协调，决定哪个 SDK 响应请求
  */
@@ -51,7 +65,7 @@ export class SdkCoordinator {
 
   constructor(config: SdkCoordinatorConfig) {
     // 生成或使用提供的 SDK ID
-    this.sdkId = config.sdkId || `sdk-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
+    this.sdkId = config.sdkId || generateSdkId()
     this.messageSource = config.messageSource
     this.level = config.level ?? 0
     this.methodLevels = config.methodLevels ?? {}
