@@ -1,0 +1,38 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/core/background/service-worker.ts",
+    "src/core/content/index.tsx",
+    "src/features/options-page/index.tsx",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts",
+    "eslint.config.js"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "test/**/*.{ts,tsx}"],
+  "ignore": [
+    "dist/**",
+    "coverage/**",
+    "node_modules/**",
+    "demo/**",
+    "docusaurus/**",
+    "packages/**",
+    "playwright-report/**",
+    "e2e/**",
+    "**/*.d.ts",
+    "src/vite-env.d.ts"
+  ],
+  "ignoreDependencies": [
+    "@crxjs/vite-plugin",
+    "@vitejs/plugin-react",
+    "vite",
+    "vitest",
+    "@vitest/ui",
+    "@vitest/coverage-v8",
+    "@playwright/test",
+    "@schema-element-editor/host-sdk",
+    "wait-on",
+    "concurrently"
+  ],
+  "ignoreBinaries": ["bash", "tsgo"]
+}
