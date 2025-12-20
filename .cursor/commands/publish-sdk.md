@@ -209,7 +209,7 @@ git push
 
 - 检查当前SDK版本的tag是否已存在：`git tag -l "schema-element-editor-sdk-v{版本号}"`
 - 如果tag已存在：
-  - 检查tag指向：`git log --oneline --decorate | grep "tag: schema-element-editor-sdk-v{版本号}"`
+  - 检查tag指向：`git rev-parse "schema-element-editor-sdk-v{版本号}"`，并与 `git rev-parse HEAD` 的结果对比
   - 如果tag不在当前HEAD：
     - ⚠️ **错误**：tag已存在但指向不同commit，这不应该发生
     - 说明：步骤4应该已强制更新版本号
