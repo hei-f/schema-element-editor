@@ -121,6 +121,10 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   const [isModified, setIsModified] = useState(false)
   const [wasStringData, setWasStringData] = useState(false)
 
+  // 收藏数量状态
+  const [favoriteCount, setFavoriteCount] = useState(0)
+  const [maxFavoriteCount, setMaxFavoriteCount] = useState(50)
+
   // 全屏模式状态管理
   const {
     setMode: setFullScreenMode,
@@ -421,9 +425,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
       // 批量保存所有配置到 storage
       await storage.setAllConfig(preset.config)
 
-      // 更新使用时间
-      await storage.updateConfigPresetUsedTime(preset.id)
-
       message.success('预设配置已应用')
     } catch (error) {
       console.error('应用预设配置失败:', error)
@@ -472,6 +473,45 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     onSuccess: (msg) => message.success(msg, 1.5),
   })
 
+  /** 加载收藏数量和上限 */
+  const loadFavoriteLimits = useCallback(async () => {
+    try {
+      const favorites = await storage.getFavorites()
+      const max = await storage.getMaxFavoritesCount()
+      setFavoriteCount(favorites.length)
+      setMaxFavoriteCount(max)
+    } catch (error) {
+      console.error('加载收藏上限失败:', error)
+    }
+  }, [])
+
+  /** 包装 handleOpenAddFavorite 以检查上限 */
+  const handleOpenAddFavoriteWithCheck = useCallback(async () => {
+    await loadFavoriteLimits()
+    if (favoriteCount >= maxFavoriteCount) {
+      message.error(
+        `已达到收藏数量上限（${favoriteCount}/${maxFavoriteCount}），请删除旧收藏后再添加`
+      )
+      return
+    }
+    handleOpenAddFavorite()
+  }, [favoriteCount, maxFavoriteCount, handleOpenAddFavorite, loadFavoriteLimits])
+
+  /** 包装 handleAddFavorite 以在添加后刷新数量 */
+  const handleAddFavoriteWithRefresh = useCallback(async () => {
+    await handleAddFavorite()
+    await loadFavoriteLimits()
+  }, [handleAddFavorite, loadFavoriteLimits])
+
+  /** 包装 handleDeleteFavorite 以在删除后刷新数量 */
+  const handleDeleteFavoriteWithRefresh = useCallback(
+    async (id: string) => {
+      await handleDeleteFavorite(id)
+      await loadFavoriteLimits()
+    },
+    [handleDeleteFavorite, loadFavoriteLimits]
+  )
+
   /**
    * Portal组件的容器获取函数
    */
@@ -487,6 +527,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
         // 打开时的初始化逻辑
         isFirstLoadRef.current = true
         checkDraft()
+        loadFavoriteLimits()
 
         // 如果是录制模式打开，自动开始录制（录制模式状态已在 useEffect 中同步设置）
         if (initialRecordingMode && recordingConfig && schemaData !== undefined) {
@@ -505,6 +546,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     },
     [
       checkDraft,
+      loadFavoriteLimits,
       initialRecordingMode,
       recordingConfig,
       schemaData,
@@ -1075,8 +1117,10 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
             hasDraft={hasDraft}
             onLoadDraft={handleLoadDraft}
             onDeleteDraft={handleDeleteDraft}
-            onOpenAddFavorite={handleOpenAddFavorite}
+            onOpenAddFavorite={handleOpenAddFavoriteWithCheck}
             onOpenFavorites={handleOpenFavorites}
+            favoriteCount={favoriteCount}
+            maxFavoriteCount={maxFavoriteCount}
             onApplyPreset={handleApplyPreset}
             themeColor={themeColor}
             editorTheme={editorTheme}
@@ -1219,14 +1263,14 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
           editorTheme={editorTheme}
           themeColor={config.themeColor}
           onAddFavoriteInputChange={setFavoriteNameInput}
-          onAddFavorite={handleAddFavorite}
+          onAddFavorite={handleAddFavoriteWithRefresh}
           onCloseAddFavoriteModal={closeAddFavoriteModal}
           onCloseFavoritesModal={closeFavoritesModal}
           onEditFavorite={handleEditFavorite}
           onApplyFavorite={handleApplyFavorite}
           onConfirmApply={handleConfirmApply}
           onCancelApply={handleCancelApply}
-          onDeleteFavorite={handleDeleteFavorite}
+          onDeleteFavorite={handleDeleteFavoriteWithRefresh}
           onPinFavorite={handlePinFavorite}
           onAddTag={handleOpenAddTag}
           onRemoveTag={handleRemoveTag}

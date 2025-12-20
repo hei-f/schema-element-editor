@@ -63,6 +63,10 @@ interface DrawerTitleProps {
   onOpenAddFavorite: () => void
   /** 打开收藏列表 */
   onOpenFavorites: () => void
+  /** 当前收藏数量 */
+  favoriteCount?: number
+  /** 最大收藏数量 */
+  maxFavoriteCount?: number
   /** 应用预设配置 */
   onApplyPreset: (preset: ConfigPreset) => Promise<void>
   /** 当前编辑器主题 */
@@ -100,6 +104,8 @@ export const DrawerTitle: React.FC<DrawerTitleProps> = (props) => {
     onDeleteDraft,
     onOpenAddFavorite,
     onOpenFavorites,
+    favoriteCount = 0,
+    maxFavoriteCount = 50,
     onApplyPreset,
     editorTheme,
     onEditorThemeChange,
@@ -203,13 +209,21 @@ export const DrawerTitle: React.FC<DrawerTitleProps> = (props) => {
 
           {toolbarButtons.favorites && (
             <>
-              <Tooltip title={previewEnabled ? '预览模式下不可用' : '添加收藏'}>
+              <Tooltip
+                title={
+                  previewEnabled
+                    ? '预览模式下不可用'
+                    : favoriteCount >= maxFavoriteCount
+                      ? `已达到收藏数量上限（${favoriteCount}/${maxFavoriteCount}），请删除旧收藏后再添加`
+                      : '添加收藏'
+                }
+              >
                 <DrawerTitleButton
                   size="small"
                   type="text"
                   icon={<StarIcon />}
                   onClick={onOpenAddFavorite}
-                  disabled={previewEnabled}
+                  disabled={previewEnabled || favoriteCount >= maxFavoriteCount}
                 />
               </Tooltip>
               <Tooltip title={previewEnabled ? '预览模式下不可用' : '浏览收藏'}>
