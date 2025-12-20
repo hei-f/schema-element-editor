@@ -31,10 +31,3 @@ export const EDITOR_THEME_OPTIONS: readonly EditorThemeOption[] = [
   { value: EDITOR_THEMES.LIGHT, label: 'Light', category: 'light' },
   { value: EDITOR_THEMES.DARK, label: 'Dark', category: 'dark' },
 ] as const
-
-/**
- * 根据主题值获取主题选项
- */
-export function getThemeOption(theme: EditorTheme): EditorThemeOption | undefined {
-  return EDITOR_THEME_OPTIONS.find((option) => option.value === theme)
-}

@@ -11,28 +11,28 @@ type FeatureItem = {
 
 const FeatureItems: FeatureItem[] = [
   {
+    title: 'Agentic UI 原生支持',
+    description: <>内置 postMessage 通信适配，开发环境下可直接调试 Bubble 组件数据</>,
+  },
+  {
     title: '智能元素检测',
-    description: <>按住 Alt/Option 键自动检测和高亮目标元素,支持 iframe 和批量高亮</>,
+    description: <>按住 Alt/Option 键自动检测和高亮目标元素，支持 iframe 和批量高亮</>,
   },
   {
     title: '专业编辑器',
-    description: <>基于 CodeMirror 6,支持 AST 智能补全、JSON 智能修复、Markdown 解析</>,
+    description: <>基于 CodeMirror 6，支持 AST 自动补全、JSON 智能修复、Markdown 解析</>,
   },
   {
     title: '实时预览',
-    description: <>编辑时实时预览 Schema 效果,支持自定义预览组件</>,
-  },
-  {
-    title: '录制模式',
-    description: <>轮询检测 Schema 变化并记录快照,支持多版本 Diff 对比</>,
+    description: <>编辑时实时预览 Schema 效果，支持自定义预览组件</>,
   },
   {
     title: '版本管理',
-    description: <>自动记录编辑历史,支持草稿保存和收藏管理</>,
+    description: <>自动记录编辑历史，支持草稿保存和收藏管理</>,
   },
   {
-    title: 'Agentic UI 原生支持',
-    description: <>内置 postMessage 通信适配,开发环境下可直接调试 Bubble 组件数据</>,
+    title: '录制模式',
+    description: <>轮询检测 Schema 变化并记录快照，支持多版本 Diff 对比</>,
   },
 ]
 

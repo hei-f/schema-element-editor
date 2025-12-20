@@ -1,8 +1,10 @@
 import { DEFAULT_VALUES, STORAGE_KEYS } from '@/shared/constants/defaults'
 import { draftManager } from '@/shared/managers/draft-manager'
 import { favoritesManager } from '@/shared/managers/favorites-manager'
+import { presetManager } from '@/shared/managers/preset-manager'
 import type {
   ApiConfig,
+  ConfigPreset,
   Draft,
   DrawerShortcutsConfig,
   EditorContextMenuConfig,
@@ -258,6 +260,7 @@ class StorageManager {
       highlightColor,
       maxFavoritesCount,
       maxPinnedFavorites,
+      maxConfigPresetsCount,
       draftRetentionDays,
       autoSaveDraft,
       draftAutoSaveDebounce,
@@ -283,6 +286,7 @@ class StorageManager {
       this.getHighlightColor(),
       this.getMaxFavoritesCount(),
       this.getMaxPinnedFavorites(),
+      this.getMaxConfigPresetsCount(),
       this.getDraftRetentionDays(),
       this.getAutoSaveDraft(),
       this.getDraftAutoSaveDebounce(),
@@ -310,6 +314,7 @@ class StorageManager {
       highlightColor,
       maxFavoritesCount,
       maxPinnedFavorites,
+      maxConfigPresetsCount,
       draftRetentionDays,
       autoSaveDraft,
       draftAutoSaveDebounce,
@@ -636,6 +641,152 @@ class StorageManager {
   }
 
   /**
+   * ==================== 预设配置管理 ====================
+   */
+
+  /**
+   * 获取最大预设配置数量
+   */
+  async getMaxConfigPresetsCount(): Promise<number> {
+    return this.getSimple<number>('maxConfigPresetsCount')
+  }
+
+  /**
+   * 设置最大预设配置数量
+   */
+  async setMaxConfigPresetsCount(count: number): Promise<void> {
+    return this.setSimple('maxConfigPresetsCount', count)
+  }
+
+  /**
+   * 获取预设配置列表
+   */
+  async getConfigPresets(): Promise<ConfigPreset[]> {
+    try {
+      return await presetManager.getPresets(() => this.getRawConfigPresets())
+    } catch (error) {
+      console.error('获取预设配置列表失败:', error)
+      return []
+    }
+  }
+
+  /**
+   * 获取原始预设配置列表（内部方法）
+   */
+  private async getRawConfigPresets(): Promise<ConfigPreset[]> {
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.CONFIG_PRESETS)
+      return (result[this.STORAGE_KEYS.CONFIG_PRESETS] as ConfigPreset[]) || []
+    } catch (error) {
+      console.error('读取预设配置失败:', error)
+      return []
+    }
+  }
+
+  /**
+   * 保存预设配置列表（内部方法）
+   */
+  private async saveConfigPresets(presets: ConfigPreset[]): Promise<void> {
+    try {
+      await chrome.storage.local.set({
+        [this.STORAGE_KEYS.CONFIG_PRESETS]: presets,
+      })
+    } catch (error) {
+      console.error('保存预设配置失败:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 添加预设配置
+   */
+  async addConfigPreset(name: string, config: StorageData): Promise<void> {
+    try {
+      const maxCount = await this.getMaxConfigPresetsCount()
+
+      await presetManager.addPreset(
+        name,
+        config,
+        maxCount,
+        () => this.getRawConfigPresets(),
+        (presets) => this.saveConfigPresets(presets)
+      )
+    } catch (error) {
+      console.error('添加预设配置失败:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 更新预设配置
+   */
+  async updateConfigPreset(id: string, name: string, config: StorageData): Promise<void> {
+    try {
+      await presetManager.updatePreset(
+        id,
+        name,
+        config,
+        () => this.getRawConfigPresets(),
+        (presets) => this.saveConfigPresets(presets)
+      )
+    } catch (error) {
+      console.error('更新预设配置失败:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 删除预设配置
+   */
+  async deleteConfigPreset(id: string): Promise<void> {
+    try {
+      await presetManager.deletePreset(
+        id,
+        () => this.getRawConfigPresets(),
+        (presets) => this.saveConfigPresets(presets)
+      )
+    } catch (error) {
+      console.error('删除预设配置失败:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 更新预设配置的最后使用时间
+   */
+  async updateConfigPresetUsedTime(id: string): Promise<void> {
+    try {
+      await presetManager.updatePresetUsedTime(
+        id,
+        () => this.getRawConfigPresets(),
+        (presets) => this.saveConfigPresets(presets)
+      )
+    } catch (error) {
+      console.error('更新预设配置使用时间失败:', error)
+    }
+  }
+
+  /**
+   * 清理超过最大数量的预设配置（使用LRU算法）
+   */
+  async cleanOldConfigPresets(): Promise<void> {
+    try {
+      const maxCount = await this.getMaxConfigPresetsCount()
+      const cleanedCount = await presetManager.cleanOldPresets(
+        maxCount,
+        () => this.getRawConfigPresets(),
+        (presets) => this.saveConfigPresets(presets)
+      )
+
+      if (cleanedCount > 0) {
+        logger.log(`已清理 ${cleanedCount} 个最少使用的预设配置`)
+      }
+    } catch (error) {
+      console.error('清理预设配置失败:', error)
+    }
+  }
+
+  /**
    * 获取历史记录上限配置
    */
   async getMaxHistoryCount(): Promise<number> {
@@ -902,6 +1053,46 @@ class StorageManager {
    */
   async setThemeColor(color: string): Promise<void> {
     return this.setSimple('themeColor', color)
+  }
+
+  /**
+   * 批量保存所有配置（用于应用预设配置）
+   */
+  async setAllConfig(config: StorageData): Promise<void> {
+    try {
+      // 批量设置所有配置项
+      await Promise.all([
+        this.setActiveState(config.isActive),
+        this.setDrawerWidth(config.drawerWidth),
+        this.setAttributeName(config.attributeName),
+        this.setSearchConfig(config.searchConfig),
+        this.setAutoParseString(config.autoParseString),
+        this.setEnableDebugLog(config.enableDebugLog),
+        this.setToolbarButtons(config.toolbarButtons),
+        this.setHighlightColor(config.highlightColor),
+        this.setMaxFavoritesCount(config.maxFavoritesCount),
+        this.setMaxPinnedFavorites(config.maxPinnedFavorites),
+        this.setDraftRetentionDays(config.draftRetentionDays),
+        this.setAutoSaveDraft(config.autoSaveDraft),
+        this.setDraftAutoSaveDebounce(config.draftAutoSaveDebounce),
+        this.setPreviewConfig(config.previewConfig),
+        this.setMaxHistoryCount(config.maxHistoryCount),
+        this.setHighlightAllConfig(config.highlightAllConfig),
+        this.setRecordingModeConfig(config.recordingModeConfig),
+        this.setIframeConfig(config.iframeConfig),
+        this.setEnableAstTypeHints(config.enableAstTypeHints),
+        this.setExportConfig(config.exportConfig),
+        this.setEditorTheme(config.editorTheme),
+        this.setApiConfig(config.apiConfig),
+        this.setDrawerShortcuts(config.drawerShortcuts),
+        this.setThemeColor(config.themeColor),
+        this.setContextMenuConfig(config.contextMenuConfig),
+        this.setMaxConfigPresetsCount(config.maxConfigPresetsCount),
+      ])
+    } catch (error) {
+      console.error('批量保存配置失败:', error)
+      throw error
+    }
   }
 }
 

@@ -9,14 +9,3 @@ export const EditorContainer = styled.div`
   position: relative;
   border-radius: 12px;
 `
-
-/**
- * 错误边界容器
- */
-export const ErrorContainer = styled.div`
-  padding: 20px;
-  color: #ff4d4f;
-  background: #fff1f0;
-  border: 1px solid #ffccc7;
-  border-radius: 4px;
-`

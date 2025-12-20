@@ -9,6 +9,7 @@ import { FavoritesManager } from '@/features/favorites/components/FavoritesManag
 import { AddTagModal } from '@/features/favorites/components/AddTagModal.lazy'
 import { generate } from '@ant-design/colors'
 import type {
+  ConfigPreset,
   DrawerShortcutsConfig,
   ElementAttributes,
   HistoryEntry,
@@ -411,6 +412,25 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     },
     [updateEditorContent]
   )
+
+  /**
+   * 应用预设配置
+   */
+  const handleApplyPreset = useCallback(async (preset: ConfigPreset) => {
+    try {
+      // 批量保存所有配置到 storage
+      await storage.setAllConfig(preset.config)
+
+      // 更新使用时间
+      await storage.updateConfigPresetUsedTime(preset.id)
+
+      message.success('预设配置已应用')
+    } catch (error) {
+      console.error('应用预设配置失败:', error)
+      message.error('应用预设配置失败')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   /** 收藏管理 */
   const {
@@ -1057,6 +1077,7 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
             onDeleteDraft={handleDeleteDraft}
             onOpenAddFavorite={handleOpenAddFavorite}
             onOpenFavorites={handleOpenFavorites}
+            onApplyPreset={handleApplyPreset}
             themeColor={themeColor}
             editorTheme={editorTheme}
             onEditorThemeChange={setEditorTheme}

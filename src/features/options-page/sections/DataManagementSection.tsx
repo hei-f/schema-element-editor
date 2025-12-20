@@ -96,6 +96,25 @@ export const DataManagementSection: React.FC<SectionProps> = (props) => {
           >
             <FixedWidthInputNumber min={1} max={50} step={1} placeholder="10" $width={120} />
           </Form.Item>
+          <Form.Item
+            label={
+              <Space>
+                预设配置上限
+                <Tooltip
+                  title={`预设配置的最大保存数量，默认值为 ${DEFAULT_VALUES.maxConfigPresetsCount}。达到上限后，最旧的预设配置将被自动删除`}
+                >
+                  <HelpTooltipIcon />
+                </Tooltip>
+              </Space>
+            }
+            name={FORM_PATHS.maxConfigPresetsCount}
+            rules={[
+              { required: true, message: '请输入预设配置上限' },
+              { type: 'number', min: 1, max: 20, message: '预设配置上限必须在1-20之间' },
+            ]}
+          >
+            <FixedWidthInputNumber min={1} max={20} step={1} placeholder="5" $width={120} />
+          </Form.Item>
         </FormContent>
       </FormSection>
 

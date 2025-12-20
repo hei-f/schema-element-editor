@@ -1,4 +1,5 @@
 import { DEFAULT_VALUES } from '@/shared/constants/defaults'
+import type { StorageData } from '@/shared/types'
 import { SECTION_DEFAULT_KEYS, type SectionKey } from '../config/field-config'
 import type { SettingsData, SettingsStorage } from '../types'
 
@@ -44,8 +45,10 @@ export const createMockStorageAdapter = (): SettingsStorage => {
       const keys = SECTION_DEFAULT_KEYS[sectionKey]
       const defaultValues: Record<string, unknown> = {}
 
-      for (const key of keys) {
-        defaultValues[key] = (DEFAULT_VALUES as Record<string, unknown>)[key]
+      if (keys && Array.isArray(keys)) {
+        for (const key of keys) {
+          defaultValues[key] = (DEFAULT_VALUES as Record<string, unknown>)[key]
+        }
       }
 
       return defaultValues
@@ -53,6 +56,11 @@ export const createMockStorageAdapter = (): SettingsStorage => {
 
     async resetAllToDefault(): Promise<Record<string, unknown>> {
       return DEFAULT_VALUES as unknown as Record<string, unknown>
+    },
+
+    async setAllConfig(_allValues: StorageData): Promise<void> {
+      // Mock 环境不持久化，仅模拟批量保存成功
+      // 实际保存由组件内部状态管理
     },
   }
 }

@@ -1,4 +1,5 @@
 import { DEFAULT_VALUES } from '@/shared/constants/defaults'
+import type { StorageData } from '@/shared/types'
 import { storage } from '@/shared/utils/browser/storage'
 import { getValueByPath, pathToString } from '@/shared/utils/form-path'
 import {
@@ -25,6 +26,7 @@ export const createChromeStorageAdapter = (): SettingsStorage => {
         drawerWidth,
         highlightColor,
         maxFavoritesCount,
+        maxConfigPresetsCount,
         autoSaveDraft,
         previewConfig,
         maxHistoryCount,
@@ -46,6 +48,7 @@ export const createChromeStorageAdapter = (): SettingsStorage => {
         storage.getDrawerWidth(),
         storage.getHighlightColor(),
         storage.getMaxFavoritesCount(),
+        storage.getMaxConfigPresetsCount(),
         storage.getAutoSaveDraft(),
         storage.getPreviewConfig(),
         storage.getMaxHistoryCount(),
@@ -70,6 +73,7 @@ export const createChromeStorageAdapter = (): SettingsStorage => {
           toolbarButtons,
           highlightColor,
           maxFavoritesCount,
+          maxConfigPresetsCount,
           autoSaveDraft,
           previewConfig,
           maxHistoryCount,
@@ -154,6 +158,11 @@ export const createChromeStorageAdapter = (): SettingsStorage => {
       ])
 
       return DEFAULT_VALUES as unknown as Record<string, unknown>
+    },
+
+    async setAllConfig(allValues: StorageData): Promise<void> {
+      // 调用全局 storage 的 setAllConfig 方法批量保存
+      await storage.setAllConfig(allValues)
     },
   }
 }

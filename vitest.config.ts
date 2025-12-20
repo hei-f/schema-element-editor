@@ -65,10 +65,20 @@ export default defineConfig({
     // Mock 配置 - 只保留实际使用的依赖
     alias: {
       '\\.svg$': resolve(__dirname, 'test/__mocks__/fileMock.ts'),
-      // CodeMirror 相关 - 编辑器使用
-      '@lezer/highlight': resolve(__dirname, 'test/__mocks__/lezerMock.ts'),
+      // CodeMirror 相关 - 编辑器使用 (解决多实例冲突)
+      '@codemirror/state': resolve(__dirname, 'test/__mocks__/codemirrorStateMock.ts'),
+      '@codemirror/view': resolve(__dirname, 'test/__mocks__/codemirrorViewMock.ts'),
       '@codemirror/language': resolve(__dirname, 'test/__mocks__/codemirrorLanguageMock.ts'),
       '@codemirror/lang-json': resolve(__dirname, 'test/__mocks__/codemirrorLangJsonMock.ts'),
+      '@codemirror/autocomplete': resolve(
+        __dirname,
+        'test/__mocks__/codemirrorAutocompleteMock.ts'
+      ),
+      '@codemirror/commands': resolve(__dirname, 'test/__mocks__/codemirrorCommandsMock.ts'),
+      '@codemirror/search': resolve(__dirname, 'test/__mocks__/codemirrorSearchMock.ts'),
+      '@codemirror/lint': resolve(__dirname, 'test/__mocks__/codemirrorLintMock.ts'),
+      '@uiw/react-codemirror': resolve(__dirname, 'test/__mocks__/reactCodemirrorMock.tsx'),
+      '@lezer/highlight': resolve(__dirname, 'test/__mocks__/lezerMock.ts'),
       // 第三方库
       '@ant-design/agentic-ui': resolve(__dirname, 'test/__mocks__/mdEditorMock.ts'),
       'parse-json': resolve(__dirname, 'test/__mocks__/parse-json.ts'),

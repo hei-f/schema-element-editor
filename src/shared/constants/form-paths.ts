@@ -74,6 +74,9 @@ export const FORM_PATHS = {
   /** 最大固定收藏数量 */
   maxPinnedFavorites: ['maxPinnedFavorites'],
 
+  /** 最大预设配置数量 */
+  maxConfigPresetsCount: ['maxConfigPresetsCount'],
+
   /** 自动保存草稿 */
   autoSaveDraft: ['autoSaveDraft'],
 

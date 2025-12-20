@@ -113,3 +113,18 @@ CSSStyleDeclaration.prototype.setProperty = function (
     // 忽略 CSS 变量导致的错误
   }
 }
+
+// Mock shadowRootManager for tests
+vi.mock('@/shared/utils/shadow-root-manager', () => {
+  const mockContainer = document.createElement('div')
+  const mockShadowRoot = mockContainer.attachShadow({ mode: 'open' })
+
+  return {
+    shadowRootManager: {
+      init: vi.fn(),
+      get: vi.fn(() => mockShadowRoot),
+      getContainer: vi.fn(() => mockContainer),
+      reset: vi.fn(),
+    },
+  }
+})

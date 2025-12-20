@@ -21,10 +21,3 @@ export { useSchemaRecording } from './hooks/schema/useSchemaRecording'
 // 导出服务
 export { schemaTransformer } from './services/schema-transformer'
 export type { TransformResult } from './services/schema-transformer'
-
-// 导出样式（如果需要在外部使用）
-export * from './styles/layout/drawer.styles'
-export * from './styles/editor/editor.styles'
-export * from './styles/notifications/notifications.styles'
-export * from './styles/toolbar/toolbar.styles'
-export * from './styles/recording/recording.styles'

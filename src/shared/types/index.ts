@@ -345,6 +345,8 @@ export interface StorageData {
   maxFavoritesCount: number
   /** 最大固定收藏数量 */
   maxPinnedFavorites: number
+  /** 最大预设配置数量 */
+  maxConfigPresetsCount: number
   /** 草稿保留天数 */
   draftRetentionDays: number
   /** 草稿自动保存开关 */
@@ -417,6 +419,22 @@ export interface Favorite {
   pinnedTime?: number
   /** 标签列表 */
   tags?: FavoriteTag[]
+}
+
+/**
+ * 配置预设数据接口
+ */
+export interface ConfigPreset {
+  /** 唯一标识符 */
+  id: string
+  /** 预设名称 */
+  name: string
+  /** 预设配置内容（完整的 StorageData） */
+  config: StorageData
+  /** 保存时间戳 */
+  timestamp: number
+  /** 最后使用时间（用于LRU算法） */
+  lastUsedTime: number
 }
 
 /**

@@ -160,49 +160,38 @@ const hasCustomPrefixStyle = (cssText: string): boolean => {
 }
 
 /**
- * 检查样式内容是否只包含宿主页面的 ant- 前缀（不包含我们的 see- 前缀）
- */
-const isHostAntStyle = (cssText: string): boolean => {
-  const hasOriginalAntPrefix = cssText.includes('.ant-')
-  const hasCustomPrefix = hasCustomPrefixStyle(cssText)
-  return hasOriginalAntPrefix && !hasCustomPrefix
-}
-
-/**
  * 加载所有必需的CSS到Shadow DOM
  * 对于 see- 前缀的样式，会从宿主页面移动到 Shadow DOM 中，完全隔离
  */
 const loadAllStyles = async (shadowRoot: ShadowRoot): Promise<void> => {
   // 1. 加载Ant Design CSS（从node_modules）
-  await loadAndInjectCSS(
-    shadowRoot,
-    chrome.runtime.getURL('node_modules/antd/dist/reset.css'),
-    'antd'
-  )
+  // 注释掉 reset.css 以避免全局样式重置污染（* { margin: 0; padding: 0; box-sizing: border-box; }）
+  // Ant Design 5/6 使用 CSS-in-JS，不再强制需要 reset.css
+  // await loadAndInjectCSS(
+  //   shadowRoot,
+  //   chrome.runtime.getURL('node_modules/antd/dist/reset.css'),
+  //   'antd'
+  // )
 
   // 2. 处理页面中已注入的 style 标签
-  // - see- 前缀的样式：移动到 Shadow DOM（从宿主页面移除）
-  // - ant- 前缀的样式：跳过（保留在宿主页面）
-  // - 其他样式：复制到 Shadow DOM（保留在宿主页面）
+  // 只处理 see- 前缀的样式：移动到 Shadow DOM（从宿主页面移除）
+  // 不复制页面的其他样式，避免全局样式污染（如 * { margin: 0; padding: 0; }）
   const existingStyles = document.querySelectorAll('head > style')
 
   existingStyles.forEach((style) => {
     const cssText = style.textContent || ''
 
-    // 跳过只包含 ant- 前缀的宿主页面样式
-    if (isHostAntStyle(cssText)) {
-      return
-    }
-
-    const clonedStyle = document.createElement('style')
-    clonedStyle.textContent = transformCSSPaths(cssText)
-    clonedStyle.setAttribute('data-shadow-copied', 'true')
-    shadowRoot.appendChild(clonedStyle)
-
-    // 如果是 see- 前缀的样式，从宿主页面移除，实现完全隔离
+    // 只处理包含 see- 前缀的样式（插件自己的样式）
     if (hasCustomPrefixStyle(cssText)) {
+      const clonedStyle = document.createElement('style')
+      clonedStyle.textContent = transformCSSPaths(cssText)
+      clonedStyle.setAttribute('data-shadow-copied', 'true')
+      shadowRoot.appendChild(clonedStyle)
+
+      // 从宿主页面移除，实现完全隔离
       style.remove()
     }
+    // 其他样式（包括页面自己的全局样式、ant- 前缀等）都不处理，避免污染
   })
 
   // 3. 复制页面中通过link标签加载的CSS，并转换路径
@@ -222,26 +211,22 @@ const loadAllStyles = async (shadowRoot: ShadowRoot): Promise<void> => {
         if (node instanceof HTMLStyleElement) {
           const cssText = node.textContent || ''
 
-          // 跳过只包含 ant- 前缀的宿主页面样式
-          if (isHostAntStyle(cssText)) {
-            return
-          }
-
-          const clonedStyle = document.createElement('style')
-          clonedStyle.textContent = transformCSSPaths(cssText)
-          clonedStyle.setAttribute('data-shadow-copied', 'true')
-          clonedStyle.setAttribute('data-dynamic', 'true')
-          shadowRoot.appendChild(clonedStyle)
-
-          // 如果是 see- 前缀的样式，从宿主页面移除，实现完全隔离
+          // 只处理包含 see- 前缀的样式（插件自己的样式）
           if (hasCustomPrefixStyle(cssText)) {
+            const clonedStyle = document.createElement('style')
+            clonedStyle.textContent = transformCSSPaths(cssText)
+            clonedStyle.setAttribute('data-shadow-copied', 'true')
+            clonedStyle.setAttribute('data-dynamic', 'true')
+            shadowRoot.appendChild(clonedStyle)
+
             // 使用 requestAnimationFrame 延迟移除，确保样式已被复制
             requestAnimationFrame(() => {
               node.remove()
             })
           }
+          // 其他样式（包括页面自己的全局样式、ant- 前缀等）都不处理，避免污染
         } else if (node instanceof HTMLLinkElement && node.rel === 'stylesheet') {
-          // 动态添加的link标签
+          // 动态添加的link标签 - 这些通常是插件需要的，所以加载它们
           const href = node.href
           if (href) {
             loadAndInjectCSS(shadowRoot, href, `dynamic-link: ${href}`).catch((error) => {

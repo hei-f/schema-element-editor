@@ -55,61 +55,110 @@ export const App: React.FC<AppProps> = ({ shadowRoot }) => {
   }, [shadowRoot])
 
   /**
+   * 加载配置
+   */
+  const loadConfig = useCallback(async () => {
+    const [
+      apiConfig,
+      toolbarButtons,
+      autoSaveDraft,
+      previewConfig,
+      maxHistoryCount,
+      enableAstTypeHints,
+      exportConfig,
+      editorTheme,
+      recordingModeConfig,
+      autoParseString,
+      shortcuts,
+      iframeConfigData,
+      themeColor,
+      contextMenuConfig,
+    ] = await Promise.all([
+      storage.getApiConfig(),
+      storage.getToolbarButtons(),
+      storage.getAutoSaveDraft(),
+      storage.getPreviewConfig(),
+      storage.getMaxHistoryCount(),
+      storage.getEnableAstTypeHints(),
+      storage.getExportConfig(),
+      storage.getEditorTheme(),
+      storage.getRecordingModeConfig(),
+      storage.getAutoParseString(),
+      storage.getDrawerShortcuts(),
+      storage.getIframeConfig(),
+      storage.getThemeColor(),
+      storage.getContextMenuConfig(),
+    ])
+    setDrawerConfig({
+      apiConfig,
+      toolbarButtons,
+      autoSaveDraft,
+      previewConfig,
+      maxHistoryCount,
+      enableAstTypeHints,
+      exportConfig,
+      editorTheme,
+      recordingModeConfig,
+      autoParseString,
+      themeColor,
+      contextMenuConfig,
+    })
+    setDrawerShortcuts(shortcuts)
+    setIframeConfig(iframeConfigData)
+  }, [])
+
+  /**
    * 初始化：加载配置
    */
   useEffect(() => {
-    const loadConfig = async () => {
-      const [
-        apiConfig,
-        toolbarButtons,
-        autoSaveDraft,
-        previewConfig,
-        maxHistoryCount,
-        enableAstTypeHints,
-        exportConfig,
-        editorTheme,
-        recordingModeConfig,
-        autoParseString,
-        shortcuts,
-        iframeConfigData,
-        themeColor,
-        contextMenuConfig,
-      ] = await Promise.all([
-        storage.getApiConfig(),
-        storage.getToolbarButtons(),
-        storage.getAutoSaveDraft(),
-        storage.getPreviewConfig(),
-        storage.getMaxHistoryCount(),
-        storage.getEnableAstTypeHints(),
-        storage.getExportConfig(),
-        storage.getEditorTheme(),
-        storage.getRecordingModeConfig(),
-        storage.getAutoParseString(),
-        storage.getDrawerShortcuts(),
-        storage.getIframeConfig(),
-        storage.getThemeColor(),
-        storage.getContextMenuConfig(),
-      ])
-      setDrawerConfig({
-        apiConfig,
-        toolbarButtons,
-        autoSaveDraft,
-        previewConfig,
-        maxHistoryCount,
-        enableAstTypeHints,
-        exportConfig,
-        editorTheme,
-        recordingModeConfig,
-        autoParseString,
-        themeColor,
-        contextMenuConfig,
-      })
-      setDrawerShortcuts(shortcuts)
-      setIframeConfig(iframeConfigData)
-    }
     loadConfig()
     storage.cleanExpiredDrafts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  /**
+   * 监听配置变化并自动重新加载
+   * 用于支持预设配置的无刷新应用
+   */
+  useEffect(() => {
+    const handleStorageChange = (
+      changes: { [key: string]: chrome.storage.StorageChange },
+      areaName: string
+    ) => {
+      if (areaName !== 'local') return
+
+      // 检查是否有配置相关的变化
+      const configKeys = [
+        'apiConfig',
+        'toolbarButtons',
+        'autoSaveDraft',
+        'previewConfig',
+        'maxHistoryCount',
+        'enableAstTypeHints',
+        'exportConfig',
+        'editorTheme',
+        'recordingModeConfig',
+        'autoParseString',
+        'drawerShortcuts',
+        'iframeConfig',
+        'themeColor',
+        'contextMenuConfig',
+      ]
+
+      const hasConfigChange = configKeys.some((key) => key in changes)
+
+      if (hasConfigChange) {
+        logger.log('检测到配置变化，重新加载配置')
+        loadConfig()
+      }
+    }
+
+    chrome.storage.onChanged.addListener(handleStorageChange)
+
+    return () => {
+      chrome.storage.onChanged.removeListener(handleStorageChange)
+    }
+  }, [loadConfig])
 
   /**
    * 初始化宿主消息监听器

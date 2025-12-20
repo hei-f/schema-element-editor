@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react'
 import type { FormInstance } from 'antd'
 import { getChangedFieldPath, pathToString } from '@/shared/utils/form-path'
-import { KNOWN_FIELD_PATHS } from '../config/field-config'
+import { KNOWN_FIELD_PATHS, isDebounceField } from '../config/field-config'
 import type { SettingsStorage } from '../types'
 
 interface UseSettingsFormProps {
@@ -68,34 +68,6 @@ export const useSettingsForm = (props: UseSettingsFormProps): UseSettingsFormRet
   )
 
   /**
-   * 判断是否需要防抖的字段
-   */
-  const isDebounceField = useCallback((fieldPath: string[]) => {
-    const debounceFields = [
-      'attributeName',
-      'drawerWidth',
-      'maxFavoritesCount',
-      'highlightColor',
-      'maxHistoryCount',
-      'themeColor',
-    ]
-    const apiConfigDebounceFields = ['requestTimeout', 'sourceConfig', 'messageTypes']
-
-    return (
-      debounceFields.includes(fieldPath[0]) ||
-      (fieldPath[0] === 'searchConfig' &&
-        ['searchDepthUp', 'throttleInterval'].includes(fieldPath[1])) ||
-      (fieldPath[0] === 'highlightAllConfig' &&
-        ['keyBinding', 'maxHighlightCount'].includes(fieldPath[1])) ||
-      (fieldPath[0] === 'recordingModeConfig' &&
-        ['keyBinding', 'pollingInterval', 'highlightColor', 'autoStopTimeout'].includes(
-          fieldPath[1]
-        )) ||
-      (fieldPath[0] === 'apiConfig' && apiConfigDebounceFields.includes(fieldPath[1]))
-    )
-  }, [])
-
-  /**
    * 防抖保存
    */
   const debouncedSave = useCallback(
@@ -139,7 +111,7 @@ export const useSettingsForm = (props: UseSettingsFormProps): UseSettingsFormRet
         saveField(fieldPath, allValues)
       }
     },
-    [isDebounceField, debouncedSave, saveField, onThemeColorChange]
+    [debouncedSave, saveField, onThemeColorChange]
   )
 
   return {

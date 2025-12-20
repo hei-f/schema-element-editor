@@ -72,6 +72,14 @@ export const SIMPLE_STORAGE_FIELDS = {
     },
   } as StorageFieldConfig<number>,
 
+  maxConfigPresetsCount: {
+    key: STORAGE_KEYS.MAX_CONFIG_PRESETS_COUNT,
+    defaultValue: DEFAULT_VALUES.maxConfigPresetsCount,
+    validator: (value: any): value is number => {
+      return typeof value === 'number' && value >= 1 && value <= 20
+    },
+  } as StorageFieldConfig<number>,
+
   draftRetentionDays: {
     key: STORAGE_KEYS.DRAFT_RETENTION_DAYS,
     defaultValue: DEFAULT_VALUES.draftRetentionDays,

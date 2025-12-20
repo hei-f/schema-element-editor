@@ -496,7 +496,7 @@ export const CodeMirrorEditor = (props: CodeMirrorEditorProps) => {
         indentOnInput(),
         bracketMatching(),
         closeBrackets(),
-        // AST 类型补全（智能补全）
+        // AST 类型补全（自动补全）
         // 使用 override 提供自定义补全，但当条件不满足时返回 null 让默认补全生效
         autocompletion({
           override: [

@@ -1,12 +1,16 @@
 import { DEFAULT_VALUES } from '@/shared/constants/defaults'
 import { useDeferredEffect } from '@/shared/hooks/useDeferredEffect'
 import { generate } from '@ant-design/colors'
-import { UndoOutlined } from '@ant-design/icons'
-import { ConfigProvider, Form, message, Popconfirm } from 'antd'
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { SettingOutlined, UndoOutlined } from '@ant-design/icons'
+import { ConfigProvider, Form, message, Popconfirm, Tooltip } from 'antd'
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { SideMenu } from './SideMenu'
 import { SECTION_KEYS } from '../config/field-config'
-import { useResetConfig, useSectionNavigation, useSettingsForm } from '../hooks'
+import { useResetConfig, useSectionNavigation, useSettingsForm, useStorageSync } from '../hooks'
+import { usePresetsManagement } from '@/features/config-presets/hooks/usePresetsManagement'
+import { PresetsManager } from '@/features/config-presets/components/PresetsManager'
+import { storage as globalStorage } from '@/shared/utils/browser/storage'
+import type { ConfigPreset } from '@/shared/types'
 import { DataManagementSection } from '../sections/DataManagementSection'
 import { DebugSection } from '../sections/DebugSection'
 import { EditorConfigSection } from '../sections/EditorConfigSection'
@@ -28,9 +32,11 @@ import {
   HintContent,
   HintDot,
   HintText,
+  ManagePresetButton,
   PageRoot,
   PageTitle,
   ResetDefaultButton,
+  SavePresetButton,
   ScrollWrapper,
   VersionContainer,
   VersionDivider,
@@ -40,7 +46,7 @@ import {
 import type { OptionsPageContentProps } from '../types'
 
 /** 当前插件版本 */
-const CURRENT_VERSION = 'v2.3.2'
+const CURRENT_VERSION = 'v2.4.0'
 
 /**
  * 设置页面内容组件（纯UI组件）
@@ -96,6 +102,46 @@ export const OptionsPageContent: React.FC<OptionsPageContentProps> = (props) => 
     showSuccess: (msg) => message.success(msg),
   })
 
+  /** 预设配置应用处理 */
+  const handleApplyPreset = useCallback(
+    async (preset: ConfigPreset) => {
+      try {
+        // 批量保存所有配置到 storage（使用适配器）
+        await storage.setAllConfig(preset.config)
+
+        // 更新使用时间（使用全局 storage）
+        await globalStorage.updateConfigPresetUsedTime(preset.id)
+
+        message.success('预设配置已应用', 1.5)
+      } catch (error) {
+        console.error('应用预设配置失败:', error)
+        message.error('应用预设配置失败')
+      }
+    },
+    [storage]
+  )
+
+  /** 预设配置管理 */
+  const {
+    presetsList,
+    presetsModalVisible,
+    addPresetModalVisible,
+    presetNameInput,
+    setPresetNameInput,
+    handleOpenAddPreset,
+    handleAddPreset,
+    handleOpenPresets,
+    handleApplyPreset: handleApplyPresetFromHook,
+    handleDeletePreset,
+    closePresetsModal,
+    closeAddPresetModal,
+  } = usePresetsManagement({
+    onApplyPreset: handleApplyPreset,
+    onWarning: (msg) => message.warning(msg),
+    onError: (msg) => message.error(msg),
+    onSuccess: (msg) => message.success(msg, 1.5),
+  })
+
   /**
    * 为光晕层设置随机负延迟，使每次刷新从不同位置开始
    */
@@ -116,6 +162,9 @@ export const OptionsPageContent: React.FC<OptionsPageContentProps> = (props) => 
   useDeferredEffect(() => {
     loadSettings()
   }, [])
+
+  /** 监听配置变化（如应用预设配置时） */
+  useStorageSync({ loadSettings })
 
   /**
    * 设置页面标题
@@ -224,6 +273,14 @@ export const OptionsPageContent: React.FC<OptionsPageContentProps> = (props) => 
                   >
                     检查更新
                   </CheckUpdateButton>
+
+                  <VersionDivider />
+                  <SavePresetButton onClick={handleOpenAddPreset} type="default">
+                    保存为预设配置
+                  </SavePresetButton>
+                  <Tooltip title="管理预设配置">
+                    <ManagePresetButton onClick={handleOpenPresets} icon={<SettingOutlined />} />
+                  </Tooltip>
                 </VersionContainer>
                 <HintContainer>
                   <HintContent>
@@ -321,6 +378,21 @@ export const OptionsPageContent: React.FC<OptionsPageContentProps> = (props) => 
               />
             </Container>
           </ScrollWrapper>
+
+          {/* 预设配置管理模态框 */}
+          <PresetsManager
+            addPresetModalVisible={addPresetModalVisible}
+            presetNameInput={presetNameInput}
+            presetsModalVisible={presetsModalVisible}
+            presetsList={presetsList}
+            themeColor={themeColors.primaryColor}
+            onAddPresetInputChange={setPresetNameInput}
+            onAddPreset={handleAddPreset}
+            onCloseAddPresetModal={closeAddPresetModal}
+            onClosePresetsModal={closePresetsModal}
+            onApplyPreset={handleApplyPresetFromHook}
+            onDeletePreset={handleDeletePreset}
+          />
         </PageRoot>
       </Form>
     </ConfigProvider>

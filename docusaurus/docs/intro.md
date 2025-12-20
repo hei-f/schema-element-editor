@@ -11,6 +11,11 @@ slug: /
 
 ## 🎯 核心特性
 
+### Agentic UI 集成
+
+- 🤝 **原生支持** - 内置 [Agentic UI](https://github.com/ant-design/agentic-ui) postMessage 通信适配
+- 🔧 **开发调试** - 开发环境下可直接调试 Bubble 组件数据
+
 ### 元素检测
 
 - 🎯 **智能元素检测** - 按住 Alt/Option 键自动检测和高亮目标元素
@@ -20,8 +25,9 @@ slug: /
 ### Schema 编辑
 
 - 📝 **专业编辑器** - 内置 CodeMirror 编辑器，支持语法高亮
-- 🧠 **AST 智能补全** - 编辑 Elements[] 类型时提供智能提示
+- 💾 **实时更新** - 修改后直接同步到页面
 - 🔧 **JSON 智能修复** - 自动检测并修复 JSON 语法错误
+- 🧠 **AST 自动补全** - 编辑 Elements[] 类型时提供自动提示
 - 🤖 **Markdown 解析** - 自动解析 Markdown 字符串为结构化数据
 
 ### 实时预览
@@ -54,7 +60,7 @@ slug: /
 详细了解 Schema Element Editor 的各项功能：
 
 - [元素检测与高亮](./guides/元素检测与高亮) - 基础检测、批量高亮、iframe 支持
-- [Schema 编辑器](./guides/Schema编辑器) - JSON 编辑、格式化、AST 智能补全
+- [Schema 编辑器](./guides/Schema编辑器) - JSON 编辑、格式化、AST 自动补全
 - [实时预览](./guides/实时预览) - 内置预览器和自定义预览
 - [录制模式](./guides/录制模式) - 录制 Schema 变化，多版本快照
 - [Diff 对比](./guides/Diff对比) - 版本差异对比，格式转换

@@ -1,12 +1,5 @@
-import { Alert, Button, Input, Space, Table, Tag } from 'antd'
+import { Alert, Input, Space, Table, Tag, Button } from 'antd'
 import styled from 'styled-components'
-
-/**
- * 编辑器预览容器
- */
-export const PreviewEditorContainer = styled.div`
-  height: 600px;
-`
 
 /**
  * 编辑模态框内容容器
@@ -75,34 +68,6 @@ export const ListSearchContainer = styled(Space).attrs({
 export const FullWidthSearchInput = styled(Input.Search)`
   &.see-input {
     width: 100%;
-  }
-`
-
-/**
- * 主题色主按钮
- * 用于支持动态主题色的主按钮样式
- */
-export const ThemedPrimaryButton = styled(Button)<{
-  $themeColor: string
-  $hoverColor: string
-  $activeColor: string
-}>`
-  &.see-btn-primary:not(:disabled):not(.see-btn-disabled) {
-    background: ${(props) => props.$themeColor} !important;
-    border-color: ${(props) => props.$themeColor} !important;
-    color: #ffffff !important;
-
-    &:hover {
-      background: ${(props) => props.$hoverColor} !important;
-      border-color: ${(props) => props.$hoverColor} !important;
-      color: #ffffff !important;
-    }
-
-    &:active {
-      background: ${(props) => props.$activeColor} !important;
-      border-color: ${(props) => props.$activeColor} !important;
-      color: #ffffff !important;
-    }
   }
 `
 

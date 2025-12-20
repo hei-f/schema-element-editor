@@ -20,6 +20,35 @@ export const SECTION_KEYS = {
 export type SectionKey = (typeof SECTION_KEYS)[keyof typeof SECTION_KEYS]
 
 /**
+ * 需要防抖保存的字段路径集合
+ * 定义哪些字段在编辑时使用防抖保存，避免频繁触发存储操作
+ */
+export const DEBOUNCE_FIELD_PATHS: readonly (readonly string[])[] = [
+  FORM_PATHS.attributeName,
+  FORM_PATHS.drawerWidth,
+  FORM_PATHS.searchConfig.searchDepthUp,
+  FORM_PATHS.searchConfig.throttleInterval,
+  FORM_PATHS.maxFavoritesCount,
+  FORM_PATHS.maxConfigPresetsCount,
+  FORM_PATHS.highlightColor,
+  FORM_PATHS.maxHistoryCount,
+  FORM_PATHS.highlightAllConfig.keyBinding,
+  FORM_PATHS.highlightAllConfig.maxHighlightCount,
+  FORM_PATHS.recordingModeConfig.keyBinding,
+  FORM_PATHS.recordingModeConfig.highlightColor,
+  FORM_PATHS.recordingModeConfig.pollingInterval,
+  FORM_PATHS.recordingModeConfig.autoStopTimeout,
+  FORM_PATHS.apiConfig.requestTimeout,
+  FORM_PATHS.apiConfig.sourceConfig.contentSource,
+  FORM_PATHS.apiConfig.sourceConfig.hostSource,
+  FORM_PATHS.apiConfig.messageTypes.getSchema,
+  FORM_PATHS.apiConfig.messageTypes.updateSchema,
+  FORM_PATHS.apiConfig.messageTypes.checkPreview,
+  FORM_PATHS.apiConfig.messageTypes.renderPreview,
+  FORM_PATHS.apiConfig.messageTypes.cleanupPreview,
+]
+
+/**
  * 各卡片对应的默认值键映射
  * key: 区块标识
  * value: 该区块包含的配置字段名数组
@@ -38,6 +67,7 @@ export const SECTION_DEFAULT_KEYS: Record<SectionKey, readonly string[]> = {
   [SECTION_KEYS.PREVIEW_CONFIG]: ['previewConfig'],
   [SECTION_KEYS.DATA_MANAGEMENT]: [
     'maxFavoritesCount',
+    'maxConfigPresetsCount',
     'autoSaveDraft',
     'maxHistoryCount',
     'exportConfig',
@@ -170,33 +200,6 @@ export const FIELD_GROUPS: Record<string, FieldGroup> = {
 }
 
 /**
- * 需要防抖保存的字段路径集合
- */
-export const DEBOUNCE_FIELD_PATHS: readonly (readonly string[])[] = [
-  FORM_PATHS.attributeName,
-  FORM_PATHS.drawerWidth,
-  FORM_PATHS.searchConfig.searchDepthUp,
-  FORM_PATHS.searchConfig.throttleInterval,
-  FORM_PATHS.maxFavoritesCount,
-  FORM_PATHS.highlightColor,
-  FORM_PATHS.maxHistoryCount,
-  FORM_PATHS.highlightAllConfig.keyBinding,
-  FORM_PATHS.highlightAllConfig.maxHighlightCount,
-  FORM_PATHS.recordingModeConfig.keyBinding,
-  FORM_PATHS.recordingModeConfig.highlightColor,
-  FORM_PATHS.recordingModeConfig.pollingInterval,
-  FORM_PATHS.recordingModeConfig.autoStopTimeout,
-  FORM_PATHS.apiConfig.requestTimeout,
-  FORM_PATHS.apiConfig.sourceConfig.contentSource,
-  FORM_PATHS.apiConfig.sourceConfig.hostSource,
-  FORM_PATHS.apiConfig.messageTypes.getSchema,
-  FORM_PATHS.apiConfig.messageTypes.updateSchema,
-  FORM_PATHS.apiConfig.messageTypes.checkPreview,
-  FORM_PATHS.apiConfig.messageTypes.renderPreview,
-  FORM_PATHS.apiConfig.messageTypes.cleanupPreview,
-]
-
-/**
  * 独立字段路径与 storage 方法的映射
  */
 export const FIELD_PATH_STORAGE_MAP: Record<string, string> = {
@@ -206,6 +209,7 @@ export const FIELD_PATH_STORAGE_MAP: Record<string, string> = {
   enableDebugLog: 'setEnableDebugLog',
   highlightColor: 'setHighlightColor',
   maxFavoritesCount: 'setMaxFavoritesCount',
+  maxConfigPresetsCount: 'setMaxConfigPresetsCount',
   autoSaveDraft: 'setAutoSaveDraft',
   maxHistoryCount: 'setMaxHistoryCount',
   enableAstTypeHints: 'setEnableAstTypeHints',

@@ -1,6 +1,6 @@
 /**
  * CodeMirror AST 补全源
- * 提供 Elements 类型的智能补全
+ * 提供 Elements 类型的自动补全
  */
 
 import type { Completion, CompletionContext, CompletionResult } from '@codemirror/autocomplete'

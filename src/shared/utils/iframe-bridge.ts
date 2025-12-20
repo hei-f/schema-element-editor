@@ -194,13 +194,6 @@ export function sendClearHighlightToTop(): void {
 }
 
 /**
- * 发送跨域检测消息到 top frame
- */
-export function sendCrossOriginDetectedToTop(): void {
-  sendToTopFrame(MessageType.CROSS_ORIGIN_DETECTED, null)
-}
-
-/**
  * 向所有 iframe 广播高亮所有元素请求
  */
 export function broadcastHighlightAllRequest(): void {

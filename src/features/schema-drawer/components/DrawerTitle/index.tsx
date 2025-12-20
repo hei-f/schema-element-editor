@@ -4,7 +4,7 @@ import { ImportIcon } from '@/shared/icons/drawer/title/ImportIcon'
 import { PreviewOffIcon } from '@/shared/icons/drawer/title/PreviewOffIcon'
 import { PreviewOnIcon } from '@/shared/icons/drawer/title/PreviewOnIcon'
 import { StarIcon } from '@/shared/icons/drawer/title/StarIcon'
-import type { EditorTheme, HistoryEntry, ToolbarButtonsConfig } from '@/shared/types'
+import type { ConfigPreset, EditorTheme, HistoryEntry, ToolbarButtonsConfig } from '@/shared/types'
 import { DeleteOutlined, FileTextOutlined } from '@ant-design/icons'
 import { generate } from '@ant-design/colors'
 import { Space, Tooltip, Upload } from 'antd'
@@ -12,6 +12,7 @@ import type { RcFile } from 'antd/es/upload'
 import React, { useMemo } from 'react'
 import { HistoryDropdown } from '../toolbar/HistoryDropdown'
 import { ThemeDropdown } from '../toolbar/ThemeDropdown'
+import { PresetsDropdown } from '../toolbar/PresetsDropdown'
 import {
   DraftAutoSaveSuccess,
   DraftNotification,
@@ -62,6 +63,8 @@ interface DrawerTitleProps {
   onOpenAddFavorite: () => void
   /** 打开收藏列表 */
   onOpenFavorites: () => void
+  /** 应用预设配置 */
+  onApplyPreset: (preset: ConfigPreset) => Promise<void>
   /** 当前编辑器主题 */
   editorTheme: EditorTheme
   /** 设置编辑器主题 */
@@ -97,6 +100,7 @@ export const DrawerTitle: React.FC<DrawerTitleProps> = (props) => {
     onDeleteDraft,
     onOpenAddFavorite,
     onOpenFavorites,
+    onApplyPreset,
     editorTheme,
     onEditorThemeChange,
   } = props
@@ -219,6 +223,13 @@ export const DrawerTitle: React.FC<DrawerTitleProps> = (props) => {
               </Tooltip>
             </>
           )}
+
+          {/* 预设配置下拉 */}
+          <PresetsDropdown
+            onApplyPreset={onApplyPreset}
+            themeColor={themeColor}
+            editorTheme={editorTheme}
+          />
 
           <ThemeDropdown
             editorTheme={editorTheme}

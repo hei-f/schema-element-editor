@@ -49,7 +49,7 @@ export const EditorConfigSection: React.FC<SectionProps> = (props) => {
             label={
               <Space>
                 AST类型提示
-                <Tooltip title="编辑 AST (Elements[]) 类型数据时，提供字段名和类型的智能补全">
+                <Tooltip title="编辑 AST (Elements[]) 类型数据时，提供字段名和类型的自动补全">
                   <HelpTooltipIcon />
                 </Tooltip>
               </Space>

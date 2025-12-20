@@ -17,6 +17,7 @@ vi.mock('@/shared/utils/browser/storage', () => ({
     getDrawerWidth: vi.fn(),
     getHighlightColor: vi.fn(),
     getMaxFavoritesCount: vi.fn(),
+    getMaxConfigPresetsCount: vi.fn(),
     getAutoSaveDraft: vi.fn(),
     getPreviewConfig: vi.fn(),
     getMaxHistoryCount: vi.fn(),
@@ -66,6 +67,9 @@ describe('ChromeStorageAdapter', () => {
       ;(storage.getDrawerWidth as Mock).mockResolvedValue(DEFAULT_VALUES.drawerWidth)
       ;(storage.getHighlightColor as Mock).mockResolvedValue(DEFAULT_VALUES.highlightColor)
       ;(storage.getMaxFavoritesCount as Mock).mockResolvedValue(DEFAULT_VALUES.maxFavoritesCount)
+      ;(storage.getMaxConfigPresetsCount as Mock).mockResolvedValue(
+        DEFAULT_VALUES.maxConfigPresetsCount
+      )
       ;(storage.getAutoSaveDraft as Mock).mockResolvedValue(DEFAULT_VALUES.autoSaveDraft)
       ;(storage.getPreviewConfig as Mock).mockResolvedValue(DEFAULT_VALUES.previewConfig)
       ;(storage.getMaxHistoryCount as Mock).mockResolvedValue(DEFAULT_VALUES.maxHistoryCount)
@@ -93,6 +97,7 @@ describe('ChromeStorageAdapter', () => {
         toolbarButtons: DEFAULT_VALUES.toolbarButtons,
         highlightColor: DEFAULT_VALUES.highlightColor,
         maxFavoritesCount: DEFAULT_VALUES.maxFavoritesCount,
+        maxConfigPresetsCount: DEFAULT_VALUES.maxConfigPresetsCount,
         autoSaveDraft: DEFAULT_VALUES.autoSaveDraft,
         previewConfig: DEFAULT_VALUES.previewConfig,
         maxHistoryCount: DEFAULT_VALUES.maxHistoryCount,

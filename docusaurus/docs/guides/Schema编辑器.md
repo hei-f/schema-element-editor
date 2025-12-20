@@ -69,9 +69,9 @@ Schema Element Editor 内置功能强大的代码编辑器，基于 CodeMirror 6
 
 <!-- screenshot: JSON 错误提示和修复按钮 -->
 
-## AST 智能补全
+## AST 自动补全
 
-编辑 AST (Elements[]) 类型数据时，编辑器提供智能补全功能。
+编辑 AST (Elements[]) 类型数据时，编辑器提供自动补全功能。
 
 ### 功能特性
 
@@ -79,7 +79,7 @@ Schema Element Editor 内置功能强大的代码编辑器，基于 CodeMirror 6
 - ⚡ **实时补全** - 输入时自动触发补全提示
 - 📚 **类型提示** - 显示字段类型和描述信息
 
-<!-- screenshot: AST 智能补全的效果 -->
+<!-- screenshot: AST 自动补全的效果 -->
 
 ### 触发方式
 

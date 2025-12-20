@@ -1,3 +1,6 @@
+// 取消全局mock，测试真实实现
+vi.unmock('@/shared/utils/shadow-root-manager')
+
 import { shadowRootManager } from '../shadow-root-manager'
 
 describe('shadowRootManager', () => {

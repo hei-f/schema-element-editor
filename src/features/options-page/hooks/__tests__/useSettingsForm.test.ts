@@ -42,6 +42,7 @@ describe('useSettingsForm', () => {
     saveField: vi.fn().mockResolvedValue(undefined),
     resetSectionToDefault: vi.fn().mockResolvedValue({}),
     resetAllToDefault: vi.fn().mockResolvedValue(DEFAULT_VALUES),
+    setAllConfig: vi.fn().mockResolvedValue(undefined),
   })
 
   const mockCallbacks = {
