@@ -1,4 +1,5 @@
 import type { SectionKey } from './config/field-config'
+import type { StorageData } from '@/shared/types'
 
 /**
  * Section 组件通用 Props
@@ -59,6 +60,12 @@ export interface SettingsStorage {
    * @returns 重置后的默认值
    */
   resetAllToDefault: () => Promise<Record<string, unknown>>
+
+  /**
+   * 批量保存所有配置
+   * @param allValues 所有配置值
+   */
+  setAllConfig: (allValues: StorageData) => Promise<void>
 }
 
 /**
