@@ -37,6 +37,7 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
   highlightColor: '#1677FF',
   maxFavoritesCount: 50,
   maxPinnedFavorites: 10,
+  maxConfigPresetsCount: 5,
   draftRetentionDays: 1,
   autoSaveDraft: false,
   draftAutoSaveDebounce: 3000,
@@ -134,4 +135,6 @@ export const STORAGE_KEYS = {
   DRAWER_SHORTCUTS: 'drawerShortcuts',
   THEME_COLOR: 'themeColor',
   CONTEXT_MENU_CONFIG: 'contextMenuConfig',
+  MAX_CONFIG_PRESETS_COUNT: 'maxConfigPresetsCount',
+  CONFIG_PRESETS: 'configPresets',
 } as const
