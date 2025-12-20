@@ -469,7 +469,7 @@ TypeScript 类型检查结果：
 
 - 检查当前版本号的tag是否已存在：`git tag -l "v{版本号}"`
 - 如果tag已存在：
-  - 检查tag指向：`git rev-parse "v{版本号}"`，并与 `git rev-parse HEAD` 的结果对比
+  - 检查tag指向：`git rev-parse "v{版本号}^{commit}"`，并与 `git rev-parse HEAD` 的结果对比
   - 如果tag不在当前HEAD：
     - ⚠️ **错误**：tag已存在但指向不同commit，这不应该发生
     - 说明：步骤4应该已强制更新版本号
