@@ -1,6 +1,14 @@
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ApplyFavoriteConfirmModal } from '../ApplyFavoriteConfirmModal'
+
+// Mock shadowRootManager
+vi.mock('@/shared/utils/shadow-root-manager', () => ({
+  shadowRootManager: {
+    getContainer: () => document.body,
+  },
+}))
 
 describe('ApplyFavoriteConfirmModal 组件测试', () => {
   const defaultProps = {
@@ -152,6 +160,73 @@ describe('ApplyFavoriteConfirmModal 组件测试', () => {
       expect(() => {
         render(<ApplyFavoriteConfirmModal {...defaultProps} themeColor="invalid-color" />)
       }).not.toThrow()
+    })
+  })
+
+  describe('用户交互', () => {
+    it('点击应用按钮时应调用onConfirm回调', async () => {
+      const user = userEvent.setup()
+      const onConfirm = vi.fn()
+      const onCancel = vi.fn()
+
+      render(
+        <ApplyFavoriteConfirmModal {...defaultProps} onConfirm={onConfirm} onCancel={onCancel} />
+      )
+
+      const applyButton = screen.getByRole('button', { name: /应\s*用/ })
+      await user.click(applyButton)
+
+      expect(onConfirm).toHaveBeenCalledTimes(1)
+      expect(onCancel).not.toHaveBeenCalled()
+    })
+
+    it('点击取消按钮时应调用onCancel回调', async () => {
+      const user = userEvent.setup()
+      const onConfirm = vi.fn()
+      const onCancel = vi.fn()
+
+      render(
+        <ApplyFavoriteConfirmModal {...defaultProps} onConfirm={onConfirm} onCancel={onCancel} />
+      )
+
+      const cancelButton = screen.getByRole('button', { name: /取\s*消/ })
+      await user.click(cancelButton)
+
+      expect(onCancel).toHaveBeenCalledTimes(1)
+      expect(onConfirm).not.toHaveBeenCalled()
+    })
+
+    it('onConfirm和onCancel应该只被调用一次', async () => {
+      const user = userEvent.setup()
+      const onConfirm = vi.fn()
+      const onCancel = vi.fn()
+
+      render(
+        <ApplyFavoriteConfirmModal {...defaultProps} onConfirm={onConfirm} onCancel={onCancel} />
+      )
+
+      const applyButton = screen.getByRole('button', { name: /应\s*用/ })
+      await user.click(applyButton)
+
+      expect(onConfirm).toHaveBeenCalledTimes(1)
+    })
+
+    it('回调函数应该接收事件对象', async () => {
+      const user = userEvent.setup()
+      const onConfirm = vi.fn()
+      const onCancel = vi.fn()
+
+      render(
+        <ApplyFavoriteConfirmModal {...defaultProps} onConfirm={onConfirm} onCancel={onCancel} />
+      )
+
+      const applyButton = screen.getByRole('button', { name: /应\s*用/ })
+      await user.click(applyButton)
+      expect(onConfirm).toHaveBeenCalledWith(expect.any(Object))
+
+      const cancelButton = screen.getByRole('button', { name: /取\s*消/ })
+      await user.click(cancelButton)
+      expect(onCancel).toHaveBeenCalledWith(expect.any(Object))
     })
   })
 })

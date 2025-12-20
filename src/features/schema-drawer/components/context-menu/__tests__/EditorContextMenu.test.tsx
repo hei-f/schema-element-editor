@@ -1,8 +1,19 @@
-import { render } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, fireEvent } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { EditorContextMenu } from '../EditorContextMenu'
 import type { EditorTheme } from '@/shared/types'
 import { CONTEXT_MENU_TRIGGER_MODE } from '@/shared/constants/context-menu'
+import { ContextMenuAction } from '../types'
+
+// Mock shadowRootManager to return document.body as container
+vi.mock('@/shared/utils/shadow-root-manager', () => ({
+  shadowRootManager: {
+    init: vi.fn(),
+    get: vi.fn(() => document.body as unknown as ShadowRoot),
+    getContainer: vi.fn(() => document.body),
+    reset: vi.fn(),
+  },
+}))
 
 describe('EditorContextMenu 组件测试', () => {
   const defaultProps = {
@@ -21,6 +32,12 @@ describe('EditorContextMenu 组件测试', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.runAllTimers()
+    vi.useRealTimers()
   })
 
   describe('基础渲染', () => {
@@ -175,6 +192,132 @@ describe('EditorContextMenu 组件测试', () => {
           rerender(<EditorContextMenu {...defaultProps} position={{ x: i * 10, y: i * 10 }} />)
         }).not.toThrow()
       }
+    })
+  })
+
+  describe('菜单交互', () => {
+    it('应该渲染菜单项内容', () => {
+      const { getByText } = render(<EditorContextMenu {...defaultProps} />)
+
+      expect(getByText('单独编辑')).toBeInTheDocument()
+    })
+
+    it('应该在hasSelection为true时启用菜单项', () => {
+      const { getByText } = render(<EditorContextMenu {...defaultProps} hasSelection={true} />)
+
+      const menuItem = getByText('单独编辑')
+      expect(menuItem).toBeInTheDocument()
+    })
+
+    it('应该在hasSelection为false时渲染但禁用菜单项', () => {
+      const { getByText } = render(<EditorContextMenu {...defaultProps} hasSelection={false} />)
+
+      const menuItem = getByText('单独编辑')
+      expect(menuItem).toBeInTheDocument()
+    })
+  })
+
+  describe('回调函数', () => {
+    it('应该在点击菜单项时调用onSelect并传入正确的action', () => {
+      const onSelect = vi.fn()
+      const { getByText } = render(<EditorContextMenu {...defaultProps} onSelect={onSelect} />)
+
+      const menuItem = getByText('单独编辑')
+      fireEvent.click(menuItem)
+
+      expect(onSelect).toHaveBeenCalledTimes(1)
+      expect(onSelect).toHaveBeenCalledWith(ContextMenuAction.QUICK_EDIT)
+    })
+
+    it('应该在点击菜单项后调用onClose', () => {
+      const onClose = vi.fn()
+      const { getByText } = render(<EditorContextMenu {...defaultProps} onClose={onClose} />)
+
+      const menuItem = getByText('单独编辑')
+      fireEvent.click(menuItem)
+
+      expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('应该在点击菜单项时同时调用onSelect和onClose', () => {
+      const onSelect = vi.fn()
+      const onClose = vi.fn()
+      const { getByText } = render(
+        <EditorContextMenu {...defaultProps} onSelect={onSelect} onClose={onClose} />
+      )
+
+      const menuItem = getByText('单独编辑')
+      fireEvent.click(menuItem)
+
+      expect(onSelect).toHaveBeenCalledTimes(1)
+      expect(onClose).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('禁用状态', () => {
+    it('应该在hasSelection为false时不触发onSelect', () => {
+      const onSelect = vi.fn()
+      const { getByText } = render(
+        <EditorContextMenu {...defaultProps} hasSelection={false} onSelect={onSelect} />
+      )
+
+      const menuItem = getByText('单独编辑')
+      fireEvent.click(menuItem)
+
+      expect(onSelect).not.toHaveBeenCalled()
+    })
+
+    it('应该在hasSelection为false时不触发onClose', () => {
+      const onClose = vi.fn()
+      const { getByText } = render(
+        <EditorContextMenu {...defaultProps} hasSelection={false} onClose={onClose} />
+      )
+
+      const menuItem = getByText('单独编辑')
+      fireEvent.click(menuItem)
+
+      expect(onClose).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('外部点击关闭', () => {
+    it('应该在点击菜单外部时调用onClose', () => {
+      const onClose = vi.fn()
+      render(<EditorContextMenu {...defaultProps} onClose={onClose} />)
+
+      // 快进定时器以触发事件监听器的添加
+      vi.runAllTimers()
+
+      // 模拟点击 body（菜单外部）
+      fireEvent.mouseDown(document.body)
+
+      expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('应该在点击菜单内部时不调用onClose', () => {
+      const onClose = vi.fn()
+      const { getByText } = render(<EditorContextMenu {...defaultProps} onClose={onClose} />)
+
+      // 快进定时器
+      vi.runAllTimers()
+
+      const menuItem = getByText('单独编辑')
+      // 点击菜单内的元素
+      fireEvent.mouseDown(menuItem)
+
+      // onClose 不应该被外部点击逻辑触发（但会被菜单项点击触发）
+      expect(onClose).not.toHaveBeenCalled()
+    })
+
+    it('应该在visible为false时不添加外部点击监听器', () => {
+      const onClose = vi.fn()
+      render(<EditorContextMenu {...defaultProps} visible={false} onClose={onClose} />)
+
+      vi.runAllTimers()
+
+      fireEvent.mouseDown(document.body)
+
+      expect(onClose).not.toHaveBeenCalled()
     })
   })
 })

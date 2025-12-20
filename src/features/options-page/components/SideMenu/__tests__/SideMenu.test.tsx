@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { SideMenu } from '../SideMenu'
 
@@ -212,6 +212,203 @@ describe('SideMenu 组件测试', () => {
         rerender(<SideMenu {...defaultProps} activeSection="section2" />)
         rerender(<SideMenu {...defaultProps} activeSection={undefined} />)
       }).not.toThrow()
+    })
+  })
+
+  describe('用户交互 - 折叠按钮', () => {
+    it('应该在点击折叠按钮时触发onCollapsedChange回调', () => {
+      const onCollapsedChange = vi.fn()
+      render(<SideMenu {...defaultProps} collapsed={false} onCollapsedChange={onCollapsedChange} />)
+
+      const collapseButton = screen.getByRole('button')
+      fireEvent.click(collapseButton)
+
+      expect(onCollapsedChange).toHaveBeenCalledTimes(1)
+      expect(onCollapsedChange).toHaveBeenCalledWith(true)
+    })
+
+    it('应该在折叠状态下点击按钮时传递false', () => {
+      const onCollapsedChange = vi.fn()
+      render(<SideMenu {...defaultProps} collapsed={true} onCollapsedChange={onCollapsedChange} />)
+
+      const collapseButton = screen.getByRole('button')
+      fireEvent.click(collapseButton)
+
+      expect(onCollapsedChange).toHaveBeenCalledTimes(1)
+      expect(onCollapsedChange).toHaveBeenCalledWith(false)
+    })
+  })
+
+  describe('用户交互 - 主菜单项点击', () => {
+    it('应该在点击主菜单项时触发onMenuClick回调', () => {
+      const onMenuClick = vi.fn()
+      render(<SideMenu {...defaultProps} onMenuClick={onMenuClick} />)
+
+      const menuItem = screen.getByText('集成配置')
+      fireEvent.click(menuItem)
+
+      expect(onMenuClick).toHaveBeenCalledTimes(1)
+      expect(onMenuClick).toHaveBeenCalledWith('section-integration-config')
+    })
+
+    it('应该在点击不同菜单项时传递正确的sectionId', () => {
+      const onMenuClick = vi.fn()
+      render(<SideMenu {...defaultProps} onMenuClick={onMenuClick} />)
+
+      const elementDetectionItem = screen.getByText('元素检测与高亮')
+      fireEvent.click(elementDetectionItem)
+
+      expect(onMenuClick).toHaveBeenCalledWith('section-element-detection')
+    })
+
+    it('应该在折叠状态下点击菜单项时触发onCollapsedChange', () => {
+      const onCollapsedChange = vi.fn()
+      const onMenuClick = vi.fn()
+      render(
+        <SideMenu
+          {...defaultProps}
+          collapsed={true}
+          onCollapsedChange={onCollapsedChange}
+          onMenuClick={onMenuClick}
+        />
+      )
+
+      const menuItem = screen.getByText('集成配置')
+      fireEvent.click(menuItem)
+
+      expect(onCollapsedChange).toHaveBeenCalledWith(false)
+      expect(onMenuClick).toHaveBeenCalledWith('section-integration-config')
+    })
+
+    it('应该支持点击多个不同的菜单项', () => {
+      const onMenuClick = vi.fn()
+      render(<SideMenu {...defaultProps} onMenuClick={onMenuClick} />)
+
+      fireEvent.click(screen.getByText('集成配置'))
+      fireEvent.click(screen.getByText('编辑器配置'))
+      fireEvent.click(screen.getByText('功能开关'))
+
+      expect(onMenuClick).toHaveBeenCalledTimes(3)
+      expect(onMenuClick).toHaveBeenNthCalledWith(1, 'section-integration-config')
+      expect(onMenuClick).toHaveBeenNthCalledWith(2, 'section-editor-config')
+      expect(onMenuClick).toHaveBeenNthCalledWith(3, 'section-feature-toggle')
+    })
+  })
+
+  describe('用户交互 - 子菜单项点击', () => {
+    it('应该在点击子菜单项时触发onSubMenuClick回调', () => {
+      const onSubMenuClick = vi.fn()
+      const onMenuClick = vi.fn()
+      render(
+        <SideMenu {...defaultProps} onSubMenuClick={onSubMenuClick} onMenuClick={onMenuClick} />
+      )
+
+      fireEvent.click(screen.getByText('集成配置'))
+
+      const subMenuItem = screen.getByText('元素标记配置')
+      fireEvent.click(subMenuItem)
+
+      expect(onSubMenuClick).toHaveBeenCalledTimes(1)
+      expect(onSubMenuClick).toHaveBeenCalledWith('field-attribute-name')
+    })
+
+    it('应该在点击子菜单项时同时触发onMenuClick', () => {
+      const onSubMenuClick = vi.fn()
+      const onMenuClick = vi.fn()
+      render(
+        <SideMenu {...defaultProps} onSubMenuClick={onSubMenuClick} onMenuClick={onMenuClick} />
+      )
+
+      fireEvent.click(screen.getByText('集成配置'))
+
+      const subMenuItem = screen.getByText('元素标记配置')
+      fireEvent.click(subMenuItem)
+
+      expect(onMenuClick).toHaveBeenCalledWith('section-integration-config')
+      expect(onSubMenuClick).toHaveBeenCalledWith('field-attribute-name')
+    })
+
+    it('应该在点击不同子菜单项时传递正确的anchorId', () => {
+      const onSubMenuClick = vi.fn()
+      render(<SideMenu {...defaultProps} onSubMenuClick={onSubMenuClick} />)
+
+      fireEvent.click(screen.getByText('集成配置'))
+
+      fireEvent.click(screen.getByText('元素标记配置'))
+      expect(onSubMenuClick).toHaveBeenLastCalledWith('field-attribute-name')
+
+      fireEvent.click(screen.getByText('postMessage 配置'))
+      expect(onSubMenuClick).toHaveBeenLastCalledWith('field-request-timeout')
+
+      fireEvent.click(screen.getByText('消息标识配置'))
+      expect(onSubMenuClick).toHaveBeenLastCalledWith('field-source-config')
+
+      expect(onSubMenuClick).toHaveBeenCalledTimes(3)
+    })
+
+    it('应该支持点击不同父菜单下的子菜单项', () => {
+      const onSubMenuClick = vi.fn()
+      render(<SideMenu {...defaultProps} onSubMenuClick={onSubMenuClick} />)
+
+      fireEvent.click(screen.getByText('元素检测与高亮'))
+      fireEvent.click(screen.getByText('基础模式'))
+
+      expect(onSubMenuClick).toHaveBeenCalledWith('field-basic-mode')
+
+      fireEvent.click(screen.getByText('编辑器配置'))
+      fireEvent.click(screen.getByText('编辑器功能'))
+
+      expect(onSubMenuClick).toHaveBeenCalledWith('field-editor-features')
+      expect(onSubMenuClick).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  describe('DOM渲染验证', () => {
+    it('应该正确渲染所有主菜单项', () => {
+      render(<SideMenu {...defaultProps} />)
+
+      expect(screen.getByText('集成配置')).toBeInTheDocument()
+      expect(screen.getByText('元素检测与高亮')).toBeInTheDocument()
+      expect(screen.getByText('编辑器配置')).toBeInTheDocument()
+      expect(screen.getByText('功能开关')).toBeInTheDocument()
+      expect(screen.getByText('实时预览')).toBeInTheDocument()
+      expect(screen.getByText('数据管理')).toBeInTheDocument()
+      expect(screen.getByText('快捷键配置')).toBeInTheDocument()
+      expect(screen.getByText('开发调试')).toBeInTheDocument()
+      expect(screen.getByText('使用指南')).toBeInTheDocument()
+    })
+
+    it('应该在展开主菜单后显示子菜单项', () => {
+      render(<SideMenu {...defaultProps} />)
+
+      fireEvent.click(screen.getByText('集成配置'))
+
+      expect(screen.getByText('元素标记配置')).toBeInTheDocument()
+      expect(screen.getByText('postMessage 配置')).toBeInTheDocument()
+      expect(screen.getByText('消息标识配置')).toBeInTheDocument()
+      expect(screen.getByText('消息类型配置')).toBeInTheDocument()
+    })
+
+    it('应该在isReleaseBuild为true时不渲染调试菜单', () => {
+      render(<SideMenu {...defaultProps} isReleaseBuild={true} />)
+
+      expect(screen.queryByText('开发调试')).not.toBeInTheDocument()
+    })
+
+    it('应该在isReleaseBuild为false时渲染调试菜单', () => {
+      render(<SideMenu {...defaultProps} isReleaseBuild={false} />)
+
+      expect(screen.getByText('开发调试')).toBeInTheDocument()
+    })
+
+    it('应该在isReleaseBuild变化时正确切换调试菜单显示', () => {
+      const { rerender } = render(<SideMenu {...defaultProps} isReleaseBuild={false} />)
+
+      expect(screen.getByText('开发调试')).toBeInTheDocument()
+
+      rerender(<SideMenu {...defaultProps} isReleaseBuild={true} />)
+
+      expect(screen.queryByText('开发调试')).not.toBeInTheDocument()
     })
   })
 })

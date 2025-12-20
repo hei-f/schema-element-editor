@@ -69,6 +69,7 @@ describe('DrawerTitle', () => {
     editorTheme: 'oneDark' as EditorTheme,
     onEditorThemeChange: vi.fn(),
     themeColor: '#1677FF',
+    onApplyPreset: vi.fn(),
   }
 
   beforeEach(() => {

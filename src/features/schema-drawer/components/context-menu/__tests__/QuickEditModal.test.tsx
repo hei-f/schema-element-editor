@@ -1,7 +1,17 @@
-import { render } from '@testing-library/react'
+import { render, fireEvent, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QuickEditModal } from '../QuickEditModal'
 import type { EditorTheme } from '@/shared/types'
+
+// Mock shadowRootManager to return document.body as container
+vi.mock('@/shared/utils/shadow-root-manager', () => ({
+  shadowRootManager: {
+    init: vi.fn(),
+    get: vi.fn(() => document.body as unknown as ShadowRoot),
+    getContainer: vi.fn(() => document.body),
+    reset: vi.fn(),
+  },
+}))
 
 // Mock CodeMirrorEditor to avoid CodeMirror multi-instance issues
 vi.mock('../../editor/CodeMirrorEditor', async () => {
@@ -10,10 +20,15 @@ vi.mock('../../editor/CodeMirrorEditor', async () => {
 
   const MockCodeMirrorEditor = React.forwardRef(
     ({ defaultValue, onChange, theme }: any, ref: any) => {
+      // 使用 state 跟踪当前值
+      const [currentValue, setCurrentValue] = React.useState(defaultValue)
+
       // Expose mock methods through ref
       React.useImperativeHandle(ref, () => ({
-        getValue: () => defaultValue,
-        setValue: vi.fn(),
+        getValue: () => currentValue,
+        setValue: vi.fn((newValue: string) => {
+          setCurrentValue(newValue)
+        }),
         focus: vi.fn(),
         getSelection: () => ({ from: 0, to: 0 }),
         setSelection: vi.fn(),
@@ -27,8 +42,11 @@ vi.mock('../../editor/CodeMirrorEditor', async () => {
         'div',
         { 'data-testid': 'mock-codemirror-editor', 'data-theme': theme },
         React.createElement('textarea', {
-          value: defaultValue,
-          onChange: (e: any) => onChange?.(e.target.value),
+          value: currentValue,
+          onChange: (e: any) => {
+            setCurrentValue(e.target.value)
+            onChange?.(e.target.value)
+          },
           style: { width: '100%', height: '100%' },
         })
       )
@@ -246,6 +264,47 @@ describe('QuickEditModal 组件测试', () => {
           rerender(<QuickEditModal {...defaultProps} visible={false} />)
         }).not.toThrow()
       }
+    })
+  })
+
+  describe('用户交互', () => {
+    it('应该在点击保存按钮时调用onSave并传递编辑器内容', () => {
+      const onSave = vi.fn()
+      render(<QuickEditModal {...defaultProps} onSave={onSave} />)
+
+      const saveButton = screen.getByText('保存并替换')
+      fireEvent.click(saveButton)
+
+      expect(onSave).toHaveBeenCalledTimes(1)
+      expect(onSave).toHaveBeenCalledWith(defaultProps.content)
+    })
+
+    it('应该在点击取消按钮时调用onClose', () => {
+      const onClose = vi.fn()
+      render(<QuickEditModal {...defaultProps} onClose={onClose} />)
+
+      const cancelButton = screen.getByText(/取\s*消/)
+      fireEvent.click(cancelButton)
+
+      expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('应该在编辑内容后保存时传递更新后的内容', () => {
+      const onSave = vi.fn()
+      const updatedContent = '{"name": "updated"}'
+
+      render(<QuickEditModal {...defaultProps} onSave={onSave} />)
+
+      // 模拟编辑器内容变化
+      const textarea = screen.getByRole('textbox')
+      fireEvent.change(textarea, { target: { value: updatedContent } })
+
+      // 点击保存
+      const saveButton = screen.getByText('保存并替换')
+      fireEvent.click(saveButton)
+
+      expect(onSave).toHaveBeenCalledTimes(1)
+      expect(onSave).toHaveBeenCalledWith(updatedContent)
     })
   })
 })
