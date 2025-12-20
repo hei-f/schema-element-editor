@@ -150,15 +150,6 @@ export const ModernDropdownItemContent = styled.div`
 `
 
 /**
- * 下拉菜单分隔线
- */
-export const ModernDropdownDivider = styled.div<{ $isDark?: boolean }>`
-  height: 1px;
-  margin: 4px 8px;
-  background-color: ${(props) => (props.$isDark ? '#3a3a3a' : '#e8e8e8')};
-`
-
-/**
  * 下拉菜单头部/底部区域
  * 用于放置标题、清除按钮等
  */

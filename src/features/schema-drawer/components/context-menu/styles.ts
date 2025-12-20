@@ -110,12 +110,3 @@ export const ContextMenuItem = styled.div<{
     }
   `}
 `
-
-/**
- * 菜单分隔线
- */
-export const MenuDivider = styled.div<{ $isDark: boolean }>`
-  height: 1px;
-  margin: 4px 0;
-  background-color: ${(props) => (props.$isDark ? '#303030' : '#f0f0f0')};
-`

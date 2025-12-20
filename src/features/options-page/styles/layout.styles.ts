@@ -1,9 +1,9 @@
-import { InfoCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons'
-import { Alert, Button, Card, Collapse, Flex, Form, Input, InputNumber, Typography } from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
+import { Alert, Button, Collapse, Flex, Form, Input, InputNumber, Typography } from 'antd'
 import styled, { keyframes } from 'styled-components'
 import { MENU_COLLAPSED_WIDTH, MENU_EXPANDED_WIDTH } from '../config/menu-config'
 
-const { Text, Title, Paragraph } = Typography
+const { Text, Title } = Typography
 
 /**
  * 光晕颜色配置
@@ -295,64 +295,6 @@ export const EdgeGlowLayer = styled.div<{ $visible?: boolean }>`
   }
 `
 
-/** 背景光晕层3 - 额外光晕 (6个光晕时隐藏，8个时显示) */
-export const RightGlowLayer = styled.div<{ $visible?: boolean }>`
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  overflow: visible;
-  --glow-delay-1: 0s;
-  --glow-delay-2: 0s;
-  display: ${(props) => (props.$visible === false ? 'none' : 'block')};
-
-  /* 中上 - 绿色 (补充中央区域) */
-  &::before {
-    content: '';
-    position: absolute;
-    width: 750px;
-    height: 750px;
-    top: 15%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: radial-gradient(
-      circle,
-      ${GLOW_COLORS.green('full')} 0%,
-      ${GLOW_COLORS.green('half')} 45%,
-      transparent 70%
-    );
-    border-radius: 50%;
-    filter: blur(30px);
-    animation:
-      ${bgGlowPulse} calc(7.2s / ${GLOW_SPEED}) ease-in-out infinite,
-      ${bgGlowDrift3} calc(27s / ${GLOW_SPEED}) ease-in-out infinite;
-    animation-delay: var(--glow-delay-1), var(--glow-delay-1);
-  }
-
-  /* 中下 - 紫色 (补充中央区域) */
-  &::after {
-    content: '';
-    position: absolute;
-    width: 750px;
-    height: 750px;
-    bottom: 15%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: radial-gradient(
-      circle,
-      ${GLOW_COLORS.purple('full')} 0%,
-      ${GLOW_COLORS.purple('half')} 45%,
-      transparent 70%
-    );
-    border-radius: 50%;
-    filter: blur(30px);
-    animation:
-      ${bgGlowPulse} calc(8s / ${GLOW_SPEED}) ease-in-out infinite,
-      ${bgGlowDrift4} calc(29s / ${GLOW_SPEED}) ease-in-out infinite;
-    animation-delay: var(--glow-delay-2), var(--glow-delay-2);
-  }
-`
-
 /** 滚动区域包装器 - 占据侧边栏右侧的所有空间 */
 export const ScrollWrapper = styled.div<{ $menuCollapsed?: boolean }>`
   flex: 1;
@@ -398,13 +340,6 @@ export const Container = styled.div`
     0 4px 24px rgba(57, 197, 187, 0.1),
     0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.35);
-`
-
-export const StyledCard = styled(Card)`
-  && {
-    margin-bottom: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
 `
 
 export const CodeBlock = styled.pre`
@@ -468,12 +403,6 @@ export const HeaderSection = styled(Flex)`
 
 export const HeaderContent = styled.div`
   flex: 1;
-`
-
-export const HeaderActions = styled(Flex)`
-  && {
-    flex-shrink: 0;
-  }
 `
 
 export const VersionTag = styled.span`
@@ -543,6 +472,33 @@ export const CheckUpdateButton = styled(Button)`
     cursor: pointer;
     /* transition: all 0.2s ease; */
     /* border: 1px solid transparent !important; */
+  }
+`
+
+/** 保存预设配置按钮 */
+export const SavePresetButton = styled(Button)`
+  && {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    height: 24px;
+    border-radius: 16px;
+    font-size: 12px;
+  }
+`
+
+/** 管理预设配置按钮（图标按钮） */
+export const ManagePresetButton = styled(Button)`
+  && {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 14px;
   }
 `
 
@@ -727,62 +683,9 @@ export const SurpriseButton = styled(NativePanelActionButton).attrs({
   $variant: 'primary' as const,
 })``
 
-export const AutoSaveHint = styled(Flex)`
-  && {
-    padding: 12px 16px;
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    border-left: 3px solid #3b82f6;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    font-size: 13px;
-    color: #1e40af;
-  }
-`
-
-/**
- * AutoSaveHint 图标样式
- */
-export const AutoSaveHintIcon = styled.span`
-  font-size: 16px;
-  color: #3b82f6;
-  display: inline-flex;
-  align-items: center;
-`
-
-/**
- * AutoSaveHint 链接按钮样式
- */
-export const AutoSaveHintLinkButton = styled(Button)`
-  && {
-    margin-left: auto;
-    padding: 0;
-    height: auto;
-  }
-`
-
 export const PageTitle = styled(Title)`
   &.see-typography {
     margin: 0;
-  }
-`
-
-export const PageDescription = styled(Paragraph)`
-  &.see-typography {
-    margin-bottom: 0;
-  }
-`
-
-export const SectionTitle = styled(Title)<{ $noMarginTop?: boolean }>`
-  &.see-typography {
-    margin-top: ${(props) => (props.$noMarginTop ? '0' : '24px')};
-    margin-bottom: 16px;
-  }
-`
-
-export const SectionSubTitle = styled(Title)`
-  &.see-typography {
-    margin-top: 24px;
-    margin-bottom: 16px;
   }
 `
 
@@ -896,15 +799,8 @@ export const StyledCollapseModern = styled(Collapse)<{ id?: string }>`
   }
 `
 
-/** 默认样式 */
+/** 默认样式（使用现代风格） */
 export const StyledCollapse = StyledCollapseModern
-
-export const HelpIcon = styled(InfoCircleOutlined)`
-  && {
-    color: #1890ff;
-    cursor: help;
-  }
-`
 
 export const ExampleSection = styled(Flex)``
 
@@ -912,37 +808,6 @@ export const ExampleLabel = styled(Text)`
   &.see-typography {
     display: block;
   }
-`
-
-/**
- * 配置卡片副标题
- */
-export const CardSubtitle = styled(Text)`
-  &.see-typography {
-    display: block;
-    font-size: 14px;
-    color: #8c8c8c;
-    margin-bottom: 16px;
-  }
-`
-
-/**
- * 卡片标题容器（带 emoji）
- */
-export const CardTitleContainer = styled(Flex)`
-  && {
-    font-size: 16px;
-    font-weight: 600;
-  }
-`
-
-/**
- * 配置区块分隔线（用于卡片内小标题上方）
- */
-export const SectionDivider = styled.div`
-  height: 1px;
-  background: #f0f0f0;
-  margin: 24px 0 16px;
 `
 
 /**
