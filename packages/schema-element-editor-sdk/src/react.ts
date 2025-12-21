@@ -16,7 +16,20 @@ import type {
 // 如需类型，请从主入口导入：import type { ... } from '@schema-element-editor/host-sdk'
 
 /** React 版本的 Schema Element Editor 配置 */
-export interface ReactSchemaElementEditorConfig extends SchemaElementEditorConfig {
+export interface ReactSchemaElementEditorConfig extends Omit<
+  SchemaElementEditorConfig,
+  'renderPreview'
+> {
+  /**
+   * 渲染预览（可选）
+   *
+   * 特殊值说明：
+   * - undefined（默认）：不关心预览功能，不参与优先级竞争
+   * - null：明确阻止预览功能，参与优先级竞争但告诉插件不支持预览（触发内置预览器）
+   * - function：提供预览功能，参与优先级竞争并正常渲染
+   */
+  renderPreview?: ((schema: SchemaValue, containerId: string) => (() => void) | void) | null
+
   /**
    * 是否启用桥接（默认 true）
    * 设为 false 时不创建桥接器，不监听消息
@@ -102,9 +115,16 @@ export function useSchemaElementEditor(
       updateSchema: configRef.current.updateSchema
         ? (schema, params) => configRef.current.updateSchema?.(schema, params) as boolean
         : undefined,
-      renderPreview: configRef.current.renderPreview
-        ? (schema, containerId) => configRef.current.renderPreview?.(schema, containerId)
-        : undefined,
+      // renderPreview 需要特殊处理：
+      // - undefined: 不传递（不参与竞争）
+      // - null: 传递 null（参与竞争但阻止预览）
+      // - function: 创建代理函数
+      renderPreview:
+        configRef.current.renderPreview === null
+          ? null
+          : configRef.current.renderPreview
+            ? (schema, containerId) => configRef.current.renderPreview?.(schema, containerId)
+            : undefined,
       sourceConfig,
       messageTypes,
       sdkId,

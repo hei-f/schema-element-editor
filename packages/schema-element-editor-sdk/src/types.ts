@@ -65,8 +65,13 @@ export interface SchemaElementEditorConfig {
    * @param schema - Schema 数据（支持所有 JSON 类型）
    * @param containerId - 预览容器 ID
    * @returns 清理函数（可选）
+   *
+   * 特殊值说明：
+   * - undefined（默认）：不关心预览功能，不参与优先级竞争
+   * - null：明确阻止预览功能，参与优先级竞争但告诉插件不支持预览（触发内置预览器）
+   * - function：提供预览功能，参与优先级竞争并正常渲染
    */
-  renderPreview?: (schema: SchemaValue, containerId: string) => (() => void) | void
+  renderPreview?: ((schema: SchemaValue, containerId: string) => (() => void) | void) | null
 
   /** 消息标识配置（可选，有默认值） */
   sourceConfig?: Partial<PostMessageSourceConfig>

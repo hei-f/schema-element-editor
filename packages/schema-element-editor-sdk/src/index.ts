@@ -17,6 +17,7 @@
 
 // 默认导出 React 版本
 export { useSchemaElementEditor } from './react'
+export type { ReactSchemaElementEditorConfig } from './react'
 
 // 也导出纯 JS 版本的函数
 export { createSchemaElementEditorBridge } from './core'

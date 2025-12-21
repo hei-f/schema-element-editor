@@ -123,7 +123,9 @@ export function createSchemaElementEditorBridge(
   const implementedMethods: string[] = []
   if (typeof getSchema === 'function') implementedMethods.push(METHOD_NAMES.GET_SCHEMA)
   if (typeof updateSchema === 'function') implementedMethods.push(METHOD_NAMES.UPDATE_SCHEMA)
-  if (typeof renderPreview === 'function') {
+  // renderPreview 支持三种值：undefined（不关心）、null（阻止）、function（实现）
+  // null 和 function 都会参与优先级竞争
+  if (renderPreview !== undefined) {
     implementedMethods.push(
       METHOD_NAMES.CHECK_PREVIEW,
       METHOD_NAMES.RENDER_PREVIEW,
@@ -290,13 +292,16 @@ export function createSchemaElementEditorBridge(
       }
 
       case mergedMessageTypes.checkPreview: {
-        // 如果传入了 renderPreview，则预览功能可用
-        result = { exists: typeof renderPreview === 'function' }
+        // renderPreview === null 表示明确阻止预览，返回 exists: false
+        // renderPreview === function 表示提供预览，返回 exists: true
+        const exists = typeof renderPreview === 'function'
+        result = { exists }
         break
       }
 
       case mergedMessageTypes.renderPreview: {
         if (typeof renderPreview !== 'function') {
+          // renderPreview 为 null 或 undefined 时返回失败
           result = { success: false, error: '预览功能未配置' }
           break
         }

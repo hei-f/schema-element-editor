@@ -35,9 +35,14 @@ export interface VueSchemaElementEditorConfig {
 
   /**
    * 渲染预览（可选）
+   *
+   * 特殊值说明：
+   * - undefined（默认）：不关心预览功能，不参与优先级竞争
+   * - null：明确阻止预览功能，参与优先级竞争但告诉插件不支持预览（触发内置预览器）
+   * - function：提供预览功能，参与优先级竞争并正常渲染
    */
   renderPreview?: MaybeRefOrGetter<
-    ((schema: SchemaValue, containerId: string) => (() => void) | void) | undefined
+    ((schema: SchemaValue, containerId: string) => (() => void) | void) | null | undefined
   >
 
   /**
