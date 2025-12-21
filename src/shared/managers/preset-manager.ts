@@ -1,10 +1,7 @@
 import type { ConfigPreset, StorageData } from '@/shared/types'
 
-/**
- * 预设配置管理服务
- * 封装预设配置相关的业务逻辑
- */
-export class PresetManager {
+/** 预设配置管理服务（类不对外导出，只导出实例）*/
+class PresetManager {
   /**
    * 获取预设配置列表（按创建时间排序，最新的在前）
    */

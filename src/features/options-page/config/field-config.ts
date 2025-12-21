@@ -19,11 +19,8 @@ export const SECTION_KEYS = {
 
 export type SectionKey = (typeof SECTION_KEYS)[keyof typeof SECTION_KEYS]
 
-/**
- * 需要防抖保存的字段路径集合
- * 定义哪些字段在编辑时使用防抖保存，避免频繁触发存储操作
- */
-export const DEBOUNCE_FIELD_PATHS: readonly (readonly string[])[] = [
+/** 需要防抖保存的字段路径集合（仅在文件内使用）*/
+const DEBOUNCE_FIELD_PATHS: readonly (readonly string[])[] = [
   FORM_PATHS.attributeName,
   FORM_PATHS.drawerWidth,
   FORM_PATHS.searchConfig.searchDepthUp,

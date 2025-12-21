@@ -66,16 +66,3 @@ export const DrawerContent: React.FC<DrawerContentProps> = (props) => {
     />
   )
 }
-
-// 导出类型
-export type {
-  DrawerContentProps,
-  BaseContentProps,
-  ToolbarActions,
-  EditorProps,
-  NotificationProps,
-  DiffModeContentProps,
-  RecordingModeContentProps,
-  PreviewModeContentProps,
-  NormalModeContentProps,
-} from './types'

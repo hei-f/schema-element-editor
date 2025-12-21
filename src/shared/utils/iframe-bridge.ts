@@ -52,11 +52,8 @@ export function isSameOriginIframe(): boolean {
   }
 }
 
-/**
- * 获取当前 iframe 相对于 top frame 的偏移量
- * 仅在同源 iframe 中有效
- */
-export function getIframeOffset(): { left: number; top: number } | null {
+/** 获取当前 iframe 相对于 top frame 的偏移量（仅在文件内使用）*/
+function getIframeOffset(): { left: number; top: number } | null {
   if (!isInIframe()) return null
 
   try {

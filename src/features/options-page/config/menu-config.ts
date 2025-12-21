@@ -29,7 +29,7 @@ export interface MenuItemConfig {
 /**
  * 子菜单项配置接口
  */
-export interface MenuChildConfig {
+interface MenuChildConfig {
   /** 子菜单项唯一标识 */
   key: string
   /** 子菜单项标题 */

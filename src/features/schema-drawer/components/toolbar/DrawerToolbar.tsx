@@ -9,9 +9,6 @@ import {
 import { ResponsiveButtonGroup, type ToolbarButtonConfig } from './ResponsiveButtonGroup'
 import { ScrollableParams } from './ScrollableParams'
 
-// 重新导出 ToolbarMode 类型以保持向后兼容
-export type { ToolbarMode }
-
 /** 参数区域隐藏的容器最小宽度阈值（px） */
 const PARAMS_HIDE_THRESHOLD = 300
 
