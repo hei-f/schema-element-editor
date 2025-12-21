@@ -20,7 +20,8 @@
     "playwright-report/**",
     "e2e/**",
     "**/*.d.ts",
-    "src/vite-env.d.ts"
+    "src/vite-env.d.ts",
+    "src/features/favorites/index.tsx"
   ],
   "ignoreDependencies": [
     "@crxjs/vite-plugin",
@@ -32,7 +33,9 @@
     "@playwright/test",
     "@schema-element-editor/host-sdk",
     "wait-on",
-    "concurrently"
+    "concurrently",
+    "@types/chrome",
+    "@types/styled-components"
   ],
   "ignoreBinaries": ["bash", "tsgo"]
 }
