@@ -1,11 +1,7 @@
 #!/bin/sh
 
-# 加载 NVM 环境
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
 echo "🔍 Running TypeScript type check..."
-npx tsgo --incremental --noEmit
+bunx tsgo --incremental --noEmit
 EXIT_CODE=$?
 
 if [ $EXIT_CODE -ne 0 ]; then
