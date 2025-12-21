@@ -540,3 +540,101 @@ html {
 .menu__list-item-collapsible--active:hover .menu__caret::before {
   transform: rotate(90deg) scale(1.1);
 }
+
+/* ========== 侧边栏展开按钮样式 ========== */
+/* 确保折叠后的侧边栏容器只显示按钮宽度 */
+@media (min-width: 997px) {
+  aside[class*="docSidebarContainer"][class*="Hidden"] {
+    width: 50px !important;
+    min-width: 50px !important;
+  }
+
+  aside[class*="docSidebarContainer"][class*="Hidden"] > div[class*="Viewport"] {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* 使用属性选择器匹配 expandButton 开头的类名，避免依赖动态生成的哈希后缀 */
+  div[class^="expandButton"],
+  div[class*=" expandButton"] {
+    position: absolute !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-left: none !important;
+    border-radius: 0 12px 12px 0 !important;
+    color: var(--ifm-color-primary) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 2px 8px var(--glass-shadow) !important;
+    cursor: pointer !important;
+    overflow: visible !important;
+    padding: 8px !important;
+    flex: 0 1 auto !important;
+  }
+
+  div[class^="expandButton"]::before,
+  div[class*=" expandButton"]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-accent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+  }
+
+  div[class^="expandButton"]:hover,
+  div[class*=" expandButton"]:hover,
+  div[class^="expandButton"]:focus,
+  div[class*=" expandButton"]:focus {
+    transform: translateX(2px) !important;
+    border-color: rgba(57, 197, 187, 0.5) !important;
+    box-shadow: 0 4px 16px rgba(57, 197, 187, 0.2), 0 2px 8px var(--glass-shadow) !important;
+    color: var(--ifm-color-primary-dark) !important;
+    background: var(--glass-bg) !important;
+  }
+
+  div[class^="expandButton"]:hover::before,
+  div[class*=" expandButton"]:hover::before,
+  div[class^="expandButton"]:focus::before,
+  div[class*=" expandButton"]:focus::before {
+    opacity: 1;
+  }
+
+  div[class^="expandButton"]:active,
+  div[class*=" expandButton"]:active {
+    transform: translateX(0) !important;
+    box-shadow: 0 2px 8px var(--glass-shadow) !important;
+  }
+
+  div[class^="expandButton"] svg,
+  div[class*=" expandButton"] svg {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  /* 暗色模式下的展开按钮 */
+  [data-theme='dark'] div[class^="expandButton"],
+  [data-theme='dark'] div[class*=" expandButton"] {
+    background: rgba(37, 37, 38, 0.65) !important;
+    border-color: rgba(77, 212, 203, 0.2) !important;
+  }
+
+  [data-theme='dark'] div[class^="expandButton"]:hover,
+  [data-theme='dark'] div[class*=" expandButton"]:hover,
+  [data-theme='dark'] div[class^="expandButton"]:focus,
+  [data-theme='dark'] div[class*=" expandButton"]:focus {
+    border-color: rgba(77, 212, 203, 0.5) !important;
+    box-shadow: 0 4px 16px rgba(77, 212, 203, 0.25), 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+    background: rgba(37, 37, 38, 0.65) !important;
+  }
+}
