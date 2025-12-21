@@ -799,9 +799,6 @@ export const StyledCollapseModern = styled(Collapse)<{ id?: string }>`
   }
 `
 
-/** 默认样式（使用现代风格） */
-export const StyledCollapse = StyledCollapseModern
-
 export const ExampleSection = styled(Flex)``
 
 export const ExampleLabel = styled(Text)`

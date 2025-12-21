@@ -86,19 +86,7 @@ export const ParamsContainer = styled.div`
 `
 
 /**
- * 单个参数项
- */
-export const ParamItem = styled.div`
-  display: flex;
-  align-items: center;
-  max-width: 200px;
-  min-width: 0;
-  flex-shrink: 0;
-`
-
-/**
  * 属性标签包装器（支持复制功能）
- * 作为 Flex 容器，内部展示参数标签和复制图标
  */
 export const AttributeTagWrapper = styled.span`
   display: inline-flex;
@@ -117,18 +105,6 @@ export const AttributeTagWrapper = styled.span`
   /* line-height: 16px; */
   color: #666f8d;
   cursor: pointer;
-`
-
-/**
- * 按钮组（保留用于兼容）
- */
-export const ButtonGroup = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  flex-shrink: 0;
-  justify-content: flex-end;
-  align-items: center;
 `
 
 /**
@@ -327,42 +303,6 @@ export const ToolbarSegmented = styled(Segmented)`
     background: #ffffff !important;
   }
 ` as typeof Segmented
-
-/**
- * 属性标签（params 胶囊样式）
- * 使用 CSS 变量 --drawer-theme-color 作为主题色，默认为 #1677FF
- */
-export const AttributeTag = styled.span`
-  display: inline-block;
-  padding: 4px 8px;
-  background:
-    linear-gradient(
-      0deg,
-      color-mix(in srgb, var(--see-color-primary, #1677ff) 15%, transparent),
-      color-mix(in srgb, var(--see-color-primary, #1677ff) 15%, transparent)
-    ),
-    #ffffff;
-  border-radius: 8px;
-  font-size: 12px;
-  line-height: 16px;
-  color: #666f8d;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: help;
-`
-
-/**
- * 参数标签
- */
-export const ParamLabel = styled.span`
-  font-size: 12px;
-  color: #8c8c8c;
-  margin-right: 4px;
-  flex-shrink: 0;
-`
 
 /**
  * 复制图标包装器

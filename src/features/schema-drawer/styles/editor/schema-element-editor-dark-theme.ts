@@ -161,11 +161,8 @@ export const seeDark = EditorView.theme(
   { dark: true }
 )
 
-/**
- * SEE Dark 语法高亮
- * 专为 JSON 优化的语法高亮
- */
-export const seeDarkHighlight = HighlightStyle.define([
+/** SEE Dark 语法高亮（仅在文件内使用，对外导出 seeDarkHighlighting）*/
+const seeDarkHighlight = HighlightStyle.define([
   // JSON 属性名 - 红色
   { tag: tags.propertyName, color: '#e06c75', fontWeight: 'bold' },
 

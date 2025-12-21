@@ -1,63 +1,6 @@
 import styled, { keyframes } from 'styled-components'
 
 /**
- * 淡入淡出动画（用于自动保存成功提示）
- */
-const fadeInOut = keyframes`
-  0% {
-    opacity: 0;
-    transform: translateY(-2px);
-  }
-  10% {
-    opacity: 0.8;
-    transform: translateY(0);
-  }
-  90% {
-    opacity: 0.8;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-2px);
-  }
-`
-
-/**
- * 淡入动画（用于草稿检测提示）
- */
-const fadeIn = keyframes`
-  0% {
-    opacity: 0;
-    transform: translateY(-2px);
-  }
-  100% {
-    opacity: 0.8;
-    transform: translateY(0);
-  }
-`
-
-/**
- * 草稿通知提示（3秒后消失）
- * 使用 Ant Design CSS 变量获取主题色
- */
-export const DraftNotification = styled.span`
-  font-size: 12px;
-  color: var(--see-color-primary, #1677ff);
-  opacity: 0.8;
-  animation: ${fadeIn} 0.3s ease-in-out;
-`
-
-/**
- * 草稿自动保存成功提示
- */
-export const DraftAutoSaveSuccess = styled.span`
-  font-size: 12px;
-  color: #52c41a;
-  opacity: 0.8;
-  animation: ${fadeInOut} 2s ease-in-out;
-`
-
-/**
  * 抽屉内容容器
  */
 export const DrawerContentContainer = styled.div`
@@ -77,73 +20,6 @@ export const ModeSwitchContainer = styled.div`
   flex: 1;
   min-height: 0;
   overflow: hidden;
-`
-
-/**
- * 抽屉底部按钮组（右对齐 + 间距）
- */
-export const DrawerFooter = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-`
-
-/**
- * 抽屉标题容器
- */
-export const DrawerTitleContainer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-`
-
-/**
- * 抽屉标题左侧内容区域
- */
-export const DrawerTitleLeft = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-`
-
-/**
- * 抽屉标题中间 params 区域
- */
-export const DrawerTitleParams = styled.div`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  max-width: 50%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 0 12px;
-  margin: 0 8px;
-
-  /* 隐藏滚动条但保留滚动功能 */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* 滚动时显示渐变遮罩 */
-  mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    black 8px,
-    black calc(100% - 8px),
-    transparent 100%
-  );
-`
-
-/**
- * 抽屉标题操作按钮区域
- */
-export const DrawerTitleActions = styled.div`
-  flex-shrink: 0;
 `
 
 /** 预览模式布局间距常量 */
