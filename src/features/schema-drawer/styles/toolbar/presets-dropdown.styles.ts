@@ -36,7 +36,7 @@ export const PresetsDropdownItem = styled(ModernDropdownItem)`
  * 预设配置菜单项内容容器
  */
 export const PresetsDropdownItemContent = styled(ModernDropdownItemContent)`
-  gap: 12px;
+  /* 使用基础样式的 gap: 8px */
 `
 
 /**
@@ -49,7 +49,7 @@ export const PresetsDropdownInfo = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
 `
 
 /**

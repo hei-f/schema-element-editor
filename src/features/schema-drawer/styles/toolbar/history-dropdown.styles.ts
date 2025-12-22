@@ -39,7 +39,6 @@ export const HistoryDropdownItem = styled(ModernDropdownItem)<{ $isActive: boole
  * 采用单行水平布局，标题和时间左右分布
  */
 export const HistoryDropdownMenuItemContent = styled(ModernDropdownItemContent)`
-  gap: 12px;
   align-items: center;
 `
 
@@ -53,7 +52,7 @@ export const HistoryDropdownInfo = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
 `
 
 /**

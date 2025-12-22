@@ -30,8 +30,8 @@ export const ModernDropdownContainer = styled.div<{ $isDark?: boolean }>`
 export const ModernDropdownList = styled.div<{ $maxHeight?: string }>`
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 8px 6px;
+  gap: 2px;
+  padding: 6px 4px;
   max-height: ${(props) => props.$maxHeight || '320px'};
   overflow-y: auto;
 
@@ -65,7 +65,7 @@ export const ModernDropdownItem = styled.div<{
   $themeColor?: string
 }>`
   position: relative;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border-radius: 6px;
   cursor: ${(props) => (props.$disabled ? 'not-allowed' : 'pointer')};
   color: ${(props) => {
@@ -74,7 +74,7 @@ export const ModernDropdownItem = styled.div<{
     return props.$isDark ? '#cccccc' : '#262626'
   }};
   font-size: 14px;
-  line-height: 1.4;
+  line-height: 20px;
   font-weight: ${(props) => (props.$isActive ? 500 : 400)};
   background: ${(props) => {
     if (props.$isActive) {
@@ -87,7 +87,6 @@ export const ModernDropdownItem = styled.div<{
   user-select: none;
   opacity: ${(props) => (props.$disabled ? 0.5 : 1)};
   pointer-events: ${(props) => (props.$disabled ? 'none' : 'auto')};
-  min-height: 44px;
 
   /* 左侧高亮条 */
   &::before {
@@ -124,7 +123,7 @@ export const ModernDropdownItem = styled.div<{
           : `inset 0 0 0 1px ${props.$themeColor || '#0066ff'}20`
       };
       transform: translateX(2px);
-      padding-left: 14px;
+      padding-left: 12px;
       
       &::before {
         height: 60%;
@@ -145,7 +144,7 @@ export const ModernDropdownItem = styled.div<{
 export const ModernDropdownItemContent = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
 `
 
