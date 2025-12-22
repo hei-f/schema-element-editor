@@ -184,15 +184,6 @@ export class SdkCoordinator {
     // 只处理使用相同 messageSource 的 SDK（避免不同 source 的 SDK 互相干扰）
     if (info.messageSource !== this.messageSource) return
 
-    console.log('[SDK Coordinator] 检测到其他 SDK 注册:', {
-      otherSdkId: info.sdkId,
-      otherLevel: info.level,
-      otherImplementedMethods: info.implementedMethods,
-      mySdkId: this.sdkId,
-      myLevel: this.level,
-      myImplementedMethods: this.implementedMethods,
-    })
-
     // 只对比当前 SDK 实现了的方法的优先级
     this.implementedMethods.forEach((method) => {
       // 检查对方是否实现了该方法
@@ -203,12 +194,6 @@ export class SdkCoordinator {
 
       const myLevel = this.getMethodLevel(method)
       const otherLevel = info.methodLevels[method as keyof MethodLevelConfig] ?? info.level
-
-      console.log(`[SDK Coordinator] 方法 ${method} 优先级对比:`, {
-        myLevel,
-        otherLevel,
-        result: otherLevel > myLevel ? '对方更高' : otherLevel === myLevel ? '同级' : '我方更高',
-      })
 
       if (otherLevel > myLevel) {
         // 对方优先级更高，加入higherLevelSDKs，从sameLevelSDKs移除
