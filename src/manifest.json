@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Schema Element Editor",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "DOM元素Schema查看和编辑工具",
   "permissions": ["storage", "activeTab", "scripting"],
   "host_permissions": ["<all_urls>"],
