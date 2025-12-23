@@ -413,7 +413,7 @@ export interface Favorite {
 }
 
 /**
- * 配置预设数据接口
+ * 预设配置数据接口
  */
 export interface ConfigPreset {
   /** 唯一标识符 */
