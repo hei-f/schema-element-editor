@@ -641,9 +641,10 @@ html {
 
 /* 内联代码块样式 */
 code:not(pre code) {
-  padding: 0 6px;
+  padding: 1px 6px;
   color: #c7254e;
   background-color: rgba(57, 197, 187, 0.08);
+  vertical-align:baseline;
 }
 
 [data-theme='dark'] code:not(pre code) {
