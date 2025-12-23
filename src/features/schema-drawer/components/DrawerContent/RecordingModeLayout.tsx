@@ -239,6 +239,7 @@ export const RecordingModeLayout: React.FC<RecordingModeLayoutProps> = (props) =
             diffLeftContent={diffLeftContent}
             diffRightContent={diffRightContent}
             diffToolbarActions={diffToolbarActions}
+            themeColor={themeColor}
           />
         </ContentAreaContainer>
       </ModeContentWrapper>

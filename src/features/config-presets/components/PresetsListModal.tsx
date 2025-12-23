@@ -41,13 +41,6 @@ export const PresetsListModal: React.FC<PresetsListModalProps> = ({
       render: (timestamp: number) => new Date(timestamp).toLocaleString('zh-CN'),
     },
     {
-      title: '最后使用',
-      dataIndex: 'lastUsedTime',
-      key: 'lastUsedTime',
-      width: 180,
-      render: (lastUsedTime: number) => new Date(lastUsedTime).toLocaleString('zh-CN'),
-    },
-    {
       title: '操作',
       key: 'action',
       width: 160,

@@ -201,6 +201,7 @@ export const NormalModeLayout: React.FC<NormalModeLayoutProps> = (props) => {
               diffLeftContent={diffLeftContent}
               diffRightContent={diffRightContent}
               diffToolbarActions={diffToolbarActions}
+              themeColor={themeColor}
             />
           </ContentAreaContainer>
         </ModeContentWrapper>

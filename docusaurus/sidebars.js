@@ -38,7 +38,7 @@ const sidebars = {
         'guides/Diff对比',
         'guides/版本管理',
         'guides/收藏管理',
-        'guides/配置预设',
+        'guides/预设配置',
         'guides/导入导出',
       ],
     },

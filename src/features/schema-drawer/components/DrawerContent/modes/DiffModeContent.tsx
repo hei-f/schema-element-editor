@@ -19,6 +19,7 @@ export const DiffModeContent: React.FC<DiffModeContentProps> = (props) => {
     editorProps,
     diffLeftContent,
     diffRightContent,
+    themeColor,
   } = props
 
   return (
@@ -43,6 +44,7 @@ export const DiffModeContent: React.FC<DiffModeContentProps> = (props) => {
         transformedLeftContent={diffLeftContent}
         transformedRightContent={diffRightContent}
         theme={editorProps.editorTheme}
+        themeColor={themeColor}
       />
     </FullScreenModeWrapper>
   )

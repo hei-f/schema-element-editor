@@ -2,7 +2,7 @@
 
 Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 
-![Version](https://img.shields.io/badge/version-2.4.2-blue)
+![Version](https://img.shields.io/badge/version-2.4.3-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 📚 [完整文档](https://hei-f.github.io/schema-element-editor/)
@@ -23,7 +23,7 @@ Chrome扩展程序，用于实时查看和编辑DOM元素的Schema数据。
 | 📜 **编辑历史**            | 自动记录编辑历史，支持版本回退和对比，标记保存/草稿/收藏等特殊版本                                          |
 | 💿 **草稿功能**            | 支持手动保存和自动保存草稿，防止数据丢失                                                                    |
 | ⭐ **收藏管理**            | 快速保存和应用常用Schema配置，支持编辑已保存的收藏                                                          |
-| 📋 **配置预设**            | 支持保存和管理完整的插件配置方案，可一键切换不同的工作环境配置 (v2.4.0+)                                    |
+| 📋 **预设配置**            | 支持保存和管理完整的插件配置方案，可一键切换不同的工作环境配置 (v2.4.0+)                                    |
 | 📥📤 **导入导出**          | 支持导出Schema为JSON文件，也可从文件导入，方便数据分享和备份                                                |
 | 🔦 **批量高亮**            | 支持快捷键（Alt+字母/数字）一键高亮页面所有可编辑元素，可配置快捷键和数量上限                               |
 | 🔴 **录制模式**            | 按 Alt+R 进入录制模式，轮询检测Schema变化并记录快照，支持多版本Diff对比                                     |
