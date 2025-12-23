@@ -94,6 +94,8 @@ export interface DiffModeContentProps extends BaseContentProps {
   onCancelRepair: () => void
   /** 是否隐藏工具栏（由父组件统一管理时使用） */
   hideToolbar?: boolean
+  /** 主题色 */
+  themeColor?: string
 }
 
 /**

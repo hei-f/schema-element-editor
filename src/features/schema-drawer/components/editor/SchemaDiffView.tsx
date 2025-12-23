@@ -1,6 +1,5 @@
 import { DEFAULT_EDITOR_THEME } from '@/shared/constants/editor-themes'
 import type { EditorTheme, SchemaSnapshot } from '@/shared/types'
-import { Select } from 'antd'
 import React, { Suspense, useMemo, useState, useRef, useCallback, useEffect } from 'react'
 import { diffChars } from 'diff'
 import {
@@ -19,6 +18,7 @@ import type { DiffEditorHandle, DiffLineInfo, InlineDiffSegment } from './DiffEd
 import { DiffEditor } from './DiffEditor.lazy'
 import { useDiffSync } from '../../hooks/diff/useDiffSync'
 import type { DiffRow } from '../../utils/diff-algorithm'
+import { VersionSelector } from '../recording/VersionSelector'
 
 interface SchemaDiffViewProps {
   /** 快照列表 */
@@ -29,6 +29,8 @@ interface SchemaDiffViewProps {
   transformedRightContent?: string
   /** 编辑器主题 */
   theme?: EditorTheme
+  /** 主题色 */
+  themeColor?: string
 }
 
 /**
@@ -189,6 +191,7 @@ export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
     transformedLeftContent,
     transformedRightContent,
     theme = DEFAULT_EDITOR_THEME,
+    themeColor = '#0066ff',
   } = props
 
   /**
@@ -283,14 +286,6 @@ export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
     rightEditorRef.current?.updateDecorations(rightDiffLines)
   }, [leftDiffLines, rightDiffLines])
 
-  // 版本选项
-  const versionOptions = useMemo(() => {
-    return snapshots.map((snapshot, index) => ({
-      value: snapshot.id,
-      label: `版本 ${index + 1} (${formatTimestamp(snapshot.timestamp)})`,
-    }))
-  }, [snapshots])
-
   // 版本信息显示
   const leftVersionInfo = useMemo(() => {
     if (isSimpleDiffMode) {
@@ -343,27 +338,25 @@ export const SchemaDiffView: React.FC<SchemaDiffViewProps> = (props) => {
         <DiffToolbar>
           <VersionSelectorGroup>
             <VersionSelectorLabel>左侧版本:</VersionSelectorLabel>
-            <Select
-              value={leftVersionId}
+            <VersionSelector
+              snapshots={snapshots}
+              value={leftVersionId ?? snapshots[0]?.id}
               onChange={setUserSelectedLeftId}
-              options={versionOptions}
-              style={{ width: 180 }}
-              size="small"
-              popupMatchSelectWidth={false}
-              getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
+              label="左侧版本"
+              theme={theme}
+              themeColor={themeColor}
             />
           </VersionSelectorGroup>
 
           <VersionSelectorGroup>
             <VersionSelectorLabel>右侧版本:</VersionSelectorLabel>
-            <Select
-              value={rightVersionId}
+            <VersionSelector
+              snapshots={snapshots}
+              value={rightVersionId ?? snapshots[snapshots.length - 1]?.id}
               onChange={setUserSelectedRightId}
-              options={versionOptions}
-              style={{ width: 180 }}
-              size="small"
-              popupMatchSelectWidth={false}
-              getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
+              label="右侧版本"
+              theme={theme}
+              themeColor={themeColor}
             />
           </VersionSelectorGroup>
 

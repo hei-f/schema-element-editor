@@ -15,7 +15,7 @@ export const EditorToolbar = styled.div`
   gap: 12px;
   flex-wrap: nowrap;
   overflow: hidden;
-  min-height: 26px;
+  min-height: 50px;
 `
 
 /**
