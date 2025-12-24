@@ -3,19 +3,49 @@ import styled from 'styled-components'
 
 /**
  * 编辑器工具栏
- * 单行布局，不换行
+ * 支持多行布局（用于组合键等扩展功能）
  */
 export const EditorToolbar = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   padding: 12px 16px;
   border-radius: 12px;
   background: #f7f8fa;
   gap: 12px;
+  min-height: 50px;
+`
+
+/**
+ * 工具栏行容器（用于多行布局）
+ */
+export const ToolbarRow = styled.div<{ $justify?: string }>`
+  display: flex;
+  justify-content: ${(props) => props.$justify || 'space-between'};
+  align-items: center;
+  gap: 12px;
   flex-wrap: nowrap;
   overflow: hidden;
-  min-height: 50px;
+`
+
+/**
+ * 组合键标签
+ */
+export const ComboKeysLabel = styled.span`
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+  flex-shrink: 0;
+`
+
+/**
+ * 组合键按钮组
+ */
+export const ComboKeysButtons = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 `
 
 /**

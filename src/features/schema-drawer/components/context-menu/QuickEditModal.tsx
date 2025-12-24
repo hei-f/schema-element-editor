@@ -212,12 +212,12 @@ export const QuickEditModal: React.FC<QuickEditModalProps> = (props) => {
   }, [diffMode, repairOriginalValue, pendingRepairedValue])
 
   /**
-   * 检查是否可以解析
+   * 检查是否可以解析（判断是否为有效JSON）
    */
   const canParse = useMemo(() => {
     try {
-      const parsed = JSON.parse(editorValue)
-      return typeof parsed === 'string'
+      JSON.parse(editorValue)
+      return true
     } catch {
       return false
     }
@@ -336,6 +336,34 @@ export const QuickEditModal: React.FC<QuickEditModalProps> = (props) => {
   }, [editorValue, showLightNotification, message])
 
   /**
+   * 加引号+去转义
+   */
+  const handleAddQuotesAndUnescape = useCallback(() => {
+    const result = schemaTransformer.addQuotesAndUnescape(editorValue)
+    if (result.success && result.data) {
+      editorRef.current?.setValue(result.data)
+      setEditorValue(result.data)
+      showLightNotification('加引号+去转义成功')
+    } else {
+      message.error(result.error || '加引号+去转义失败')
+    }
+  }, [editorValue, showLightNotification, message])
+
+  /**
+   * 压缩+转义+去引号
+   */
+  const handleCompactEscapeAndRemoveQuotes = useCallback(() => {
+    const result = schemaTransformer.compactEscapeAndRemoveQuotes(editorValue)
+    if (result.success && result.data) {
+      editorRef.current?.setValue(result.data)
+      setEditorValue(result.data)
+      showLightNotification('压缩+转义+去引号成功')
+    } else {
+      message.error(result.error || '压缩+转义+去引号失败')
+    }
+  }, [editorValue, showLightNotification, message])
+
+  /**
    * Segment 切换
    */
   const handleSegmentChange = useCallback((_value: string | number) => {
@@ -429,6 +457,9 @@ export const QuickEditModal: React.FC<QuickEditModalProps> = (props) => {
               hasPendingRepair={!!pendingRepairedValue}
               onApplyRepair={handleApplyRepair}
               onCancelRepair={handleCancelRepair}
+              onAddQuotesAndUnescape={handleAddQuotesAndUnescape}
+              onCompactEscapeAndRemoveQuotes={handleCompactEscapeAndRemoveQuotes}
+              showComboKeys={true}
               themeColor={primaryColor}
               hoverColor={hoverColor}
               activeColor={activeColor}
