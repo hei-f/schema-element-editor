@@ -104,7 +104,7 @@ export const unescapeJson = (input: string): JsonProcessResult => {
  * @param data 要压缩的内容（可以是字符串、对象、数组等）
  * @returns 压缩后的 JSON 字符串
  */
-export const compactJson = (data: any): JsonProcessResult => {
+export const compactJson = (data: unknown): JsonProcessResult => {
   try {
     // 压缩为紧凑的一行 JSON 格式
     const jsonString = JSON.stringify(data)
@@ -136,9 +136,9 @@ export const parseNestedJson = (input: string): JsonProcessResult => {
   let parseCount = 0
 
   try {
-    let parsed: any = input.trim()
+    const trimmed = input.trim()
 
-    if (!parsed) {
+    if (!trimmed) {
       return {
         success: false,
         error: '输入内容为空',
@@ -146,9 +146,9 @@ export const parseNestedJson = (input: string): JsonProcessResult => {
     }
 
     // 尝试修复常见的格式问题
-    const fixedInput = tryFixJsonString(parsed)
-    if (fixedInput !== parsed) {
-      parsed = fixedInput
+    const fixedInput = tryFixJsonString(trimmed)
+    let parsed: unknown = fixedInput
+    if (fixedInput !== trimmed) {
       parseCount++
     }
 
@@ -236,4 +236,145 @@ export const tryFixJsonString = (input: string): string => {
   }
 
   return trimmed
+}
+
+/**
+ * 加引号+去转义
+ * @description 组合操作：先添加外层引号，再执行去转义。用于处理裸露的转义JSON
+ * @example {\"user\":\"Alice\"} → {"user":"Alice"}
+ * @param input 要处理的内容
+ * @returns 处理结果
+ */
+export const addQuotesAndUnescape = (input: string): JsonProcessResult => {
+  try {
+    const trimmed = input.trim()
+    if (!trimmed) {
+      return {
+        success: false,
+        error: '输入内容为空',
+      }
+    }
+
+    // 步骤1: 添加外层引号
+    const quoted = `"${trimmed}"`
+
+    // 步骤2: 执行去转义
+    return unescapeJson(quoted)
+  } catch (error) {
+    return {
+      success: false,
+      error: `加引号+去转义失败: ${(error as Error).message}`,
+    }
+  }
+}
+
+/**
+ * 转义+去引号
+ * @description 组合操作：先执行转义，再去除外层引号。用于将JSON转换为裸露的转义格式
+ * @example {"user":"Alice"} → {\"user\":\"Alice\"}
+ * @param input 要处理的内容
+ * @returns 处理结果
+ */
+export const escapeAndRemoveQuotes = (input: string): JsonProcessResult => {
+  try {
+    const trimmed = input.trim()
+    if (!trimmed) {
+      return {
+        success: false,
+        error: '输入内容为空',
+      }
+    }
+
+    // 步骤1: 执行转义
+    const escapeResult = escapeJson(trimmed)
+    if (!escapeResult.success || !escapeResult.data) {
+      return escapeResult
+    }
+
+    // 步骤2: 去除外层引号
+    const escaped = escapeResult.data
+    if (!escaped.startsWith('"') || !escaped.endsWith('"')) {
+      return {
+        success: false,
+        error: '转义结果格式异常，无法去除外层引号',
+      }
+    }
+
+    const result = escaped.slice(1, -1)
+    return {
+      success: true,
+      data: result,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: `转义+去引号失败: ${(error as Error).message}`,
+    }
+  }
+}
+
+/**
+ * 压缩+转义+去引号
+ * @description 组合操作：先压缩JSON，再转义，最后去除外层引号。用于将格式化JSON转换为紧凑的裸露转义格式
+ * @example { "user": "Alice" } → {\"user\":\"Alice\"}
+ * @param input 要处理的内容
+ * @returns 处理结果
+ */
+export const compactEscapeAndRemoveQuotes = (input: string): JsonProcessResult => {
+  try {
+    const trimmed = input.trim()
+    if (!trimmed) {
+      return {
+        success: false,
+        error: '输入内容为空',
+      }
+    }
+
+    // 步骤1: 压缩（需要先解析为对象再压缩）
+    let compactResult: JsonProcessResult
+    try {
+      const parsed = JSON.parse(trimmed)
+      compactResult = compactJson(parsed)
+    } catch (error) {
+      // 如果不是有效JSON，尝试直接压缩字符串
+      console.debug('JSON解析失败，尝试直接压缩字符串:', error)
+      compactResult = compactJson(trimmed)
+    }
+
+    if (!compactResult.success || !compactResult.data) {
+      return {
+        success: false,
+        error: `压缩失败: ${compactResult.error}`,
+      }
+    }
+
+    // 步骤2: 转义
+    const escapeResult = escapeJson(compactResult.data)
+    if (!escapeResult.success || !escapeResult.data) {
+      return {
+        success: false,
+        error: `转义失败: ${escapeResult.error}`,
+      }
+    }
+
+    // 步骤3: 去除外层引号
+    const escaped = escapeResult.data
+    if (!escaped.startsWith('"') || !escaped.endsWith('"')) {
+      return {
+        success: false,
+        error: '转义结果格式异常，无法去除外层引号',
+      }
+    }
+
+    const result = escaped.slice(1, -1)
+    return {
+      success: true,
+      data: result,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      error: `压缩+转义+去引号失败: ${(error as Error).message}`,
+    }
+  }
 }

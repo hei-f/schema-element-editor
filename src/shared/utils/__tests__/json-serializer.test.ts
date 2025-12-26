@@ -4,6 +4,9 @@ import {
   escapeJson,
   unescapeJson,
   tryFixJsonString,
+  addQuotesAndUnescape,
+  escapeAndRemoveQuotes,
+  compactEscapeAndRemoveQuotes,
 } from '@/shared/utils/schema/serializer'
 
 describe('JSON处理工具测试', () => {
@@ -407,6 +410,238 @@ describe('JSON处理工具测试', () => {
       // 验证往返一致性
       const finalData = JSON.parse(parseResult.data!)
       expect(finalData).toEqual(arrayData)
+    })
+  })
+
+  describe('addQuotesAndUnescape 加引号+去转义', () => {
+    it('应该正确处理裸露的转义JSON', () => {
+      const input = '{\\"user\\":\\"Alice\\"}'
+      const result = addQuotesAndUnescape(input)
+
+      expect(result.success).toBe(true)
+      expect(JSON.parse(result.data!)).toEqual({ user: 'Alice' })
+    })
+
+    it('应该处理包含嵌套对象的裸露转义JSON', () => {
+      const input = '{\\"user\\":\\"Alice\\",\\"profile\\":{\\"age\\":25}}'
+      const result = addQuotesAndUnescape(input)
+
+      expect(result.success).toBe(true)
+      expect(JSON.parse(result.data!)).toEqual({
+        user: 'Alice',
+        profile: { age: 25 },
+      })
+    })
+
+    it('应该处理包含数组的裸露转义JSON', () => {
+      const input = '{\\"items\\":[1,2,3]}'
+      const result = addQuotesAndUnescape(input)
+
+      expect(result.success).toBe(true)
+      expect(JSON.parse(result.data!)).toEqual({ items: [1, 2, 3] })
+    })
+
+    it('应该拒绝空输入', () => {
+      const result = addQuotesAndUnescape('')
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('输入内容为空')
+    })
+
+    it('应该拒绝只有空白字符的输入', () => {
+      const result = addQuotesAndUnescape('   ')
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('输入内容为空')
+    })
+
+    it('应该处理普通文本', () => {
+      const input = 'hello world'
+      const result = addQuotesAndUnescape(input)
+
+      // 普通文本添加引号后再去转义，结果还是原文本
+      expect(result.success).toBe(true)
+      expect(result.data).toBe('hello world')
+    })
+  })
+
+  describe('escapeAndRemoveQuotes 转义+去引号', () => {
+    it('应该正确处理标准JSON对象', () => {
+      const input = '{"user":"Alice"}'
+      const result = escapeAndRemoveQuotes(input)
+
+      expect(result.success).toBe(true)
+      expect(result.data).toBe('{\\"user\\":\\"Alice\\"}')
+    })
+
+    it('应该处理包含嵌套对象的JSON', () => {
+      const input = '{"user":"Alice","profile":{"age":25}}'
+      const result = escapeAndRemoveQuotes(input)
+
+      expect(result.success).toBe(true)
+      expect(result.data).toBe('{\\"user\\":\\"Alice\\",\\"profile\\":{\\"age\\":25}}')
+    })
+
+    it('应该处理包含数组的JSON', () => {
+      const input = '{"items":[1,2,3]}'
+      const result = escapeAndRemoveQuotes(input)
+
+      expect(result.success).toBe(true)
+      expect(result.data).toBe('{\\"items\\":[1,2,3]}')
+    })
+
+    it('应该处理格式化的JSON', () => {
+      const input = '{\n  "user": "Alice"\n}'
+      const result = escapeAndRemoveQuotes(input)
+
+      expect(result.success).toBe(true)
+      expect(result.data).toContain('\\n')
+    })
+
+    it('应该拒绝空输入', () => {
+      const result = escapeAndRemoveQuotes('')
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('输入内容为空')
+    })
+
+    it('应该拒绝只有空白字符的输入', () => {
+      const result = escapeAndRemoveQuotes('   ')
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('输入内容为空')
+    })
+
+    it('应该处理普通文本', () => {
+      const input = 'hello world'
+      const result = escapeAndRemoveQuotes(input)
+
+      expect(result.success).toBe(true)
+      expect(result.data).toBe('hello world')
+    })
+  })
+
+  describe('组合操作往返测试', () => {
+    it('应该支持裸露转义JSON的往返转换', () => {
+      const original = '{\\"user\\":\\"Alice\\",\\"age\\":25}'
+
+      // 展开编辑：加引号+去转义
+      const expandResult = addQuotesAndUnescape(original)
+      expect(expandResult.success).toBe(true)
+
+      // 修改内容（模拟用户编辑）
+      const edited = JSON.parse(expandResult.data!)
+      edited.age = 26
+      const editedJson = JSON.stringify(edited)
+
+      // 收起保存：转义+去引号
+      const collapseResult = escapeAndRemoveQuotes(editedJson)
+      expect(collapseResult.success).toBe(true)
+
+      // 验证结果格式正确
+      expect(collapseResult.data).toBe('{\\"user\\":\\"Alice\\",\\"age\\":26}')
+    })
+
+    it('应该支持标准JSON的转换流程', () => {
+      const original = '{"user":"Bob"}'
+
+      // 转义+去引号
+      const collapseResult = escapeAndRemoveQuotes(original)
+      expect(collapseResult.success).toBe(true)
+      expect(collapseResult.data).toBe('{\\"user\\":\\"Bob\\"}')
+
+      // 加引号+去转义（还原）
+      const expandResult = addQuotesAndUnescape(collapseResult.data!)
+      expect(expandResult.success).toBe(true)
+      expect(JSON.parse(expandResult.data!)).toEqual({ user: 'Bob' })
+    })
+  })
+
+  describe('compactEscapeAndRemoveQuotes 压缩+转义+去引号', () => {
+    it('应该正确处理格式化的JSON', () => {
+      const input = '{\n  "user": "Alice",\n  "age": 25\n}'
+      const result = compactEscapeAndRemoveQuotes(input)
+
+      expect(result.success).toBe(true)
+      expect(result.data).toBe('{\\"user\\":\\"Alice\\",\\"age\\":25}')
+    })
+
+    it('应该处理已经压缩的JSON', () => {
+      const input = '{"user":"Alice","age":25}'
+      const result = compactEscapeAndRemoveQuotes(input)
+
+      expect(result.success).toBe(true)
+      expect(result.data).toBe('{\\"user\\":\\"Alice\\",\\"age\\":25}')
+    })
+
+    it('应该处理包含嵌套对象的JSON', () => {
+      const input = '{"user":"Alice","profile":{"age":25,"city":"NYC"}}'
+      const result = compactEscapeAndRemoveQuotes(input)
+
+      expect(result.success).toBe(true)
+      expect(result.data).toBe(
+        '{\\"user\\":\\"Alice\\",\\"profile\\":{\\"age\\":25,\\"city\\":\\"NYC\\"}}'
+      )
+    })
+
+    it('应该处理包含数组的JSON', () => {
+      const input = '{"items":[1,2,3],"total":3}'
+      const result = compactEscapeAndRemoveQuotes(input)
+
+      expect(result.success).toBe(true)
+      expect(result.data).toBe('{\\"items\\":[1,2,3],\\"total\\":3}')
+    })
+
+    it('应该拒绝空输入', () => {
+      const result = compactEscapeAndRemoveQuotes('')
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('输入内容为空')
+    })
+
+    it('应该拒绝只有空白字符的输入', () => {
+      const result = compactEscapeAndRemoveQuotes('   ')
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('输入内容为空')
+    })
+
+    it('应该处理复杂嵌套结构', () => {
+      const input = `{
+  "users": [
+    { "name": "Alice", "age": 25 },
+    { "name": "Bob", "age": 30 }
+  ],
+  "meta": { "total": 2 }
+}`
+      const result = compactEscapeAndRemoveQuotes(input)
+
+      expect(result.success).toBe(true)
+      // 验证结果是紧凑格式的裸露转义JSON
+      expect(result.data).not.toContain('\n')
+      expect(result.data).toContain('\\"users\\"')
+      expect(result.data).toContain('\\"meta\\"')
+    })
+
+    it('应该支持完整的工作流：格式化→压缩→转义→去引号', () => {
+      // 用户从日志中选中格式化的JSON
+      const formatted = '{\n  "user": "Alice",\n  "action": "login"\n}'
+
+      // 使用组合键转换为裸露转义格式
+      const result = compactEscapeAndRemoveQuotes(formatted)
+      expect(result.success).toBe(true)
+
+      // 验证结果是紧凑的裸露转义格式
+      const expected = '{\\"user\\":\\"Alice\\",\\"action\\":\\"login\\"}'
+      expect(result.data).toBe(expected)
+
+      // 验证可以通过加引号+去转义还原
+      const restoreResult = addQuotesAndUnescape(result.data!)
+      expect(restoreResult.success).toBe(true)
+      expect(JSON.parse(restoreResult.data!)).toEqual({
+        user: 'Alice',
+        action: 'login',
+      })
     })
   })
 })

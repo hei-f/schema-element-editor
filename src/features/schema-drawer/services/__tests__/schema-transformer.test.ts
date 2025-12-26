@@ -6,6 +6,9 @@ vi.mock('@/shared/utils/schema/serializer', () => ({
   unescapeJson: vi.fn(),
   compactJson: vi.fn(),
   parseNestedJson: vi.fn(),
+  addQuotesAndUnescape: vi.fn(),
+  escapeAndRemoveQuotes: vi.fn(),
+  compactEscapeAndRemoveQuotes: vi.fn(),
 }))
 
 vi.mock('@/shared/utils/schema/transformers', () => ({
@@ -22,6 +25,9 @@ import {
   escapeJson,
   parseNestedJson,
   unescapeJson,
+  addQuotesAndUnescape,
+  escapeAndRemoveQuotes,
+  compactEscapeAndRemoveQuotes,
 } from '@/shared/utils/schema/serializer'
 import {
   convertToASTString,
@@ -36,6 +42,9 @@ const mockEscapeJson = vi.mocked(escapeJson)
 const mockUnescapeJson = vi.mocked(unescapeJson)
 const mockCompactJson = vi.mocked(compactJson)
 const mockParseNestedJson = vi.mocked(parseNestedJson)
+const mockAddQuotesAndUnescape = vi.mocked(addQuotesAndUnescape)
+const mockEscapeAndRemoveQuotes = vi.mocked(escapeAndRemoveQuotes)
+const mockCompactEscapeAndRemoveQuotes = vi.mocked(compactEscapeAndRemoveQuotes)
 const mockFormatJsonString = vi.mocked(formatJsonString)
 const mockConvertToASTString = vi.mocked(convertToASTString)
 const mockConvertToMarkdownString = vi.mocked(convertToMarkdownString)
@@ -324,6 +333,42 @@ describe('SchemaTransformer 测试', () => {
 
       expect(result.success).toBe(true)
       expect(result.data).toEqual(nested)
+    })
+  })
+
+  describe('addQuotesAndUnescape 加引号+去转义', () => {
+    it('应该调用 addQuotesAndUnescape', () => {
+      const mockResult = { success: true, data: '{"user":"Alice"}' }
+      mockAddQuotesAndUnescape.mockReturnValue(mockResult)
+
+      const result = schemaTransformer.addQuotesAndUnescape('{\\"user\\":\\"Alice\\"}')
+
+      expect(mockAddQuotesAndUnescape).toHaveBeenCalledWith('{\\"user\\":\\"Alice\\"}')
+      expect(result).toEqual(mockResult)
+    })
+  })
+
+  describe('escapeAndRemoveQuotes 转义+去引号', () => {
+    it('应该调用 escapeAndRemoveQuotes', () => {
+      const mockResult = { success: true, data: '{\\"user\\":\\"Alice\\"}' }
+      mockEscapeAndRemoveQuotes.mockReturnValue(mockResult)
+
+      const result = schemaTransformer.escapeAndRemoveQuotes('{"user":"Alice"}')
+
+      expect(mockEscapeAndRemoveQuotes).toHaveBeenCalledWith('{"user":"Alice"}')
+      expect(result).toEqual(mockResult)
+    })
+  })
+
+  describe('compactEscapeAndRemoveQuotes 压缩+转义+去引号', () => {
+    it('应该调用 compactEscapeAndRemoveQuotes', () => {
+      const mockResult = { success: true, data: '{\\"user\\":\\"Alice\\"}' }
+      mockCompactEscapeAndRemoveQuotes.mockReturnValue(mockResult)
+
+      const result = schemaTransformer.compactEscapeAndRemoveQuotes('{ "user": "Alice" }')
+
+      expect(mockCompactEscapeAndRemoveQuotes).toHaveBeenCalledWith('{ "user": "Alice" }')
+      expect(result).toEqual(mockResult)
     })
   })
 })

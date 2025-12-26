@@ -2,9 +2,14 @@ import type { ElementAttributes, ToolbarButtonsConfig } from '@/shared/types'
 import { ContentType } from '@/shared/types'
 import { TOOLBAR_MODE, type ToolbarMode } from '@/shared/constants/ui-modes'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { Tooltip } from 'antd'
 import {
   EditorToolbar as StyledEditorToolbar,
+  ToolbarRow,
   ToolbarSegmented,
+  ToolbarButton,
+  ComboKeysLabel,
+  ComboKeysButtons,
 } from '../../styles/toolbar/toolbar.styles'
 import { ResponsiveButtonGroup, type ToolbarButtonConfig } from './ResponsiveButtonGroup'
 import { ScrollableParams } from './ScrollableParams'
@@ -74,6 +79,12 @@ interface DrawerToolbarProps {
   onCancelRepair?: () => void
   /** 复制参数成功回调 */
   onCopyParam?: (value: string, index: number) => void
+  /** 加引号+去转义 */
+  onAddQuotesAndUnescape?: () => void
+  /** 压缩+转义+去引号 */
+  onCompactEscapeAndRemoveQuotes?: () => void
+  /** 是否显示组合键（仅在特定场景如QuickEditModal中显示） */
+  showComboKeys?: boolean
   /** 主题色 */
   themeColor?: string
   /** 悬浮态颜色 */
@@ -114,6 +125,9 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = (props) => {
     onApplyRepair,
     onCancelRepair,
     onCopyParam,
+    onAddQuotesAndUnescape,
+    onCompactEscapeAndRemoveQuotes,
+    showComboKeys = false,
     themeColor,
     hoverColor,
     activeColor,
@@ -407,21 +421,67 @@ export const DrawerToolbar: React.FC<DrawerToolbarProps> = (props) => {
 
   const buttonConfigs = buildButtonConfigs()
 
+  /** 是否显示组合键区域（仅在showComboKeys为true且非Diff模式时显示） */
+  const shouldShowComboKeys =
+    showComboKeys && !isInDiffMode && (onAddQuotesAndUnescape || onCompactEscapeAndRemoveQuotes)
+
   return (
     <StyledEditorToolbar ref={toolbarRef}>
-      {/* 参数区域：仅非 Diff 模式且空间足够时显示 */}
-      {!isInDiffMode && !hideParams && (
-        <ScrollableParams params={attributes.params || []} onCopyParam={onCopyParam} />
-      )}
+      {/* 第一行：参数区域和主要按钮 */}
+      <ToolbarRow>
+        {/* 参数区域：仅非 Diff 模式且空间足够时显示 */}
+        {!isInDiffMode && !hideParams && (
+          <ScrollableParams params={attributes.params || []} onCopyParam={onCopyParam} />
+        )}
 
-      {/* 响应式按钮组 */}
-      <ResponsiveButtonGroup
-        buttons={buttonConfigs}
-        getPopupContainer={getPopupContainer}
-        themeColor={themeColor}
-        hoverColor={hoverColor}
-        activeColor={activeColor}
-      />
+        {/* 响应式按钮组 */}
+        <ResponsiveButtonGroup
+          buttons={buttonConfigs}
+          getPopupContainer={getPopupContainer}
+          themeColor={themeColor}
+          hoverColor={hoverColor}
+          activeColor={activeColor}
+        />
+      </ToolbarRow>
+
+      {/* 第二行：组合键区域 */}
+      {shouldShowComboKeys && (
+        <ToolbarRow $justify={'flex-start'}>
+          <ComboKeysLabel>组合键</ComboKeysLabel>
+          <ComboKeysButtons>
+            {onAddQuotesAndUnescape && (
+              <Tooltip
+                title="先添加外层引号，再去转义。用于处理裸露的转义JSON"
+                getPopupContainer={getPopupContainer}
+              >
+                <ToolbarButton
+                  onClick={onAddQuotesAndUnescape}
+                  $themeColor={themeColor}
+                  $hoverColor={hoverColor}
+                  $activeColor={activeColor}
+                >
+                  加引号→去转义
+                </ToolbarButton>
+              </Tooltip>
+            )}
+            {onCompactEscapeAndRemoveQuotes && (
+              <Tooltip
+                title="先压缩JSON，再转义，最后去除外层引号"
+                getPopupContainer={getPopupContainer}
+              >
+                <ToolbarButton
+                  onClick={onCompactEscapeAndRemoveQuotes}
+                  $themeColor={themeColor}
+                  $hoverColor={hoverColor}
+                  $activeColor={activeColor}
+                >
+                  压缩→转义→去引号
+                </ToolbarButton>
+              </Tooltip>
+            )}
+          </ComboKeysButtons>
+        </ToolbarRow>
+      )}
     </StyledEditorToolbar>
   )
 }

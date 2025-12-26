@@ -1,6 +1,9 @@
 import { ContentType } from '@/shared/types'
 import { isElementsArray, isStringData } from '@/shared/utils/schema/transformers'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+/** 内容检测防抖延迟时间（毫秒） */
+const DETECTION_DEBOUNCE_MS = 300
 
 interface DetectionResult {
   type: ContentType
@@ -51,7 +54,7 @@ export const useContentDetection = (): UseContentDetectionReturn => {
   }, [])
 
   /**
-   * 带防抖的内容检测（300ms防抖）
+   * 带防抖的内容检测
    */
   const debouncedDetectContent = useCallback(
     (value: string) => {
@@ -63,7 +66,7 @@ export const useContentDetection = (): UseContentDetectionReturn => {
         const result = detectContentType(value)
         setContentType(result.type)
         setCanParse(result.canParse)
-      }, 300)
+      }, DETECTION_DEBOUNCE_MS)
     },
     [detectContentType]
   )
@@ -74,6 +77,17 @@ export const useContentDetection = (): UseContentDetectionReturn => {
   const updateContentType = useCallback((result: DetectionResult) => {
     setContentType(result.type)
     setCanParse(result.canParse)
+  }, [])
+
+  /**
+   * 组件卸载时清理防抖定时器
+   */
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+    }
   }, [])
 
   return {

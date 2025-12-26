@@ -14,7 +14,6 @@ import {
   AppstoreOutlined,
 } from '@ant-design/icons'
 import { AstTestPage } from './pages/AstTestPage'
-import { SchemaTestPage } from './pages/SchemaTestPage'
 import { AgenticDemoPage } from './pages/AgenticDemoPage'
 import { IframeTestPage } from './pages/IframeTestPage'
 import { OptionsTestPage } from './pages/OptionsTestPage'
@@ -26,6 +25,13 @@ import { PriorityOverrideTest } from './pages/multi-sdk-tests/PriorityOverrideTe
 import { PriorityBlockingTest } from './pages/multi-sdk-tests/PriorityBlockingTest'
 import { MethodLevelTest } from './pages/multi-sdk-tests/MethodLevelTest'
 import { PartialImplementationTest } from './pages/multi-sdk-tests/PartialImplementationTest'
+import { SchemaTestIndex } from './pages/schema-tests/index'
+import { BasicTypesTest } from './pages/schema-tests/BasicTypesTest'
+import { ComplexTypesTest } from './pages/schema-tests/ComplexTypesTest'
+import { JsonRepairTest } from './pages/schema-tests/JsonRepairTest'
+import { QuickEditTest } from './pages/schema-tests/QuickEditTest'
+import { RecordingModeTest } from './pages/schema-tests/RecordingModeTest'
+import { UIFeaturesTest } from './pages/schema-tests/UIFeaturesTest'
 import styled from 'styled-components'
 
 const { Header, Content, Sider } = Layout
@@ -127,9 +133,16 @@ type PageKey =
   | 'multi-sdk-test-priority-blocking'
   | 'multi-sdk-test-method-level'
   | 'multi-sdk-test-partial-implementation'
+  | 'schema-tests'
+  | 'schema-tests-basic-types'
+  | 'schema-tests-complex-types'
+  | 'schema-tests-json-repair'
+  | 'schema-tests-quick-edit'
+  | 'schema-tests-recording-mode'
+  | 'schema-tests-ui-features'
 
 /** 默认页面 */
-const DEFAULT_PAGE: PageKey = 'schema-test'
+const DEFAULT_PAGE: PageKey = 'schema-tests'
 
 /**
  * 从 URL hash 中获取当前页面
@@ -150,6 +163,13 @@ const getPageFromHash = (): PageKey => {
     'multi-sdk-test-priority-blocking',
     'multi-sdk-test-method-level',
     'multi-sdk-test-partial-implementation',
+    'schema-tests',
+    'schema-tests-basic-types',
+    'schema-tests-complex-types',
+    'schema-tests-json-repair',
+    'schema-tests-quick-edit',
+    'schema-tests-recording-mode',
+    'schema-tests-ui-features',
   ]
   return validPages.includes(hash as PageKey) ? (hash as PageKey) : DEFAULT_PAGE
 }
@@ -207,7 +227,7 @@ export const TestApp: React.FC = () => {
 
   const menuItems = [
     {
-      key: 'schema-test',
+      key: 'schema-tests',
       icon: <ApiOutlined />,
       label: 'Schema 功能测试',
     },
@@ -252,8 +272,6 @@ export const TestApp: React.FC = () => {
     switch (currentPage) {
       case 'ast-test':
         return <AstTestPage siderCollapsed={siderCollapsed} />
-      case 'schema-test':
-        return <SchemaTestPage siderCollapsed={siderCollapsed} />
       case 'agentic-demo':
         return <AgenticDemoPage siderCollapsed={siderCollapsed} />
       case 'recording-test':
@@ -274,6 +292,24 @@ export const TestApp: React.FC = () => {
         return <MethodLevelTest onBack={() => handlePageChange('multi-sdk-test')} />
       case 'multi-sdk-test-partial-implementation':
         return <PartialImplementationTest onBack={() => handlePageChange('multi-sdk-test')} />
+      case 'schema-tests':
+        return (
+          <SchemaTestIndex
+            onNavigate={(testKey) => handlePageChange(`schema-tests-${testKey}` as PageKey)}
+          />
+        )
+      case 'schema-tests-basic-types':
+        return <BasicTypesTest onBack={() => handlePageChange('schema-tests')} />
+      case 'schema-tests-complex-types':
+        return <ComplexTypesTest onBack={() => handlePageChange('schema-tests')} />
+      case 'schema-tests-json-repair':
+        return <JsonRepairTest onBack={() => handlePageChange('schema-tests')} />
+      case 'schema-tests-quick-edit':
+        return <QuickEditTest onBack={() => handlePageChange('schema-tests')} />
+      case 'schema-tests-recording-mode':
+        return <RecordingModeTest onBack={() => handlePageChange('schema-tests')} />
+      case 'schema-tests-ui-features':
+        return <UIFeaturesTest onBack={() => handlePageChange('schema-tests')} />
       case 'iframe-test':
         return <IframeTestPage siderCollapsed={siderCollapsed} />
       case 'builtin-preview-test':
@@ -281,7 +317,11 @@ export const TestApp: React.FC = () => {
       case 'options-test':
         return <OptionsTestPage siderCollapsed={siderCollapsed} />
       default:
-        return <SchemaTestPage siderCollapsed={siderCollapsed} />
+        return (
+          <SchemaTestIndex
+            onNavigate={(testKey) => handlePageChange(`schema-tests-${testKey}` as PageKey)}
+          />
+        )
     }
   }
 

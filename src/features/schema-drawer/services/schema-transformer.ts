@@ -3,6 +3,9 @@ import {
   escapeJson,
   parseNestedJson,
   unescapeJson,
+  addQuotesAndUnescape,
+  escapeAndRemoveQuotes,
+  compactEscapeAndRemoveQuotes,
 } from '@/shared/utils/schema/serializer'
 import {
   convertToASTString,
@@ -76,6 +79,33 @@ export class SchemaTransformer {
    */
   parseNestedJson(value: string): TransformResult {
     return parseNestedJson(value)
+  }
+
+  /**
+   * 加引号+去转义
+   * 组合操作：先添加外层引号，再执行去转义。用于处理裸露的转义JSON
+   * @example {\"user\":\"Alice\"} → {"user":"Alice"}
+   */
+  addQuotesAndUnescape(value: string): TransformResult {
+    return addQuotesAndUnescape(value)
+  }
+
+  /**
+   * 转义+去引号
+   * 组合操作：先执行转义，再去除外层引号。用于将JSON转换为裸露的转义格式
+   * @example {"user":"Alice"} → {\"user\":\"Alice\"}
+   */
+  escapeAndRemoveQuotes(value: string): TransformResult {
+    return escapeAndRemoveQuotes(value)
+  }
+
+  /**
+   * 压缩+转义+去引号
+   * 组合操作：先压缩JSON，再转义，最后去除外层引号。用于将格式化JSON转换为紧凑的裸露转义格式
+   * @example { "user": "Alice" } → {\"user\":\"Alice\"}
+   */
+  compactEscapeAndRemoveQuotes(value: string): TransformResult {
+    return compactEscapeAndRemoveQuotes(value)
   }
 
   /**
