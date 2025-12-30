@@ -1,4 +1,4 @@
-import type { Mocked, MockedFunction } from 'vitest'
+import type { MockedFunction } from 'vitest'
 import {
   convertToASTString,
   convertToMarkdownString,
@@ -23,7 +23,6 @@ vi.mock('@ant-design/agentic-ui', () => ({
 }))
 
 import { parserMarkdownToSlateNode, parserSlateNodeToMarkdown } from '@ant-design/agentic-ui'
-import { logger } from '@/shared/utils/logger'
 
 const mockParserMarkdownToSlateNode = parserMarkdownToSlateNode as MockedFunction<
   typeof parserMarkdownToSlateNode
@@ -31,7 +30,6 @@ const mockParserMarkdownToSlateNode = parserMarkdownToSlateNode as MockedFunctio
 const mockParserSlateNodeToMarkdown = parserSlateNodeToMarkdown as MockedFunction<
   typeof parserSlateNodeToMarkdown
 >
-const mockLogger = logger as Mocked<typeof logger>
 
 describe('transformers 工具函数测试', () => {
   beforeEach(() => {
@@ -202,7 +200,6 @@ describe('transformers 工具函数测试', () => {
 
       const result = parseMarkdownString('invalid')
 
-      expect(mockLogger.error).toHaveBeenCalledWith('解析 Markdown 失败:', error)
       expect(result).toEqual([])
     })
   })
@@ -227,7 +224,6 @@ describe('transformers 工具函数测试', () => {
       const elements = [{ type: 'paragraph', children: [{ text: 'hello' }] }]
 
       expect(() => parserSchemaNodeToMarkdown(elements as any)).toThrow(error)
-      expect(mockLogger.error).toHaveBeenCalledWith('转换为 Markdown 失败:', error)
     })
   })
 

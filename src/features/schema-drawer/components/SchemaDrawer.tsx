@@ -18,7 +18,6 @@ import type {
 import { ContentType, HistoryEntryType } from '@/shared/types'
 import { sendRequestToHost } from '@/shared/utils/browser/message'
 import { storage } from '@/shared/utils/browser/storage'
-import { logger } from '@/shared/utils/logger'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { useDrawerShortcuts } from '../hooks/ui/useDrawerShortcuts'
 import { useFullScreenMode } from '../hooks/ui/useFullScreenMode'
@@ -279,7 +278,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
   const cleanupPreviewContainer = useCallback(() => {
     // 立即清除 DOM 容器（同步操作，无延迟）
     previewContainerManager.clear()
-    logger.log('预览容器已清理')
 
     // 异步通知宿主清理其内部状态
     const messageType =
@@ -290,8 +288,9 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
       { containerId: PREVIEW_CONTAINER_ID },
       2,
       apiConfig?.sourceConfig
-    ).catch((error) => {
-      logger.warn('预览容器清理请求失败:', error)
+    ).catch((err) => {
+      // 清理通知失败不影响流程，但需要记录
+      console.error('通知宿主清理预览失败:', err)
     })
   }, [apiConfig])
 
@@ -426,8 +425,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
       await storage.setAllConfig(preset.config)
 
       message.success('预设配置已应用')
-    } catch (error) {
-      console.error('应用预设配置失败:', error)
+    } catch (err) {
+      console.error('应用预设配置失败:', err)
       message.error('应用预设配置失败')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -480,8 +479,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
       const max = await storage.getMaxFavoritesCount()
       setFavoriteCount(favorites.length)
       setMaxFavoriteCount(max)
-    } catch (error) {
-      console.error('加载收藏上限失败:', error)
+    } catch (err) {
+      console.error('加载收藏上限失败:', err)
     }
   }, [])
 
@@ -624,8 +623,8 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
     try {
       const { content, wasStringData } = formatSchemaContent(schemaData)
       updateEditorContent(content, { ...initLoadOptions, wasStringData })
-    } catch (error) {
-      logger.error('处理Schema数据失败:', error)
+    } catch (err) {
+      console.error('处理Schema数据失败:', err)
       updateEditorContent(JSON.stringify(schemaData), { ...initLoadOptions, wasStringData: false })
     } finally {
       setTimeout(() => {
@@ -689,8 +688,9 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
             { schema: result.data, containerId },
             apiConfig?.requestTimeout ?? 1,
             apiConfig?.sourceConfig
-          ).catch((error) => {
-            logger.warn('拖拽结束后预览渲染请求失败:', error)
+          ).catch((err) => {
+            // 预览渲染失败不影响编辑，但需要记录
+            console.error('渲染预览失败:', err)
           })
         }
 
@@ -897,7 +897,6 @@ export const SchemaDrawer: React.FC<SchemaDrawerProps> = ({
             apiConfig?.requestTimeout ?? 1,
             apiConfig?.sourceConfig
           )
-          logger.log('预览渲染请求已发送')
         } catch (error: any) {
           message.error('预览渲染失败：' + error.message)
           // 显示错误信息到容器

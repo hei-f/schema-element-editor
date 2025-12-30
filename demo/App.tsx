@@ -316,12 +316,6 @@ export const TestApp: React.FC = () => {
         return <BuiltinPreviewTestPage siderCollapsed={siderCollapsed} />
       case 'options-test':
         return <OptionsTestPage siderCollapsed={siderCollapsed} />
-      default:
-        return (
-          <SchemaTestIndex
-            onNavigate={(testKey) => handlePageChange(`schema-tests-${testKey}` as PageKey)}
-          />
-        )
     }
   }
 

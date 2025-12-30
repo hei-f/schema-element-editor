@@ -46,11 +46,6 @@ export const SIMPLE_STORAGE_FIELDS = {
     defaultValue: DEFAULT_VALUES.autoParseString,
   } as StorageFieldConfig<boolean>,
 
-  enableDebugLog: {
-    key: STORAGE_KEYS.ENABLE_DEBUG_LOG,
-    defaultValue: DEFAULT_VALUES.enableDebugLog,
-  } as StorageFieldConfig<boolean>,
-
   highlightColor: {
     key: STORAGE_KEYS.HIGHLIGHT_COLOR,
     defaultValue: DEFAULT_VALUES.highlightColor,

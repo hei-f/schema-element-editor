@@ -1,4 +1,3 @@
-import { logger } from '@/shared/utils/logger'
 import type { Elements } from '@ant-design/agentic-ui'
 import { parserMarkdownToSlateNode, parserSlateNodeToMarkdown } from '@ant-design/agentic-ui'
 
@@ -20,7 +19,7 @@ export const parseMarkdownString = (markdownText: string): Elements[] => {
     const schema = result?.schema || []
     return schema
   } catch (error) {
-    logger.error('解析 Markdown 失败:', error)
+    console.error('解析 Markdown 失败:', error)
     return []
   }
 }
@@ -32,7 +31,7 @@ export const parserSchemaNodeToMarkdown = (elements: Elements[]): string => {
   try {
     return parserSlateNodeToMarkdown(elements)
   } catch (error) {
-    logger.error('转换为 Markdown 失败:', error)
+    console.error('转换为 Markdown 失败:', error)
     throw error
   }
 }

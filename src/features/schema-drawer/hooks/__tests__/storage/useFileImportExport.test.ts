@@ -1,7 +1,6 @@
 import { renderHook, act } from '@testing-library/react'
 import { Modal } from 'antd'
 import { useFileImportExport } from '../../storage/useFileImportExport'
-import { logger } from '@/shared/utils/logger'
 
 // Mock dependencies
 vi.mock('antd', () => ({
@@ -73,13 +72,6 @@ describe('useFileImportExport', () => {
 
       // 验证提示
       expect(mockShowLightNotification).toHaveBeenCalledWith('✅ 已导出到文件')
-      expect(logger.log).toHaveBeenCalledWith(
-        'Export successful:',
-        expect.objectContaining({
-          fileName: expect.stringContaining('content-param1_param2-'),
-          size: expect.any(Number),
-        })
-      )
     })
 
     it('当 JSON 格式错误时应该提示错误', () => {
@@ -126,7 +118,6 @@ describe('useFileImportExport', () => {
       })
 
       expect(mockOnError).toHaveBeenCalledWith('导出失败：数据处理错误')
-      expect(logger.error).toHaveBeenCalledWith('Export failed:', expect.any(Error))
     })
 
     it('启用自定义文件名时应该弹出 Modal', () => {
@@ -451,7 +442,6 @@ describe('useFileImportExport', () => {
       })
 
       expect(mockOnError).toHaveBeenCalledWith('导入失败：文件格式错误或非法 JSON')
-      expect(logger.error).toHaveBeenCalled()
     })
 
     it('当导入的文件内容为空时应该提示错误', async () => {
@@ -525,7 +515,6 @@ describe('useFileImportExport', () => {
       })
 
       expect(mockOnError).toHaveBeenCalledWith('文件读取失败')
-      expect(logger.error).toHaveBeenCalledWith('FileReader error')
     })
 
     it('应该始终返回 false 以阻止默认上传行为', () => {

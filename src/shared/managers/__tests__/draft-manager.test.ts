@@ -9,8 +9,6 @@ vi.mock('@/shared/utils/logger', () => ({
   },
 }))
 
-import { logger } from '@/shared/utils/logger'
-
 describe('DraftManager 测试', () => {
   let manager: DraftManager
 
@@ -204,7 +202,6 @@ describe('DraftManager 测试', () => {
 
       expect(count).toBe(2)
       expect(mockRemove).toHaveBeenCalledWith(['draft:expired1', 'draft:expired2'])
-      expect(logger.log).toHaveBeenCalledWith('已清理 2 个过期草稿')
     })
 
     it('没有过期草稿时不应该调用删除', async () => {
@@ -219,7 +216,6 @@ describe('DraftManager 测试', () => {
 
       expect(count).toBe(0)
       expect(mockRemove).not.toHaveBeenCalled()
-      expect(logger.log).not.toHaveBeenCalled()
     })
 
     it('出错时应该记录错误并返回0', async () => {
@@ -229,7 +225,6 @@ describe('DraftManager 测试', () => {
       const count = await manager.cleanExpiredDrafts(1, 'draft:', mockGetAll, mockRemove)
 
       expect(count).toBe(0)
-      expect(logger.error).toHaveBeenCalledWith('清理过期草稿失败:', expect.any(Error))
       expect(mockRemove).not.toHaveBeenCalled()
     })
 
@@ -244,7 +239,6 @@ describe('DraftManager 测试', () => {
       const count = await manager.cleanExpiredDrafts(1, 'draft:', mockGetAll, mockRemove)
 
       expect(count).toBe(0)
-      expect(logger.error).toHaveBeenCalled()
     })
   })
 

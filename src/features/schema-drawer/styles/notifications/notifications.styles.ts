@@ -77,7 +77,7 @@ export const LightSuccessNotification = styled.div<{ $isDark?: boolean }>`
   /* 入场和出场动画 - 对标 antd message 的 3 秒停留时间 */
   animation:
     ${lightSlideIn} 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-    ${lightFadeOut} 0.2s cubic-bezier(0.4, 0, 0.2, 1) 2.8s forwards;
+    ${lightFadeOut} 0.2s cubic-bezier(0.4, 0, 0.2, 1) 1.8s forwards;
 
   /* 禁用交互 */
   pointer-events: none;
