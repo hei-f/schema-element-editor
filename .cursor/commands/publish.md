@@ -46,7 +46,7 @@
   - **关键**：同一文件内的不同功能改动必须拆分到不同的提交组
   - 例如：文件A中的第10-15行是功能X，第50-60行是功能Y，应拆分为两个提交组
   - 避免在一个提交中混合不相关的改动
-- **重要**：暂时忽略版本号相关文件（package.json, src/manifest.json, src/features/options-page/components/OptionsPageContent.tsx中的版本号），这些将在步骤9中单独提交
+- **重要**：暂时忽略版本号相关文件（package.json, src/manifest.json, src/features/options-page/components/OptionsPageContent.tsx中的版本号, docusaurus/docs/intro.md中的版本号），这些将在步骤9中单独提交
 - **输出格式**：对每个提交组，明确列出：
   - 提交组编号
   - 功能描述
@@ -410,12 +410,15 @@ TypeScript 类型检查结果：
 - `package.json` 中的 `version` 字段
 - `src/manifest.json` 中的 `version` 字段
 - `src/features/options-page/components/OptionsPageContent.tsx` 中的 `CURRENT_VERSION` 常量（搜索 `const CURRENT_VERSION` 并更新版本号）
+- `docusaurus/docs/intro.md` 中的版本号（搜索 `**当前版本：**` 并更新版本号）
 - 版本号格式：`major.minor.patch`（如 `1.2.3`）
 - 注：README.md 中的版本号badge将在步骤6中一并更新
 
-### 6. 检查README文档更新
+### 6. 检查并更新文档
 
-根据本次提交的改动内容，判断是否需要更新README文档：
+根据本次提交的改动内容，判断是否需要更新项目文档：
+
+**6.1 README.md 更新检查**
 
 - **必须更新的内容**（如有版本更新）：
   - README.md 中的版本号badge（搜索 `badge/version-` 并更新为新版本号）
@@ -429,11 +432,85 @@ TypeScript 类型检查结果：
   - 功能介绍是否需要补充或修改
   - 使用说明是否需要更新
   - 截图或示例是否需要更换
-- **操作**：
-  - 向用户确认是否需要更新README内容
-  - 如需要，帮助用户修改README
-  - 等待用户完成对README修改的确认后继续后续流程
-  - 注：README所有更新（版本号badge + 内容）会在步骤9.2中作为独立的 `docs:` 类型提交
+
+**6.2 Docusaurus 文档更新检查**
+
+根据本次改动类型，检查以下 docusaurus 文档是否需要更新：
+
+- **必须更新的情况**：
+  - 新增用户可见的功能 → 更新 `docusaurus/docs/intro.md` 中的功能介绍（除版本号外的其他内容）
+  - 新增用户可见的功能 → 可能需要在 `docusaurus/docs/` 目录下创建新的功能文档页面
+  - 修改了用户使用方式 → 更新相应的使用指南文档
+  - API 或配置项变更 → 更新相应的 API 文档
+  - 移除功能 → 删除或标记弃用相关文档
+- **可选更新的情况**：
+  - 性能优化、内部重构等对用户透明的改动 → 通常无需更新文档
+  - Bug 修复 → 如果涉及使用方式的澄清，可在文档中补充说明
+
+- **检查要点**：
+  - `docusaurus/docs/intro.md` - 项目介绍和快速开始
+  - `docusaurus/docs/` - 其他功能文档页面
+  - 文档中的示例代码是否仍然正确
+  - 文档中的配置说明是否与最新版本一致
+
+**6.3 自动判断并执行文档更新**
+
+**判断逻辑**：
+根据步骤 2 的改动分析，对照 6.1 和 6.2 的规则，自动判断文档更新需求：
+
+1. **分析改动类型**：
+   - 检查步骤 2 中所有提交的类型（feat/fix/refactor/perf等）
+   - 识别涉及的功能模块和用户可见的变更
+
+2. **匹配更新规则**：
+   - 对于 README.md：检查是否符合 6.1 中的"必须更新"或"可选更新"条件
+   - 对于 docusaurus 文档：检查是否符合 6.2 中的"必须更新"或"可选更新"条件
+
+3. **做出判断**：
+   - 明确列出需要更新的文档和具体更新点
+   - 或明确说明无需更新文档的理由
+
+**执行操作**：
+
+**情况 A：无需更新文档**
+
+- 输出格式：
+  ```
+  文档更新检查结果：
+  - README.md：无需更新
+    理由：[具体说明，如"本次改动仅涉及内部代码重构，无用户可见的功能变更"]
+  - Docusaurus 文档：无需更新
+    理由：[具体说明]
+  ○ 步骤 6 跳过（原因：无文档更新需求）
+  ```
+- 直接进入步骤 7
+
+**情况 B：需要更新文档**
+
+- 输出格式：
+  ```
+  文档更新检查结果：
+  - README.md：需要更新
+    - 版本号badge：必须更新为 v{新版本号}
+    - [其他需要更新的内容，如有]
+  - Docusaurus 文档：需要更新
+    - docusaurus/docs/intro.md：需要补充新功能 X 的说明
+    - [其他需要更新的文档]
+  ```
+- 直接使用文件编辑工具修改需要更新的文档：
+  - 对于 README.md：更新版本号badge和相关内容
+  - 对于 docusaurus 文档：补充或修改相应的说明
+- 修改完成后，向用户展示所有文档改动内容
+- 询问用户确认：改动是否符合预期？
+  - 如确认：继续步骤 7
+  - 如需调整：根据用户反馈重新修改，直到确认为止
+
+**注意事项**：
+
+- 版本号相关的更新（README.md badge、docusaurus/docs/intro.md 版本号）在步骤 5 中已完成，此处主要关注内容更新
+- **提交说明**：
+  - README.md 的所有更新（版本号badge + 内容）会在步骤9.2中作为独立的 `docs:` 类型提交
+  - docusaurus 文档的更新也会在步骤9.2中一并提交（如有改动）
 
 ### 7. 构建打包并生成压缩包
 
@@ -450,14 +527,19 @@ TypeScript 类型检查结果：
 
 **9.1 提交版本号更新（如有版本更新）**
 
-- `git add package.json src/manifest.json src/features/options-page/components/OptionsPageContent.tsx`
+- `git add package.json src/manifest.json src/features/options-page/components/OptionsPageContent.tsx docusaurus/docs/intro.md`
 - `git commit -m "chore: release v{版本号}"`
 
-**9.2 提交README更新（如有版本更新或README内容改动）**
+**9.2 提交文档更新（如有版本更新或文档内容改动）**
 
-- `git add README.md`
-- `git commit -m "docs: 更新README文档"`
-- 注：此提交包含版本号badge更新和内容更新（如有）
+- 添加所有文档改动到暂存区：
+  - 如果只有 README.md 改动：`git add README.md`
+  - 如果还包含 docusaurus 文档改动：`git add README.md docusaurus/`
+- 提交文档更新：`git commit -m "docs: 更新项目文档"`
+- 注：此提交包含以下内容（如有改动）：
+  - README.md 的版本号badge更新
+  - README.md 的内容更新
+  - docusaurus 文档的内容更新
 
 ### 10. 推送到远程
 
