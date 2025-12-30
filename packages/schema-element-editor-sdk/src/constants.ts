@@ -33,17 +33,3 @@ export const SDK_COORDINATION_MESSAGE_TYPES = {
   unregister: 'SDK_UNREGISTER',
   query: 'SDK_QUERY',
 } as const
-
-/** 所有支持的方法名称列表 */
-export const ALL_METHOD_NAMES = [
-  'getSchema',
-  'updateSchema',
-  'checkPreview',
-  'renderPreview',
-  'cleanupPreview',
-  'startRecording',
-  'stopRecording',
-] as const
-
-/** 方法名称类型 */
-export type MethodName = (typeof ALL_METHOD_NAMES)[number]

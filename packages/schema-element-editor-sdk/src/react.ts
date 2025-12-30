@@ -16,20 +16,7 @@ import type {
 // 如需类型，请从主入口导入：import type { ... } from '@schema-element-editor/host-sdk'
 
 /** React 版本的 Schema Element Editor 配置 */
-export interface ReactSchemaElementEditorConfig extends Omit<
-  SchemaElementEditorConfig,
-  'renderPreview'
-> {
-  /**
-   * 渲染预览（可选）
-   *
-   * 特殊值说明：
-   * - undefined（默认）：不关心预览功能，不参与优先级竞争
-   * - null：明确阻止预览功能，参与优先级竞争但告诉插件不支持预览（触发内置预览器）
-   * - function：提供预览功能，参与优先级竞争并正常渲染
-   */
-  renderPreview?: ((schema: SchemaValue, containerId: string) => (() => void) | void) | null
-
+export interface ReactSchemaElementEditorConfig extends SchemaElementEditorConfig {
   /**
    * 是否启用桥接（默认 true）
    * 设为 false 时不创建桥接器，不监听消息
