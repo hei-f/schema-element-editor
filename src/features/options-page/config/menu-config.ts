@@ -1,6 +1,5 @@
 import {
   ApiOutlined,
-  BulbOutlined,
   ControlOutlined,
   DatabaseOutlined,
   DesktopOutlined,
@@ -117,13 +116,6 @@ export const MENU_CONFIG: MenuItemConfig[] = [
     children: [
       { key: 'editor-shortcuts', label: '编辑器快捷键', anchorId: 'field-editor-shortcuts' },
     ],
-  },
-  {
-    key: 'debug',
-    label: '开发调试',
-    icon: BulbOutlined,
-    sectionId: 'section-debug',
-    children: [{ key: 'log-settings', label: '日志设置', anchorId: 'field-log-settings' }],
   },
   {
     key: 'usage-guide',

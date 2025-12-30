@@ -84,12 +84,6 @@ export interface ExternalActions {
    * @default true
    */
   shouldSetDocumentTitle?: boolean
-
-  /**
-   * 是否为发布构建（控制 DebugSection 显示）
-   * @default __IS_RELEASE_BUILD__
-   */
-  isReleaseBuild?: boolean
 }
 
 /**

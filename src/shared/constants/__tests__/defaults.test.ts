@@ -9,7 +9,6 @@ describe('defaults', () => {
         'attributeName',
         'searchConfig',
         'autoParseString',
-        'enableDebugLog',
         'toolbarButtons',
         'highlightColor',
         'maxFavoritesCount',
@@ -57,10 +56,6 @@ describe('defaults', () => {
 
     it('autoParseString 默认应该为 true', () => {
       expect(DEFAULT_VALUES.autoParseString).toBe(true)
-    })
-
-    it('enableDebugLog 默认应该为 false', () => {
-      expect(DEFAULT_VALUES.enableDebugLog).toBe(false)
     })
 
     it('highlightColor 默认应该为有效的颜色值', () => {
@@ -265,7 +260,6 @@ describe('defaults', () => {
         'ATTRIBUTE_NAME',
         'SEARCH_CONFIG',
         'AUTO_PARSE_STRING',
-        'ENABLE_DEBUG_LOG',
         'TOOLBAR_BUTTONS',
         'HIGHLIGHT_COLOR',
         'MAX_FAVORITES_COUNT',

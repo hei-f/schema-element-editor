@@ -14,7 +14,6 @@ export const SECTION_KEYS = {
   PREVIEW_CONFIG: 'previewConfig',
   DATA_MANAGEMENT: 'dataManagement',
   KEYBOARD_SHORTCUTS: 'keyboardShortcuts',
-  DEBUG: 'debug',
 } as const
 
 export type SectionKey = (typeof SECTION_KEYS)[keyof typeof SECTION_KEYS]
@@ -70,7 +69,6 @@ export const SECTION_DEFAULT_KEYS: Record<SectionKey, readonly string[]> = {
     'exportConfig',
   ],
   [SECTION_KEYS.KEYBOARD_SHORTCUTS]: ['drawerShortcuts'],
-  [SECTION_KEYS.DEBUG]: ['enableDebugLog', 'autoParseString'],
 }
 
 /**
@@ -203,7 +201,6 @@ export const FIELD_PATH_STORAGE_MAP: Record<string, string> = {
   attributeName: 'setAttributeName',
   drawerWidth: 'setDrawerWidth',
   autoParseString: 'setAutoParseString',
-  enableDebugLog: 'setEnableDebugLog',
   highlightColor: 'setHighlightColor',
   maxFavoritesCount: 'setMaxFavoritesCount',
   maxConfigPresetsCount: 'setMaxConfigPresetsCount',

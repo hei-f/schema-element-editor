@@ -38,9 +38,6 @@ export const FORM_PATHS = {
   /** 自动解析字符串 */
   autoParseString: ['autoParseString'],
 
-  /** 启用调试日志 */
-  enableDebugLog: ['enableDebugLog'],
-
   /** 高亮颜色 */
   highlightColor: ['highlightColor'],
 

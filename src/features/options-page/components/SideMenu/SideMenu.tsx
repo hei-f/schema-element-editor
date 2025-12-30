@@ -1,7 +1,7 @@
 import { LogoIcon } from '@/shared/icons/optionsPage/Logo'
 import { RightOutlined } from '@ant-design/icons'
 import { theme } from 'antd'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { MENU_BREAKPOINT, MENU_CONFIG, type MenuItemConfig } from '../../config/menu-config'
 import {
   CollapseButton,
@@ -32,8 +32,6 @@ interface SideMenuProps {
   onMenuClick?: (sectionId: string) => void
   /** 点击子菜单项回调 */
   onSubMenuClick?: (anchorId: string) => void
-  /** 是否为发布构建（控制调试菜单显示） */
-  isReleaseBuild?: boolean
 }
 
 /**
@@ -41,31 +39,13 @@ interface SideMenuProps {
  * 支持折叠/展开、子菜单、滚动定位
  */
 export const SideMenu: React.FC<SideMenuProps> = (props) => {
-  const {
-    collapsed,
-    onCollapsedChange,
-    activeSection,
-    onMenuClick,
-    onSubMenuClick,
-    isReleaseBuild = false,
-  } = props
+  const { collapsed, onCollapsedChange, activeSection, onMenuClick, onSubMenuClick } = props
 
   /** 展开的菜单项 */
   const [expandedKeys, setExpandedKeys] = useState<string[]>([])
 
-  /**
-   * 根据配置动态生成菜单配置
-   * 发布模式下隐藏调试菜单
-   */
-  const menuConfig = useMemo(() => {
-    return MENU_CONFIG.filter((item) => {
-      /** 发布模式下隐藏调试菜单 */
-      if (isReleaseBuild && item.key === 'debug') {
-        return false
-      }
-      return true
-    })
-  }, [isReleaseBuild])
+  /** 菜单配置 */
+  const menuConfig = MENU_CONFIG
 
   /**
    * 响应式处理：窗口宽度小于断点时自动折叠
@@ -96,7 +76,7 @@ export const SideMenu: React.FC<SideMenuProps> = (props) => {
         })
       }
     }
-  }, [activeSection, menuConfig])
+  }, [activeSection])
 
   /**
    * 切换菜单项展开/折叠

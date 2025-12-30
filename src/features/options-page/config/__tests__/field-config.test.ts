@@ -42,11 +42,6 @@ describe('field-config测试', () => {
       expect(FIELD_PATH_STORAGE_MAP.autoParseString).toBe('setAutoParseString')
     })
 
-    it('应该包含enableDebugLog的映射', () => {
-      expect(FIELD_PATH_STORAGE_MAP).toHaveProperty('enableDebugLog')
-      expect(FIELD_PATH_STORAGE_MAP.enableDebugLog).toBe('setEnableDebugLog')
-    })
-
     it('应该包含maxFavoritesCount的映射', () => {
       expect(FIELD_PATH_STORAGE_MAP).toHaveProperty('maxFavoritesCount')
       expect(FIELD_PATH_STORAGE_MAP.maxFavoritesCount).toBe('setMaxFavoritesCount')
@@ -121,11 +116,6 @@ describe('field-config测试', () => {
 
     it('autoParseString不应该使用防抖', () => {
       const result = isDebounceField(['autoParseString'])
-      expect(result).toBe(false)
-    })
-
-    it('enableDebugLog不应该使用防抖', () => {
-      const result = isDebounceField(['enableDebugLog'])
       expect(result).toBe(false)
     })
 

@@ -326,8 +326,6 @@ export interface StorageData {
   searchConfig: SearchConfig
   /** 字符串自动解析为 Markdown Elements */
   autoParseString: boolean
-  /** 启用调试日志 */
-  enableDebugLog: boolean
   /** 工具栏按钮配置 */
   toolbarButtons: ToolbarButtonsConfig
   /** 高亮框颜色 */

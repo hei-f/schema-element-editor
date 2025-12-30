@@ -20,7 +20,6 @@ const chromeStorageAdapter = createChromeStorageAdapter()
 const chromeActions: ExternalActions = {
   onCheckUpdate: openReleasePage,
   shouldSetDocumentTitle: true,
-  isReleaseBuild: __IS_RELEASE_BUILD__,
 }
 
 /**

@@ -9,7 +9,6 @@ describe('SideMenu 组件测试', () => {
     activeSection: undefined,
     onMenuClick: vi.fn(),
     onSubMenuClick: vi.fn(),
-    isReleaseBuild: false,
   }
 
   beforeEach(() => {
@@ -42,11 +41,6 @@ describe('SideMenu 组件测试', () => {
 
     it('应该接受activeSection prop', () => {
       const { container } = render(<SideMenu {...defaultProps} activeSection="elementDetection" />)
-      expect(container).toBeDefined()
-    })
-
-    it('应该接受isReleaseBuild prop', () => {
-      const { container } = render(<SideMenu {...defaultProps} isReleaseBuild={true} />)
       expect(container).toBeDefined()
     })
 
@@ -84,14 +78,6 @@ describe('SideMenu 组件测试', () => {
       }).not.toThrow()
     })
 
-    it('应该响应isReleaseBuild变化', () => {
-      const { rerender } = render(<SideMenu {...defaultProps} isReleaseBuild={false} />)
-
-      expect(() => {
-        rerender(<SideMenu {...defaultProps} isReleaseBuild={true} />)
-      }).not.toThrow()
-    })
-
     it('应该响应回调函数变化', () => {
       const { rerender } = render(<SideMenu {...defaultProps} />)
 
@@ -109,18 +95,6 @@ describe('SideMenu 组件测试', () => {
           />
         )
       }).not.toThrow()
-    })
-  })
-
-  describe('isReleaseBuild 功能', () => {
-    it('应该在isReleaseBuild为false时显示所有菜单', () => {
-      const { container } = render(<SideMenu {...defaultProps} isReleaseBuild={false} />)
-      expect(container).toBeDefined()
-    })
-
-    it('应该在isReleaseBuild为true时隐藏调试菜单', () => {
-      const { container } = render(<SideMenu {...defaultProps} isReleaseBuild={true} />)
-      expect(container).toBeDefined()
     })
   })
 
@@ -374,7 +348,6 @@ describe('SideMenu 组件测试', () => {
       expect(screen.getByText('实时预览')).toBeInTheDocument()
       expect(screen.getByText('数据管理')).toBeInTheDocument()
       expect(screen.getByText('快捷键配置')).toBeInTheDocument()
-      expect(screen.getByText('开发调试')).toBeInTheDocument()
       expect(screen.getByText('使用指南')).toBeInTheDocument()
     })
 
@@ -387,28 +360,6 @@ describe('SideMenu 组件测试', () => {
       expect(screen.getByText('postMessage 配置')).toBeInTheDocument()
       expect(screen.getByText('消息标识配置')).toBeInTheDocument()
       expect(screen.getByText('消息类型配置')).toBeInTheDocument()
-    })
-
-    it('应该在isReleaseBuild为true时不渲染调试菜单', () => {
-      render(<SideMenu {...defaultProps} isReleaseBuild={true} />)
-
-      expect(screen.queryByText('开发调试')).not.toBeInTheDocument()
-    })
-
-    it('应该在isReleaseBuild为false时渲染调试菜单', () => {
-      render(<SideMenu {...defaultProps} isReleaseBuild={false} />)
-
-      expect(screen.getByText('开发调试')).toBeInTheDocument()
-    })
-
-    it('应该在isReleaseBuild变化时正确切换调试菜单显示', () => {
-      const { rerender } = render(<SideMenu {...defaultProps} isReleaseBuild={false} />)
-
-      expect(screen.getByText('开发调试')).toBeInTheDocument()
-
-      rerender(<SideMenu {...defaultProps} isReleaseBuild={true} />)
-
-      expect(screen.queryByText('开发调试')).not.toBeInTheDocument()
     })
   })
 })

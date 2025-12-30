@@ -16,7 +16,6 @@ describe('menu-config', () => {
         'preview-config',
         'data-management',
         'keyboard-shortcuts',
-        'debug',
         'usage-guide',
       ]
 

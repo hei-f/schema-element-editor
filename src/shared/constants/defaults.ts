@@ -21,7 +21,6 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     throttleInterval: 16,
   },
   autoParseString: true,
-  enableDebugLog: false,
   toolbarButtons: {
     astRawStringToggle: true,
     escape: true,
@@ -113,7 +112,6 @@ export const STORAGE_KEYS = {
   ATTRIBUTE_NAME: 'attributeName',
   SEARCH_CONFIG: 'searchConfig',
   AUTO_PARSE_STRING: 'autoParseString',
-  ENABLE_DEBUG_LOG: 'enableDebugLog',
   TOOLBAR_BUTTONS: 'toolbarButtons',
   HIGHLIGHT_COLOR: 'highlightColor',
   MAX_FAVORITES_COUNT: 'maxFavoritesCount',
