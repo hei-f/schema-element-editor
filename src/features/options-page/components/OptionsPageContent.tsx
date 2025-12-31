@@ -53,7 +53,7 @@ const CURRENT_VERSION = 'v2.6.1'
  */
 export const OptionsPageContent: React.FC<OptionsPageContentProps> = (props) => {
   const { storage, actions = {} } = props
-  const { onCheckUpdate, shouldSetDocumentTitle = true } = actions
+  const { onCheckUpdate, onViewDocs, shouldSetDocumentTitle = true } = actions
 
   const [form] = Form.useForm()
 
@@ -307,6 +307,15 @@ export const OptionsPageContent: React.FC<OptionsPageContentProps> = (props) => 
                     type="primary"
                   >
                     检查更新
+                  </CheckUpdateButton>
+
+                  <CheckUpdateButton
+                    onClick={() => {
+                      onViewDocs?.()
+                    }}
+                    type="default"
+                  >
+                    使用文档
                   </CheckUpdateButton>
 
                   <VersionDivider />

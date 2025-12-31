@@ -13,12 +13,23 @@ const openReleasePage = () => {
   })
 }
 
+/**
+ * 打开文档网站
+ */
+const openDocsPage = () => {
+  chrome.tabs.create({
+    url: 'https://hei-f.github.io/schema-element-editor/',
+    active: true,
+  })
+}
+
 /** Chrome Storage 适配器实例 */
 const chromeStorageAdapter = createChromeStorageAdapter()
 
 /** 外部操作配置 */
 const chromeActions: ExternalActions = {
   onCheckUpdate: openReleasePage,
+  onViewDocs: openDocsPage,
   shouldSetDocumentTitle: true,
 }
 
