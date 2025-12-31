@@ -35,7 +35,6 @@ import {
   PageRoot,
   PageTitle,
   ResetDefaultButton,
-  SavePresetButton,
   ScrollWrapper,
   VersionContainer,
   VersionDivider,
@@ -300,6 +299,7 @@ export const OptionsPageContent: React.FC<OptionsPageContentProps> = (props) => 
                   <VersionTag>{CURRENT_VERSION}</VersionTag>
 
                   <VersionDivider />
+
                   <CheckUpdateButton
                     onClick={() => {
                       onCheckUpdate?.()
@@ -326,13 +326,13 @@ export const OptionsPageContent: React.FC<OptionsPageContentProps> = (props) => 
                         : '保存当前配置为预设'
                     }
                   >
-                    <SavePresetButton
+                    <CheckUpdateButton
                       onClick={handleOpenAddPresetWithCheck}
                       type="default"
                       disabled={presetCount >= maxPresetCount}
                     >
                       保存为预设配置
-                    </SavePresetButton>
+                    </CheckUpdateButton>
                   </Tooltip>
                   <Tooltip title="管理预设配置">
                     <ManagePresetButton onClick={handleOpenPresets} icon={<SettingOutlined />} />
