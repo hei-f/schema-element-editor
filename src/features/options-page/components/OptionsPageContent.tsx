@@ -44,7 +44,7 @@ import {
 import type { OptionsPageContentProps } from '../types'
 
 /** 当前插件版本 */
-const CURRENT_VERSION = 'v2.6.2'
+const CURRENT_VERSION = 'v2.6.3'
 
 /**
  * 设置页面内容组件（纯UI组件）
