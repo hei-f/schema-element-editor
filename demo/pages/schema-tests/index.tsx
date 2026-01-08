@@ -7,6 +7,7 @@ import {
   EditOutlined,
   VideoCameraOutlined,
   BgColorsOutlined,
+  ThunderboltOutlined,
 } from '@ant-design/icons'
 
 const { Title, Paragraph, Text } = Typography
@@ -66,6 +67,13 @@ const TEST_CASES: TestCase[] = [
     description: '测试 z-index 配置、滚动支持、预览功能等 UI 相关特性',
     icon: <BgColorsOutlined />,
     tag: { color: 'cyan', text: 'UI 测试' },
+  },
+  {
+    key: 'click-event',
+    title: '点击事件触发测试',
+    description: '测试按住 Option/Alt 键点击元素时，是否会触发元素自身的点击事件',
+    icon: <ThunderboltOutlined />,
+    tag: { color: 'gold', text: '交互测试' },
   },
 ]
 
