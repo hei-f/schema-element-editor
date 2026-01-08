@@ -103,6 +103,7 @@ describe('Storage工具测试', () => {
         drawerWidth: '800px',
         attributeName: 'id',
         searchConfig: {
+          allowHighlightedElementClick: false,
           limitUpwardSearch: false,
           searchDepthUp: 5,
           throttleInterval: 16,
@@ -211,6 +212,7 @@ describe('Storage工具测试', () => {
         drawerWidth: '1000px',
         attributeName: 'custom-attr',
         searchConfig: {
+          allowHighlightedElementClick: false,
           limitUpwardSearch: true,
           searchDepthUp: 5,
           throttleInterval: 8,
@@ -311,6 +313,7 @@ describe('Storage工具测试', () => {
         drawerWidth: '800px',
         attributeName: 'id',
         searchConfig: {
+          allowHighlightedElementClick: false,
           limitUpwardSearch: false,
           searchDepthUp: 5,
           throttleInterval: 16,
@@ -405,6 +408,7 @@ describe('Storage工具测试', () => {
       const result = await storage.getSearchConfig()
 
       expect(result).toEqual({
+        allowHighlightedElementClick: false,
         limitUpwardSearch: false,
         searchDepthUp: 5,
         throttleInterval: 16,
@@ -423,6 +427,7 @@ describe('Storage工具测试', () => {
       const result = await storage.getSearchConfig()
 
       expect(result).toEqual({
+        allowHighlightedElementClick: false,
         limitUpwardSearch: true,
         searchDepthUp: 10,
         throttleInterval: 32,
@@ -461,6 +466,7 @@ describe('Storage工具测试', () => {
 
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         searchConfig: {
+          allowHighlightedElementClick: false,
           limitUpwardSearch: true,
           searchDepthUp: 5,
           throttleInterval: 32,
@@ -483,6 +489,7 @@ describe('Storage工具测试', () => {
 
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         searchConfig: {
+          allowHighlightedElementClick: false,
           limitUpwardSearch: false,
           searchDepthUp: 8,
           throttleInterval: 100,
@@ -505,6 +512,7 @@ describe('Storage工具测试', () => {
 
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         searchConfig: {
+          allowHighlightedElementClick: false,
           limitUpwardSearch: false,
           searchDepthUp: 5,
           throttleInterval: 50,
@@ -521,6 +529,7 @@ describe('Storage工具测试', () => {
           drawerWidth: '1000px',
           attributeName: 'test-params',
           searchConfig: {
+            allowHighlightedElementClick: false,
             limitUpwardSearch: false,
             searchDepthUp: 2,
             throttleInterval: 20,
@@ -545,6 +554,7 @@ describe('Storage工具测试', () => {
         drawerWidth: '1000px',
         attributeName: 'test-params',
         searchConfig: {
+          allowHighlightedElementClick: false,
           limitUpwardSearch: false,
           searchDepthUp: 2,
           throttleInterval: 20,
@@ -1018,6 +1028,7 @@ describe('Storage工具测试', () => {
 
     it('setSearchConfig应该合并现有配置', async () => {
       const existingConfig = {
+        allowHighlightedElementClick: false,
         limitUpwardSearch: false,
         searchDepthUp: 3,
         throttleInterval: 200,
