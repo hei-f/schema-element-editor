@@ -1,4 +1,4 @@
-import type { ConfigPreset, EditorTheme } from '@/shared/types'
+import type { ConfigPreset, ConfigPresetMeta, EditorTheme } from '@/shared/types'
 import { storage } from '@/shared/utils/browser/storage'
 import { ProfileOutlined } from '@ant-design/icons'
 import { Dropdown, Tooltip } from 'antd'
@@ -41,15 +41,15 @@ export const PresetsDropdown: React.FC<PresetsDropdownProps> = ({
   showText = false,
 }) => {
   const [open, setOpen] = useState(false)
-  const [presetsList, setPresetsList] = useState<ConfigPreset[]>([])
+  const [presetsList, setPresetsList] = useState<ConfigPresetMeta[]>([])
   const isDark = editorTheme !== 'light'
 
   /**
-   * 加载预设配置列表
+   * 加载预设配置元数据列表
    */
   const loadPresets = useCallback(async () => {
     try {
-      const presets = await storage.getConfigPresets()
+      const presets = await storage.getPresetsMeta()
       setPresetsList(presets)
     } catch (error) {
       console.error('加载预设配置列表失败:', error)
@@ -68,9 +68,26 @@ export const PresetsDropdown: React.FC<PresetsDropdownProps> = ({
     }
   }, [open, loadPresets])
 
-  const handlePresetClick = async (preset: ConfigPreset) => {
+  /**
+   * 点击预设项，懒加载完整配置后应用
+   */
+  const handlePresetClick = async (preset: ConfigPresetMeta) => {
     try {
-      await onApplyPreset(preset)
+      // 按需加载完整的配置内容
+      const config = await storage.getPresetConfig(preset.id)
+      if (!config) {
+        console.error('预设配置内容不存在')
+        setOpen(false)
+        return
+      }
+
+      // 构造完整的 ConfigPreset 对象
+      const fullPreset: ConfigPreset = {
+        ...preset,
+        config,
+      }
+
+      await onApplyPreset(fullPreset)
       setOpen(false)
     } catch (error) {
       console.error('应用预设配置失败:', error)

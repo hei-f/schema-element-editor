@@ -1,5 +1,5 @@
 import { MODAL_Z_INDEX } from '@/shared/constants/theme'
-import type { Favorite, FavoriteTag } from '@/shared/types'
+import type { FavoriteMeta, FavoriteTag } from '@/shared/types'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import type { TableColumnsType } from 'antd'
 import { Modal, Space, Flex } from 'antd'
@@ -18,9 +18,12 @@ import {
 
 interface FavoritesListModalProps {
   visible: boolean
-  favoritesList: Favorite[]
-  onEdit: (favorite: Favorite) => void
-  onApply: (favorite: Favorite) => void
+  favoritesList: FavoriteMeta[]
+  themeColor: string
+  hoverColor: string
+  activeColor: string
+  onEdit: (favorite: FavoriteMeta) => void
+  onApply: (favorite: FavoriteMeta) => void
   onDelete: (id: string) => Promise<void>
   onPin: (id: string) => Promise<void>
   onAddTag: (id: string) => Promise<void>
@@ -34,6 +37,9 @@ interface FavoritesListModalProps {
 export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
   visible,
   favoritesList,
+  themeColor,
+  hoverColor,
+  activeColor,
   onEdit,
   onApply,
   onDelete,
@@ -60,7 +66,7 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
 
   /**
    * 过滤收藏列表
-   * 支持搜索名称和内容
+   * 支持搜索名称
    */
   const filteredFavoritesList = useMemo(() => {
     if (!debouncedSearchKeyword.trim()) {
@@ -70,17 +76,16 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
     const keyword = debouncedSearchKeyword.toLowerCase()
     return favoritesList.filter((favorite) => {
       const nameMatch = favorite.name.toLowerCase().includes(keyword)
-      const contentMatch = favorite.content.toLowerCase().includes(keyword)
-      return nameMatch || contentMatch
+      return nameMatch
     })
   }, [favoritesList, debouncedSearchKeyword])
 
-  const favoritesColumns: TableColumnsType<Favorite> = [
+  const favoritesColumns: TableColumnsType<FavoriteMeta> = [
     {
       title: '',
       key: 'pin',
       width: 50,
-      render: (_: any, record: Favorite) => (
+      render: (_: any, record: FavoriteMeta) => (
         <FavoritesPinButton
           type="text"
           size="small"
@@ -97,7 +102,7 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
       key: 'name',
       width: 150,
       ellipsis: true,
-      render: (name: string, record: Favorite) => (
+      render: (name: string, record: FavoriteMeta) => (
         <FavoriteName $pinned={record.isPinned}>{name}</FavoriteName>
       ),
     },
@@ -105,7 +110,7 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
       title: '标签',
       key: 'tags',
       width: 220,
-      render: (_: any, record: Favorite) => (
+      render: (_: any, record: FavoriteMeta) => (
         <Flex wrap="wrap" gap="4px">
           {(record.tags || []).map((tag: FavoriteTag) => (
             <FavoriteModalTag
@@ -139,15 +144,37 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
       title: '操作',
       key: 'action',
       width: 160,
-      render: (_: any, record: Favorite) => (
+      render: (_: any, record: FavoriteMeta) => (
         <Space size="small">
-          <ModalFooterButton type="link" size="small" onClick={() => onEdit(record)}>
+          <ModalFooterButton
+            type="link"
+            size="small"
+            onClick={() => onEdit(record)}
+            $themeColor={themeColor}
+            $hoverColor={hoverColor}
+            $activeColor={activeColor}
+          >
             编辑
           </ModalFooterButton>
-          <ModalFooterButton type="link" size="small" onClick={() => onApply(record)}>
+          <ModalFooterButton
+            type="link"
+            size="small"
+            onClick={() => onApply(record)}
+            $themeColor={themeColor}
+            $hoverColor={hoverColor}
+            $activeColor={activeColor}
+          >
             应用
           </ModalFooterButton>
-          <ModalFooterButton type="link" size="small" danger onClick={() => onDelete(record.id)}>
+          <ModalFooterButton
+            type="link"
+            size="small"
+            danger
+            onClick={() => onDelete(record.id)}
+            $themeColor={themeColor}
+            $hoverColor={hoverColor}
+            $activeColor={activeColor}
+          >
             删除
           </ModalFooterButton>
         </Space>
@@ -167,7 +194,7 @@ export const FavoritesListModal: React.FC<FavoritesListModalProps> = ({
     >
       <ListSearchContainer>
         <FullWidthSearchInput
-          placeholder="搜索收藏名称或内容..."
+          placeholder="搜索收藏名称..."
           value={searchKeyword}
           onChange={(e) => setSearchKeyword(e.target.value)}
           allowClear

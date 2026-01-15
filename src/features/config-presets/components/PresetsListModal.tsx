@@ -1,15 +1,17 @@
 import { MODAL_Z_INDEX } from '@/shared/constants/theme'
-import type { ConfigPreset } from '@/shared/types'
+import type { ConfigPresetMeta } from '@/shared/types'
 import type { TableColumnsType } from 'antd'
 import { Modal, Space } from 'antd'
-import React from 'react'
+import React, { useMemo } from 'react'
+import { generate } from '@ant-design/colors'
 import { ModalFooterButton } from '@/shared/styles/modal-button.styles'
 import { PresetName, PresetsTable } from '../styles/modals.styles'
 
 interface PresetsListModalProps {
   visible: boolean
-  presetsList: ConfigPreset[]
-  onApply: (preset: ConfigPreset) => void
+  presetsList: ConfigPresetMeta[]
+  themeColor: string
+  onApply: (preset: ConfigPresetMeta) => Promise<void>
   onDelete: (id: string) => Promise<void>
   onClose: () => void
 }
@@ -20,11 +22,21 @@ interface PresetsListModalProps {
 export const PresetsListModal: React.FC<PresetsListModalProps> = ({
   visible,
   presetsList,
+  themeColor,
   onApply,
   onDelete,
   onClose,
 }) => {
-  const presetsColumns: TableColumnsType<ConfigPreset> = [
+  const { primaryColor, hoverColor, activeColor } = useMemo(() => {
+    const colors = generate(themeColor)
+    return {
+      primaryColor: colors[5],
+      hoverColor: colors[4],
+      activeColor: colors[6],
+    }
+  }, [themeColor])
+
+  const presetsColumns: TableColumnsType<ConfigPresetMeta> = [
     {
       title: '名称',
       dataIndex: 'name',
@@ -44,12 +56,29 @@ export const PresetsListModal: React.FC<PresetsListModalProps> = ({
       title: '操作',
       key: 'action',
       width: 160,
-      render: (_: any, record: ConfigPreset) => (
+      render: (_: any, record: ConfigPresetMeta) => (
         <Space size="small">
-          <ModalFooterButton type="link" size="small" onClick={() => onApply(record)}>
+          <ModalFooterButton
+            type="link"
+            size="small"
+            onClick={async () => {
+              await onApply(record)
+            }}
+            $themeColor={primaryColor}
+            $hoverColor={hoverColor}
+            $activeColor={activeColor}
+          >
             应用
           </ModalFooterButton>
-          <ModalFooterButton type="link" size="small" danger onClick={() => onDelete(record.id)}>
+          <ModalFooterButton
+            type="link"
+            size="small"
+            danger
+            onClick={() => onDelete(record.id)}
+            $themeColor={primaryColor}
+            $hoverColor={hoverColor}
+            $activeColor={activeColor}
+          >
             删除
           </ModalFooterButton>
         </Space>

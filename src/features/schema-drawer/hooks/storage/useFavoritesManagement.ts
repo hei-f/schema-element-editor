@@ -1,4 +1,4 @@
-import type { Favorite, FavoriteTag } from '@/shared/types'
+import type { Favorite, FavoriteMeta, FavoriteTag } from '@/shared/types'
 import { storage } from '@/shared/utils/browser/storage'
 import { useCallback, useState } from 'react'
 
@@ -15,7 +15,7 @@ interface UseFavoritesManagementProps {
 }
 
 interface UseFavoritesManagementReturn {
-  favoritesList: Favorite[]
+  favoritesList: FavoriteMeta[]
   favoritesModalVisible: boolean
   addFavoriteModalVisible: boolean
   favoriteNameInput: string
@@ -31,7 +31,7 @@ interface UseFavoritesManagementReturn {
   handleOpenAddFavorite: () => void
   handleAddFavorite: () => Promise<void>
   handleOpenFavorites: () => Promise<void>
-  handleApplyFavorite: (favorite: Favorite) => void
+  handleApplyFavorite: (favorite: FavoriteMeta) => void
   handleConfirmApply: () => void
   handleCancelApply: () => void
   handleDeleteFavorite: (id: string) => Promise<void>
@@ -40,7 +40,7 @@ interface UseFavoritesManagementReturn {
   handleAddTag: (tag: FavoriteTag) => Promise<void>
   handleRemoveTag: (id: string, tagLabel: string) => Promise<void>
   closeAddTagModal: () => void
-  handleEditFavorite: (favorite: Favorite) => void
+  handleEditFavorite: (favorite: FavoriteMeta) => void
   handleSaveEdit: (id: string, name: string, content: string) => Promise<void>
   closeFavoritesModal: () => void
   closeAddFavoriteModal: () => void
@@ -59,7 +59,7 @@ export const useFavoritesManagement = ({
   onSuccess,
 }: UseFavoritesManagementProps): UseFavoritesManagementReturn => {
   const [favoritesModalVisible, setFavoritesModalVisible] = useState(false)
-  const [favoritesList, setFavoritesList] = useState<Favorite[]>([])
+  const [favoritesList, setFavoritesList] = useState<FavoriteMeta[]>([])
   const [addFavoriteModalVisible, setAddFavoriteModalVisible] = useState(false)
   const [favoriteNameInput, setFavoriteNameInput] = useState('')
   const [editModalVisible, setEditModalVisible] = useState(false)
@@ -67,9 +67,9 @@ export const useFavoritesManagement = ({
   const [editingName, setEditingName] = useState('')
   const [editingContent, setEditingContent] = useState('')
   const [addTagModalVisible, setAddTagModalVisible] = useState(false)
-  const [currentFavoriteForTag, setCurrentFavoriteForTag] = useState<Favorite | null>(null)
+  const [currentFavoriteForTag, setCurrentFavoriteForTag] = useState<FavoriteMeta | null>(null)
   const [applyConfirmModalVisible, setApplyConfirmModalVisible] = useState(false)
-  const [pendingApplyFavorite, setPendingApplyFavorite] = useState<Favorite | null>(null)
+  const [pendingApplyFavorite, setPendingApplyFavorite] = useState<FavoriteMeta | null>(null)
 
   /**
    * 打开添加收藏对话框
@@ -110,8 +110,8 @@ export const useFavoritesManagement = ({
    */
   const handleOpenFavorites = useCallback(async () => {
     try {
-      const favorites = await storage.getFavorites()
-      setFavoritesList(favorites)
+      const metadata = await storage.getFavoritesMeta()
+      setFavoritesList(metadata)
       setFavoritesModalVisible(true)
     } catch (error) {
       console.error('加载收藏列表失败:', error)
@@ -123,22 +123,34 @@ export const useFavoritesManagement = ({
    * 应用收藏内容
    */
   const applyFavoriteContent = useCallback(
-    async (favorite: Favorite) => {
-      onApplyFavorite(favorite.content)
-      setFavoritesModalVisible(false)
+    async (favorite: FavoriteMeta) => {
+      try {
+        // 按需加载content
+        const content = await storage.getFavoriteContent(favorite.id)
+        if (content === null) {
+          onError?.('获取收藏内容失败')
+          return
+        }
 
-      await storage.updateFavoriteUsedTime(favorite.id)
+        onApplyFavorite(content)
+        setFavoritesModalVisible(false)
 
-      onSuccess?.('已应用收藏内容')
+        await storage.updateFavoriteUsedTime(favorite.id)
+
+        onSuccess?.('已应用收藏内容')
+      } catch (error) {
+        console.error('应用收藏失败:', error)
+        onError?.('应用收藏失败')
+      }
     },
-    [onApplyFavorite, onSuccess]
+    [onApplyFavorite, onSuccess, onError]
   )
 
   /**
    * 应用收藏
    */
   const handleApplyFavorite = useCallback(
-    (favorite: Favorite) => {
+    (favorite: FavoriteMeta) => {
       if (isModified) {
         setPendingApplyFavorite(favorite)
         setApplyConfirmModalVisible(true)
@@ -175,8 +187,8 @@ export const useFavoritesManagement = ({
     async (id: string) => {
       try {
         await storage.deleteFavorite(id)
-        const favorites = await storage.getFavorites()
-        setFavoritesList(favorites)
+        const metadata = await storage.getFavoritesMeta()
+        setFavoritesList(metadata)
         onSuccess?.('收藏已删除')
       } catch (error) {
         console.error('删除收藏失败:', error)
@@ -195,8 +207,8 @@ export const useFavoritesManagement = ({
         await storage.togglePinFavorite(id)
 
         // 刷新列表
-        const favorites = await storage.getFavorites()
-        setFavoritesList(favorites)
+        const metadata = await storage.getFavoritesMeta()
+        setFavoritesList(metadata)
 
         onSuccess?.('已更新固定状态')
       } catch (error) {
@@ -233,8 +245,8 @@ export const useFavoritesManagement = ({
         await storage.updateFavoriteTags(currentFavoriteForTag.id, updatedTags)
 
         // 刷新列表
-        const favorites = await storage.getFavorites()
-        setFavoritesList(favorites)
+        const metadata = await storage.getFavoritesMeta()
+        setFavoritesList(metadata)
 
         onSuccess?.('标签已添加')
         setAddTagModalVisible(false)
@@ -252,15 +264,15 @@ export const useFavoritesManagement = ({
   const handleRemoveTag = useCallback(
     async (id: string, tagLabel: string) => {
       try {
-        const favorite = favoritesList.find((fav) => fav.id === id)
-        if (!favorite) return
+        const meta = favoritesList.find((fav) => fav.id === id)
+        if (!meta) return
 
-        const updatedTags = (favorite.tags || []).filter((tag) => tag.label !== tagLabel)
+        const updatedTags = (meta.tags || []).filter((tag) => tag.label !== tagLabel)
         await storage.updateFavoriteTags(id, updatedTags)
 
         // 刷新列表
-        const favorites = await storage.getFavorites()
-        setFavoritesList(favorites)
+        const metadata = await storage.getFavoritesMeta()
+        setFavoritesList(metadata)
 
         onSuccess?.('标签已删除')
       } catch (_error) {
@@ -278,18 +290,34 @@ export const useFavoritesManagement = ({
   /**
    * 编辑收藏
    */
-  const handleEditFavorite = useCallback((favorite: Favorite) => {
-    setEditingFavoriteId(favorite.id)
-    setEditingName(favorite.name)
-    try {
-      const formatted = JSON.stringify(JSON.parse(favorite.content), null, 2)
-      setEditingContent(formatted)
-    } catch (error) {
-      console.debug('JSON 格式化失败，使用原始内容:', error)
-      setEditingContent(favorite.content)
-    }
-    setEditModalVisible(true)
-  }, [])
+  const handleEditFavorite = useCallback(
+    async (favorite: FavoriteMeta) => {
+      try {
+        setEditingFavoriteId(favorite.id)
+        setEditingName(favorite.name)
+
+        // 按需加载content
+        const content = await storage.getFavoriteContent(favorite.id)
+        if (content === null) {
+          onError?.('获取收藏内容失败')
+          return
+        }
+
+        try {
+          const formatted = JSON.stringify(JSON.parse(content), null, 2)
+          setEditingContent(formatted)
+        } catch (error) {
+          console.debug('JSON 格式化失败，使用原始内容:', error)
+          setEditingContent(content)
+        }
+        setEditModalVisible(true)
+      } catch (error) {
+        console.error('加载收藏内容失败:', error)
+        onError?.('加载收藏内容失败')
+      }
+    },
+    [onError]
+  )
 
   /**
    * 保存编辑
@@ -300,8 +328,8 @@ export const useFavoritesManagement = ({
         await storage.updateFavorite(id, name, content)
 
         // 刷新列表
-        const favorites = await storage.getFavorites()
-        setFavoritesList(favorites)
+        const metadata = await storage.getFavoritesMeta()
+        setFavoritesList(metadata)
 
         onSuccess?.('收藏已更新')
         setEditModalVisible(false)
