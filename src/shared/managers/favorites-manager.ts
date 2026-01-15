@@ -1,4 +1,4 @@
-import type { Favorite } from '@/shared/types'
+import type { Favorite, FavoriteMeta } from '@/shared/types'
 
 /**
  * 收藏管理服务
@@ -6,11 +6,38 @@ import type { Favorite } from '@/shared/types'
  */
 export class FavoritesManager {
   /**
+   * 获取收藏元数据列表（按Pin状态和LRU排序）
+   */
+  async getFavoritesMeta(storageGetter: () => Promise<FavoriteMeta[]>): Promise<FavoriteMeta[]> {
+    const metadata = await storageGetter()
+    return this.sortFavoritesMeta(metadata)
+  }
+
+  /**
    * 获取收藏列表（按Pin状态和LRU排序）
    */
   async getFavorites(storageGetter: () => Promise<Favorite[]>): Promise<Favorite[]> {
     const favorites = await storageGetter()
     return this.sortFavorites(favorites)
+  }
+
+  /**
+   * 对收藏元数据列表排序：Pin的在前，然后按LRU排序
+   */
+  private sortFavoritesMeta(metadata: FavoriteMeta[]): FavoriteMeta[] {
+    return [...metadata].sort((a, b) => {
+      // Pin的优先级最高
+      if (a.isPinned && !b.isPinned) return -1
+      if (!a.isPinned && b.isPinned) return 1
+
+      // 都是Pin或都不是Pin，按LRU排序
+      // Pin的按pinnedTime排序，非Pin的按lastUsedTime排序
+      if (a.isPinned && b.isPinned) {
+        return (b.pinnedTime || b.timestamp) - (a.pinnedTime || a.timestamp)
+      }
+
+      return (b.lastUsedTime || b.timestamp) - (a.lastUsedTime || a.timestamp)
+    })
   }
 
   /**

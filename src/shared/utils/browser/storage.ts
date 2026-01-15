@@ -5,12 +5,16 @@ import { presetManager } from '@/shared/managers/preset-manager'
 import type {
   ApiConfig,
   ConfigPreset,
+  ConfigPresetMeta,
+  ConfigPresetsContentMap,
   Draft,
   DrawerShortcutsConfig,
   EditorContextMenuConfig,
   EditorTheme,
   ExportConfig,
   Favorite,
+  FavoriteMeta,
+  FavoritesContentMap,
   FavoriteTag,
   HighlightAllConfig,
   IframeConfig,
@@ -30,6 +34,11 @@ type StorageValueMap = {
   [STORAGE_KEYS.TOOLBAR_BUTTONS]: Partial<ToolbarButtonsConfig>
   [STORAGE_KEYS.PREVIEW_CONFIG]: Partial<PreviewConfig>
   [STORAGE_KEYS.FAVORITES]: Favorite[]
+  [STORAGE_KEYS.FAVORITES_METADATA]: FavoriteMeta[]
+  [STORAGE_KEYS.FAVORITES_CONTENT]: FavoritesContentMap
+  [STORAGE_KEYS.CONFIG_PRESETS]: ConfigPreset[]
+  [STORAGE_KEYS.CONFIG_PRESETS_METADATA]: ConfigPresetMeta[]
+  [STORAGE_KEYS.CONFIG_PRESETS_CONTENT]: ConfigPresetsContentMap
   [STORAGE_KEYS.HIGHLIGHT_ALL_CONFIG]: Partial<HighlightAllConfig>
   [STORAGE_KEYS.RECORDING_MODE_CONFIG]: Partial<RecordingModeConfig>
   [STORAGE_KEYS.IFRAME_CONFIG]: Partial<IframeConfig>
@@ -46,6 +55,136 @@ type StorageValueMap = {
 class StorageManager {
   private readonly STORAGE_KEYS = STORAGE_KEYS
   private readonly DEFAULT_VALUES = DEFAULT_VALUES
+  private migrationCompleted = false
+
+  constructor() {
+    // 异步执行数据迁移（不阻塞实例化）
+    this.migrateOldFavoritesData().catch((error) => {
+      console.error('收藏数据迁移失败:', error)
+    })
+    this.migrateOldPresetsData().catch((error) => {
+      console.error('预设配置数据迁移失败:', error)
+    })
+  }
+
+  /**
+   * 迁移旧版收藏数据到新的分离存储格式
+   * @deprecated 此方法将在下个大版本中移除
+   * TODO: 在下个大版本（v3.0.0）中移除此迁移逻辑
+   */
+  private async migrateOldFavoritesData(): Promise<void> {
+    if (this.migrationCompleted) {
+      return
+    }
+
+    try {
+      // 检查是否存在旧数据
+      const oldFavorites = await this.getStorageValue(this.STORAGE_KEYS.FAVORITES)
+      if (!oldFavorites || oldFavorites.length === 0) {
+        this.migrationCompleted = true
+        return
+      }
+
+      // 检查新格式数据是否已存在
+      const existingMeta = await this.getStorageValue(this.STORAGE_KEYS.FAVORITES_METADATA)
+      if (existingMeta && existingMeta.length > 0) {
+        // 新数据已存在，跳过迁移
+        this.migrationCompleted = true
+        return
+      }
+
+      console.log('开始迁移收藏数据到新格式...')
+
+      // 分离元数据和内容
+      const metadata: FavoriteMeta[] = []
+      const contentMap: FavoritesContentMap = {}
+
+      for (const favorite of oldFavorites) {
+        // 提取元数据
+        metadata.push({
+          id: favorite.id,
+          name: favorite.name,
+          timestamp: favorite.timestamp,
+          lastUsedTime: favorite.lastUsedTime,
+          isPinned: favorite.isPinned,
+          pinnedTime: favorite.pinnedTime,
+          tags: favorite.tags,
+        })
+
+        // 存储内容
+        contentMap[favorite.id] = favorite.content
+      }
+
+      // 保存新格式数据
+      await chrome.storage.local.set({
+        [this.STORAGE_KEYS.FAVORITES_METADATA]: metadata,
+        [this.STORAGE_KEYS.FAVORITES_CONTENT]: contentMap,
+      })
+
+      // 删除旧数据
+      await chrome.storage.local.remove(this.STORAGE_KEYS.FAVORITES)
+
+      console.log(`收藏数据迁移完成，共迁移 ${metadata.length} 条记录`)
+      this.migrationCompleted = true
+    } catch (error) {
+      console.error('收藏数据迁移失败:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 迁移旧版预设配置数据到新的分离存储格式
+   * @deprecated 此方法将在下个大版本中移除
+   * TODO: 在下个大版本（v3.0.0）中移除此迁移逻辑
+   */
+  private async migrateOldPresetsData(): Promise<void> {
+    try {
+      // 检查是否存在旧数据
+      const oldPresets = await this.getStorageValue(this.STORAGE_KEYS.CONFIG_PRESETS)
+      if (!oldPresets || oldPresets.length === 0) {
+        return
+      }
+
+      // 检查新格式数据是否已存在
+      const existingMeta = await this.getStorageValue(this.STORAGE_KEYS.CONFIG_PRESETS_METADATA)
+      if (existingMeta && existingMeta.length > 0) {
+        // 新数据已存在，跳过迁移
+        return
+      }
+
+      console.log('开始迁移预设配置数据到新格式...')
+
+      // 分离元数据和内容
+      const metadata: ConfigPresetMeta[] = []
+      const contentMap: ConfigPresetsContentMap = {}
+
+      for (const preset of oldPresets) {
+        // 提取元数据
+        metadata.push({
+          id: preset.id,
+          name: preset.name,
+          timestamp: preset.timestamp,
+        })
+
+        // 存储内容
+        contentMap[preset.id] = preset.config
+      }
+
+      // 保存新格式数据
+      await chrome.storage.local.set({
+        [this.STORAGE_KEYS.CONFIG_PRESETS_METADATA]: metadata,
+        [this.STORAGE_KEYS.CONFIG_PRESETS_CONTENT]: contentMap,
+      })
+
+      // 删除旧数据
+      await chrome.storage.local.remove(this.STORAGE_KEYS.CONFIG_PRESETS)
+
+      console.log(`预设配置数据迁移完成，共迁移 ${metadata.length} 条记录`)
+    } catch (error) {
+      console.error('预设配置数据迁移失败:', error)
+      throw error
+    }
+  }
 
   /**
    * 类型安全的存储值获取方法
@@ -474,11 +613,43 @@ class StorageManager {
   }
 
   /**
+   * 获取收藏元数据列表（已排序：Pin的在前，然后按LRU排序）
+   */
+  async getFavoritesMeta(): Promise<FavoriteMeta[]> {
+    try {
+      return await favoritesManager.getFavoritesMeta(() => this.getRawFavoritesMeta())
+    } catch (error) {
+      console.error('获取收藏元数据列表失败:', error)
+      return []
+    }
+  }
+
+  /**
+   * 获取指定收藏的内容
+   */
+  async getFavoriteContent(id: string): Promise<string | null> {
+    try {
+      const contentMap = await this.getRawFavoritesContent()
+      return contentMap[id] ?? null
+    } catch (error) {
+      console.error('获取收藏内容失败:', error)
+      return null
+    }
+  }
+
+  /**
    * 获取收藏列表（已排序：Pin的在前，然后按LRU排序）
+   * 合并元数据和内容，返回完整的Favorite对象
    */
   async getFavorites(): Promise<Favorite[]> {
     try {
-      return await favoritesManager.getFavorites(() => this.getRawFavorites())
+      const metadata = await this.getFavoritesMeta()
+      const contentMap = await this.getRawFavoritesContent()
+
+      return metadata.map((meta) => ({
+        ...meta,
+        content: contentMap[meta.id] ?? '',
+      }))
     } catch (error) {
       console.error('获取收藏列表失败:', error)
       return []
@@ -486,24 +657,46 @@ class StorageManager {
   }
 
   /**
-   * 获取原始收藏列表（未排序，用于内部存储操作）
+   * 获取原始收藏元数据列表（未排序，用于内部存储操作）
    */
-  private async getRawFavorites(): Promise<Favorite[]> {
+  private async getRawFavoritesMeta(): Promise<FavoriteMeta[]> {
     try {
-      const storedValue = await this.getStorageValue(this.STORAGE_KEYS.FAVORITES)
+      const storedValue = await this.getStorageValue(this.STORAGE_KEYS.FAVORITES_METADATA)
       return storedValue ?? []
     } catch (error) {
-      console.error('获取收藏列表失败:', error)
+      console.error('获取收藏元数据列表失败:', error)
       return []
     }
   }
 
   /**
-   * 保存收藏列表
+   * 获取原始收藏内容映射（用于内部存储操作）
    */
-  private async saveFavorites(favorites: Favorite[]): Promise<void> {
+  private async getRawFavoritesContent(): Promise<FavoritesContentMap> {
+    try {
+      const storedValue = await this.getStorageValue(this.STORAGE_KEYS.FAVORITES_CONTENT)
+      return storedValue ?? {}
+    } catch (error) {
+      console.error('获取收藏内容映射失败:', error)
+      return {}
+    }
+  }
+
+  /**
+   * 保存收藏元数据列表
+   */
+  private async saveFavoritesMeta(metadata: FavoriteMeta[]): Promise<void> {
     await chrome.storage.local.set({
-      [this.STORAGE_KEYS.FAVORITES]: favorites,
+      [this.STORAGE_KEYS.FAVORITES_METADATA]: metadata,
+    })
+  }
+
+  /**
+   * 保存收藏内容映射
+   */
+  private async saveFavoritesContent(contentMap: FavoritesContentMap): Promise<void> {
+    await chrome.storage.local.set({
+      [this.STORAGE_KEYS.FAVORITES_CONTENT]: contentMap,
     })
   }
 
@@ -513,14 +706,36 @@ class StorageManager {
   async addFavorite(name: string, content: string): Promise<void> {
     try {
       const maxCount = await this.getMaxFavoritesCount()
+      const metadata = await this.getRawFavoritesMeta()
 
-      await favoritesManager.addFavorite(
+      // 检查是否达到上限
+      if (metadata.length >= maxCount) {
+        throw new Error(
+          `已达到收藏数量上限（${metadata.length}/${maxCount}），请删除旧收藏后再添加`
+        )
+      }
+
+      const now = Date.now()
+      const id = `fav_${now}_${Math.random().toString(36).slice(2, 9)}`
+
+      // 创建新的元数据
+      const newMeta: FavoriteMeta = {
+        id,
         name,
-        content,
-        maxCount,
-        () => this.getRawFavorites(),
-        (favorites) => this.saveFavorites(favorites)
-      )
+        timestamp: now,
+        lastUsedTime: now,
+      }
+
+      // 添加到元数据列表开头
+      metadata.unshift(newMeta)
+
+      // 获取内容映射并添加新内容
+      const contentMap = await this.getRawFavoritesContent()
+      contentMap[id] = content
+
+      // 保存
+      await this.saveFavoritesMeta(metadata)
+      await this.saveFavoritesContent(contentMap)
     } catch (error) {
       console.error('添加收藏失败:', error)
       throw error
@@ -532,13 +747,24 @@ class StorageManager {
    */
   async updateFavorite(id: string, name: string, content: string): Promise<void> {
     try {
-      await favoritesManager.updateFavorite(
-        id,
-        name,
-        content,
-        () => this.getRawFavorites(),
-        (favorites) => this.saveFavorites(favorites)
-      )
+      const metadata = await this.getRawFavoritesMeta()
+      const meta = metadata.find((m) => m.id === id)
+
+      if (!meta) {
+        throw new Error('收藏不存在')
+      }
+
+      // 更新元数据
+      meta.name = name
+      meta.lastUsedTime = Date.now()
+
+      // 更新内容
+      const contentMap = await this.getRawFavoritesContent()
+      contentMap[id] = content
+
+      // 保存
+      await this.saveFavoritesMeta(metadata)
+      await this.saveFavoritesContent(contentMap)
     } catch (error) {
       console.error('更新收藏失败:', error)
       throw error
@@ -550,11 +776,17 @@ class StorageManager {
    */
   async deleteFavorite(id: string): Promise<void> {
     try {
-      await favoritesManager.deleteFavorite(
-        id,
-        () => this.getRawFavorites(),
-        (favorites) => this.saveFavorites(favorites)
-      )
+      // 删除元数据
+      const metadata = await this.getRawFavoritesMeta()
+      const filteredMeta = metadata.filter((m) => m.id !== id)
+
+      // 删除内容
+      const contentMap = await this.getRawFavoritesContent()
+      delete contentMap[id]
+
+      // 保存
+      await this.saveFavoritesMeta(filteredMeta)
+      await this.saveFavoritesContent(contentMap)
     } catch (error) {
       console.error('删除收藏失败:', error)
       throw error
@@ -566,11 +798,13 @@ class StorageManager {
    */
   async updateFavoriteUsedTime(id: string): Promise<void> {
     try {
-      await favoritesManager.updateFavoriteUsedTime(
-        id,
-        () => this.getRawFavorites(),
-        (favorites) => this.saveFavorites(favorites)
-      )
+      const metadata = await this.getRawFavoritesMeta()
+      const meta = metadata.find((m) => m.id === id)
+
+      if (meta) {
+        meta.lastUsedTime = Date.now()
+        await this.saveFavoritesMeta(metadata)
+      }
     } catch (error) {
       console.error('更新收藏使用时间失败:', error)
     }
@@ -582,11 +816,30 @@ class StorageManager {
   async cleanOldFavorites(): Promise<void> {
     try {
       const maxCount = await this.getMaxFavoritesCount()
-      await favoritesManager.cleanOldFavorites(
-        maxCount,
-        () => this.getRawFavorites(),
-        (favorites) => this.saveFavorites(favorites)
+      const metadata = await this.getRawFavoritesMeta()
+
+      if (metadata.length <= maxCount) {
+        return
+      }
+
+      // 按最后使用时间排序（降序）
+      const sorted = [...metadata].sort(
+        (a, b) => (b.lastUsedTime || b.timestamp) - (a.lastUsedTime || a.timestamp)
       )
+
+      // 只保留最近使用的maxCount个
+      const kept = sorted.slice(0, maxCount)
+      const removed = sorted.slice(maxCount)
+
+      // 从内容映射中删除被移除的收藏
+      const contentMap = await this.getRawFavoritesContent()
+      for (const meta of removed) {
+        delete contentMap[meta.id]
+      }
+
+      // 保存
+      await this.saveFavoritesMeta(kept)
+      await this.saveFavoritesContent(contentMap)
     } catch (error) {
       console.error('清理收藏失败:', error)
     }
@@ -597,13 +850,29 @@ class StorageManager {
    */
   async togglePinFavorite(id: string): Promise<void> {
     try {
-      const maxPinned = await this.getMaxPinnedFavorites()
-      await favoritesManager.togglePin(
-        id,
-        maxPinned,
-        () => this.getRawFavorites(),
-        (favorites) => this.saveFavorites(favorites)
-      )
+      const metadata = await this.getRawFavoritesMeta()
+      const meta = metadata.find((m) => m.id === id)
+
+      if (!meta) {
+        throw new Error('收藏不存在')
+      }
+
+      // 如果当前是未固定状态，需要检查是否超过最大固定数量
+      if (!meta.isPinned) {
+        const maxPinned = await this.getMaxPinnedFavorites()
+        const pinnedCount = metadata.filter((m) => m.isPinned).length
+        if (pinnedCount >= maxPinned) {
+          throw new Error(`最多只能固定 ${maxPinned} 个收藏`)
+        }
+        meta.isPinned = true
+        meta.pinnedTime = Date.now()
+      } else {
+        // 取消固定
+        meta.isPinned = false
+        meta.pinnedTime = undefined
+      }
+
+      await this.saveFavoritesMeta(metadata)
     } catch (error) {
       console.error('切换收藏固定状态失败:', error)
       throw error
@@ -615,12 +884,12 @@ class StorageManager {
    */
   async updateFavoriteTags(id: string, tags: FavoriteTag[]): Promise<void> {
     try {
-      const favorites = await this.getRawFavorites()
-      const favorite = favorites.find((fav) => fav.id === id)
+      const metadata = await this.getRawFavoritesMeta()
+      const meta = metadata.find((m) => m.id === id)
 
-      if (favorite) {
-        favorite.tags = tags
-        await this.saveFavorites(favorites)
+      if (meta) {
+        meta.tags = tags
+        await this.saveFavoritesMeta(metadata)
       } else {
         throw new Error('收藏不存在')
       }
@@ -649,7 +918,19 @@ class StorageManager {
   }
 
   /**
-   * 获取预设配置列表
+   * 获取预设配置元数据列表（推荐使用，用于列表展示）
+   */
+  async getPresetsMeta(): Promise<ConfigPresetMeta[]> {
+    try {
+      return await presetManager.getPresetsMeta(() => this.getRawPresetsMeta())
+    } catch (error) {
+      console.error('获取预设配置元数据列表失败:', error)
+      return []
+    }
+  }
+
+  /**
+   * 获取预设配置列表（向后兼容，包含完整配置内容）
    */
   async getConfigPresets(): Promise<ConfigPreset[]> {
     try {
@@ -661,12 +942,57 @@ class StorageManager {
   }
 
   /**
-   * 获取原始预设配置列表（内部方法）
+   * 获取指定预设的完整配置内容
+   */
+  async getPresetConfig(id: string): Promise<StorageData | null> {
+    try {
+      const contentMap = await this.getRawPresetsContent()
+      return contentMap[id] || null
+    } catch (error) {
+      console.error(`获取预设配置内容失败 (id: ${id}):`, error)
+      return null
+    }
+  }
+
+  /**
+   * 获取原始预设配置元数据列表（内部方法）
+   */
+  private async getRawPresetsMeta(): Promise<ConfigPresetMeta[]> {
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.CONFIG_PRESETS_METADATA)
+      return (result[this.STORAGE_KEYS.CONFIG_PRESETS_METADATA] as ConfigPresetMeta[]) || []
+    } catch (error) {
+      console.error('读取预设配置元数据失败:', error)
+      return []
+    }
+  }
+
+  /**
+   * 获取原始预设配置内容映射（内部方法）
+   */
+  private async getRawPresetsContent(): Promise<ConfigPresetsContentMap> {
+    try {
+      const result = await chrome.storage.local.get(this.STORAGE_KEYS.CONFIG_PRESETS_CONTENT)
+      return (result[this.STORAGE_KEYS.CONFIG_PRESETS_CONTENT] as ConfigPresetsContentMap) || {}
+    } catch (error) {
+      console.error('读取预设配置内容失败:', error)
+      return {}
+    }
+  }
+
+  /**
+   * 获取原始预设配置列表（内部方法，向后兼容）
    */
   private async getRawConfigPresets(): Promise<ConfigPreset[]> {
     try {
-      const result = await chrome.storage.local.get(this.STORAGE_KEYS.CONFIG_PRESETS)
-      return (result[this.STORAGE_KEYS.CONFIG_PRESETS] as ConfigPreset[]) || []
+      // 从分离的存储中合并数据
+      const metadata = await this.getRawPresetsMeta()
+      const contentMap = await this.getRawPresetsContent()
+
+      return metadata.map((meta) => ({
+        ...meta,
+        config: contentMap[meta.id] || ({} as StorageData),
+      }))
     } catch (error) {
       console.error('读取预设配置失败:', error)
       return []
@@ -674,12 +1000,27 @@ class StorageManager {
   }
 
   /**
-   * 保存预设配置列表（内部方法）
+   * 保存预设配置列表（内部方法，分离存储元数据和内容）
    */
   private async saveConfigPresets(presets: ConfigPreset[]): Promise<void> {
     try {
+      // 分离元数据和内容
+      const metadata: ConfigPresetMeta[] = []
+      const contentMap: ConfigPresetsContentMap = {}
+
+      for (const preset of presets) {
+        metadata.push({
+          id: preset.id,
+          name: preset.name,
+          timestamp: preset.timestamp,
+        })
+        contentMap[preset.id] = preset.config
+      }
+
+      // 分别保存元数据和内容
       await chrome.storage.local.set({
-        [this.STORAGE_KEYS.CONFIG_PRESETS]: presets,
+        [this.STORAGE_KEYS.CONFIG_PRESETS_METADATA]: metadata,
+        [this.STORAGE_KEYS.CONFIG_PRESETS_CONTENT]: contentMap,
       })
     } catch (error) {
       console.error('保存预设配置失败:', error)

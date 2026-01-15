@@ -1,13 +1,32 @@
-import type { ConfigPreset, StorageData } from '@/shared/types'
+import type { ConfigPreset, ConfigPresetMeta, StorageData } from '@/shared/types'
 
 /** 预设配置管理服务（类不对外导出，只导出实例）*/
 class PresetManager {
+  /**
+   * 获取预设配置元数据列表（按创建时间排序，最新的在前）
+   */
+  async getPresetsMeta(
+    storageGetter: () => Promise<ConfigPresetMeta[]>
+  ): Promise<ConfigPresetMeta[]> {
+    const presets = await storageGetter()
+    return this.sortPresetsMeta(presets)
+  }
+
   /**
    * 获取预设配置列表（按创建时间排序，最新的在前）
    */
   async getPresets(storageGetter: () => Promise<ConfigPreset[]>): Promise<ConfigPreset[]> {
     const presets = await storageGetter()
     return this.sortPresets(presets)
+  }
+
+  /**
+   * 对预设配置元数据列表排序：按创建时间降序排序（最新的在前）
+   */
+  private sortPresetsMeta(presets: ConfigPresetMeta[]): ConfigPresetMeta[] {
+    return [...presets].sort((a, b) => {
+      return b.timestamp - a.timestamp
+    })
   }
 
   /**
