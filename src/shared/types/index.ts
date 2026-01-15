@@ -413,6 +413,31 @@ export interface Favorite {
 }
 
 /**
+ * 收藏元数据接口（不含content，用于列表展示）
+ */
+export interface FavoriteMeta {
+  /** 唯一标识符 */
+  id: string
+  /** 收藏名称 */
+  name: string
+  /** 保存时间戳 */
+  timestamp: number
+  /** 最后使用时间（用于LRU算法） */
+  lastUsedTime: number
+  /** 是否固定（Pin） */
+  isPinned?: boolean
+  /** 固定时间（用于多个Pin之间的排序） */
+  pinnedTime?: number
+  /** 标签列表 */
+  tags?: FavoriteTag[]
+}
+
+/**
+ * 收藏内容映射类型（id到content的映射）
+ */
+export type FavoritesContentMap = Record<string, string>
+
+/**
  * 预设配置数据接口
  */
 export interface ConfigPreset {
@@ -425,6 +450,23 @@ export interface ConfigPreset {
   /** 保存时间戳 */
   timestamp: number
 }
+
+/**
+ * 预设配置元数据接口（不包含完整配置内容）
+ */
+export interface ConfigPresetMeta {
+  /** 唯一标识符 */
+  id: string
+  /** 预设名称 */
+  name: string
+  /** 保存时间戳 */
+  timestamp: number
+}
+
+/**
+ * 预设配置内容映射类型（id到config的映射）
+ */
+export type ConfigPresetsContentMap = Record<string, StorageData>
 
 /**
  * 历史记录条目类型枚举
