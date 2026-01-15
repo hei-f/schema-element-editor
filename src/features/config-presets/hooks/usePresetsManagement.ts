@@ -1,4 +1,4 @@
-import type { ConfigPreset } from '@/shared/types'
+import type { ConfigPreset, ConfigPresetMeta } from '@/shared/types'
 import { storage } from '@/shared/utils/browser/storage'
 import { useCallback, useState } from 'react'
 
@@ -10,7 +10,7 @@ interface UsePresetsManagementProps {
 }
 
 interface UsePresetsManagementReturn {
-  presetsList: ConfigPreset[]
+  presetsList: ConfigPresetMeta[]
   presetsModalVisible: boolean
   addPresetModalVisible: boolean
   presetNameInput: string
@@ -18,7 +18,7 @@ interface UsePresetsManagementReturn {
   handleOpenAddPreset: () => void
   handleAddPreset: () => Promise<void>
   handleOpenPresets: () => Promise<void>
-  handleApplyPreset: (preset: ConfigPreset) => void
+  handleApplyPreset: (preset: ConfigPresetMeta) => Promise<void>
   handleDeletePreset: (id: string) => Promise<void>
   closePresetsModal: () => void
   closeAddPresetModal: () => void
@@ -35,7 +35,7 @@ export const usePresetsManagement = ({
   onSuccess,
 }: UsePresetsManagementProps): UsePresetsManagementReturn => {
   const [presetsModalVisible, setPresetsModalVisible] = useState(false)
-  const [presetsList, setPresetsList] = useState<ConfigPreset[]>([])
+  const [presetsList, setPresetsList] = useState<ConfigPresetMeta[]>([])
   const [addPresetModalVisible, setAddPresetModalVisible] = useState(false)
   const [presetNameInput, setPresetNameInput] = useState('')
 
@@ -81,7 +81,7 @@ export const usePresetsManagement = ({
    */
   const handleOpenPresets = useCallback(async () => {
     try {
-      const presets = await storage.getConfigPresets()
+      const presets = await storage.getPresetsMeta()
       setPresetsList(presets)
       setPresetsModalVisible(true)
     } catch (error) {
@@ -91,14 +91,32 @@ export const usePresetsManagement = ({
   }, [onError])
 
   /**
-   * 应用预设配置
+   * 应用预设配置（懒加载完整配置内容）
    */
   const handleApplyPreset = useCallback(
-    (preset: ConfigPreset) => {
-      onApplyPreset(preset)
-      setPresetsModalVisible(false)
+    async (preset: ConfigPresetMeta) => {
+      try {
+        // 按需加载完整的配置内容
+        const config = await storage.getPresetConfig(preset.id)
+        if (!config) {
+          onError?.('预设配置内容不存在')
+          return
+        }
+
+        // 构造完整的 ConfigPreset 对象
+        const fullPreset: ConfigPreset = {
+          ...preset,
+          config,
+        }
+
+        await onApplyPreset(fullPreset)
+        setPresetsModalVisible(false)
+      } catch (error) {
+        console.error('应用预设配置失败:', error)
+        onError?.('应用预设配置失败')
+      }
     },
-    [onApplyPreset]
+    [onApplyPreset, onError]
   )
 
   /**
@@ -108,7 +126,7 @@ export const usePresetsManagement = ({
     async (id: string) => {
       try {
         await storage.deleteConfigPreset(id)
-        const presets = await storage.getConfigPresets()
+        const presets = await storage.getPresetsMeta()
         setPresetsList(presets)
         onSuccess?.('预设配置已删除')
       } catch (error) {

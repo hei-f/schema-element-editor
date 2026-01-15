@@ -35,7 +35,6 @@ import {
   PageRoot,
   PageTitle,
   ResetDefaultButton,
-  SavePresetButton,
   ScrollWrapper,
   VersionContainer,
   VersionDivider,
@@ -45,7 +44,7 @@ import {
 import type { OptionsPageContentProps } from '../types'
 
 /** 当前插件版本 */
-const CURRENT_VERSION = 'v2.6.1'
+const CURRENT_VERSION = 'v2.7.0'
 
 /**
  * 设置页面内容组件（纯UI组件）
@@ -53,7 +52,7 @@ const CURRENT_VERSION = 'v2.6.1'
  */
 export const OptionsPageContent: React.FC<OptionsPageContentProps> = (props) => {
   const { storage, actions = {} } = props
-  const { onCheckUpdate, shouldSetDocumentTitle = true } = actions
+  const { onCheckUpdate, onViewDocs, shouldSetDocumentTitle = true } = actions
 
   const [form] = Form.useForm()
 
@@ -300,6 +299,7 @@ export const OptionsPageContent: React.FC<OptionsPageContentProps> = (props) => 
                   <VersionTag>{CURRENT_VERSION}</VersionTag>
 
                   <VersionDivider />
+
                   <CheckUpdateButton
                     onClick={() => {
                       onCheckUpdate?.()
@@ -307,6 +307,15 @@ export const OptionsPageContent: React.FC<OptionsPageContentProps> = (props) => 
                     type="primary"
                   >
                     检查更新
+                  </CheckUpdateButton>
+
+                  <CheckUpdateButton
+                    onClick={() => {
+                      onViewDocs?.()
+                    }}
+                    type="default"
+                  >
+                    使用文档
                   </CheckUpdateButton>
 
                   <VersionDivider />
@@ -317,13 +326,13 @@ export const OptionsPageContent: React.FC<OptionsPageContentProps> = (props) => 
                         : '保存当前配置为预设'
                     }
                   >
-                    <SavePresetButton
+                    <CheckUpdateButton
                       onClick={handleOpenAddPresetWithCheck}
                       type="default"
                       disabled={presetCount >= maxPresetCount}
                     >
                       保存为预设配置
-                    </SavePresetButton>
+                    </CheckUpdateButton>
                   </Tooltip>
                   <Tooltip title="管理预设配置">
                     <ManagePresetButton onClick={handleOpenPresets} icon={<SettingOutlined />} />

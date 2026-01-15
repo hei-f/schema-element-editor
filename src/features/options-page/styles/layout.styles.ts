@@ -460,38 +460,21 @@ export const VersionDivider = styled.div`
 /** 检查更新按钮 */
 export const CheckUpdateButton = styled(Button)`
   && {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     padding: 0 8px;
     height: 24px;
-    /* background: #ffffff; */
     border-radius: 16px;
     font-size: 12px;
-    /* color: #666f8d; */
     cursor: pointer;
-    /* transition: all 0.2s ease; */
-    /* border: 1px solid transparent !important; */
-  }
-`
-
-/** 保存预设配置按钮 */
-export const SavePresetButton = styled(Button)`
-  && {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 12px;
-    height: 24px;
-    border-radius: 16px;
-    font-size: 12px;
   }
 `
 
 /** 管理预设配置按钮（图标按钮） */
 export const ManagePresetButton = styled(Button)`
   && {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
     width: 24px;

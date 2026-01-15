@@ -19,6 +19,7 @@ export const DEFAULT_VALUES: Readonly<StorageData> = {
     limitUpwardSearch: false,
     searchDepthUp: 5,
     throttleInterval: 16,
+    allowHighlightedElementClick: false,
   },
   autoParseString: true,
   toolbarButtons: {
@@ -122,6 +123,8 @@ export const STORAGE_KEYS = {
   PREVIEW_CONFIG: 'previewConfig',
   DRAFTS_PREFIX: 'draft:',
   FAVORITES: 'favorites',
+  FAVORITES_METADATA: 'favoritesMetadata',
+  FAVORITES_CONTENT: 'favoritesContent',
   MAX_HISTORY_COUNT: 'maxHistoryCount',
   HIGHLIGHT_ALL_CONFIG: 'highlightAllConfig',
   RECORDING_MODE_CONFIG: 'recordingModeConfig',
@@ -135,4 +138,6 @@ export const STORAGE_KEYS = {
   CONTEXT_MENU_CONFIG: 'contextMenuConfig',
   MAX_CONFIG_PRESETS_COUNT: 'maxConfigPresetsCount',
   CONFIG_PRESETS: 'configPresets',
+  CONFIG_PRESETS_METADATA: 'configPresetsMetadata',
+  CONFIG_PRESETS_CONTENT: 'configPresetsContent',
 } as const

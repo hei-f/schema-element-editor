@@ -108,6 +108,7 @@ export const FIELD_GROUPS: Record<string, FieldGroup> = {
       FORM_PATHS.searchConfig.limitUpwardSearch,
       FORM_PATHS.searchConfig.searchDepthUp,
       FORM_PATHS.searchConfig.throttleInterval,
+      FORM_PATHS.searchConfig.allowHighlightedElementClick,
     ],
     save: async (allValues: any) => {
       await storage.setSearchConfig(allValues.searchConfig)

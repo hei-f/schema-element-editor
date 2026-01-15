@@ -166,6 +166,51 @@ export const ResponsiveButtonGroupScrollable = styled.div`
 `
 
 /**
+ * 动画按钮包装器
+ * 根据动画状态应用不同的变换效果
+ */
+export const AnimatedButtonWrapper = styled.div<{
+  $animationState?: 'entering' | 'leaving' | 'stable'
+  $animationDistance?: number
+}>`
+  flex-shrink: 0;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  ${(props) => {
+    const distance = props.$animationDistance || 80
+    const leavingDistance = distance - 10 // 消失时向左减少10px
+
+    switch (props.$animationState) {
+      case 'leaving':
+        return `
+          transform: translateX(${leavingDistance}px) scale(0.8);
+          opacity: 0;
+          pointer-events: none;
+        `
+      case 'entering':
+        return `
+          animation: slideIn-${distance} 300ms cubic-bezier(0.4, 0, 0.2, 1);
+          @keyframes slideIn-${distance} {
+            from {
+              transform: translateX(${distance}px) scale(0.8);
+              opacity: 0;
+            }
+            to {
+              transform: translateX(0) scale(1);
+              opacity: 1;
+            }
+          }
+        `
+      default:
+        return `
+          transform: translateX(0) scale(1);
+          opacity: 1;
+        `
+    }
+  }}
+`
+
+/**
  * 响应式按钮组固定区域
  * 包含更多按钮和固定按钮，始终显示
  */

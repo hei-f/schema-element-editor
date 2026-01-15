@@ -1,4 +1,4 @@
-import type { EditorTheme, Favorite } from '@/shared/types'
+import type { EditorTheme, FavoriteMeta } from '@/shared/types'
 import { generate } from '@ant-design/colors'
 import React, { useMemo } from 'react'
 import { AddFavoriteModal } from './AddFavoriteModal'
@@ -10,7 +10,7 @@ interface FavoritesManagerProps {
   addFavoriteModalVisible: boolean
   favoriteNameInput: string
   favoritesModalVisible: boolean
-  favoritesList: Favorite[]
+  favoritesList: FavoriteMeta[]
   editModalVisible: boolean
   editingFavoriteId: string | null
   editingName: string
@@ -24,8 +24,8 @@ interface FavoritesManagerProps {
   onAddFavorite: () => Promise<void>
   onCloseAddFavoriteModal: () => void
   onCloseFavoritesModal: () => void
-  onEditFavorite: (favorite: Favorite) => void
-  onApplyFavorite: (favorite: Favorite) => void
+  onEditFavorite: (favorite: FavoriteMeta) => void
+  onApplyFavorite: (favorite: FavoriteMeta) => void
   onConfirmApply: () => void
   onCancelApply: () => void
   onDeleteFavorite: (id: string) => Promise<void>
@@ -92,6 +92,9 @@ export const FavoritesManager: React.FC<FavoritesManagerProps> = (props) => {
       <FavoritesListModal
         visible={favoritesModalVisible}
         favoritesList={favoritesList}
+        themeColor={themeColors.primaryColor}
+        hoverColor={themeColors.hoverColor}
+        activeColor={themeColors.activeColor}
         onEdit={onEditFavorite}
         onApply={onApplyFavorite}
         onDelete={onDeleteFavorite}

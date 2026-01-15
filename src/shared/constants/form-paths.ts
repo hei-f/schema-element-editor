@@ -33,6 +33,8 @@ export const FORM_PATHS = {
     searchDepthUp: ['searchConfig', 'searchDepthUp'],
     /** 节流间隔 */
     throttleInterval: ['searchConfig', 'throttleInterval'],
+    /** 是否允许触发高亮元素的点击事件 */
+    allowHighlightedElementClick: ['searchConfig', 'allowHighlightedElementClick'],
   },
 
   /** 自动解析字符串 */

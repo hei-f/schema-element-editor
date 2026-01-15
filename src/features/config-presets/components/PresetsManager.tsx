@@ -1,4 +1,4 @@
-import type { ConfigPreset } from '@/shared/types'
+import type { ConfigPresetMeta } from '@/shared/types'
 import React from 'react'
 import { AddPresetModal } from './AddPresetModal'
 import { PresetsListModal } from './PresetsListModal'
@@ -7,13 +7,13 @@ interface PresetsManagerProps {
   addPresetModalVisible: boolean
   presetNameInput: string
   presetsModalVisible: boolean
-  presetsList: ConfigPreset[]
+  presetsList: ConfigPresetMeta[]
   themeColor: string
   onAddPresetInputChange: (value: string) => void
   onAddPreset: () => void
   onCloseAddPresetModal: () => void
   onClosePresetsModal: () => void
-  onApplyPreset: (preset: ConfigPreset) => void
+  onApplyPreset: (preset: ConfigPresetMeta) => Promise<void>
   onDeletePreset: (id: string) => Promise<void>
 }
 
@@ -49,6 +49,7 @@ export const PresetsManager: React.FC<PresetsManagerProps> = (props) => {
       <PresetsListModal
         visible={presetsModalVisible}
         presetsList={presetsList}
+        themeColor={themeColor}
         onApply={onApplyPreset}
         onDelete={onDeletePreset}
         onClose={onClosePresetsModal}

@@ -34,4 +34,17 @@ export const ModalFooterButton = styled(Button)<{
       color: #ffffff !important;
     }
   }
+
+  /* link 按钮使用主题色（仅非禁用状态） */
+  &.see-btn-link:not(:disabled):not(.see-btn-disabled) {
+    color: ${(props) => props.$themeColor || '#1677ff'} !important;
+
+    &:hover {
+      color: ${(props) => props.$hoverColor || '#4096ff'} !important;
+    }
+
+    &:active {
+      color: ${(props) => props.$activeColor || '#0958d9'} !important;
+    }
+  }
 `

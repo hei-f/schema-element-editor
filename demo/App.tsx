@@ -32,6 +32,7 @@ import { JsonRepairTest } from './pages/schema-tests/JsonRepairTest'
 import { QuickEditTest } from './pages/schema-tests/QuickEditTest'
 import { RecordingModeTest } from './pages/schema-tests/RecordingModeTest'
 import { UIFeaturesTest } from './pages/schema-tests/UIFeaturesTest'
+import { ClickEventTest } from './pages/schema-tests/ClickEventTest'
 import styled from 'styled-components'
 
 const { Header, Content, Sider } = Layout
@@ -139,6 +140,7 @@ type PageKey =
   | 'schema-tests-quick-edit'
   | 'schema-tests-recording-mode'
   | 'schema-tests-ui-features'
+  | 'schema-tests-click-event'
 
 /** 默认页面 */
 const DEFAULT_PAGE: PageKey = 'schema-tests'
@@ -168,6 +170,7 @@ const getPageFromHash = (): PageKey => {
     'schema-tests-quick-edit',
     'schema-tests-recording-mode',
     'schema-tests-ui-features',
+    'schema-tests-click-event',
   ]
   return validPages.includes(hash as PageKey) ? (hash as PageKey) : DEFAULT_PAGE
 }
@@ -308,6 +311,8 @@ export const TestApp: React.FC = () => {
         return <RecordingModeTest onBack={() => handlePageChange('schema-tests')} />
       case 'schema-tests-ui-features':
         return <UIFeaturesTest onBack={() => handlePageChange('schema-tests')} />
+      case 'schema-tests-click-event':
+        return <ClickEventTest onBack={() => handlePageChange('schema-tests')} />
       case 'iframe-test':
         return <IframeTestPage siderCollapsed={siderCollapsed} />
       case 'builtin-preview-test':

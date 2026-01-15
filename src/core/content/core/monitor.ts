@@ -716,14 +716,18 @@ export class ElementMonitor {
     // 使用当前已检测到的元素
     if (!this.currentElement) return
 
-    // 获取元素属性
+    // 在任何异步操作之前，立即根据配置决定是否阻止元素的点击事件
+    const allowClick = this.searchConfig?.allowHighlightedElementClick ?? false
+    if (!allowClick) {
+      event.preventDefault()
+      event.stopImmediatePropagation()
+    }
+
+    // 获取元素属性（异步操作）
     const attrs = await getElementAttributes(this.currentElement)
 
     // 只有有效的元素才触发回调
     if (hasValidAttributes(attrs)) {
-      event.preventDefault()
-      event.stopPropagation()
-
       // iframe 模式：发送点击消息给 top frame
       if (this.isIframeMode) {
         sendElementClickToTop(attrs, this.isRecordingMode)

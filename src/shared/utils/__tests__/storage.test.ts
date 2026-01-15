@@ -103,6 +103,7 @@ describe('Storage工具测试', () => {
         drawerWidth: '800px',
         attributeName: 'id',
         searchConfig: {
+          allowHighlightedElementClick: false,
           limitUpwardSearch: false,
           searchDepthUp: 5,
           throttleInterval: 16,
@@ -211,6 +212,7 @@ describe('Storage工具测试', () => {
         drawerWidth: '1000px',
         attributeName: 'custom-attr',
         searchConfig: {
+          allowHighlightedElementClick: false,
           limitUpwardSearch: true,
           searchDepthUp: 5,
           throttleInterval: 8,
@@ -311,6 +313,7 @@ describe('Storage工具测试', () => {
         drawerWidth: '800px',
         attributeName: 'id',
         searchConfig: {
+          allowHighlightedElementClick: false,
           limitUpwardSearch: false,
           searchDepthUp: 5,
           throttleInterval: 16,
@@ -405,6 +408,7 @@ describe('Storage工具测试', () => {
       const result = await storage.getSearchConfig()
 
       expect(result).toEqual({
+        allowHighlightedElementClick: false,
         limitUpwardSearch: false,
         searchDepthUp: 5,
         throttleInterval: 16,
@@ -423,6 +427,7 @@ describe('Storage工具测试', () => {
       const result = await storage.getSearchConfig()
 
       expect(result).toEqual({
+        allowHighlightedElementClick: false,
         limitUpwardSearch: true,
         searchDepthUp: 10,
         throttleInterval: 32,
@@ -461,6 +466,7 @@ describe('Storage工具测试', () => {
 
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         searchConfig: {
+          allowHighlightedElementClick: false,
           limitUpwardSearch: true,
           searchDepthUp: 5,
           throttleInterval: 32,
@@ -483,6 +489,7 @@ describe('Storage工具测试', () => {
 
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         searchConfig: {
+          allowHighlightedElementClick: false,
           limitUpwardSearch: false,
           searchDepthUp: 8,
           throttleInterval: 100,
@@ -505,6 +512,7 @@ describe('Storage工具测试', () => {
 
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         searchConfig: {
+          allowHighlightedElementClick: false,
           limitUpwardSearch: false,
           searchDepthUp: 5,
           throttleInterval: 50,
@@ -521,6 +529,7 @@ describe('Storage工具测试', () => {
           drawerWidth: '1000px',
           attributeName: 'test-params',
           searchConfig: {
+            allowHighlightedElementClick: false,
             limitUpwardSearch: false,
             searchDepthUp: 2,
             throttleInterval: 20,
@@ -545,6 +554,7 @@ describe('Storage工具测试', () => {
         drawerWidth: '1000px',
         attributeName: 'test-params',
         searchConfig: {
+          allowHighlightedElementClick: false,
           limitUpwardSearch: false,
           searchDepthUp: 2,
           throttleInterval: 20,
@@ -886,22 +896,39 @@ describe('Storage工具测试', () => {
 
   describe('收藏操作', () => {
     it('应该获取收藏列表', async () => {
-      const mockFavorites = [
+      const now = Date.now()
+      const mockMetadata = [
         {
           id: 'fav_1',
           name: 'Test',
-          content: 'content',
-          timestamp: Date.now(),
-          lastUsedTime: Date.now(),
+          timestamp: now,
+          lastUsedTime: now,
         },
       ]
-      ;(chrome.storage.local.get as Mock).mockResolvedValue({
-        favorites: mockFavorites,
+      const mockContent = {
+        fav_1: 'content',
+      }
+      ;(chrome.storage.local.get as Mock).mockImplementation((key) => {
+        if (key === 'favoritesMetadata') {
+          return Promise.resolve({ favoritesMetadata: mockMetadata })
+        }
+        if (key === 'favoritesContent') {
+          return Promise.resolve({ favoritesContent: mockContent })
+        }
+        return Promise.resolve({})
       })
 
       const result = await storage.getFavorites()
 
-      expect(result).toEqual(mockFavorites)
+      expect(result).toEqual([
+        {
+          id: 'fav_1',
+          name: 'Test',
+          content: 'content',
+          timestamp: now,
+          lastUsedTime: now,
+        },
+      ])
     })
 
     it('收藏列表不存在时应该返回空数组', async () => {
@@ -1018,6 +1045,7 @@ describe('Storage工具测试', () => {
 
     it('setSearchConfig应该合并现有配置', async () => {
       const existingConfig = {
+        allowHighlightedElementClick: false,
         limitUpwardSearch: false,
         searchDepthUp: 3,
         throttleInterval: 200,
@@ -1585,13 +1613,19 @@ describe('Storage工具测试', () => {
     })
 
     it('getFavorites 应该返回收藏列表', async () => {
-      const mockFavorites = [
-        { id: '1', name: 'Fav1', content: '{}', timestamp: Date.now(), lastUsedTime: Date.now() },
-      ]
-      ;(chrome.storage.local.get as Mock).mockResolvedValue({ favorites: mockFavorites })
+      const now = Date.now()
+      const mockMetadata = [{ id: '1', name: 'Fav1', timestamp: now, lastUsedTime: now }]
+      const mockContent = { '1': '{}' }
+      ;(chrome.storage.local.get as Mock).mockImplementation((key) => {
+        if (key === 'favoritesMetadata') return Promise.resolve({ favoritesMetadata: mockMetadata })
+        if (key === 'favoritesContent') return Promise.resolve({ favoritesContent: mockContent })
+        return Promise.resolve({})
+      })
 
       const result = await storage.getFavorites()
-      expect(result).toEqual(mockFavorites)
+      expect(result).toEqual([
+        { id: '1', name: 'Fav1', content: '{}', timestamp: now, lastUsedTime: now },
+      ])
     })
 
     it('getFavorites 失败时应该返回空数组', async () => {
@@ -1602,9 +1636,11 @@ describe('Storage工具测试', () => {
     })
 
     it('addFavorite 应该添加收藏', async () => {
-      ;(chrome.storage.local.get as Mock).mockResolvedValue({
-        favorites: [],
-        maxFavoritesCount: 50,
+      ;(chrome.storage.local.get as Mock).mockImplementation((key) => {
+        if (key === 'favoritesMetadata') return Promise.resolve({ favoritesMetadata: [] })
+        if (key === 'favoritesContent') return Promise.resolve({ favoritesContent: {} })
+        if (key === 'maxFavoritesCount') return Promise.resolve({ maxFavoritesCount: 50 })
+        return Promise.resolve({})
       })
 
       await storage.addFavorite('Test', '{"key": "value"}')
@@ -1613,9 +1649,11 @@ describe('Storage工具测试', () => {
     })
 
     it('addFavorite 失败时应该抛出错误', async () => {
-      ;(chrome.storage.local.get as Mock).mockResolvedValue({
-        favorites: [],
-        maxFavoritesCount: 50,
+      ;(chrome.storage.local.get as Mock).mockImplementation((key) => {
+        if (key === 'favoritesMetadata') return Promise.resolve({ favoritesMetadata: [] })
+        if (key === 'favoritesContent') return Promise.resolve({ favoritesContent: {} })
+        if (key === 'maxFavoritesCount') return Promise.resolve({ maxFavoritesCount: 50 })
+        return Promise.resolve({})
       })
       ;(chrome.storage.local.set as Mock).mockRejectedValue(new Error('Storage error'))
 
@@ -1623,16 +1661,21 @@ describe('Storage工具测试', () => {
     })
 
     it('updateFavorite 应该更新收藏', async () => {
-      const mockFavorites = [
+      const now = Date.now()
+      const mockMetadata = [
         {
           id: 'test-id',
           name: 'Old',
-          content: '{}',
-          timestamp: Date.now(),
-          lastUsedTime: Date.now(),
+          timestamp: now,
+          lastUsedTime: now,
         },
       ]
-      ;(chrome.storage.local.get as Mock).mockResolvedValue({ favorites: mockFavorites })
+      const mockContent = { 'test-id': '{}' }
+      ;(chrome.storage.local.get as Mock).mockImplementation((key) => {
+        if (key === 'favoritesMetadata') return Promise.resolve({ favoritesMetadata: mockMetadata })
+        if (key === 'favoritesContent') return Promise.resolve({ favoritesContent: mockContent })
+        return Promise.resolve({})
+      })
 
       await storage.updateFavorite('test-id', 'New Name', '{"new": true}')
 
@@ -1640,7 +1683,11 @@ describe('Storage工具测试', () => {
     })
 
     it('updateFavorite 收藏不存在时应该抛出错误', async () => {
-      ;(chrome.storage.local.get as Mock).mockResolvedValue({ favorites: [] })
+      ;(chrome.storage.local.get as Mock).mockImplementation((key) => {
+        if (key === 'favoritesMetadata') return Promise.resolve({ favoritesMetadata: [] })
+        if (key === 'favoritesContent') return Promise.resolve({ favoritesContent: {} })
+        return Promise.resolve({})
+      })
 
       await expect(storage.updateFavorite('non-existent', 'Name', '{}')).rejects.toThrow(
         '收藏不存在'
@@ -1648,16 +1695,21 @@ describe('Storage工具测试', () => {
     })
 
     it('deleteFavorite 应该删除收藏', async () => {
-      const mockFavorites = [
+      const now = Date.now()
+      const mockMetadata = [
         {
           id: 'test-id',
           name: 'Test',
-          content: '{}',
-          timestamp: Date.now(),
-          lastUsedTime: Date.now(),
+          timestamp: now,
+          lastUsedTime: now,
         },
       ]
-      ;(chrome.storage.local.get as Mock).mockResolvedValue({ favorites: mockFavorites })
+      const mockContent = { 'test-id': '{}' }
+      ;(chrome.storage.local.get as Mock).mockImplementation((key) => {
+        if (key === 'favoritesMetadata') return Promise.resolve({ favoritesMetadata: mockMetadata })
+        if (key === 'favoritesContent') return Promise.resolve({ favoritesContent: mockContent })
+        return Promise.resolve({})
+      })
 
       await storage.deleteFavorite('test-id')
 
@@ -1665,32 +1717,40 @@ describe('Storage工具测试', () => {
     })
 
     it('deleteFavorite 失败时应该抛出错误', async () => {
-      const mockFavorites = [
+      const now = Date.now()
+      const mockMetadata = [
         {
           id: 'test-id',
           name: 'Test',
-          content: '{}',
-          timestamp: Date.now(),
-          lastUsedTime: Date.now(),
+          timestamp: now,
+          lastUsedTime: now,
         },
       ]
-      ;(chrome.storage.local.get as Mock).mockResolvedValue({ favorites: mockFavorites })
+      const mockContent = { 'test-id': '{}' }
+      ;(chrome.storage.local.get as Mock).mockImplementation((key) => {
+        if (key === 'favoritesMetadata') return Promise.resolve({ favoritesMetadata: mockMetadata })
+        if (key === 'favoritesContent') return Promise.resolve({ favoritesContent: mockContent })
+        return Promise.resolve({})
+      })
       ;(chrome.storage.local.set as Mock).mockRejectedValue(new Error('Storage error'))
 
       await expect(storage.deleteFavorite('test-id')).rejects.toThrow()
     })
 
     it('updateFavoriteUsedTime 应该更新使用时间', async () => {
-      const mockFavorites = [
+      const now = Date.now()
+      const mockMetadata = [
         {
           id: 'test-id',
           name: 'Test',
-          content: '{}',
-          timestamp: Date.now(),
-          lastUsedTime: Date.now() - 10000,
+          timestamp: now,
+          lastUsedTime: now - 10000,
         },
       ]
-      ;(chrome.storage.local.get as Mock).mockResolvedValue({ favorites: mockFavorites })
+      ;(chrome.storage.local.get as Mock).mockImplementation((key) => {
+        if (key === 'favoritesMetadata') return Promise.resolve({ favoritesMetadata: mockMetadata })
+        return Promise.resolve({})
+      })
 
       await storage.updateFavoriteUsedTime('test-id')
 
@@ -1705,16 +1765,21 @@ describe('Storage工具测试', () => {
 
     it('cleanOldFavorites 应该清理超过最大数量的收藏', async () => {
       const now = Date.now()
-      const mockFavorites = Array.from({ length: 10 }, (_, i) => ({
+      const mockMetadata = Array.from({ length: 10 }, (_, i) => ({
         id: `fav-${i}`,
         name: `Fav ${i}`,
-        content: '{}',
         timestamp: now - i * 1000,
         lastUsedTime: now - i * 1000,
       }))
-      ;(chrome.storage.local.get as Mock).mockResolvedValue({
-        favorites: mockFavorites,
-        maxFavoritesCount: 5,
+      const mockContent: Record<string, string> = {}
+      mockMetadata.forEach((meta) => {
+        mockContent[meta.id] = '{}'
+      })
+      ;(chrome.storage.local.get as Mock).mockImplementation((key) => {
+        if (key === 'favoritesMetadata') return Promise.resolve({ favoritesMetadata: mockMetadata })
+        if (key === 'favoritesContent') return Promise.resolve({ favoritesContent: mockContent })
+        if (key === 'maxFavoritesCount') return Promise.resolve({ maxFavoritesCount: 5 })
+        return Promise.resolve({})
       })
 
       await storage.cleanOldFavorites()

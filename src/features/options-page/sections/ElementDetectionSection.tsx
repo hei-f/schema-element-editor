@@ -105,6 +105,20 @@ export const ElementDetectionSection: React.FC<SectionProps> = (props) => {
           <Form.Item
             label={
               <Space>
+                触发高亮元素点击事件
+                <Tooltip title="开启后，按住 Option/Alt 点击元素时，除了打开编辑抽屉，还会触发元素自身的点击事件">
+                  <HelpTooltipIcon />
+                </Tooltip>
+              </Space>
+            }
+            name={FORM_PATHS.searchConfig.allowHighlightedElementClick}
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+          <Form.Item
+            label={
+              <Space>
                 高亮框颜色
                 <Tooltip title="设置鼠标悬停时元素高亮框的颜色">
                   <HelpTooltipIcon />

@@ -18,9 +18,9 @@ vi.mock('@/shared/utils/browser/storage', () => ({
  */
 vi.mock('@/shared/constants/editor-themes', () => ({
   EDITOR_THEME_OPTIONS: [
-    { label: '简洁亮色', value: 'light' },
-    { label: '简洁暗色', value: 'dark' },
-    { label: '自定义暗色', value: 'schema-element-editor-dark' },
+    { value: 'seeDark', label: 'SEE Dark', category: 'dark' },
+    { value: 'light', label: 'Light', category: 'light' },
+    { value: 'dark', label: 'Dark', category: 'dark' },
   ],
 }))
 
@@ -77,9 +77,9 @@ describe('ThemeDropdown 组件测试', () => {
       await user.click(button)
 
       await waitFor(() => {
-        expect(screen.getByText('简洁亮色')).toBeInTheDocument()
-        expect(screen.getByText('简洁暗色')).toBeInTheDocument()
-        expect(screen.getByText('自定义暗色')).toBeInTheDocument()
+        expect(screen.getByText('Light')).toBeInTheDocument()
+        expect(screen.getByText('Dark')).toBeInTheDocument()
+        expect(screen.getByText('SEE Dark')).toBeInTheDocument()
       })
     })
 
@@ -91,9 +91,9 @@ describe('ThemeDropdown 组件测试', () => {
       await user.click(button)
 
       await waitFor(() => {
-        expect(screen.getByText('简洁亮色')).toBeInTheDocument()
-        expect(screen.getByText('简洁暗色')).toBeInTheDocument()
-        expect(screen.getByText('自定义暗色')).toBeInTheDocument()
+        expect(screen.getByText('Light')).toBeInTheDocument()
+        expect(screen.getByText('Dark')).toBeInTheDocument()
+        expect(screen.getByText('SEE Dark')).toBeInTheDocument()
       })
     })
 
@@ -121,10 +121,10 @@ describe('ThemeDropdown 组件测试', () => {
       await user.click(button)
 
       await waitFor(() => {
-        expect(screen.getByText('简洁暗色')).toBeInTheDocument()
+        expect(screen.getByText('Dark')).toBeInTheDocument()
       })
 
-      const darkOption = screen.getByText('简洁暗色')
+      const darkOption = screen.getByText('Dark')
       await user.click(darkOption)
 
       expect(onEditorThemeChange).toHaveBeenCalledWith('dark')
@@ -138,10 +138,10 @@ describe('ThemeDropdown 组件测试', () => {
       await user.click(button)
 
       await waitFor(() => {
-        expect(screen.getByText('简洁暗色')).toBeInTheDocument()
+        expect(screen.getByText('Dark')).toBeInTheDocument()
       })
 
-      const darkOption = screen.getByText('简洁暗色')
+      const darkOption = screen.getByText('Dark')
       await user.click(darkOption)
 
       expect(storage.setEditorTheme).toHaveBeenCalledWith('dark')
@@ -155,10 +155,10 @@ describe('ThemeDropdown 组件测试', () => {
       await user.click(button)
 
       await waitFor(() => {
-        expect(screen.getByText('简洁暗色')).toBeInTheDocument()
+        expect(screen.getByText('Dark')).toBeInTheDocument()
       })
 
-      const darkOption = screen.getByText('简洁暗色')
+      const darkOption = screen.getByText('Dark')
       await user.click(darkOption)
 
       // 验证主题切换回调被调用（不验证DOM，因为可能有关闭动画）
@@ -174,14 +174,14 @@ describe('ThemeDropdown 组件测试', () => {
       await user.click(button)
 
       await waitFor(() => {
-        expect(screen.getByText('自定义暗色')).toBeInTheDocument()
+        expect(screen.getByText('SEE Dark')).toBeInTheDocument()
       })
 
-      const customOption = screen.getByText('自定义暗色')
+      const customOption = screen.getByText('SEE Dark')
       await user.click(customOption)
 
-      expect(onEditorThemeChange).toHaveBeenCalledWith('schema-element-editor-dark')
-      expect(storage.setEditorTheme).toHaveBeenCalledWith('schema-element-editor-dark')
+      expect(onEditorThemeChange).toHaveBeenCalledWith('seeDark')
+      expect(storage.setEditorTheme).toHaveBeenCalledWith('seeDark')
     })
   })
 
@@ -235,7 +235,7 @@ describe('ThemeDropdown 组件测试', () => {
       await user.click(button)
 
       await waitFor(() => {
-        expect(screen.getByText('简洁亮色')).toBeInTheDocument()
+        expect(screen.getByText('Light')).toBeInTheDocument()
       })
     })
 
@@ -247,7 +247,7 @@ describe('ThemeDropdown 组件测试', () => {
       await user.click(button)
 
       await waitFor(() => {
-        expect(screen.getByText('简洁亮色')).toBeInTheDocument()
+        expect(screen.getByText('Light')).toBeInTheDocument()
       })
     })
 
@@ -259,7 +259,7 @@ describe('ThemeDropdown 组件测试', () => {
       await user.click(button)
 
       await waitFor(() => {
-        expect(screen.getByText('简洁亮色')).toBeInTheDocument()
+        expect(screen.getByText('Light')).toBeInTheDocument()
       })
     })
   })
@@ -321,7 +321,7 @@ describe('ThemeDropdown 组件测试', () => {
       // 第一次打开
       await user.click(button)
       await waitFor(() => {
-        expect(screen.getByText('简洁亮色')).toBeInTheDocument()
+        expect(screen.getByText('Light')).toBeInTheDocument()
       })
 
       // 关闭（再次点击按钮）
@@ -330,7 +330,7 @@ describe('ThemeDropdown 组件测试', () => {
       // 第二次打开
       await user.click(button)
       await waitFor(() => {
-        expect(screen.getByText('简洁亮色')).toBeInTheDocument()
+        expect(screen.getByText('Light')).toBeInTheDocument()
       })
 
       // 验证能够多次打开关闭
@@ -346,22 +346,22 @@ describe('ThemeDropdown 组件测试', () => {
 
       // 切换到暗色
       await user.click(button)
-      await waitFor(() => expect(screen.getByText('简洁暗色')).toBeInTheDocument())
-      await user.click(screen.getByText('简洁暗色'))
+      await waitFor(() => expect(screen.getByText('Dark')).toBeInTheDocument())
+      await user.click(screen.getByText('Dark'))
 
-      // 切换到自定义暗色
+      // 切换到SEE Dark
       await user.click(button)
-      await waitFor(() => expect(screen.getByText('自定义暗色')).toBeInTheDocument())
-      await user.click(screen.getByText('自定义暗色'))
+      await waitFor(() => expect(screen.getByText('SEE Dark')).toBeInTheDocument())
+      await user.click(screen.getByText('SEE Dark'))
 
       // 切换回亮色
       await user.click(button)
-      await waitFor(() => expect(screen.getByText('简洁亮色')).toBeInTheDocument())
-      await user.click(screen.getByText('简洁亮色'))
+      await waitFor(() => expect(screen.getByText('Light')).toBeInTheDocument())
+      await user.click(screen.getByText('Light'))
 
       expect(onEditorThemeChange).toHaveBeenCalledTimes(3)
       expect(onEditorThemeChange).toHaveBeenNthCalledWith(1, 'dark')
-      expect(onEditorThemeChange).toHaveBeenNthCalledWith(2, 'schema-element-editor-dark')
+      expect(onEditorThemeChange).toHaveBeenNthCalledWith(2, 'seeDark')
       expect(onEditorThemeChange).toHaveBeenNthCalledWith(3, 'light')
     })
 
@@ -380,10 +380,10 @@ describe('ThemeDropdown 组件测试', () => {
       await user.click(button)
 
       await waitFor(() => {
-        expect(screen.getByText('简洁亮色')).toBeInTheDocument()
+        expect(screen.getByText('Light')).toBeInTheDocument()
       })
 
-      const lightOption = screen.getByText('简洁亮色')
+      const lightOption = screen.getByText('Light')
       await user.click(lightOption)
 
       // 应该正常调用回调
@@ -399,7 +399,7 @@ describe('ThemeDropdown 组件测试', () => {
       await user.click(button)
 
       await waitFor(() => {
-        expect(screen.getByText('简洁亮色')).toBeInTheDocument()
+        expect(screen.getByText('Light')).toBeInTheDocument()
       })
 
       // 关闭
@@ -410,7 +410,7 @@ describe('ThemeDropdown 组件测试', () => {
       await user.click(button)
 
       await waitFor(() => {
-        expect(screen.getByText('简洁亮色')).toBeInTheDocument()
+        expect(screen.getByText('Light')).toBeInTheDocument()
       })
     })
   })
@@ -424,7 +424,7 @@ describe('ThemeDropdown 组件测试', () => {
       await user.click(button)
 
       await waitFor(() => {
-        expect(screen.getByText('简洁亮色')).toBeInTheDocument()
+        expect(screen.getByText('Light')).toBeInTheDocument()
       })
     })
   })
@@ -438,15 +438,15 @@ describe('ThemeDropdown 组件测试', () => {
 
       // 切换到暗色
       await user.click(button)
-      await waitFor(() => expect(screen.getByText('简洁暗色')).toBeInTheDocument())
-      await user.click(screen.getByText('简洁暗色'))
+      await waitFor(() => expect(screen.getByText('Dark')).toBeInTheDocument())
+      await user.click(screen.getByText('Dark'))
 
       expect(storage.setEditorTheme).toHaveBeenCalledTimes(1)
 
-      // 切换到自定义暗色
+      // 切换到SEE Dark
       await user.click(button)
-      await waitFor(() => expect(screen.getByText('自定义暗色')).toBeInTheDocument())
-      await user.click(screen.getByText('自定义暗色'))
+      await waitFor(() => expect(screen.getByText('SEE Dark')).toBeInTheDocument())
+      await user.click(screen.getByText('SEE Dark'))
 
       expect(storage.setEditorTheme).toHaveBeenCalledTimes(2)
     })

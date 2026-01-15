@@ -2,6 +2,7 @@ import { EllipsisOutlined } from '@ant-design/icons'
 import { Dropdown, Tooltip } from 'antd'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
+  AnimatedButtonWrapper,
   MoreButton,
   MoreMenuContainer,
   MoreMenuItem,
@@ -51,6 +52,12 @@ interface ResponsiveButtonGroupProps {
 /** 按钮之间的间距 */
 const BUTTON_GAP = 8
 
+/** 动画持续时间（毫秒） */
+const ANIMATION_DURATION = 300
+
+/** 按钮动画状态 */
+type AnimationState = 'entering' | 'leaving' | 'stable'
+
 /**
  * 响应式按钮组组件
  * 使用 IntersectionObserver 检测按钮可见性，将被截断的按钮收入"更多"下拉菜单
@@ -61,10 +68,17 @@ export const ResponsiveButtonGroup: React.FC<ResponsiveButtonGroupProps> = (prop
   const containerRef = useRef<HTMLDivElement>(null)
   const measureContainerRef = useRef<HTMLDivElement>(null)
   const fixedAreaRef = useRef<HTMLDivElement>(null)
+  const moreButtonRef = useRef<HTMLDivElement>(null)
   const [visibleButtonKeys, setVisibleButtonKeys] = useState<Set<string>>(new Set())
   const [fixedAreaWidth, setFixedAreaWidth] = useState(0)
   const [moreMenuOpen, setMoreMenuOpen] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
+
+  /** 动画状态管理 */
+  const [animatingButtons, setAnimatingButtons] = useState<Map<string, AnimationState>>(new Map())
+  const prevVisibleButtonKeysRef = useRef<Set<string>>(new Set())
+  const animationTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map())
+  const [animationDistance, setAnimationDistance] = useState(80)
 
   /** 过滤出可见的按钮 */
   const enabledButtons = useMemo(() => buttons.filter((btn) => btn.visible !== false), [buttons])
@@ -74,6 +88,79 @@ export const ResponsiveButtonGroup: React.FC<ResponsiveButtonGroupProps> = (prop
 
   /** 固定按钮（始终显示） */
   const fixedButtons = useMemo(() => enabledButtons.filter((btn) => btn.fixed), [enabledButtons])
+
+  /** 计算到更多按钮的动画距离 */
+  const updateAnimationDistance = useCallback(() => {
+    const scrollableArea = containerRef.current?.querySelector(
+      '[data-scrollable-area]'
+    ) as HTMLElement
+    const moreButton = moreButtonRef.current
+
+    if (!scrollableArea || !moreButton) {
+      setAnimationDistance(80)
+      return
+    }
+
+    const scrollableRect = scrollableArea.getBoundingClientRect()
+    const moreButtonRect = moreButton.getBoundingClientRect()
+
+    // 计算从可滚动区域右边缘到更多按钮左边缘的距离
+    const distance = moreButtonRect.left - scrollableRect.right + BUTTON_GAP
+    setAnimationDistance(Math.max(distance, 40))
+  }, [])
+
+  /** 处理可见性变化，触发动画 */
+  const handleVisibilityChange = useCallback(
+    (newVisibleKeys: Set<string>) => {
+      // 初始化阶段不触发动画
+      if (!isInitialized) {
+        prevVisibleButtonKeysRef.current = newVisibleKeys
+        return
+      }
+
+      const prevKeys = prevVisibleButtonKeysRef.current
+      const newAnimating = new Map<string, AnimationState>()
+
+      // 检测新显示的按钮（entering）
+      newVisibleKeys.forEach((key) => {
+        if (!prevKeys.has(key)) {
+          newAnimating.set(key, 'entering')
+        }
+      })
+
+      // 检测新隐藏的按钮（leaving）
+      prevKeys.forEach((key) => {
+        if (!newVisibleKeys.has(key)) {
+          newAnimating.set(key, 'leaving')
+        }
+      })
+
+      // 如果有按钮需要动画
+      if (newAnimating.size > 0) {
+        setAnimatingButtons(newAnimating)
+
+        // 清理旧的定时器
+        animationTimersRef.current.forEach((timer) => clearTimeout(timer))
+        animationTimersRef.current.clear()
+
+        // 为每个动画按钮设置完成回调
+        newAnimating.forEach((_state, key) => {
+          const timer = setTimeout(() => {
+            setAnimatingButtons((prev) => {
+              const next = new Map(prev)
+              next.delete(key)
+              return next
+            })
+            animationTimersRef.current.delete(key)
+          }, ANIMATION_DURATION)
+          animationTimersRef.current.set(key, timer)
+        })
+      }
+
+      prevVisibleButtonKeysRef.current = newVisibleKeys
+    },
+    [isInitialized]
+  )
 
   /** 检测测量容器中按钮的可见性 */
   const checkButtonsVisibility = useCallback(() => {
@@ -102,9 +189,12 @@ export const ResponsiveButtonGroup: React.FC<ResponsiveButtonGroupProps> = (prop
       }
     }
 
+    // 触发动画
+    handleVisibilityChange(newVisibleKeys)
+
     setVisibleButtonKeys(newVisibleKeys)
     setIsInitialized(true)
-  }, [])
+  }, [handleVisibilityChange])
 
   /** 更新固定区域宽度 */
   const updateFixedAreaWidth = useCallback(() => {
@@ -121,16 +211,19 @@ export const ResponsiveButtonGroup: React.FC<ResponsiveButtonGroupProps> = (prop
     const measureContainer = measureContainerRef.current
     if (!container || !measureContainer) return
 
-    // 初始检测
-    updateFixedAreaWidth()
-    // 延迟一帧执行检测，确保布局已经完成
+    // 延迟执行，避免在 effect 中同步调用 setState
     requestAnimationFrame(() => {
+      updateFixedAreaWidth()
+      updateAnimationDistance()
       checkButtonsVisibility()
     })
 
     const resizeObserver = new ResizeObserver(() => {
-      updateFixedAreaWidth()
-      checkButtonsVisibility()
+      requestAnimationFrame(() => {
+        updateFixedAreaWidth()
+        updateAnimationDistance()
+        checkButtonsVisibility()
+      })
     })
 
     resizeObserver.observe(container)
@@ -139,7 +232,7 @@ export const ResponsiveButtonGroup: React.FC<ResponsiveButtonGroupProps> = (prop
     return () => {
       resizeObserver.disconnect()
     }
-  }, [checkButtonsVisibility, updateFixedAreaWidth])
+  }, [checkButtonsVisibility, updateFixedAreaWidth, updateAnimationDistance])
 
   /** 监听固定区域大小变化 */
   useEffect(() => {
@@ -147,9 +240,12 @@ export const ResponsiveButtonGroup: React.FC<ResponsiveButtonGroupProps> = (prop
     if (!fixedArea) return
 
     const resizeObserver = new ResizeObserver(() => {
-      updateFixedAreaWidth()
-      // 固定区域大小变化后重新检测
-      checkButtonsVisibility()
+      requestAnimationFrame(() => {
+        updateFixedAreaWidth()
+        updateAnimationDistance()
+        // 固定区域大小变化后重新检测
+        checkButtonsVisibility()
+      })
     })
 
     resizeObserver.observe(fixedArea)
@@ -157,7 +253,7 @@ export const ResponsiveButtonGroup: React.FC<ResponsiveButtonGroupProps> = (prop
     return () => {
       resizeObserver.disconnect()
     }
-  }, [updateFixedAreaWidth, checkButtonsVisibility])
+  }, [updateFixedAreaWidth, updateAnimationDistance, checkButtonsVisibility])
 
   /** 按钮配置变化时重新检测 */
   useEffect(() => {
@@ -167,14 +263,27 @@ export const ResponsiveButtonGroup: React.FC<ResponsiveButtonGroupProps> = (prop
     })
   }, [normalButtons.length, checkButtonsVisibility])
 
-  /** 可显示的普通按钮 */
+  /** 清理定时器 */
+  useEffect(() => {
+    const timers = animationTimersRef.current
+    return () => {
+      // 清理所有动画定时器
+      timers.forEach((timer) => clearTimeout(timer))
+      timers.clear()
+    }
+  }, [])
+
+  /** 可显示的普通按钮（包含正在 leaving 的按钮） */
   const displayedButtons = useMemo(() => {
     // 初始化之前显示所有按钮
     if (!isInitialized) {
       return normalButtons
     }
-    return normalButtons.filter((btn) => visibleButtonKeys.has(btn.key))
-  }, [normalButtons, visibleButtonKeys, isInitialized])
+    return normalButtons.filter((btn) => {
+      // 显示可见的按钮 或 正在执行 leaving 动画的按钮
+      return visibleButtonKeys.has(btn.key) || animatingButtons.get(btn.key) === 'leaving'
+    })
+  }, [normalButtons, visibleButtonKeys, isInitialized, animatingButtons])
 
   /** 被隐藏的普通按钮 */
   const hiddenButtons = useMemo(() => {
@@ -214,22 +323,30 @@ export const ResponsiveButtonGroup: React.FC<ResponsiveButtonGroupProps> = (prop
     )
   }
 
-  /** 渲染单个按钮（带 tooltip） */
+  /** 渲染单个按钮（带 tooltip 和动画） */
   const renderButton = (config: ToolbarButtonConfig) => {
     const { key, tooltip, isRawComponent } = config
 
     const content = renderButtonContent(config)
+    const animationState = animatingButtons.get(key) || 'stable'
+
+    const wrappedContent =
+      tooltip && !isRawComponent ? (
+        <Tooltip title={tooltip} placement="bottom" getPopupContainer={getPopupContainer}>
+          {content}
+        </Tooltip>
+      ) : (
+        content
+      )
 
     return (
-      <div key={key} style={{ flexShrink: 0 }}>
-        {tooltip && !isRawComponent ? (
-          <Tooltip title={tooltip} placement="bottom" getPopupContainer={getPopupContainer}>
-            {content}
-          </Tooltip>
-        ) : (
-          content
-        )}
-      </div>
+      <AnimatedButtonWrapper
+        key={key}
+        $animationState={animationState}
+        $animationDistance={animationDistance}
+      >
+        {wrappedContent}
+      </AnimatedButtonWrapper>
     )
   }
 
@@ -297,7 +414,7 @@ export const ResponsiveButtonGroup: React.FC<ResponsiveButtonGroupProps> = (prop
       </div>
 
       {/* 可见按钮区域 */}
-      <ResponsiveButtonGroupScrollable>
+      <ResponsiveButtonGroupScrollable data-scrollable-area>
         {displayedButtons.map((btn) => renderButton(btn))}
       </ResponsiveButtonGroupScrollable>
 
@@ -306,16 +423,18 @@ export const ResponsiveButtonGroup: React.FC<ResponsiveButtonGroupProps> = (prop
         <ResponsiveButtonGroupFixed ref={fixedAreaRef}>
           {/* 更多按钮 */}
           {showMoreButton && (
-            <Dropdown
-              popupRender={() => moreMenuContent}
-              trigger={['click']}
-              open={moreMenuOpen}
-              onOpenChange={setMoreMenuOpen}
-              placement="bottomRight"
-              getPopupContainer={getPopupContainer}
-            >
-              <MoreButton size="small" icon={<EllipsisOutlined />} />
-            </Dropdown>
+            <div ref={moreButtonRef}>
+              <Dropdown
+                popupRender={() => moreMenuContent}
+                trigger={['click']}
+                open={moreMenuOpen}
+                onOpenChange={setMoreMenuOpen}
+                placement="bottomRight"
+                getPopupContainer={getPopupContainer}
+              >
+                <MoreButton size="small" icon={<EllipsisOutlined />} />
+              </Dropdown>
+            </div>
           )}
 
           {/* 固定按钮（始终显示在最右侧） */}

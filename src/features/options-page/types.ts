@@ -80,6 +80,12 @@ export interface ExternalActions {
   onCheckUpdate?: () => void
 
   /**
+   * 查看文档按钮点击回调
+   * undefined 表示隐藏查看文档按钮
+   */
+  onViewDocs?: () => void
+
+  /**
    * 是否设置 document.title
    * @default true
    */

@@ -70,7 +70,12 @@ const mockStorage = storage as Mocked<typeof storage>
 describe.skip('OptionsApp组件测试', () => {
   const defaultMockValues = {
     attributeName: 'id',
-    searchConfig: { limitUpwardSearch: false, searchDepthUp: 3, throttleInterval: 200 },
+    searchConfig: {
+      limitUpwardSearch: false,
+      searchDepthUp: 3,
+      throttleInterval: 200,
+      allowHighlightedElementClick: false,
+    },
     autoParseString: true,
     toolbarButtons: {
       astRawStringToggle: true,
