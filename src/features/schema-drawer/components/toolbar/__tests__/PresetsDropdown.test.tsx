@@ -1,6 +1,6 @@
 import { render, screen, waitFor, createMockConfigPreset } from '@test/test-utils'
 import userEvent from '@testing-library/user-event'
-import type { ConfigPreset } from '@/shared/types'
+import type { ConfigPreset, ConfigPresetMeta } from '@/shared/types'
 import { storage } from '@/shared/utils/browser/storage'
 import { PresetsDropdown } from '../PresetsDropdown'
 
@@ -9,12 +9,13 @@ import { PresetsDropdown } from '../PresetsDropdown'
  */
 vi.mock('@/shared/utils/browser/storage', () => ({
   storage: {
-    getConfigPresets: vi.fn(),
+    getPresetsMeta: vi.fn(),
+    getPresetConfig: vi.fn(),
   },
 }))
 
 describe('PresetsDropdown 组件测试', () => {
-  const mockPresets: ConfigPreset[] = [
+  const mockPresetsData: ConfigPreset[] = [
     createMockConfigPreset({
       id: 'preset-1',
       name: '深色主题配置',
@@ -27,6 +28,12 @@ describe('PresetsDropdown 组件测试', () => {
     }),
   ]
 
+  const mockPresetsMeta: ConfigPresetMeta[] = mockPresetsData.map(({ id, name, timestamp }) => ({
+    id,
+    name,
+    timestamp,
+  }))
+
   const defaultProps = {
     onApplyPreset: vi.fn().mockResolvedValue(undefined),
     themeColor: '#1890ff',
@@ -36,7 +43,8 @@ describe('PresetsDropdown 组件测试', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(storage.getConfigPresets).mockResolvedValue([])
+    vi.mocked(storage.getPresetsMeta).mockResolvedValue([])
+    vi.mocked(storage.getPresetConfig).mockResolvedValue(null)
   })
 
   describe('基本渲染', () => {
@@ -74,7 +82,7 @@ describe('PresetsDropdown 组件测试', () => {
   describe('下拉菜单交互', () => {
     it('应该在点击按钮时打开下拉菜单', async () => {
       const user = userEvent.setup()
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockPresetsMeta)
 
       render(<PresetsDropdown {...defaultProps} />)
 
@@ -88,23 +96,23 @@ describe('PresetsDropdown 组件测试', () => {
 
     it('应该在打开下拉菜单时加载预设列表', async () => {
       const user = userEvent.setup()
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockPresetsMeta)
 
       render(<PresetsDropdown {...defaultProps} />)
 
-      expect(storage.getConfigPresets).not.toHaveBeenCalled()
+      expect(storage.getPresetsMeta).not.toHaveBeenCalled()
 
       const button = screen.getByLabelText('config-presets')
       await user.click(button)
 
       await waitFor(() => {
-        expect(storage.getConfigPresets).toHaveBeenCalledTimes(1)
+        expect(storage.getPresetsMeta).toHaveBeenCalledTimes(1)
       })
     })
 
     it('应该显示所有预设项', async () => {
       const user = userEvent.setup()
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockPresetsMeta)
 
       render(<PresetsDropdown {...defaultProps} />)
 
@@ -119,7 +127,7 @@ describe('PresetsDropdown 组件测试', () => {
 
     it('应该在没有预设时显示空状态', async () => {
       const user = userEvent.setup()
-      vi.mocked(storage.getConfigPresets).mockResolvedValue([])
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue([])
 
       render(<PresetsDropdown {...defaultProps} />)
 
@@ -136,7 +144,8 @@ describe('PresetsDropdown 组件测试', () => {
     it('应该在点击预设时调用onApplyPreset', async () => {
       const user = userEvent.setup()
       const onApplyPreset = vi.fn().mockResolvedValue(undefined)
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockPresetsMeta)
+      vi.mocked(storage.getPresetConfig).mockResolvedValue(mockPresetsData[0].config)
 
       render(<PresetsDropdown {...defaultProps} onApplyPreset={onApplyPreset} />)
 
@@ -150,12 +159,15 @@ describe('PresetsDropdown 组件测试', () => {
       const presetItem = screen.getByText('深色主题配置')
       await user.click(presetItem)
 
-      expect(onApplyPreset).toHaveBeenCalledWith(mockPresets[0])
+      await waitFor(() => {
+        expect(onApplyPreset).toHaveBeenCalledWith(mockPresetsData[0])
+      })
     })
 
     it('应该在应用预设后关闭下拉菜单', async () => {
       const user = userEvent.setup()
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockPresetsMeta)
+      vi.mocked(storage.getPresetConfig).mockResolvedValue(mockPresetsData[0].config)
 
       render(<PresetsDropdown {...defaultProps} />)
 
@@ -170,13 +182,16 @@ describe('PresetsDropdown 组件测试', () => {
       await user.click(presetItem)
 
       // 下拉菜单应该被调用关闭（不验证DOM，因为可能有关闭动画）
-      expect(defaultProps.onApplyPreset).toHaveBeenCalled()
+      await waitFor(() => {
+        expect(defaultProps.onApplyPreset).toHaveBeenCalled()
+      })
     })
 
     it('应该支持应用不同的预设', async () => {
       const user = userEvent.setup()
       const onApplyPreset = vi.fn().mockResolvedValue(undefined)
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockPresetsMeta)
+      vi.mocked(storage.getPresetConfig).mockResolvedValue(mockPresetsData[1].config)
 
       render(<PresetsDropdown {...defaultProps} onApplyPreset={onApplyPreset} />)
 
@@ -190,14 +205,16 @@ describe('PresetsDropdown 组件测试', () => {
       const presetItem = screen.getByText('浅色主题配置')
       await user.click(presetItem)
 
-      expect(onApplyPreset).toHaveBeenCalledWith(mockPresets[1])
+      await waitFor(() => {
+        expect(onApplyPreset).toHaveBeenCalledWith(mockPresetsData[1])
+      })
     })
   })
 
   describe('时间格式化', () => {
     it('应该显示格式化的时间', async () => {
       const user = userEvent.setup()
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockPresetsMeta)
 
       render(<PresetsDropdown {...defaultProps} />)
 
@@ -215,7 +232,7 @@ describe('PresetsDropdown 组件测试', () => {
   describe('主题适配', () => {
     it('应该在light主题下正确渲染', async () => {
       const user = userEvent.setup()
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockPresetsMeta)
 
       render(<PresetsDropdown {...defaultProps} editorTheme="light" />)
 
@@ -229,7 +246,7 @@ describe('PresetsDropdown 组件测试', () => {
 
     it('应该在dark主题下正确渲染', async () => {
       const user = userEvent.setup()
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockPresetsMeta)
 
       render(<PresetsDropdown {...defaultProps} editorTheme="dark" />)
 
@@ -243,7 +260,7 @@ describe('PresetsDropdown 组件测试', () => {
 
     it('应该在custom主题下正确渲染', async () => {
       const user = userEvent.setup()
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockPresetsMeta)
 
       render(<PresetsDropdown {...defaultProps} editorTheme="seeDark" />)
 
@@ -260,7 +277,7 @@ describe('PresetsDropdown 组件测试', () => {
     it('应该处理加载预设失败的情况', async () => {
       const user = userEvent.setup()
       const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
-      vi.mocked(storage.getConfigPresets).mockRejectedValue(new Error('加载失败'))
+      vi.mocked(storage.getPresetsMeta).mockRejectedValue(new Error('加载失败'))
 
       render(<PresetsDropdown {...defaultProps} />)
 
@@ -279,7 +296,8 @@ describe('PresetsDropdown 组件测试', () => {
       const user = userEvent.setup()
       const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
       const onApplyPreset = vi.fn().mockRejectedValue(new Error('应用失败'))
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockPresetsMeta)
+      vi.mocked(storage.getPresetConfig).mockResolvedValue(mockPresetsData[0].config)
 
       render(<PresetsDropdown {...defaultProps} onApplyPreset={onApplyPreset} />)
 
@@ -305,14 +323,12 @@ describe('PresetsDropdown 组件测试', () => {
   describe('边界情况', () => {
     it('应该处理大量预设', async () => {
       const user = userEvent.setup()
-      const manyPresets: ConfigPreset[] = Array.from({ length: 50 }, (_, i) =>
-        createMockConfigPreset({
-          id: `preset-${i}`,
-          name: `预设配置${i}`,
-          timestamp: Date.now(),
-        })
-      )
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(manyPresets)
+      const manyPresetsMeta: ConfigPresetMeta[] = Array.from({ length: 50 }, (_, i) => ({
+        id: `preset-${i}`,
+        name: `预设配置${i}`,
+        timestamp: Date.now(),
+      }))
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(manyPresetsMeta)
 
       render(<PresetsDropdown {...defaultProps} />)
 
@@ -326,14 +342,14 @@ describe('PresetsDropdown 组件测试', () => {
 
     it('应该处理特殊字符的预设名称', async () => {
       const user = userEvent.setup()
-      const specialPresets: ConfigPreset[] = [
-        createMockConfigPreset({
+      const specialPresetsMeta: ConfigPresetMeta[] = [
+        {
           id: 'preset-1',
           name: '<script>alert("xss")</script>',
           timestamp: Date.now(),
-        }),
+        },
       ]
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(specialPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(specialPresetsMeta)
 
       render(<PresetsDropdown {...defaultProps} />)
 
@@ -347,14 +363,14 @@ describe('PresetsDropdown 组件测试', () => {
 
     it('应该处理emoji的预设名称', async () => {
       const user = userEvent.setup()
-      const emojiPresets: ConfigPreset[] = [
-        createMockConfigPreset({
+      const emojiPresetsMeta: ConfigPresetMeta[] = [
+        {
           id: 'preset-1',
           name: '😀 快乐配置 🎉',
           timestamp: Date.now(),
-        }),
+        },
       ]
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(emojiPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(emojiPresetsMeta)
 
       render(<PresetsDropdown {...defaultProps} />)
 
@@ -368,7 +384,7 @@ describe('PresetsDropdown 组件测试', () => {
 
     it('应该支持多次打开和关闭下拉菜单', async () => {
       const user = userEvent.setup()
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockPresetsMeta)
 
       render(<PresetsDropdown {...defaultProps} />)
 
@@ -390,12 +406,12 @@ describe('PresetsDropdown 组件测试', () => {
       })
 
       // 验证加载了两次（每次打开时加载）
-      expect(storage.getConfigPresets).toHaveBeenCalledTimes(2)
+      expect(storage.getPresetsMeta).toHaveBeenCalledTimes(2)
     })
 
     it('应该处理不同的themeColor', async () => {
       const user = userEvent.setup()
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockPresetsMeta)
 
       const { rerender } = render(<PresetsDropdown {...defaultProps} themeColor="#ff0000" />)
 
@@ -414,21 +430,21 @@ describe('PresetsDropdown 组件测试', () => {
 
   describe('懒加载行为', () => {
     it('应该只在打开下拉菜单时加载数据', async () => {
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockPresetsMeta)
 
       render(<PresetsDropdown {...defaultProps} />)
 
       // 初始渲染时不应该加载
-      expect(storage.getConfigPresets).not.toHaveBeenCalled()
+      expect(storage.getPresetsMeta).not.toHaveBeenCalled()
 
       await waitFor(() => {
-        expect(storage.getConfigPresets).not.toHaveBeenCalled()
+        expect(storage.getPresetsMeta).not.toHaveBeenCalled()
       })
     })
 
     it('应该在每次打开时重新加载数据', async () => {
       const user = userEvent.setup()
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockPresetsMeta)
 
       render(<PresetsDropdown {...defaultProps} />)
 
@@ -437,7 +453,7 @@ describe('PresetsDropdown 组件测试', () => {
       // 第一次打开
       await user.click(button)
       await waitFor(() => {
-        expect(storage.getConfigPresets).toHaveBeenCalledTimes(1)
+        expect(storage.getPresetsMeta).toHaveBeenCalledTimes(1)
       })
 
       // 关闭
@@ -446,7 +462,7 @@ describe('PresetsDropdown 组件测试', () => {
       // 第二次打开
       await user.click(button)
       await waitFor(() => {
-        expect(storage.getConfigPresets).toHaveBeenCalledTimes(2)
+        expect(storage.getPresetsMeta).toHaveBeenCalledTimes(2)
       })
     })
   })

@@ -74,7 +74,7 @@ describe('FavoritesListModal组件测试', () => {
     it('应该渲染搜索框', () => {
       render(<FavoritesListModal {...defaultProps} />)
 
-      expect(screen.getByPlaceholderText('搜索收藏名称或内容...')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('搜索收藏名称...')).toBeInTheDocument()
     })
 
     it('应该渲染表格', () => {
@@ -135,7 +135,7 @@ describe('FavoritesListModal组件测试', () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
       render(<FavoritesListModal {...defaultProps} />)
 
-      const searchInput = screen.getByPlaceholderText('搜索收藏名称或内容...')
+      const searchInput = screen.getByPlaceholderText('搜索收藏名称...')
       await user.type(searchInput, '特殊')
 
       // 等待防抖完成
@@ -154,7 +154,7 @@ describe('FavoritesListModal组件测试', () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
       render(<FavoritesListModal {...defaultProps} />)
 
-      const searchInput = screen.getByPlaceholderText('搜索收藏名称或内容...')
+      const searchInput = screen.getByPlaceholderText('搜索收藏名称...')
       await user.type(searchInput, 'test1')
 
       // 等待防抖完成
@@ -173,7 +173,7 @@ describe('FavoritesListModal组件测试', () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
       render(<FavoritesListModal {...defaultProps} />)
 
-      const searchInput = screen.getByPlaceholderText('搜索收藏名称或内容...')
+      const searchInput = screen.getByPlaceholderText('搜索收藏名称...')
       await user.type(searchInput, 'TEST1')
 
       // 等待防抖完成
@@ -190,7 +190,7 @@ describe('FavoritesListModal组件测试', () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
       render(<FavoritesListModal {...defaultProps} />)
 
-      const searchInput = screen.getByPlaceholderText('搜索收藏名称或内容...')
+      const searchInput = screen.getByPlaceholderText('搜索收藏名称...')
       await user.type(searchInput, '不存在的内容')
 
       // 等待防抖完成
@@ -209,7 +209,7 @@ describe('FavoritesListModal组件测试', () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
       render(<FavoritesListModal {...defaultProps} />)
 
-      const searchInput = screen.getByPlaceholderText('搜索收藏名称或内容...')
+      const searchInput = screen.getByPlaceholderText('搜索收藏名称...')
       await user.type(searchInput, '特殊')
 
       // 等待防抖完成
@@ -306,7 +306,7 @@ describe('FavoritesListModal组件测试', () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
       render(<FavoritesListModal {...defaultProps} />)
 
-      const searchInput = screen.getByPlaceholderText('搜索收藏名称或内容...')
+      const searchInput = screen.getByPlaceholderText('搜索收藏名称...')
       await user.type(searchInput, '   ')
 
       // 等待防抖完成
@@ -336,7 +336,7 @@ describe('FavoritesListModal组件测试', () => {
 
       render(<FavoritesListModal {...defaultProps} favoritesList={favoritesWithSpecialChars} />)
 
-      const searchInput = screen.getByPlaceholderText('搜索收藏名称或内容...')
+      const searchInput = screen.getByPlaceholderText('搜索收藏名称...')
       await user.type(searchInput, '(测试)')
 
       // 等待防抖完成

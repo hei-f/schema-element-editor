@@ -3,7 +3,7 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { storage } from '@/shared/utils/browser/storage'
 import { shadowRootManager } from '@/shared/utils/shadow-root-manager'
 import { useFavoritesManagement } from '../../storage/useFavoritesManagement'
-import type { Favorite } from '@/shared/types'
+import type { FavoriteMeta } from '@/shared/types'
 
 // Mock dependencies
 vi.mock('@/shared/utils/browser/storage')
@@ -25,10 +25,9 @@ describe('useFavoritesManagement Hook 测试', () => {
     onError: mockOnError,
   }
 
-  const mockFavorite: Favorite = {
+  const mockFavoriteMeta: FavoriteMeta = {
     id: 'fav_1',
     name: '测试收藏',
-    content: '{"test": "data"}',
     timestamp: Date.now(),
     lastUsedTime: Date.now(),
   }
@@ -194,8 +193,8 @@ describe('useFavoritesManagement Hook 测试', () => {
 
   describe('handleOpenFavorites 打开收藏列表', () => {
     it('应该加载并显示收藏列表', async () => {
-      const mockFavorites = [mockFavorite]
-      mockStorage.getFavorites.mockResolvedValue(mockFavorites)
+      const mockMetadata = [mockFavoriteMeta]
+      mockStorage.getFavoritesMeta.mockResolvedValue(mockMetadata)
 
       const { result } = renderHook(() => useFavoritesManagement(defaultProps))
 
@@ -203,13 +202,13 @@ describe('useFavoritesManagement Hook 测试', () => {
         await result.current.handleOpenFavorites()
       })
 
-      expect(mockStorage.getFavorites).toHaveBeenCalled()
-      expect(result.current.favoritesList).toEqual(mockFavorites)
+      expect(mockStorage.getFavoritesMeta).toHaveBeenCalled()
+      expect(result.current.favoritesList).toEqual(mockMetadata)
       expect(result.current.favoritesModalVisible).toBe(true)
     })
 
     it('加载失败时应该显示错误', async () => {
-      mockStorage.getFavorites.mockRejectedValue(new Error('Load error'))
+      mockStorage.getFavoritesMeta.mockRejectedValue(new Error('Load error'))
 
       const { result } = renderHook(() => useFavoritesManagement(defaultProps))
 
@@ -223,11 +222,12 @@ describe('useFavoritesManagement Hook 测试', () => {
 
   describe('handleApplyFavorite 应用收藏', () => {
     it('未修改时应该直接应用收藏', async () => {
+      mockStorage.getFavoriteContent.mockResolvedValue('{"test": "data"}')
       mockStorage.updateFavoriteUsedTime.mockResolvedValue(undefined)
       const { result } = renderHook(() => useFavoritesManagement(defaultProps))
 
       await act(async () => {
-        result.current.handleApplyFavorite(mockFavorite)
+        result.current.handleApplyFavorite(mockFavoriteMeta)
       })
 
       await waitFor(() => {
@@ -239,6 +239,7 @@ describe('useFavoritesManagement Hook 测试', () => {
     })
 
     it('已修改时应该打开确认modal', async () => {
+      mockStorage.getFavoriteContent.mockResolvedValue('{"test": "data"}')
       mockStorage.updateFavoriteUsedTime.mockResolvedValue(undefined)
 
       const { result } = renderHook(() =>
@@ -249,12 +250,12 @@ describe('useFavoritesManagement Hook 测试', () => {
       )
 
       await act(async () => {
-        result.current.handleApplyFavorite(mockFavorite)
+        result.current.handleApplyFavorite(mockFavoriteMeta)
       })
 
       // 应该设置applyConfirmModalVisible为true
       expect(result.current.applyConfirmModalVisible).toBe(true)
-      expect(result.current.pendingApplyFavorite).toEqual(mockFavorite)
+      expect(result.current.pendingApplyFavorite).toEqual(mockFavoriteMeta)
 
       // 此时还未应用收藏
       expect(mockOnApplyFavorite).not.toHaveBeenCalled()
@@ -275,9 +276,9 @@ describe('useFavoritesManagement Hook 测试', () => {
 
   describe('handleDeleteFavorite 删除收藏', () => {
     it('应该成功删除收藏并刷新列表', async () => {
-      const updatedFavorites: Favorite[] = []
+      const updatedMetadata: FavoriteMeta[] = []
       mockStorage.deleteFavorite.mockResolvedValue(undefined)
-      mockStorage.getFavorites.mockResolvedValue(updatedFavorites)
+      mockStorage.getFavoritesMeta.mockResolvedValue(updatedMetadata)
 
       const { result } = renderHook(() => useFavoritesManagement(defaultProps))
 
@@ -286,8 +287,8 @@ describe('useFavoritesManagement Hook 测试', () => {
       })
 
       expect(mockStorage.deleteFavorite).toHaveBeenCalledWith('fav_1')
-      expect(mockStorage.getFavorites).toHaveBeenCalled()
-      expect(result.current.favoritesList).toEqual(updatedFavorites)
+      expect(mockStorage.getFavoritesMeta).toHaveBeenCalled()
+      expect(result.current.favoritesList).toEqual(updatedMetadata)
       expect(mockOnSuccess).toHaveBeenCalledWith('收藏已删除')
     })
 
@@ -305,49 +306,50 @@ describe('useFavoritesManagement Hook 测试', () => {
   })
 
   describe('handleEditFavorite 编辑收藏', () => {
-    it('应该格式化JSON内容并打开编辑模态框', () => {
+    it('应该格式化JSON内容并打开编辑模态框', async () => {
+      mockStorage.getFavoriteContent.mockResolvedValue('{"test": "data"}')
       const { result } = renderHook(() => useFavoritesManagement(defaultProps))
 
-      act(() => {
-        result.current.handleEditFavorite(mockFavorite)
+      await act(async () => {
+        await result.current.handleEditFavorite(mockFavoriteMeta)
       })
 
-      expect(result.current.editModalVisible).toBe(true)
-      expect(result.current.editingFavoriteId).toBe('fav_1')
-      expect(result.current.editingName).toBe('测试收藏')
-      expect(result.current.editingContent).toBe(
-        JSON.stringify(JSON.parse('{"test": "data"}'), null, 2)
-      )
+      await waitFor(() => {
+        expect(result.current.editModalVisible).toBe(true)
+        expect(result.current.editingFavoriteId).toBe('fav_1')
+        expect(result.current.editingName).toBe('测试收藏')
+        expect(result.current.editingContent).toBe(
+          JSON.stringify(JSON.parse('{"test": "data"}'), null, 2)
+        )
+      })
     })
 
-    it('非JSON内容应该直接显示', () => {
-      const nonJsonFavorite: Favorite = {
-        ...mockFavorite,
-        content: 'plain text content',
-      }
+    it('非JSON内容应该直接显示', async () => {
+      mockStorage.getFavoriteContent.mockResolvedValue('plain text content')
 
       const { result } = renderHook(() => useFavoritesManagement(defaultProps))
 
-      act(() => {
-        result.current.handleEditFavorite(nonJsonFavorite)
+      await act(async () => {
+        await result.current.handleEditFavorite(mockFavoriteMeta)
       })
 
-      expect(result.current.editingContent).toBe('plain text content')
+      await waitFor(() => {
+        expect(result.current.editingContent).toBe('plain text content')
+      })
     })
 
-    it('格式化失败时应该显示原始内容', () => {
-      const invalidJsonFavorite: Favorite = {
-        ...mockFavorite,
-        content: '{invalid json',
-      }
+    it('格式化失败时应该显示原始内容', async () => {
+      mockStorage.getFavoriteContent.mockResolvedValue('{invalid json')
 
       const { result } = renderHook(() => useFavoritesManagement(defaultProps))
 
-      act(() => {
-        result.current.handleEditFavorite(invalidJsonFavorite)
+      await act(async () => {
+        await result.current.handleEditFavorite(mockFavoriteMeta)
       })
 
-      expect(result.current.editingContent).toBe('{invalid json')
+      await waitFor(() => {
+        expect(result.current.editingContent).toBe('{invalid json')
+      })
     })
   })
 
