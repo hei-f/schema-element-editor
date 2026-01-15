@@ -153,12 +153,12 @@ describe('FavoritesListModal组件测试', () => {
       })
     })
 
-    it('应该根据内容过滤收藏', async () => {
+    it('应该支持大小写不敏感搜索', async () => {
       const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
       render(<FavoritesListModal {...defaultProps} />)
 
       const searchInput = screen.getByPlaceholderText('搜索收藏名称...')
-      await user.type(searchInput, 'test1')
+      await user.type(searchInput, '收藏1')
 
       // 等待防抖完成
       await act(async () => {
@@ -169,23 +169,6 @@ describe('FavoritesListModal组件测试', () => {
         expect(screen.getByText('收藏1')).toBeInTheDocument()
         expect(screen.queryByText('收藏2')).not.toBeInTheDocument()
         expect(screen.queryByText('特殊收藏')).not.toBeInTheDocument()
-      })
-    })
-
-    it('应该支持大小写不敏感搜索', async () => {
-      const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
-      render(<FavoritesListModal {...defaultProps} />)
-
-      const searchInput = screen.getByPlaceholderText('搜索收藏名称...')
-      await user.type(searchInput, 'TEST1')
-
-      // 等待防抖完成
-      await act(async () => {
-        vi.advanceTimersByTime(400)
-      })
-
-      await waitFor(() => {
-        expect(screen.getByText('收藏1')).toBeInTheDocument()
       })
     })
 

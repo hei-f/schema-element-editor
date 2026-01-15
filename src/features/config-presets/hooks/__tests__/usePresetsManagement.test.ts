@@ -12,6 +12,8 @@ vi.mock('@/shared/utils/browser/storage', () => ({
     getAllData: vi.fn(),
     addConfigPreset: vi.fn(),
     getConfigPresets: vi.fn(),
+    getPresetsMeta: vi.fn(),
+    getPresetConfig: vi.fn(),
     deleteConfigPreset: vi.fn(),
   },
 }))
@@ -224,7 +226,8 @@ describe('usePresetsManagement Hook 测试', () => {
 
   describe('handleOpenPresets', () => {
     it('应该加载预设配置列表并打开对话框', async () => {
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(mockPresets)
+      const mockMeta = mockPresets.map(({ id, name, timestamp }) => ({ id, name, timestamp }))
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(mockMeta)
 
       const { result } = renderHook(() => usePresetsManagement(defaultProps))
 
@@ -232,14 +235,14 @@ describe('usePresetsManagement Hook 测试', () => {
         await result.current.handleOpenPresets()
       })
 
-      expect(storage.getConfigPresets).toHaveBeenCalled()
-      expect(result.current.presetsList).toEqual(mockPresets)
+      expect(storage.getPresetsMeta).toHaveBeenCalled()
+      expect(result.current.presetsList).toEqual(mockMeta)
       expect(result.current.presetsModalVisible).toBe(true)
     })
 
     it('应该处理加载失败的情况', async () => {
       const error = new Error('加载失败')
-      vi.mocked(storage.getConfigPresets).mockRejectedValue(error)
+      vi.mocked(storage.getPresetsMeta).mockRejectedValue(error)
 
       const { result } = renderHook(() => usePresetsManagement(defaultProps))
 
@@ -252,7 +255,7 @@ describe('usePresetsManagement Hook 测试', () => {
     })
 
     it('应该处理空的预设列表', async () => {
-      vi.mocked(storage.getConfigPresets).mockResolvedValue([])
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue([])
 
       const { result } = renderHook(() => usePresetsManagement(defaultProps))
 
@@ -267,10 +270,17 @@ describe('usePresetsManagement Hook 测试', () => {
 
   describe('handleApplyPreset', () => {
     it('应该调用onApplyPreset并关闭对话框', async () => {
+      const mockMeta = {
+        id: mockPresets[0].id,
+        name: mockPresets[0].name,
+        timestamp: mockPresets[0].timestamp,
+      }
+      vi.mocked(storage.getPresetConfig).mockResolvedValue(mockPresets[0].config)
+
       const { result } = renderHook(() => usePresetsManagement(defaultProps))
 
-      act(() => {
-        result.current.handleApplyPreset(mockPresets[0])
+      await act(async () => {
+        await result.current.handleApplyPreset(mockMeta)
       })
 
       await waitFor(() => {
@@ -282,9 +292,11 @@ describe('usePresetsManagement Hook 测试', () => {
 
   describe('handleDeletePreset', () => {
     it('应该成功删除预设配置并刷新列表', async () => {
-      const updatedPresets = [mockPresets[1]]
+      const updatedMeta = [
+        { id: mockPresets[1].id, name: mockPresets[1].name, timestamp: mockPresets[1].timestamp },
+      ]
       vi.mocked(storage.deleteConfigPreset).mockResolvedValue(undefined)
-      vi.mocked(storage.getConfigPresets).mockResolvedValue(updatedPresets)
+      vi.mocked(storage.getPresetsMeta).mockResolvedValue(updatedMeta)
 
       const { result } = renderHook(() => usePresetsManagement(defaultProps))
 
@@ -293,8 +305,8 @@ describe('usePresetsManagement Hook 测试', () => {
       })
 
       expect(storage.deleteConfigPreset).toHaveBeenCalledWith('preset-1')
-      expect(storage.getConfigPresets).toHaveBeenCalled()
-      expect(result.current.presetsList).toEqual(updatedPresets)
+      expect(storage.getPresetsMeta).toHaveBeenCalled()
+      expect(result.current.presetsList).toEqual(updatedMeta)
       expect(mockOnSuccess).toHaveBeenCalledWith('预设配置已删除')
     })
 
@@ -370,7 +382,7 @@ describe('usePresetsManagement Hook 测试', () => {
     })
 
     it('应该在没有onError时不报错', async () => {
-      vi.mocked(storage.getConfigPresets).mockRejectedValue(new Error('错误'))
+      vi.mocked(storage.getPresetsMeta).mockRejectedValue(new Error('错误'))
 
       const { result } = renderHook(() =>
         usePresetsManagement({
