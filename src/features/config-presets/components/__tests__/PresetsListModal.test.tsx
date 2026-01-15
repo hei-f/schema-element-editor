@@ -316,10 +316,21 @@ describe('PresetsListModal 组件测试', () => {
     })
 
     it('应该为名称列设置省略号', () => {
-      render(<PresetsListModal {...defaultProps} />)
+      const longNamePreset: ConfigPreset = createMockConfigPreset({
+        id: 'long-name',
+        name: '这是一个非常非常非常非常长的预设配置名称用于测试省略号功能是否正常工作',
+        timestamp: Date.now(),
+      })
 
-      // 检查表格是否正确渲染
-      expect(screen.getByRole('table')).toBeInTheDocument()
+      render(<PresetsListModal {...defaultProps} presetsList={[longNamePreset]} />)
+
+      // 检查表头是否应用了 ellipsis 样式
+      const nameHeader = screen.getByText('名称')
+      expect(nameHeader.closest('th')).toHaveClass('see-table-cell-ellipsis')
+
+      // 检查数据单元格是否应用了 ellipsis 样式
+      const nameCell = screen.getByText(/这是一个非常非常非常非常长的/)
+      expect(nameCell.closest('td')).toHaveClass('see-table-cell-ellipsis')
     })
   })
 })

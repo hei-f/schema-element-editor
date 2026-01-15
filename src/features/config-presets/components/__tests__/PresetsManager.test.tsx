@@ -264,8 +264,9 @@ describe('PresetsManager 组件测试', () => {
       const input = screen.getByPlaceholderText(
         '请输入预设配置名称（不超过50字符）'
       ) as HTMLInputElement
-      // 输入框有 maxLength 限制，所以只显示前50个字符
-      expect(input.value.length).toBeLessThanOrEqual(100)
+      // maxLength 属性不会截断以编程方式设置的 value
+      expect(input.value).toBe(longName)
+      expect(input.value.length).toBe(100)
     })
   })
 

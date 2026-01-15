@@ -1,8 +1,7 @@
 #!/bin/sh
 
-# 加载 NVM 环境
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+# 加载环境配置
+. ./scripts/setup-env.sh
 
 echo "🔍 Running TypeScript type check..."
 bunx tsgo --incremental --noEmit
